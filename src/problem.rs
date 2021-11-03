@@ -12,6 +12,21 @@ pub struct Train {
     pub path: Vec<(i32, usize)>,
 }
 
+impl Train {
+    pub fn delay_cost(&self, path_idx :usize, t :i32) -> usize {
+        let delay = t - self.path[path_idx].0;
+        if delay > 360 {
+            3
+        } else if delay  > 180 {
+            2
+        } else if delay > 0 {
+            1
+        } else {
+            0
+        }
+    }
+}
+
 pub fn problem1() -> Problem {
     // a = 0
     // b = 1
