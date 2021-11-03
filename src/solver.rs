@@ -32,44 +32,97 @@ pub fn solve(problem: &Problem) -> Result<(), ()> {
 
             let travel_time = problem.resources[*resource].travel_time;
             let insert_idx = resource_occ[*resource].partition_point(|(start, _, _)| start < t);
-            resource_occ[*resource].insert(insert_idx, (*t, t + travel_time, train_idx));
+            resource_occ[*resource].insert(insert_idx, (*t, t + travel_time /*wrong*/, train_idx));
             touched_times.push((train_idx, visit_idx));
         }
     }
 
-    let mut soft = Vec::new();
+    let mut new_soft_constraints = Vec::new();
 
     loop {
         let mut found_conflict = false;
         for (train_idx, visit_idx) in touched_times.drain(..) {
-            // Check if we could reach here from the previous visit
-            if visit_idx > 0 {
-                let prev_occ = &train_occ[&(train_idx, visit_idx - 1)];
+            let next_visit_idx = visit_idx + 1;
+
+            if next_visit_idx < problem.trains[train_idx].path.len() {
+                // GATHER INFORMATION ABOUT TWO CONSECUTIVE TIME POINTS
                 let this_occ = &train_occ[&(train_idx, visit_idx)];
+                let t1_in = this_occ.incumbent_time();
 
-                let prev_resource_id = problem.trains[train_idx].path[visit_idx].1;
-                let travel_time = problem.resources[prev_resource_id].travel_time;
+                let this_resource_id = problem.trains[train_idx].path[visit_idx].1;
+                let travel_time = problem.resources[this_resource_id].travel_time;
 
-                if prev_occ.incumbent_time() + travel_time > this_occ.incumbent_time() {
+                let next_occ = &train_occ[&(train_idx, next_visit_idx)];
+                let t1_out = next_occ.incumbent_time();
 
-                    found_conflict= true;
+                // TRAVEL TIME CONFLICT
+                if t1_in + travel_time > t1_out {
+                    found_conflict = true;
 
                     // Insert the new time point.
-                    let idx = prev_occ.incumbent;
-                    let t = this_occ.incumbent_time();
-                    let var = train_occ
-                        .get_mut(&(train_idx, visit_idx))
+                    let t1_in_var = this_occ.delays[this_occ.incumbent].0;
+                    let new_t = this_occ.incumbent_time() + travel_time;
+                    let new_timepoint_idx = next_occ.incumbent + 1;
+                    let t1_earliest_out_var = train_occ
+                        .get_mut(&(train_idx, next_visit_idx))
                         .unwrap()
-                        .add_time(&mut solver, idx, t);
+                        .add_time(&mut solver, new_timepoint_idx, new_t);
 
-                    let cost = problem.trains[train_idx].delay_cost(visit_idx, t);
+                    // T1_IN delay implies T1_EARLIEST_OUT delay.
+                    SatInstance::add_clause(&mut solver, vec![!t1_in_var, t1_earliest_out_var]);
+
+                    // The new timepoint might have a cost.
+                    let cost = problem.trains[train_idx].delay_cost(visit_idx, new_t);
                     if cost > 0 {
                         // Add soft.
-                        soft.push((var, cost)); // TODO
+                        new_soft_constraints.push((t1_earliest_out_var, cost)); // TODO
+                    }
+                }
+
+                // RESOURCE CONFLICT
+
+                if let Some(conflicting_resources) = conflicts.get(&this_resource_id) {
+                    for other_resource in conflicting_resources.iter().copied() {
+                        let this_resource_occ = &resource_occ[other_resource];
+                        let conflict_start_idx = this_resource_occ
+                            .partition_point(|(t, _, _)| *t < t1_in /*wrong partition */);
+                        let conflict_end_idx =
+                            this_resource_occ.partition_point(|(t, _, _)| *t < t1_out);
+                        let conflicting_occs =
+                            &this_resource_occ[conflict_start_idx..conflict_end_idx];
+
+                        for (t2in, t2out, train2) in conflicting_occs.iter().copied() {
+                            // We have a train2 that is conflicting.
+                            if train2 == train_idx {
+                                continue; // Assume for now that the train doesn't conflict with itself.
+                            }
+                            let this_occ = &train_occ[&(train_idx, visit_idx)];
+
+                            // The constraint is:
+                            // We can delay T1_IN until T2_OUT?
+
+                            let new_timepoint_idx = this_occ.incumbent + 1;
+                            let new_t = t2out;
+                            let delay_t1 = train_occ
+                                .get_mut(&(train_idx, visit_idx))
+                                .unwrap()
+                                .add_time(&mut solver, new_timepoint_idx, new_t);
+
+
+                            // .. OR we can delay T2_IN until T1_OUT
+                            let new_timepoint_idx = this_occ.incumbent + 1;
+                            let new_t = t2out;
+                            let delay_t1 = train_occ
+                                .get_mut(&(train2, visit_idx))
+                                .unwrap()
+                                .add_time(&mut solver, new_timepoint_idx, new_t);
+                        }
                     }
                 }
             }
         }
+
+        touched_times.clear();
 
         if !found_conflict {
             // Incumbent times are feasible and optimal.
@@ -82,11 +135,16 @@ pub fn solve(problem: &Problem) -> Result<(), ()> {
                 satcoder::SatResultWithCore::Sat(model) => {
                     for train_idx in 0..problem.trains.len() {
                         for visit_idx in 0..problem.trains[train_idx].path.len() {
-                            if let Some(new_time) = train_occ
+                            if train_occ
                                 .get_mut(&(train_idx, visit_idx))
                                 .unwrap()
                                 .update_chosen_delay(model.as_ref())
                             {
+                                if visit_idx > 0
+                                    && touched_times.last() != Some(&(train_idx, visit_idx - 1))
+                                {
+                                    touched_times.push((train_idx, visit_idx - 1));
+                                }
                                 touched_times.push((train_idx, visit_idx));
                             }
                         }
@@ -115,7 +173,10 @@ struct Occ {
 }
 
 impl Occ {
-    pub fn update_chosen_delay(&mut self, model: &dyn satcoder::SatModel<Lit = minisat::Lit>) -> Option<i32> {
+    pub fn update_chosen_delay(
+        &mut self,
+        model: &dyn satcoder::SatModel<Lit = minisat::Lit>,
+    ) -> bool {
         let mut touched = false;
 
         while !model.value(&self.delays[self.incumbent].0) {
@@ -127,14 +188,19 @@ impl Occ {
             touched = true;
         }
 
-        touched.then(|| self.incumbent_time())
+        touched
     }
 
     pub fn incumbent_time(&self) -> i32 {
         self.delays[self.incumbent].1
     }
 
-    pub fn add_time(&mut self, solver: &mut impl SatInstance<minisat::Lit>, idx: usize, t: i32) -> Bool {
+    pub fn add_time(
+        &mut self,
+        solver: &mut impl SatInstance<minisat::Lit>,
+        idx: usize,
+        t: i32,
+    ) -> Bool {
         // The inserted time should be between the neighboring times.
         assert!(idx == 0 || self.delays[idx - 1].1 < t);
         assert!(idx == self.delays.len() || self.delays[idx + 1].1 > t);
