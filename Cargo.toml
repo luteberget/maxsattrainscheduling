@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 satcoder = { path = "../../salvers/satcoder" }
+rust-lapper = "1.0"

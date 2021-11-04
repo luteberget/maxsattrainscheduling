@@ -5,5 +5,6 @@ mod solver;
 mod railway;
 
 fn main() {
-    println!("Hello, world!");
+    let result = solver::solve(&problem::problem1());
+    println!("Result {:#?}", result);
 }
