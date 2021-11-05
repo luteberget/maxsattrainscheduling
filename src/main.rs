@@ -2,9 +2,11 @@
 
 mod problem;
 mod solver;
-mod railway;
+mod intervals;
 
 fn main() {
-    let result = solver::solve(&problem::problem1());
+    let problem = problem::problem1();
+    let result = solver::solve(&problem).unwrap();
+    println!("Verifying solution {:?}", problem.verify_solution(&result));
     println!("Result {:#?}", result);
 }

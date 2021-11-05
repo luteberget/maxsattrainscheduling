@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 satcoder = { path = "../../salvers/satcoder" }
-rust-lapper = "1.0"
+typed-index-collections = "3.0"
+derive_more = "0.99"

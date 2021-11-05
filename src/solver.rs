@@ -1,98 +1,100 @@
 use std::collections::HashMap;
 
 use crate::problem::Problem;
-use rust_lapper::Lapper;
 use satcoder::{
     prelude::SymbolicModel,
     solvers::minisat::{self, Bool},
-    SatInstance, SatSolver, SatSolverWithCore,
+    SatInstance, SatSolverWithCore,
 };
+use typed_index_collections::TiVec;
+
+#[derive(Clone, Copy)]
+struct VisitId(u32);
+
+impl From<VisitId> for usize {
+    fn from(v: VisitId) -> Self {
+        v.0 as usize
+    }
+}
+
+impl From<usize> for VisitId {
+    fn from(x: usize) -> Self {
+        VisitId(x as u32)
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+struct ResourceId(u32);
+
+impl From<ResourceId> for usize {
+    fn from(v: ResourceId) -> Self {
+        v.0 as usize
+    }
+}
+
+impl From<usize> for ResourceId {
+    fn from(x: usize) -> Self {
+        ResourceId(x as u32)
+    }
+}
 
 pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
     let mut solver = minisat::Solver::new();
+    let mut visits: TiVec<VisitId, (usize, usize)> = TiVec::new();
+    let mut resource_visits: Vec<Vec<VisitId>> = Vec::new();
+    let mut occupations: TiVec<VisitId, Occ> = TiVec::new();
+    let mut touched_intervals = Vec::new();
+    let mut conflicts: HashMap<_, Vec<_>> = HashMap::new();
 
-    let mut train_occ = HashMap::new();
-
-    let mut resource_occ: Vec<Lapper<u32, (usize,usize)>> = vec![Lapper::new(vec![]); problem.resources.len()];
-    let mut touched_times = Vec::new();
-
-    let mut conflicts: HashMap<usize, Vec<usize>> = HashMap::new();
     for (a, b) in problem.conflicts.iter() {
         conflicts.entry(*a).or_default().push(*b);
         conflicts.entry(*b).or_default().push(*a);
     }
 
     for (train_idx, train) in problem.trains.iter().enumerate() {
-        for (visit_idx, (t, _resource)) in train.path.iter().enumerate() {
-            train_occ.insert(
-                (train_idx, visit_idx),
-                Occ {
-                    delays: vec![(true.into(), *t), (false.into(), i32::MAX)],
-                    incumbent: 0,
-                },
-            );
+        for (visit_idx, (t, resource)) in train.path.iter().enumerate() {
+            let visit: VisitId = visits.len().into();
 
-            touched_times.push((train_idx, visit_idx));
-        }
-    }
+            occupations.push(Occ {
+                delays: vec![(true.into(), *t), (false.into(), i32::MAX)],
+                incumbent: 0,
+            });
 
-    for (train_idx, train) in problem.trains.iter().enumerate() {
-        for (visit_idx, (t_in, resource)) in train.path.iter().enumerate() {
-            if visit_idx + 1 < train.path.len() {
-                let travel_time = problem.resources[*resource].travel_time;
-                let t_out = train.path[visit_idx + 1].0;
-                // let insert_idx = resource_occ[*resource].partition_point(|(start, _, _, _)| start < t_in);
-                // assert!(t_in + travel_time <= t_out);
-                // resource_occ[*resource].insert(insert_idx, (*t_in, t_out, train_idx, visit_idx));
+            while resource_visits.len() <= *resource {
+                resource_visits.push(Vec::new());
             }
+
+            resource_visits[*resource].push(visit);
+            touched_intervals.push(visit);
+
+            visits.push((train_idx, visit_idx));
         }
     }
-
-    let mut new_soft_constraints = Vec::new();
-
-    for (train_idx, train) in problem.trains.iter().enumerate() {
-        for (visit_idx, (t_in, resource)) in train.path.iter().enumerate() {
-            println!(
-                "t{} v{} r{} {:?}",
-                train_idx,
-                visit_idx,
-                resource,
-                train_occ[&(train_idx, visit_idx)]
-            );
-        }
-    }
-    for (r, res) in resource_occ.iter().enumerate() {
-        println!("r{} {:?}", r, res);
-    }
-    // println!("Initial train_occ {:#?}", train_occ);
-    // println!("Initial resource_occ {:#?}", resource_occ);
 
     let mut iteration = 0;
+    let mut new_soft_constraints = Vec::new();
+
     loop {
         println!("Iteration {} conflict detection starting...", iteration);
         let mut found_conflict = false;
-        for (train_idx, visit_idx) in touched_times.drain(..) {
-            let next_visit_idx = visit_idx + 1;
+        for visit in touched_intervals.drain(..) {
+            let (train_idx, visit_idx) = visits[visit];
+            let next_visit: Option<VisitId> = if visit_idx + 1 < problem.trains[train_idx].path.len() {
+                Some((usize::from(visit) + 1).into())
+            } else {
+                None
+            };
 
             // GATHER INFORMATION ABOUT TWO CONSECUTIVE TIME POINTS
-            let this_occ = &train_occ[&(train_idx, visit_idx)];
-            let t1_in = this_occ.incumbent_time();
+            let t1_in = occupations[visit].incumbent_time();
 
             let this_resource_id = problem.trains[train_idx].path[visit_idx].1;
             let travel_time = problem.resources[this_resource_id].travel_time;
 
-            let t1_out = train_occ
-                .get(&(train_idx, next_visit_idx))
-                .map(|o| o.incumbent_time())
-                .unwrap_or_else(|| t1_in + travel_time);
-
-            println!(
-                "Checking t{}-v{}-r{} @ t={}--{}",
-                train_idx, visit_idx, this_resource_id, t1_in, t1_out
-            );
-
-            if next_visit_idx < problem.trains[train_idx].path.len() {
-                let next_occ = &train_occ[&(train_idx, next_visit_idx)];
+            if let Some(next_visit) = next_visit {
+                let v1 = &occupations[visit];
+                let v2 = &occupations[next_visit];
+                let t1_out = v2.incumbent_time();
 
                 // TRAVEL TIME CONFLICT
                 if t1_in + travel_time > t1_out {
@@ -103,13 +105,11 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                     );
 
                     // Insert the new time point.
-                    let t1_in_var = this_occ.delays[this_occ.incumbent].0;
-                    let new_t = this_occ.incumbent_time() + travel_time;
-                    let new_timepoint_idx = next_occ.incumbent + 1;
-                    let (t1_earliest_out_var, t1_is_new) = train_occ
-                        .get_mut(&(train_idx, next_visit_idx))
-                        .unwrap()
-                        .time_point(&mut solver, new_timepoint_idx, new_t);
+                    let t1_in_var = v1.delays[v1.incumbent].0;
+                    let new_t = v1.incumbent_time() + travel_time;
+                    let new_timepoint_idx = v2.incumbent + 1;
+                    let (t1_earliest_out_var, t1_is_new) =
+                        occupations[next_visit].time_point(&mut solver, new_timepoint_idx, new_t);
 
                     // T1_IN delay implies T1_EARLIEST_OUT delay.
                     SatInstance::add_clause(&mut solver, vec![!t1_in_var, t1_earliest_out_var]);
@@ -129,22 +129,40 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
             if let Some(conflicting_resources) = conflicts.get(&this_resource_id) {
                 for other_resource in conflicting_resources.iter().copied() {
-                    let this_resource_occ = &resource_occ[other_resource];
+                    let t1_out = next_visit
+                        .map(|v| occupations[v].incumbent_time())
+                        .unwrap_or(t1_in + travel_time);
 
-                    // // TODO correctly determine the relevant conflict index interval
-                    // let conflict_start_idx =
-                    //     this_resource_occ.partition_point(|(t, _, _, _)| *t < t1_in /*wrong partition */);
-                    // let conflict_end_idx = this_resource_occ.partition_point(|(t, _, _, _)| *t < t1_out);
+                    for other_visit in resource_visits[other_resource].iter().copied() {
+                        if usize::from(visit) == usize::from(other_visit) {
+                            continue;
+                        }
+                        let v1 = &occupations[visit];
+                        let v2 = &occupations[other_visit];
+                        let t2_in = v2.incumbent_time();
+                        let (other_train_idx, other_visit_idx) = visits[other_visit];
 
-                    // let conflicting_occs = &this_resource_occ[conflict_start_idx..conflict_end_idx];
-                    let conflicting_occs = &this_resource_occ[..];
-
-                    for (t2_in, t2_out, other_train, other_visit) in conflicting_occs.iter().copied() {
                         // We have a train2 that is conflicting.
-                        if other_train == train_idx {
+                        if other_train_idx == train_idx {
                             continue; // Assume for now that the train doesn't conflict with itself.
                         }
 
+                        let other_next_visit: Option<VisitId> =
+                            if other_visit_idx + 1 < problem.trains[other_train_idx].path.len() {
+                                Some((usize::from(other_visit) + 1).into())
+                            } else {
+                                None
+                            };
+
+                        let t2_out = other_next_visit
+                            .map(|v| occupations[v].incumbent_time())
+                            .unwrap_or_else(|| {
+                                let other_resource_id = problem.trains[other_train_idx].path[other_visit_idx].1;
+                                let travel_time = problem.resources[other_resource_id].travel_time;
+                                t2_in + travel_time
+                            });
+
+                        // They are not overlapping so not in conflict.
                         if t1_out <= t2_in || t2_out <= t1_in {
                             continue;
                         }
@@ -158,9 +176,9 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                             problem.trains[train_idx].path[visit_idx].1,
                             t1_in,
                             t1_out,
-                            other_train,
-                            other_visit,
-                            problem.trains[other_train].path[other_visit].1,
+                            other_train_idx,
+                            other_visit_idx,
+                            problem.trains[other_train_idx].path[other_visit_idx].1,
                             t2_in,
                             t2_out,
                         );
@@ -173,46 +191,32 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
                         // The constraint is:
                         // We can delay T1_IN until T2_OUT?
-                        let t1occ = &train_occ[&(train_idx, visit_idx)];
-                        let new_timepoint_idx = t1occ.incumbent + 1;
-                        let new_t = t2_out;
-                        let (delay_t1, t1_is_new) = train_occ.get_mut(&(train_idx, visit_idx)).unwrap().time_point(
-                            &mut solver,
-                            new_timepoint_idx,
-                            new_t,
-                        );
+                        let new_idx1 = v1.incumbent + 1;
+                        let new_t1 = t2_out;
 
                         // .. OR we can delay T2_IN until T1_OUT
-                        let t2occ = &train_occ[&(other_train, other_visit)];
-                        let new_timepoint_idx = t2occ.incumbent + 1;
-                        let new_t = t1_out;
-                        let (delay_t2, t2_is_new) = train_occ.get_mut(&(other_train, other_visit)).unwrap().time_point(
-                            &mut solver,
-                            new_timepoint_idx,
-                            new_t,
-                        );
+                        let new_idx2 = v2.incumbent + 1;
+                        let new_t2 = t1_out;
 
-                        let t1occ = &train_occ[&(train_idx, visit_idx)];
-                        let t2occ = &train_occ[&(other_train, other_visit)];
+                        
+                        let (delay_t2, t2_is_new) = occupations[other_visit].time_point(&mut solver, new_idx2, new_t2);
+                        let (delay_t1, t1_is_new) = occupations[visit].time_point(&mut solver, new_idx1, new_t1);
+
+                        let v1 = &occupations[visit];
+                        let v2 = &occupations[other_visit];
 
                         const USE_CHOICE_VAR: bool = false;
 
                         if USE_CHOICE_VAR {
                             let choose = SatInstance::new_var(&mut solver);
-                            SatInstance::add_clause(
-                                &mut solver,
-                                vec![!choose, !t1occ.delays[t1occ.incumbent].0, delay_t2],
-                            );
-                            SatInstance::add_clause(
-                                &mut solver,
-                                vec![choose, !t2occ.delays[t1occ.incumbent].0, delay_t1],
-                            );
+                            SatInstance::add_clause(&mut solver, vec![!choose, !v1.delays[v1.incumbent].0, delay_t2]);
+                            SatInstance::add_clause(&mut solver, vec![choose, !v2.delays[v2.incumbent].0, delay_t1]);
                         } else {
                             SatInstance::add_clause(
                                 &mut solver,
                                 vec![
-                                    !t1occ.delays[t1occ.incumbent].0,
-                                    !t2occ.delays[t1occ.incumbent].0,
+                                    !v1.delays[v1.incumbent].0,
+                                    !v2.delays[v2.incumbent].0,
                                     delay_t1,
                                     delay_t2,
                                 ],
@@ -223,16 +227,16 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
             }
         }
 
-        assert!(touched_times.is_empty());
-
         if !found_conflict {
             // Incumbent times are feasible and optimal.
 
             let mut trains = Vec::new();
+            let mut i = 0;
             for (train_idx, train) in problem.trains.iter().enumerate() {
                 let mut train_times = Vec::new();
-                for (visit_idx, (t_in, resource)) in train.path.iter().enumerate() {
-                    train_times.push(train_occ[&(train_idx, visit_idx)].incumbent_time());
+                for _ in train.path.iter().enumerate() {
+                    train_times.push(occupations[VisitId(i)].incumbent_time());
+                    i += 1;
                 }
 
                 let last_resource = problem.trains[train_idx].path[train_times.len() - 1].1;
@@ -249,37 +253,32 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
             let result = SatSolverWithCore::solve_with_assumptions(&mut solver, std::iter::empty());
             match result {
                 satcoder::SatResultWithCore::Sat(model) => {
-                    for train_idx in 0..problem.trains.len() {
-                        for visit_idx in 0..problem.trains[train_idx].path.len() {
-                            let this_occ = train_occ.get_mut(&(train_idx, visit_idx)).unwrap();
-                            let old_time = this_occ.incumbent_time();
-                            let mut touched = false;
+                    for (visit, this_occ) in occupations.iter_mut_enumerated() {
+                        let old_time = this_occ.incumbent_time();
+                        let mut touched = false;
 
-                            while model.value(&this_occ.delays[this_occ.incumbent + 1].0) {
-                                this_occ.incumbent += 1;
-                                touched = true;
+                        while model.value(&this_occ.delays[this_occ.incumbent + 1].0) {
+                            this_occ.incumbent += 1;
+                            touched = true;
+                        }
+                        while !model.value(&this_occ.delays[this_occ.incumbent].0) {
+                            this_occ.incumbent -= 1;
+                            touched = true;
+                        }
+
+                        if touched {
+                            let (train_idx, visit_idx) = visits[visit];
+                            let resource = problem.trains[train_idx].path[visit_idx].1;
+                            let new_time = this_occ.incumbent_time();
+                            println!(
+                                "Updated t{}-v{}-r{}  t={}-->{}",
+                                train_idx, visit_idx, resource, old_time, new_time
+                            );
+
+                            if visit_idx > 0 {
+                                touched_intervals.push((Into::<usize>::into(visit) - 1).into());
                             }
-                            while !model.value(&this_occ.delays[this_occ.incumbent].0) {
-                                this_occ.incumbent -= 1;
-                                touched = true;
-                            }
-
-                            if touched {
-                                let resource = problem.trains[train_idx].path[visit_idx].1;
-                                let new_time = this_occ.incumbent_time();
-                                println!(
-                                    "Updated t{}-v{}-r{}  t={}-->{}",
-                                    train_idx, visit_idx, resource, old_time, new_time
-                                );
-
-                                resource_occ[resource].retain(|(_, _, t, _)| *t != train_idx);
-                                resource_occ[resource].push((*new_time, train_idx, visit_idx));
-
-                                if visit_idx > 0 && touched_times.last() != Some(&(train_idx, visit_idx - 1)) {
-                                    touched_times.push((train_idx, visit_idx - 1));
-                                }
-                                touched_times.push((train_idx, visit_idx));
-                            }
+                            touched_intervals.push(visit);
                         }
                     }
 
