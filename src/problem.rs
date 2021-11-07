@@ -4,6 +4,15 @@ pub struct Problem {
     pub conflicts: Vec<(usize, usize)>,
 }
 
+pub struct Resource {
+    pub travel_time: i32,
+}
+
+pub struct Train {
+    pub path: Vec<(i32, usize)>,
+}
+
+
 impl Problem {
     pub fn verify_solution(&self, solution: &Vec<Vec<i32>>) -> Option<i32> {
         // Check the shape of the solution
@@ -74,13 +83,6 @@ impl Problem {
     }
 }
 
-pub struct Resource {
-    pub travel_time: i32,
-}
-
-pub struct Train {
-    pub path: Vec<(i32, usize)>,
-}
 
 impl Train {
     pub fn delay_cost(&self, path_idx: usize, t: i32) -> usize {

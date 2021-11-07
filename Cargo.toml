@@ -9,3 +9,6 @@ edition = "2021"
 satcoder = { path = "../../salvers/satcoder" }
 typed-index-collections = "3.0"
 derive_more = "0.99"
+roxmltree = "0.14"
+log = "0.4"
+chrono = "0.4"
