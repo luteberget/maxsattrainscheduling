@@ -46,7 +46,6 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
     //    - propagate simple presedences?
     //    - update all conflicts and presedences when adding new time points?
     //    - smt refinement of the simple presedences?
-    //  - parse the DDD paper instances
     //  - get rid of the multiple adding of constraints
 
     let mut solver = minisat::Solver::new();
@@ -62,11 +61,11 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
     }
 
     for (train_idx, train) in problem.trains.iter().enumerate() {
-        for (visit_idx, (t, resource)) in train.path.iter().enumerate() {
+        for (visit_idx, (resource, earliest_t, _travel_time)) in train.visits.iter().enumerate() {
             let visit: VisitId = visits.push_and_get_key((train_idx, visit_idx));
 
             occupations.push(Occ {
-                delays: vec![(true.into(), *t), (false.into(), i32::MAX)],
+                delays: vec![(true.into(), *earliest_t), (false.into(), i32::MAX)],
                 incumbent: 0,
             });
 
@@ -91,7 +90,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
             let mut found_conflict = false;
             for visit in touched_intervals.drain(..) {
                 let (train_idx, visit_idx) = visits[visit];
-                let next_visit: Option<VisitId> = if visit_idx + 1 < problem.trains[train_idx].path.len() {
+                let next_visit: Option<VisitId> = if visit_idx + 1 < problem.trains[train_idx].visits.len() {
                     Some((usize::from(visit) + 1).into())
                 } else {
                     None
@@ -99,9 +98,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
                 // GATHER INFORMATION ABOUT TWO CONSECUTIVE TIME POINTS
                 let t1_in = occupations[visit].incumbent_time();
-
-                let this_resource_id = problem.trains[train_idx].path[visit_idx].1;
-                let travel_time = problem.resources[this_resource_id].travel_time;
+                let (this_resource_id, _earliest, travel_time) = problem.trains[train_idx].visits[visit_idx];
 
                 if let Some(next_visit) = next_visit {
                     let v1 = &occupations[visit];
@@ -142,7 +139,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                             if usize::from(visit) == usize::from(other_visit) {
                                 continue;
                             }
-                            let v1 = &occupations[visit];
+                            let _v1 = &occupations[visit];
                             let v2 = &occupations[other_visit];
                             let t2_in = v2.incumbent_time();
                             let (other_train_idx, other_visit_idx) = visits[other_visit];
@@ -153,7 +150,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                             }
 
                             let other_next_visit: Option<VisitId> =
-                                if other_visit_idx + 1 < problem.trains[other_train_idx].path.len() {
+                                if other_visit_idx + 1 < problem.trains[other_train_idx].visits.len() {
                                     Some((usize::from(other_visit) + 1).into())
                                 } else {
                                     None
@@ -162,8 +159,8 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                             let t2_out = other_next_visit
                                 .map(|v| occupations[v].incumbent_time())
                                 .unwrap_or_else(|| {
-                                    let other_resource_id = problem.trains[other_train_idx].path[other_visit_idx].1;
-                                    let travel_time = problem.resources[other_resource_id].travel_time;
+                                    let (_other_resource_id, _e, travel_time) =
+                                        problem.trains[other_train_idx].visits[other_visit_idx];
                                     t2_in + travel_time
                                 });
 
@@ -178,12 +175,12 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                                 " - RESOURCE conflict between t{}-v{}-r{}-in{}-out{} t{}-v{}-r{}-in{}-out{}",
                                 train_idx,
                                 visit_idx,
-                                problem.trains[train_idx].path[visit_idx].1,
+                                problem.trains[train_idx].visits[visit_idx].1,
                                 t1_in,
                                 t1_out,
                                 other_train_idx,
                                 other_visit_idx,
-                                problem.trains[other_train_idx].path[other_visit_idx].1,
+                                problem.trains[other_train_idx].visits[other_visit_idx].1,
                                 t2_in,
                                 t2_out,
                             );
@@ -250,13 +247,13 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                 let mut i = 0;
                 for (train_idx, train) in problem.trains.iter().enumerate() {
                     let mut train_times = Vec::new();
-                    for _ in train.path.iter().enumerate() {
+                    for _ in train.visits.iter().enumerate() {
                         train_times.push(occupations[VisitId(i)].incumbent_time());
                         i += 1;
                     }
 
-                    let last_resource = problem.trains[train_idx].path[train_times.len() - 1].1;
-                    let last_t = train_times[train_times.len() - 1] + problem.resources[last_resource].travel_time;
+                    let (_last_resource, _, travel_time) = problem.trains[train_idx].visits[train_times.len() - 1];
+                    let last_t = train_times[train_times.len() - 1] + travel_time;
                     train_times.push(last_t);
 
                     trains.push(train_times);
@@ -272,7 +269,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
         for (visit, new_var, new_t) in new_time_points.drain(..) {
             let (train_idx, visit_idx) = visits[visit];
-            let resource = problem.trains[train_idx].path[visit_idx].1;
+            let resource = problem.trains[train_idx].visits[visit_idx].1;
 
             let cost = problem.trains[train_idx].delay_cost(visit_idx, new_t);
             if cost > 0 {
@@ -306,7 +303,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
                         if touched {
                             let (train_idx, visit_idx) = visits[visit];
-                            let resource = problem.trains[train_idx].path[visit_idx].1;
+                            let resource = problem.trains[train_idx].visits[visit_idx].1;
                             let new_time = this_occ.incumbent_time();
                             println!(
                                 "Updated t{}-v{}-r{}  t={}-->{}",
@@ -363,8 +360,10 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                             let new_bound = bound + 1;
                             tot.increase_bound(&mut solver, new_bound as u32);
                             if new_bound < tot.rhs().len() {
-                                soft_constraints
-                                    .insert(!tot.rhs()[new_bound], (Soft::Totalizer(tot, new_bound), original_cost, original_cost));
+                                soft_constraints.insert(
+                                    !tot.rhs()[new_bound],
+                                    (Soft::Totalizer(tot, new_bound), original_cost, original_cost),
+                                );
                             }
                         }
                     }

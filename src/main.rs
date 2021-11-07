@@ -2,7 +2,6 @@
 
 mod problem;
 mod solver;
-mod intervals;
 mod parser;
 
 fn main() {

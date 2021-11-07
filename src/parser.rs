@@ -1,22 +1,7 @@
 use crate::problem::Problem;
-use chrono::NaiveDateTime;
-use log::info;
-use std::collections::{HashMap, HashSet};
+use chrono::{Duration, NaiveDateTime};
+use std::collections::HashMap;
 
-struct RawProblem {
-    trains: Vec<RawTrain>,
-    conflicts: Vec<(usize, usize)>,
-}
-
-struct RawTrain {
-    visit: Vec<RawVisit>,
-}
-
-struct RawVisit {
-    resource_id: usize,
-    earliest_in: i32,
-    travel_time: i32,
-}
 enum Pos<'a> {
     OnTrack(&'a str, NaiveDateTime, i32),
     InStation(&'a str, NaiveDateTime, i32),
@@ -33,42 +18,13 @@ pub fn read_file(instance_fn: &str) -> Problem {
         .children()
         .find(|n| n.tag_name().name() == "Network")
         .unwrap();
-    let stations = network.children().find(|n| n.tag_name().name() == "Stations").unwrap();
+    let _stations = network.children().find(|n| n.tag_name().name() == "Stations").unwrap();
     let tracks = network.children().find(|n| n.tag_name().name() == "Tracks").unwrap();
 
     let minimum_running_times = get_runningtimes_map(&doc);
     let connection_ids = get_track_id_map(tracks);
-    let objective_map = get_objective_map(&doc);
-    let train_positions = get_train_pos(&doc, date_format);
-
-    // let mut ignore_trains = HashSet::new();
-
-    // // for ch in doc.root_element().children().filter(|c| c.is_element()) {
-    // //     println!("{:?}", ch.tag_name().name());
-    // // }
-
-    // for station in stations.children().filter(|c| c.is_element()) {
-    //     let id = station.attribute("StationId").unwrap();
-    //     let maintrack = station.attribute("MainTrackId").unwrap();
-    //     println!("station {} {}", id, maintrack);
-
-    //     let internal_tracks = station
-    //         .children()
-    //         .find(|n| n.tag_name().name() == "InternalTracks")
-    //         .unwrap();
-    //     for internal_track in internal_tracks.children().filter(|c| c.is_element()) {
-    //         assert!(internal_track.tag_name().name() == "InternalTrack");
-    //         let track_id = internal_track.attribute("TrackId").unwrap();
-    //         let has_platform = internal_track
-    //             .attribute("HasPlatform")
-    //             .unwrap()
-    //             .parse::<bool>()
-    //             .unwrap();
-    //         let length = internal_track.attribute("Length").map(|l| l.parse::<u32>().unwrap());
-
-    //         println!("  - track {} {} {:?}", track_id, has_platform, length);
-    //     }
-    // }
+    let _objective_map = get_objective_map(&doc);
+    let (_time_now, train_positions) = get_train_pos(&doc, date_format);
 
     let timetable = doc
         .root_element()
@@ -79,14 +35,17 @@ pub fn read_file(instance_fn: &str) -> Problem {
         .children()
         .find(|n| n.tag_name().name() == "TrainSchedules")
         .unwrap();
+
+        let mut problem_trains = Vec::new();
     for train_schedule in train_schedules.children().filter(|c| c.is_element()) {
         assert!(train_schedule.tag_name().name() == "TrainSchedule");
         let id = train_schedule.attribute("TrainId").unwrap();
         let speed_class = train_schedule.attribute("SpeedClass").unwrap();
-        let type_ = train_schedule.attribute("Type").unwrap();
-        let origin_id = train_schedule.attribute("OriginId").unwrap();
-        let destination_id = train_schedule.attribute("DestinationId").unwrap();
-        let length = train_schedule.attribute("Length").unwrap().parse::<u32>().unwrap();
+
+        let _type_ = train_schedule.attribute("Type").unwrap();
+        let _origin_id = train_schedule.attribute("OriginId").unwrap();
+        let _destination_id = train_schedule.attribute("DestinationId").unwrap();
+        let _length = train_schedule.attribute("Length").unwrap().parse::<u32>().unwrap();
 
         let stop_nodes = train_schedule.children().filter(|c| c.is_element()).collect::<Vec<_>>();
         if stop_nodes.len() < 2 {
@@ -97,102 +56,100 @@ pub fn read_file(instance_fn: &str) -> Problem {
         if let Some(pos) = train_positions.get(id) {
             let mut visits = Vec::new();
 
-            let (stop_idx, current_time) = match pos {
-                Pos::OnTrack(tx, enter_time, delay) => stop_nodes
+            let (first_stop_idx, mut current_time) = match pos {
+                Pos::OnTrack(track, enter_time, _delay) => stop_nodes
                     .iter()
                     .zip(stop_nodes.iter().skip(1))
-                    .find_map(|(n1, n2)| {
+                    .enumerate()
+                    .find_map(|(stop_idx, (n1, n2))| {
                         let prev_station = n1.attribute("StationId").unwrap();
                         let next_station = n2.attribute("StationId").unwrap();
-                        if connection_ids[&(prev_station, next_station)] == *tx {
-                            Some(todo!())
-                        } else {
-                            None
-                        }
+                        (connection_ids[&(prev_station, next_station)] == *track).then(|| {
+                            let travel_time = Duration::seconds(minimum_running_times[speed_class][*track] as i64);
+                            visits.push((Err(*track), *enter_time, travel_time));
+                            (stop_idx + 1, *enter_time + travel_time)
+                        })
                     })
                     .unwrap(),
-                Pos::InStation(sx, enter_time, delay) => stop_nodes
+                Pos::InStation(sx, enter_time, _delay) => stop_nodes
                     .iter()
-                    .find_map(|n| {
-                        if *sx == n.attribute("StationId").unwrap() {
-                            Some(todo!())
-                        } else {
-                            None
-                        }
+                    .enumerate()
+                    .find_map(|(stop_idx, n)| {
+                        (*sx == n.attribute("StationId").unwrap()).then(|| (stop_idx, *enter_time))
                     })
                     .unwrap(),
-                Pos::NotStarted(delay) => {
-                    // start_time = true;
-                    (
-                        0,
-                        parse_date(stop_nodes[0].attribute("AimedArrivalTime").unwrap())
-                            + chrono::Duration::seconds(*delay as i64),
-                    )
-                }
+                Pos::NotStarted(delay) => (
+                    0,
+                    parse_date(stop_nodes[0].attribute("AimedArrivalTime").unwrap())
+                        + chrono::Duration::seconds(*delay as i64),
+                ),
             };
 
-            for (stop, next_stop) in stop_nodes[stop_idx..].iter().zip(
-                stop_nodes[stop_idx..]
+            for (stop, next_stop) in stop_nodes[first_stop_idx..].iter().zip(
+                stop_nodes[first_stop_idx..]
                     .iter()
                     .skip(1)
                     .map(Some)
                     .chain(std::iter::once(None)),
             ) {
                 let station = stop.attribute("StationId").unwrap();
-                let aimed_arrival = parse_date(stop.attribute("AimedArrivalTime").unwrap());
+                let _aimed_arrival = parse_date(stop.attribute("AimedArrivalTime").unwrap());
                 let aimed_departure = parse_date(stop.attribute("AimedDepartureTime").unwrap());
 
                 // Now we enter the station at current_time.
+                visits.push((Ok(station), current_time, Duration::zero()));
 
-                visits.push((Ok(station), current_time, 0));
+                // Now the earliest time to exit the station, is the max of (the current time + 0) and
+                // the aimed departure time.
+                current_time = (current_time + Duration::zero()).max(aimed_departure);
 
                 if let Some(next_stop) = next_stop {
                     let next_station = next_stop.attribute("StationId").unwrap();
                     let track = *connection_ids.get(&(station, next_station)).unwrap();
-
-                    visits.push((Err(track), current_time, minimum_running_times[speed_class][track]));
+                    let travel_time = Duration::seconds(minimum_running_times[speed_class][track] as i64);
+                    visits.push((Err(track), current_time, travel_time));
+                    current_time += travel_time;
                 }
             }
 
-            // if let Some(start_time) = start_time {
-
-            //     if stop_idx > 0 {
-            //         // add the track
-            //         let prev_station = stop_nodes[stop_idx - 1].attribute("StationId").unwrap();
-            //         let next_station = stop_nodes[stop_idx].attribute("StationId").unwrap();
-            //         let track = connection_ids[&(prev_station, next_station)];
-
-            //         let track_running_time = minimum_running_times[speed_class][track];
-
-            //         visits.push((Err(track),0));
-
-            //     }
-
-            //     visits.push((Ok(station), 0));
-
-            // }
-
-            // stop_idx += 1;
-            // if stop_idx >= stop_nodes.len() {
-            //     break; // Done.
-            // }
-
-            // for stop in train_schedule.children().filter(|c| c.is_element()) {
-            //     assert!(stop.tag_name().name() == "ScheduledStop");
-
-            //     println!("  {} {} {}", station, aimed_arrival, aimed_departure);
-            // }
+            problem_trains.push(visits);
         } else {
             println!("Ignoring train {} has left the network.", id);
         }
     }
 
-    // println!("{}", &instance_xml[snapshots.range()]);
+
 
     todo!()
 }
 
-fn get_train_pos<'a>(doc: &'a roxmltree::Document, date_format: &'_ str) -> HashMap<&'a str, Pos<'a>> {
+#[allow(unused)]
+fn station_info(stations: roxmltree::Node) {
+    for station in stations.children().filter(|c| c.is_element()) {
+        let id = station.attribute("StationId").unwrap();
+        let maintrack = station.attribute("MainTrackId").unwrap();
+        println!("station {} {}", id, maintrack);
+
+        let internal_tracks = station
+            .children()
+            .find(|n| n.tag_name().name() == "InternalTracks")
+            .unwrap();
+        for internal_track in internal_tracks.children().filter(|c| c.is_element()) {
+            assert!(internal_track.tag_name().name() == "InternalTrack");
+            let track_id = internal_track.attribute("TrackId").unwrap();
+            let has_platform = internal_track
+                .attribute("HasPlatform")
+                .unwrap()
+                .parse::<bool>()
+                .unwrap();
+            let length = internal_track.attribute("Length").map(|l| l.parse::<u32>().unwrap());
+
+            println!("  - track {} {} {:?}", track_id, has_platform, length);
+        }
+    }
+}
+
+fn get_train_pos<'a>(doc: &'a roxmltree::Document, date_format: &'_ str) -> (NaiveDateTime, HashMap<&'a str, Pos<'a>>) {
     let mut train_positions: HashMap<&str, Pos> = HashMap::new();
     let snapshots = doc
         .root_element()
@@ -253,9 +210,10 @@ fn get_train_pos<'a>(doc: &'a roxmltree::Document, date_format: &'_ str) -> Hash
             _ => panic!(),
         }
     }
-    train_positions
+    (time_now, train_positions)
 }
 
+#[allow(clippy::type_complexity)]
 fn get_objective_map<'a>(doc: &'a roxmltree::Document<'a>) -> HashMap<(&'a str, &'a str), Vec<(i32, i32, f32, f32)>> {
     let mut objective_map: HashMap<(&str, &str), Vec<(i32, i32, f32, f32)>> = HashMap::new();
     let objective = doc
