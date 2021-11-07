@@ -1,4 +1,3 @@
-
 #[derive(Debug)]
 pub struct Problem {
     pub trains: Vec<Train>,
@@ -48,10 +47,12 @@ impl Problem {
         for (train_idx1, train1) in self.trains.iter().enumerate() {
             for (visit_idx1, (r1, _earliest1, _travel1)) in train1.visits.iter().enumerate() {
                 for (train_idx2, train2) in self.trains.iter().enumerate() {
-                    for (visit_idx2, (r2, _earliest2, _travel2)) in train2.visits.iter().enumerate() {
-
-                        if (train_idx1 != train_idx2 || visit_idx1 != visit_idx2) && self.conflicts.contains(&(*r1,*r2)) {
-                            // Different visits to the same resource.
+                    for (visit_idx2, (r2, _earliest2, _travel2)) in train2.visits.iter().enumerate()
+                    {
+                        if (train_idx1 != train_idx2 || visit_idx1 != visit_idx2)
+                            && self.conflicts.contains(&(*r1, *r2))
+                        {
+                            // Different visits to the conflicting resources.
 
                             let t1_in = solution[train_idx1][visit_idx1];
                             let t1_out = solution[train_idx1][visit_idx1 + 1];
@@ -92,6 +93,47 @@ impl Train {
     }
 }
 
+#[allow(unused)]
+pub fn problem1_with_stations() -> Problem {
+    // a = 0
+    // b = 1
+    // c = 2
+    // d = 3
+    // e = 4
+    // f = 5
+    // g = 6
+    let travel_times = vec![6, 3, 4, 9, 10, 5, 8];
+    Problem {
+        trains: vec![
+            Train {
+                visits: vec![
+                    (0, 0, travel_times[0]),
+                    (7, 6, 0),
+                    (1, 6, travel_times[1]),
+                    (7, 9, 0),
+                    (6, 9, travel_times[6]),
+                ],
+            },
+            Train {
+                visits: vec![(2, 0, travel_times[2]), (7, 4, 0), (1, 4, travel_times[1])],
+            },
+            Train {
+                visits: vec![
+                    (3, 0, travel_times[3]),
+                    (7, 9, 0),
+                    (1, 9, travel_times[1]),
+                    (7, 12, 0),
+                    (5, 12, travel_times[5]),
+                ],
+            },
+            Train {
+                visits: vec![(4, 0, travel_times[4]), (7,10,0), (5, 10, travel_times[5])],
+            },
+        ],
+
+        conflicts: (0..=6).map(|i| (i, i)).collect(), // resources only conflict with themselves.
+    }
+}
 #[allow(unused)]
 pub fn problem1() -> Problem {
     // a = 0

@@ -24,7 +24,7 @@ fn main() {
 mod tests {
     #[test]
     pub fn testproblem() {
-        let problem = crate::problem::problem1();
+        let problem = crate::problem::problem1_with_stations();
         let result = crate::solver::solve(&problem).unwrap();
         let score = problem.verify_solution(&result);
         assert!(score.is_some());
@@ -32,7 +32,21 @@ mod tests {
 
     #[test]
     pub fn samescore() {
-        let problem = crate::problem::problem1();
+        let problem = crate::problem::problem1_with_stations();
+
+        let result = crate::solver::solve(&problem).unwrap();
+        let first_score = problem.verify_solution(&result);
+
+        for _ in 0..100 {
+            let result = crate::solver::solve(&problem).unwrap();
+            let score = problem.verify_solution(&result);
+            assert!(score == first_score);
+        }
+    }
+
+    #[test]
+    pub fn samescore2() {
+        let (problem, _train_names, _res_names) = crate::parser::read_file("instances/Instance20.xml");
 
         let result = crate::solver::solve(&problem).unwrap();
         let first_score = problem.verify_solution(&result);
