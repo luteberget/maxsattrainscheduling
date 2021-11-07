@@ -175,7 +175,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                     .or_default() += 1;
             }
             // SOLVE ALL SIMPLE PRESEDENCES BEFORE CONFLICTS
-            if !found_conflict {
+            // if !found_conflict {
                 for visit in touched_intervals.iter().copied() {
                     let (train_idx, visit_idx) = visits[visit];
                     let next_visit: Option<VisitId> =
@@ -332,7 +332,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                         }
                     }
                 }
-            }
+            // }
 
             if !found_conflict {
                 // Incumbent times are feasible and optimal.
