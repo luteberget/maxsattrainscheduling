@@ -29,4 +29,18 @@ mod tests {
         let score = problem.verify_solution(&result);
         assert!(score.is_some());
     }
+
+    #[test]
+    pub fn samescore() {
+        let problem = crate::problem::problem1();
+
+        let result = crate::solver::solve(&problem).unwrap();
+        let first_score = problem.verify_solution(&result);
+
+        for _ in 0..100 {
+            let result = crate::solver::solve(&problem).unwrap();
+            let score = problem.verify_solution(&result);
+            assert!(score == first_score);
+        }
+    }
 }

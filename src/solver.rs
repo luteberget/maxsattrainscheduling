@@ -9,7 +9,7 @@ use satcoder::{
 };
 use typed_index_collections::TiVec;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 struct VisitId(u32);
 
 impl From<VisitId> for usize {
@@ -54,6 +54,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
     let mut occupations: TiVec<VisitId, Occ> = TiVec::new();
     let mut touched_intervals = Vec::new();
     let mut conflicts: HashMap<_, Vec<_>> = HashMap::new();
+    let mut new_time_points = Vec::new();
 
     for (a, b) in problem.conflicts.iter() {
         conflicts.entry(*a).or_default().push(*b);
@@ -65,6 +66,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
             let visit: VisitId = visits.push_and_get_key((train_idx, visit_idx));
 
             occupations.push(Occ {
+                cost: vec![true.into()],
                 delays: vec![(true.into(), *earliest_t), (false.into(), i32::MAX)],
                 incumbent: 0,
             });
@@ -75,12 +77,13 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
             resource_visits[*resource].push(visit);
             touched_intervals.push(visit);
+            new_time_points.push((visit, true.into(), *earliest_t));
         }
     }
 
     let mut iteration = 0;
+    let mut total_cost = 0;
     let mut soft_constraints = HashMap::new();
-    let mut new_time_points = Vec::new();
     let mut is_sat = true;
 
     loop {
@@ -123,7 +126,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
                         // The new timepoint might have a cost.
                         if t1_is_new {
-                            new_time_points.push((visit, t1_in_var, new_t));
+                            new_time_points.push((next_visit, t1_in_var, new_t));
                         }
                     }
                 }
@@ -259,6 +262,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                     trains.push(train_times);
                 }
 
+                println!("Finished with cost {} iterations {} solver {:?}", total_cost, iteration, solver);
                 return Ok(trains);
             }
         }
@@ -268,18 +272,30 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
         }
 
         for (visit, new_var, new_t) in new_time_points.drain(..) {
+            
             let (train_idx, visit_idx) = visits[visit];
             let resource = problem.trains[train_idx].visits[visit_idx].1;
+            
+            let new_var_cost = problem.trains[train_idx].delay_cost(visit_idx, new_t);
+            println!("new var for t{} v{} t{} cost{}", train_idx, visit_idx, new_t, new_var_cost);
+            for cost in occupations[visit].cost.len()..=new_var_cost {
+                println!("Extending t{}v{} to cost {}", train_idx, visit_idx, cost);
+                let prev_cost_var = occupations[visit].cost[cost - 1];
+                let next_cost_var = SatInstance::new_var(&mut solver);
 
-            let cost = problem.trains[train_idx].delay_cost(visit_idx, new_t);
-            if cost > 0 {
-                // Add soft.
+                SatInstance::add_clause(&mut solver, vec![!next_cost_var, prev_cost_var]);
+                occupations[visit].cost.push(next_cost_var);
+
                 println!(
                     "Soft constraint for t{}-v{}-r{} t{} cost{} lit{:?}",
-                    train_idx, visit_idx, resource, new_t, cost, new_var
+                    train_idx, visit_idx, resource, new_t, new_var_cost, new_var
                 );
-                soft_constraints.insert(!new_var, (Soft::Delay, cost, cost));
+                soft_constraints.insert(!next_cost_var, (Soft::Delay, 1, 1));
             }
+
+            // set the cost for this new time point.
+            println!("   new var implies cost {}=>{:?}", new_var_cost, occupations[visit].cost[new_var_cost]);
+            SatInstance::add_clause(&mut solver, vec![!new_var, occupations[visit].cost[new_var_cost]]);
         }
 
         let core = {
@@ -310,8 +326,13 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
                                 train_idx, visit_idx, resource, old_time, new_time
                             );
 
+                            // We are really interested not in the visits, but the resource occupation
+                            // intervals. Therefore, also the previous visit has been touched by this visit.
                             if visit_idx > 0 {
-                                touched_intervals.push((Into::<usize>::into(visit) - 1).into());
+                                let prev_visit = (Into::<usize>::into(visit) - 1).into();
+                                if touched_intervals.last() != Some(&prev_visit) {
+                                    touched_intervals.push(prev_visit);
+                                }
                             }
                             touched_intervals.push(visit);
                         }
@@ -338,6 +359,8 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
             }
 
             let min_weight = core.iter().map(|c| soft_constraints[&Bool::Lit(*c)].1).min().unwrap();
+            assert!(min_weight == 1);
+
             println!("Core min weight {}", min_weight);
 
             for c in core.iter() {
@@ -350,26 +373,25 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
                 assert!(cost >= min_weight);
                 let new_cost = cost - min_weight;
-                if new_cost > 0 {
-                    soft_constraints.insert(Bool::Lit(*c), (soft, new_cost, original_cost));
-                } else {
-                    match soft {
-                        Soft::Delay => { /* primary soft constraint, when we relax we are done */ }
-                        Soft::Totalizer(mut tot, bound) => {
-                            // totalizer: need to extend its bound
-                            let new_bound = bound + 1;
-                            tot.increase_bound(&mut solver, new_bound as u32);
-                            if new_bound < tot.rhs().len() {
-                                soft_constraints.insert(
-                                    !tot.rhs()[new_bound],
-                                    (Soft::Totalizer(tot, new_bound), original_cost, original_cost),
-                                );
-                            }
+                assert!(new_cost == 0);
+
+                match soft {
+                    Soft::Delay => { /* primary soft constraint, when we relax we are done */ }
+                    Soft::Totalizer(mut tot, bound) => {
+                        // totalizer: need to extend its bound
+                        let new_bound = bound + 1;
+                        tot.increase_bound(&mut solver, new_bound as u32);
+                        if new_bound < tot.rhs().len() {
+                            soft_constraints.insert(
+                                !tot.rhs()[new_bound],
+                                (Soft::Totalizer(tot, new_bound), original_cost, original_cost),
+                            );
                         }
                     }
                 }
             }
 
+            total_cost += 1;
             if core.len() > 1 {
                 let bound = 1;
                 let tot = Totalizer::count(&mut solver, core.iter().map(|c| Bool::Lit(!*c)), bound as u32);
@@ -385,6 +407,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, ()> {
 
 #[derive(Debug)]
 struct Occ {
+    cost: Vec<Bool>,
     delays: Vec<(Bool, i32)>,
     incumbent: usize,
 }
