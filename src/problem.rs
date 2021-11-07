@@ -1,8 +1,11 @@
+
+#[derive(Debug)]
 pub struct Problem {
     pub trains: Vec<Train>,
     pub conflicts: Vec<(usize, usize)>,
 }
 
+#[derive(Debug)]
 pub struct Train {
     pub visits: Vec<(usize, i32, i32)>,
 }
@@ -46,7 +49,8 @@ impl Problem {
             for (visit_idx1, (r1, _earliest1, _travel1)) in train1.visits.iter().enumerate() {
                 for (train_idx2, train2) in self.trains.iter().enumerate() {
                     for (visit_idx2, (r2, _earliest2, _travel2)) in train2.visits.iter().enumerate() {
-                        if (train_idx1 != train_idx2 || visit_idx1 != visit_idx2) && r1 == r2 {
+
+                        if (train_idx1 != train_idx2 || visit_idx1 != visit_idx2) && self.conflicts.contains(&(*r1,*r2)) {
                             // Different visits to the same resource.
 
                             let t1_in = solution[train_idx1][visit_idx1];
@@ -88,6 +92,7 @@ impl Train {
     }
 }
 
+#[allow(unused)]
 pub fn problem1() -> Problem {
     // a = 0
     // b = 1

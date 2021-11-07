@@ -8,7 +8,7 @@ enum Pos<'a> {
     NotStarted(i32),
 }
 
-pub fn read_file(instance_fn: &str) -> Problem {
+pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
     let date_format = "%Y-%m-%dT%H:%M:%S";
     let parse_date = |d| chrono::NaiveDateTime::parse_from_str(d, date_format).unwrap();
     let instance_xml = std::fs::read_to_string(instance_fn).unwrap();
@@ -24,7 +24,7 @@ pub fn read_file(instance_fn: &str) -> Problem {
     let minimum_running_times = get_runningtimes_map(&doc);
     let connection_ids = get_track_id_map(tracks);
     let _objective_map = get_objective_map(&doc);
-    let (_time_now, train_positions) = get_train_pos(&doc, date_format);
+    let (time_now, train_positions) = get_train_pos(&doc, date_format);
 
     let timetable = doc
         .root_element()
@@ -112,15 +112,48 @@ pub fn read_file(instance_fn: &str) -> Problem {
                 }
             }
 
-            problem_trains.push(visits);
+            problem_trains.push((id, visits));
         } else {
             println!("Ignoring train {} has left the network.", id);
         }
     }
 
+    let mut problem = crate::problem::Problem {
+        trains: Vec::new(),
+        conflicts: Vec::new(),
+    };
 
+    let mut train_names = Vec::new();
+    let mut resource_names = Vec::new();
 
-    todo!()
+    let mut resource_ids = HashMap::new();
+    let mut resource_idx = 0;
+    for (name,visits) in problem_trains.iter() {
+        let mut t= Vec::new();
+        for (r, earliest, travel) in visits.iter() {
+
+            let resource = *resource_ids.entry(r).or_insert_with(|| {
+                let i = resource_idx;
+                resource_names.push(match r {
+                    Ok(station) => format!("Station {}", station),
+                    Err(track) => format!("Track {}", track),
+                });
+                if r.is_err() {
+                    // Tracks are exclusive.
+                    problem.conflicts.push((i,i));
+                }
+                resource_idx += 1;
+                i
+            });
+
+            t.push((resource, (*earliest-time_now).num_seconds() as i32, travel.num_seconds() as i32));
+        }
+
+        problem.trains.push(crate::problem::Train { visits: t });
+        train_names.push(name.to_string());
+    }
+
+    (problem, train_names, resource_names)
 }
 
 #[allow(unused)]
