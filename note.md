@@ -1,6 +1,8 @@
 ---
 title: An incremental MaxSAT formulation for on-line train scheduling
 author: bjørnar
+header-includes:
+  - \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 ---
 
 Re-scheduling trains after traffic disturbances is an important problem from
@@ -68,7 +70,7 @@ $$ x_t^i \geq e_t^i $$
  * Travel time constraints: for two consecutive visits $V_t^i, V_t^{i+1}$, 
 $$ x_t^i + l_t^i \leq x_t^{i+1} $$
  * Resource constraints: for any pair of visits $V_a^i, V_b^j$ that use conflicting resources $(r_a^i,r_b^j) \in C$,
-$$ (r_a^{i+1} \geq r_b^j) \vee (r_b^{j+1} \geq r_a^i ) $$
+$$ (x_a^{i+1} \geq x_b^j) \vee (x_b^{j+1} \geq x_a^i ) $$
 
 The objective function is $$\sum_{t \in T} \sum_{V_t^i} \sigma(x_t^i - e_t^i),$$ where $x_t^i$ is the 
 chosen time for train $t$ to start its visit $i$, and $\sigma(x)$ is:
@@ -110,10 +112,56 @@ always have $f < c < g$.  Note that if values are inserted in arbitrary order,
 all the clauses are sufficient for consistency, and valid, though some become
 redundant.
 
-This encoding corresponds to the "unary" number representation \cite{björk}.
+This encoding is similar to the number representation known as the Unary
+encoding\cite{björk} in that it represent lower and upper bounds, but this
+version does not require all values to be represented.
+
+With this representation, we can create Boolean logic constraints involving 
+$y < c$ and $y \geq c$ for any specific $c$.
 
 Note that the number may be either continuous or integral, in fact any totally
 ordered domain would work. In practice, we use integers representing seconds
 in the online train scheduling algorithm described below.
 
+## Discretized train scheduling constraints
+Now, we implement each of the train scheduling constraints using dynamically
+discretized number representations of each $x_t^i$ from the online train
+scheduling problem.
+
+ * **Earliest time constraints**: if we let $lb(x_t^i)=e_t^i$ (and $ub(x_t^i) =\infty$), then
+   each constraint $x_t^i \geq e_t^i$ becomes $\top$, i.e. the constraint is implicit.
+
+ * **Travel time constraint**: consider consecutive visits $x_t^i, x_t^{i+1}$.
+   For every possible value $c$, we have the clause $$ x_t^i \geq c \Rightarrow x_t^{i+1} \geq c+l_t^i. $$
+ * **Resource occupation constraint**: consider conflicting visits $x_a^i, x_b^j$. 
+For every possible value $c_1$ and $c_2$, we have the clause
+<!--$$ (x_a^{i+1} \geq x_b^j) \vee (x_b^{j+1} \geq x_a^i ) $$-->
+$$ \left( (x_a^{i+1} \geq c_1) \Rightarrow (x_b^j \geq c_1) \right) \vee \left( (x_b^{j+1} \geq c_2)  \Rightarrow (x_a^i \geq c_2) \right) $$
+
+Since these are an infinte number of constraints, we can check a propositional
+model M for violations of the original constraints, and add values $c$ to the
+dynamically discretized numbers as needed and create the corresponding
+discretized constraints.
+
 # Algorithm
+
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetAlgoLined
+\KwResult{Write here the result}
+\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+\Input{Write here the input}
+\Output{Write here the output}
+\BlankLine
+\While{While condition}{
+    instructions\;
+    \eIf{condition}{
+        instructions1\;
+        instructions2\;
+    }{
+        instructions3\;
+    }
+}
+\caption{While loop with If/Else condition}
+\end{algorithm} 
+
