@@ -1,6 +1,6 @@
 use crate::problem::Problem;
 use chrono::{Duration, NaiveDateTime};
-use std::collections::HashMap;
+use std::{collections::HashMap, net::ToSocketAddrs};
 
 enum Pos<'a> {
     OnTrack(&'a str, NaiveDateTime, i32),
@@ -18,11 +18,41 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
         .children()
         .find(|n| n.tag_name().name() == "Network")
         .unwrap();
-    let _stations = network.children().find(|n| n.tag_name().name() == "Stations").unwrap();
-    let tracks = network.children().find(|n| n.tag_name().name() == "Tracks").unwrap();
+    let stations = network
+        .children()
+        .find(|n| n.tag_name().name() == "Stations")
+        .unwrap();
+    let tracks = network
+        .children()
+        .find(|n| n.tag_name().name() == "Tracks")
+        .unwrap();
+
+    let connection_ids = get_track_id_map(tracks);
+
+    // Create resource ids for stations in order
+    let mut resource_order = Vec::new();
+    for station in stations.children().filter(|c| c.is_element()) {
+        let id = station.attribute("StationId").unwrap();
+        resource_order.push(Ok(id));
+    }
+
+    // Insert tracks between stations
+    for track in tracks.children().filter(|c| c.is_element()) {
+        let t = track.attribute("TrackId").unwrap();
+        let sa = track.attribute("StationA").unwrap();
+        let sb = track.attribute("StationB").unwrap();
+        let p = (0..resource_order.len() - 1).find(|i| {
+            (resource_order[*i] == Ok(sa) && resource_order[*i + 1] == Ok(sb))
+            ||(resource_order[*i] == Ok(sb) && resource_order[*i + 1] == Ok(sa))
+            || (*i < resource_order.len() - 1 && resource_order[*i] == Ok(sa)&& resource_order[*i + 2] == Ok(sb))
+            || (*i < resource_order.len() - 1 && resource_order[*i] == Ok(sb)&& resource_order[*i + 2] == Ok(sa))
+        });
+
+        let idx = p.unwrap();
+        resource_order.insert(idx + 1, Err(t));
+    }
 
     let minimum_running_times = get_runningtimes_map(&doc);
-    let connection_ids = get_track_id_map(tracks);
     let _objective_map = get_objective_map(&doc);
     let (time_now, train_positions) = get_train_pos(&doc, date_format);
 
@@ -36,7 +66,7 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
         .find(|n| n.tag_name().name() == "TrainSchedules")
         .unwrap();
 
-        let mut problem_trains = Vec::new();
+    let mut problem_trains = Vec::new();
     for train_schedule in train_schedules.children().filter(|c| c.is_element()) {
         assert!(train_schedule.tag_name().name() == "TrainSchedule");
         let id = train_schedule.attribute("TrainId").unwrap();
@@ -45,11 +75,18 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
         let _type_ = train_schedule.attribute("Type").unwrap();
         let _origin_id = train_schedule.attribute("OriginId").unwrap();
         let _destination_id = train_schedule.attribute("DestinationId").unwrap();
-        let _length = train_schedule.attribute("Length").unwrap().parse::<u32>().unwrap();
+        let _length = train_schedule
+            .attribute("Length")
+            .unwrap()
+            .parse::<u32>()
+            .unwrap();
 
-        let stop_nodes = train_schedule.children().filter(|c| c.is_element()).collect::<Vec<_>>();
+        let stop_nodes = train_schedule
+            .children()
+            .filter(|c| c.is_element())
+            .collect::<Vec<_>>();
         if stop_nodes.len() < 2 {
-            println!("ignoring train {} too few stations", id);
+            // println!("ignoring train {} too few stations", id);
             continue;
         }
 
@@ -65,7 +102,9 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
                         let prev_station = n1.attribute("StationId").unwrap();
                         let next_station = n2.attribute("StationId").unwrap();
                         (connection_ids[&(prev_station, next_station)] == *track).then(|| {
-                            let travel_time = Duration::seconds(minimum_running_times[speed_class][*track] as i64);
+                            let travel_time = Duration::seconds(
+                                minimum_running_times[speed_class][*track] as i64,
+                            );
                             visits.push((Err(*track), *enter_time, travel_time));
                             (stop_idx + 1, *enter_time + travel_time)
                         })
@@ -106,7 +145,8 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
                 if let Some(next_stop) = next_stop {
                     let next_station = next_stop.attribute("StationId").unwrap();
                     let track = *connection_ids.get(&(station, next_station)).unwrap();
-                    let travel_time = Duration::seconds(minimum_running_times[speed_class][track] as i64);
+                    let travel_time =
+                        Duration::seconds(minimum_running_times[speed_class][track] as i64);
                     visits.push((Err(track), current_time, travel_time));
                     current_time += travel_time;
                 }
@@ -114,39 +154,57 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
 
             problem_trains.push((id, visits));
         } else {
-            println!("Ignoring train {} has left the network.", id);
+            // println!("Ignoring train {} has left the network.", id);
         }
     }
 
+    let mut train_names = Vec::new();
+    let resource_names = resource_order
+        .iter()
+        .map(|i| match i {
+            Ok(x) => x.to_string(),
+            Err(x) => x.to_string(),
+        })
+        .collect::<Vec<_>>();
+
+    let resource_ids = resource_order
+        .iter()
+        .enumerate()
+        .map(|(i, x)| (*x, i))
+        .collect::<HashMap<_, _>>();
     let mut problem = crate::problem::Problem {
         trains: Vec::new(),
         conflicts: Vec::new(),
     };
-
-    let mut train_names = Vec::new();
-    let mut resource_names = Vec::new();
-
-    let mut resource_ids = HashMap::new();
-    let mut resource_idx = 0;
-    for (name,visits) in problem_trains.iter() {
-        let mut t= Vec::new();
+    for (n, i) in resource_ids.iter() {
+        if n.is_err() {
+            // track
+            problem.conflicts.push((*i, *i));
+        }
+    }
+    for (name, visits) in problem_trains.iter() {
+        let mut t = Vec::new();
         for (r, earliest, travel) in visits.iter() {
+            // println!("Looking up resource {:?}", r);
+            let resource = resource_ids[r];
+            //     let i = resource_idx;
+            //     resource_names.push(match r {
+            //         Ok(station) => format!("Station {}", station),
+            //         Err(track) => format!("Track {}", track),
+            //     });
+            //     if r.is_err() {
+            //         // Tracks are exclusive.
+            //         problem.conflicts.push((i,i));
+            //     }
+            //     resource_idx += 1;
+            //     i
+            // });
 
-            let resource = *resource_ids.entry(r).or_insert_with(|| {
-                let i = resource_idx;
-                resource_names.push(match r {
-                    Ok(station) => format!("Station {}", station),
-                    Err(track) => format!("Track {}", track),
-                });
-                if r.is_err() {
-                    // Tracks are exclusive.
-                    problem.conflicts.push((i,i));
-                }
-                resource_idx += 1;
-                i
-            });
-
-            t.push((resource, (*earliest-time_now).num_seconds() as i32, travel.num_seconds() as i32));
+            t.push((
+                resource,
+                (*earliest - time_now).num_seconds() as i32,
+                travel.num_seconds() as i32,
+            ));
         }
 
         problem.trains.push(crate::problem::Train { visits: t });
@@ -161,7 +219,7 @@ fn station_info(stations: roxmltree::Node) {
     for station in stations.children().filter(|c| c.is_element()) {
         let id = station.attribute("StationId").unwrap();
         let maintrack = station.attribute("MainTrackId").unwrap();
-        println!("station {} {}", id, maintrack);
+        // println!("station {} {}", id, maintrack);
 
         let internal_tracks = station
             .children()
@@ -175,35 +233,52 @@ fn station_info(stations: roxmltree::Node) {
                 .unwrap()
                 .parse::<bool>()
                 .unwrap();
-            let length = internal_track.attribute("Length").map(|l| l.parse::<u32>().unwrap());
+            let length = internal_track
+                .attribute("Length")
+                .map(|l| l.parse::<u32>().unwrap());
 
             println!("  - track {} {} {:?}", track_id, has_platform, length);
         }
     }
 }
 
-fn get_train_pos<'a>(doc: &'a roxmltree::Document, date_format: &'_ str) -> (NaiveDateTime, HashMap<&'a str, Pos<'a>>) {
+fn get_train_pos<'a>(
+    doc: &'a roxmltree::Document,
+    date_format: &'_ str,
+) -> (NaiveDateTime, HashMap<&'a str, Pos<'a>>) {
     let mut train_positions: HashMap<&str, Pos> = HashMap::new();
     let snapshots = doc
         .root_element()
         .children()
         .find(|n| n.tag_name().name() == "Snapshots")
         .unwrap();
-    let snapshots = snapshots.children().filter(|c| c.is_element()).collect::<Vec<_>>();
+    let snapshots = snapshots
+        .children()
+        .filter(|c| c.is_element())
+        .collect::<Vec<_>>();
     assert!(snapshots.len() == 1);
     let snapshot = snapshots[0];
     assert!(snapshot.tag_name().name() == "Snapshot");
     let snapshot_index = snapshot.attribute("Index").unwrap();
     assert!(snapshot_index == "0");
-    let time_now = chrono::NaiveDateTime::parse_from_str(snapshot.attribute("Now").unwrap(), date_format).unwrap();
-    let train_infos = snapshot.children().filter(|c| c.is_element()).collect::<Vec<_>>();
+    let time_now =
+        chrono::NaiveDateTime::parse_from_str(snapshot.attribute("Now").unwrap(), date_format)
+            .unwrap();
+    let train_infos = snapshot
+        .children()
+        .filter(|c| c.is_element())
+        .collect::<Vec<_>>();
     assert!(train_infos.len() == 1);
     let train_infos = train_infos[0];
     for train_info in train_infos.children().filter(|c| c.is_element()) {
         assert!(train_info.tag_name().name() == "TrainInfo");
         let train = train_info.attribute("TrainId").unwrap();
         let position = train_info.attribute("Position").unwrap();
-        let delay = train_info.attribute("DelayInSeconds").unwrap().parse::<i32>().unwrap();
+        let delay = train_info
+            .attribute("DelayInSeconds")
+            .unwrap()
+            .parse::<i32>()
+            .unwrap();
 
         match position {
             "HasLeftTheNetwork" => {
@@ -211,9 +286,11 @@ fn get_train_pos<'a>(doc: &'a roxmltree::Document, date_format: &'_ str) -> (Nai
             } // uninteresting
             "OnConnection" => {
                 let track = train_info.attribute("TrackId").unwrap();
-                let time_in =
-                    chrono::NaiveDateTime::parse_from_str(train_info.attribute("TimeIn").unwrap(), date_format)
-                        .unwrap();
+                let time_in = chrono::NaiveDateTime::parse_from_str(
+                    train_info.attribute("TimeIn").unwrap(),
+                    date_format,
+                )
+                .unwrap();
                 // println!(
                 //     "  train{} {} delay{} track{} time{}",
                 //     train, position, delay, track, time_in
@@ -224,9 +301,11 @@ fn get_train_pos<'a>(doc: &'a roxmltree::Document, date_format: &'_ str) -> (Nai
             }
             "InStation" => {
                 let station = train_info.attribute("StationId").unwrap();
-                let time_in =
-                    chrono::NaiveDateTime::parse_from_str(train_info.attribute("TimeIn").unwrap(), date_format)
-                        .unwrap();
+                let time_in = chrono::NaiveDateTime::parse_from_str(
+                    train_info.attribute("TimeIn").unwrap(),
+                    date_format,
+                )
+                .unwrap();
                 // println!(
                 //     "  train{} {} delay{} station{} time{}",
                 //     train, position, delay, station, time_in
@@ -238,7 +317,9 @@ fn get_train_pos<'a>(doc: &'a roxmltree::Document, date_format: &'_ str) -> (Nai
             "Offline" => {
                 // println!("  train{} {} delay{}", train, position, delay);
 
-                assert!(train_positions.insert(train, Pos::NotStarted(delay)).is_none());
+                assert!(train_positions
+                    .insert(train, Pos::NotStarted(delay))
+                    .is_none());
             }
             _ => panic!(),
         }
@@ -247,7 +328,9 @@ fn get_train_pos<'a>(doc: &'a roxmltree::Document, date_format: &'_ str) -> (Nai
 }
 
 #[allow(clippy::type_complexity)]
-fn get_objective_map<'a>(doc: &'a roxmltree::Document<'a>) -> HashMap<(&'a str, &'a str), Vec<(i32, i32, f32, f32)>> {
+fn get_objective_map<'a>(
+    doc: &'a roxmltree::Document<'a>,
+) -> HashMap<(&'a str, &'a str), Vec<(i32, i32, f32, f32)>> {
     let mut objective_map: HashMap<(&str, &str), Vec<(i32, i32, f32, f32)>> = HashMap::new();
     let objective = doc
         .root_element()
@@ -262,15 +345,29 @@ fn get_objective_map<'a>(doc: &'a roxmltree::Document<'a>) -> HashMap<(&'a str, 
         for penalty in penalties.children().filter(|c| c.is_element()) {
             assert!(penalty.tag_name().name() == "DelayPenalty");
             let station = penalty.attribute("StationId").unwrap();
-            let from_seconds = penalty.attribute("FromSeconds").unwrap().parse::<i32>().unwrap();
-            let to_seconds = penalty.attribute("ToSeconds").unwrap().parse::<i32>().unwrap();
-            let from_value = penalty.attribute("FromValue").unwrap().parse::<f32>().unwrap();
+            let from_seconds = penalty
+                .attribute("FromSeconds")
+                .unwrap()
+                .parse::<i32>()
+                .unwrap();
+            let to_seconds = penalty
+                .attribute("ToSeconds")
+                .unwrap()
+                .parse::<i32>()
+                .unwrap();
+            let from_value = penalty
+                .attribute("FromValue")
+                .unwrap()
+                .parse::<f32>()
+                .unwrap();
             let slope = penalty.attribute("Slope").unwrap().parse::<f32>().unwrap();
 
-            objective_map
-                .entry((train, station))
-                .or_default()
-                .push((from_seconds, to_seconds, from_value, slope));
+            objective_map.entry((train, station)).or_default().push((
+                from_seconds,
+                to_seconds,
+                from_value,
+                slope,
+            ));
 
             // println!(
             //     "  obj t{} s{} {}-{}  {}-{}",
@@ -287,16 +384,32 @@ fn get_track_id_map<'a>(tracks: roxmltree::Node<'a, 'a>) -> HashMap<(&'a str, &'
         let id = track.attribute("TrackId").unwrap();
         let station_a = track.attribute("StationA").unwrap();
         let station_b = track.attribute("StationB").unwrap();
-        println!(" track {} {} {}", id, station_a, station_b);
+        // println!(" track {} {} {}", id, station_a, station_b);
         assert!(!track.children().any(|c| c.is_element()));
 
         assert!(connection_ids.insert((station_a, station_b), id).is_none());
-        assert!(connection_ids.insert((station_b, station_a), id).is_none());
+        // assert!(connection_ids.insert((station_b, station_a), id).is_none());
     }
+    for track in tracks.children().filter(|c| c.is_element()) {
+        let id = track.attribute("TrackId").unwrap();
+        let station_a = track.attribute("StationA").unwrap();
+        let station_b = track.attribute("StationB").unwrap();
+
+        connection_ids
+            .entry((station_b, station_a))
+            .or_insert_with(|| {
+                // println!("{}-{} is not a double track", station_a, station_b);
+                id
+            });
+        // assert!(connection_ids.insert((station_a, station_b), id).is_none());
+    }
+
     connection_ids
 }
 
-fn get_runningtimes_map<'a>(doc: &'a roxmltree::Document<'a>) -> HashMap<&'a str, HashMap<&'a str, u32>> {
+fn get_runningtimes_map<'a>(
+    doc: &'a roxmltree::Document<'a>,
+) -> HashMap<&'a str, HashMap<&'a str, u32>> {
     let mut minimum_running_times: HashMap<&str, HashMap<&str, u32>> = HashMap::new();
     let running_times = doc
         .root_element()

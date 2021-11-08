@@ -11,6 +11,7 @@ pub struct Train {
 
 impl Problem {
     pub fn verify_solution(&self, solution: &[Vec<i32>]) -> Option<i32> {
+        let _p = hprof::enter("verify_solution");
         // Check the shape of the solution
         assert!(self.trains.len() == solution.len());
         for (train_idx, train) in self.trains.iter().enumerate() {
@@ -37,7 +38,7 @@ impl Problem {
 
                 let cost = train.delay_cost(visit_idx, t1_in) as i32;
                 if cost > 0 {
-                    println!("Added cost for t{} v{} = {}", train_idx, visit_idx, cost);
+                    // println!("Added cost for t{} v{} = {}", train_idx, visit_idx, cost);
                     sum_cost += cost;
                 }
             }
@@ -81,7 +82,8 @@ impl Problem {
 impl Train {
     pub fn delay_cost(&self, path_idx: usize, t: i32) -> usize {
         let delay = t - self.visits[path_idx].1;
-        if delay > 360 {
+        let cost = if delay > 360 {
+            // 5 + 3*(delay as usize -360)/360
             3
         } else if delay > 180 {
             2
@@ -89,7 +91,9 @@ impl Train {
             1
         } else {
             0
-        }
+        };
+        // println!("new delay cost {} {} {}", path_idx, t, cost);
+        cost
     }
 }
 
