@@ -19,7 +19,7 @@ fn main() {
     let mut frame_idx = -1isize;
     let mut frames = Vec::new();
     let (tx, rx) = mpsc::channel();
-    let filename = "../instances/Instance1.xml";
+    let filename = "../instances/Instance22.xml";
     println!("Loading problem {}", filename);
 
     let (problem, train_names, res_names) = ddd::parser::read_file(filename);

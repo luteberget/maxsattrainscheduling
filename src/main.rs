@@ -4,7 +4,8 @@ use satcoder::{SatInstance, SatSolverWithCore};
 fn main() {
     let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    for instance_id in a_instances.into_iter().chain(b_instances) {
+    let c_instances = [21, 22, 23, 24];
+    for instance_id in a_instances.into_iter().chain(b_instances).chain(c_instances) {
         hprof::start_frame();
         let filename = format!("instances/Instance{}.xml", instance_id);
         println!("Reading {}", filename);
