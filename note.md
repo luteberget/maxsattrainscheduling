@@ -148,20 +148,31 @@ discretized constraints.
 \begin{algorithm}[H]
 \DontPrintSemicolon
 \SetAlgoLined
-\KwResult{Write here the result}
 \SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
-\Input{Write here the input}
-\Output{Write here the output}
+\Input{Visits $V_t^i=(r_t^i, e_t^i, l_t^i)$ and objective function $\sigma(x)$.}
+\Output{A value $x_t^i$ for each visit, fulfilling the train scheduling constraints and minimizing the objective function.}
 \BlankLine
-\While{While condition}{
-    instructions\;
-    \eIf{condition}{
-        instructions1\;
-        instructions2\;
-    }{
-        instructions3\;
+$\mathcal{S} \leftarrow $ new incremental MaxSAT solver instance\;
+$\mathcal{O} \leftarrow \left\{ V_t^i:\, \left[ \left(l_t^i, \top\right), \left(\infty, \bot\right) \right]\ \right\}$\;
+\While{true}{
+    $M \leftarrow \mathcal{P}$\texttt{.solve}()\;
+    $x_t^i \leftarrow \mathcal{O}[V_t^i]$\texttt{.evalDiscretizedNumber}$(M)$\;
+    \If{ any $x_t^i + l_t^i > x_t^{i+1}$}{
+      $O[V_t^{i+1}]$\texttt{.createValue}$(x_t^i + l_t^i)$\;
+      $\mathcal{P}$\texttt{.addClause}$( x_t^i \geq c \Rightarrow x_t^{i+1} \geq c+l_t^i)$\;
+    }
+    \If{ any $ (x_a^{i+1} < x_b^j) \wedge (x_b^{j+1} < x_a^i )$}{
+      $O[V_t^{i+1}]$\texttt{.createValue}$(x_t^i + l_t^i)$\;
+      $O[V_t^{i+1}]$\texttt{.createValue}$(x_t^i + l_t^i)$\;
+      $\mathcal{P}$\texttt{.addClause}$
+        \left( (x_a^{i+1} \geq c_1)  \Rightarrow (x_b^j \geq c_1) \right) \vee 
+        \left( (x_b^{j+1} \geq c_2)  \Rightarrow (x_a^i \geq c_2) \right) $\;
+    }
+    \If{no constraints were added}{
+      \Return{$x_t^i$}
     }
 }
-\caption{While loop with If/Else condition}
+\caption{Incremental MaxSAT algorithm for the online train scheduling problem}
 \end{algorithm} 
 
+# Performance evaluation
