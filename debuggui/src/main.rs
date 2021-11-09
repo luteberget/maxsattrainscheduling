@@ -19,19 +19,33 @@ fn main() {
     let mut frame_idx = -1isize;
     let mut frames = Vec::new();
     let (tx, rx) = mpsc::channel();
-    let filename = "../instances/Instance22.xml";
+    let filename = "../instances/Instance1.xml";
     println!("Loading problem {}", filename);
 
     let (problem, train_names, res_names) = ddd::parser::read_file(filename);
+
+    let watch_train_idx = train_names.iter().position(|t| t == "25").unwrap();
+    let watch_resource_idx = res_names.iter().position(|t| t == "XX.S14").unwrap();
+    let watch_visit_idx = problem.trains[watch_train_idx].visits.iter().position(|x| x.0 == watch_resource_idx).unwrap();
+
+
     let problem = Arc::new(problem);
 
     {
         let problem = problem.clone();
         thread::spawn(move || {
-            // let problem = problem::problem1();
-            let result = ddd::solver::solve_debug(satcoder::solvers::minisat::Solver::new(), &problem, |d| tx.send(d).unwrap()).unwrap();
 
-            println!("Finished. result={:?}", result);
+            ddd::solver::WATCH.with(|v| {
+                let w = Some((watch_train_idx,watch_visit_idx));
+                println!("Setting watch {:?}", w);
+                *v.borrow_mut() = w;
+            });
+
+            // let problem = problem::problem1();
+            let result = ddd::solver::solve_debug(satcoder::solvers::minisat::Solver::new(), &problem, |d| tx.send(d).unwrap()).unwrap().0;
+            println!("COST {:?}", problem.verify_solution(&result));
+
+            //println!("Finished. result={:?}", result);
         });
     }
 

@@ -84,9 +84,9 @@ impl Train {
         let delay = t - self.visits[path_idx].1;
         let cost = if delay > 360 {
             // 5 + 3*(delay as usize -360)/360
-            3
+            9
         } else if delay > 180 {
-            2
+            3
         } else if delay > 0 {
             1
         } else {

@@ -1,9 +1,10 @@
-use std::collections::{BTreeMap, HashMap};
-
-use crate::{
-    debug::{ResourceInterval, SolverAction},
-    problem::Problem,
+use std::{
+    borrow::Borrow,
+    cell::RefCell,
+    collections::{BTreeMap, HashMap},
 };
+
+use crate::{debug::{ResourceInterval, SolverAction}, minimize_core, problem::Problem, trim_core};
 use satcoder::{
     constraints::Totalizer, prelude::SymbolicModel, Bool, SatInstance, SatSolverWithCore,
 };
@@ -50,19 +51,31 @@ pub enum IterationType {
     TravelTimeConflict,
     ResourceConflict,
 }
-pub fn solve<L: satcoder::Lit + Copy>(
+
+#[derive(Default)]
+pub struct SolveStats {
+    pub n_sat: usize,
+    pub n_unsat: usize,
+    pub n_travel: usize,
+    pub n_conflict: usize,
+    pub satsolver: String,
+}
+
+pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
     solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
-) -> Result<Vec<Vec<i32>>, SolverError> {
+) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     solve_debug(solver, problem, |_| {})
 }
 
+thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
+
 use crate::debug::DebugInfo;
-pub fn solve_debug<L: satcoder::Lit + Copy>(
+pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     mut solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     debug_out: impl Fn(DebugInfo),
-) -> Result<Vec<Vec<i32>>, SolverError> {
+) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     // TODO
     //  - more eager constraint generation
     //    - propagate simple presedences?
@@ -73,6 +86,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
 
     let _p = hprof::enter("solver");
 
+    let mut stats = SolveStats::default();
+
     let mut visits: TiVec<VisitId, (usize, usize)> = TiVec::new();
     let mut resource_visits: Vec<Vec<VisitId>> = Vec::new();
     let mut occupations: TiVec<VisitId, Occ<_>> = TiVec::new();
@@ -81,6 +96,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
     let mut new_time_points = Vec::new();
 
     let mut core_sizes: BTreeMap<usize, usize> = BTreeMap::new();
+    let mut processed_core_sizes: BTreeMap<usize, usize> = BTreeMap::new();
     let mut iteration_types: BTreeMap<IterationType, usize> = BTreeMap::new();
 
     for (a, b) in problem.conflicts.iter() {
@@ -120,6 +136,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
             // println!("Iteration {} conflict detection starting...", iteration);
 
             let mut found_conflict = false;
+
+            // let mut touched_intervals = visits.keys().collect::<Vec<_>>();
+
             for visit in touched_intervals.iter().copied() {
                 let _p = hprof::enter("travel time check");
                 let (train_idx, visit_idx) = visits[visit];
@@ -167,9 +186,10 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
 
                         // T1_IN delay implies T1_EARLIEST_OUT delay.
                         SatInstance::add_clause(&mut solver, vec![!t1_in_var, t1_earliest_out_var]);
+                        stats.n_travel += 1;
                         // The new timepoint might have a cost.
                         if t1_is_new {
-                            new_time_points.push((next_visit, t1_in_var, new_t));
+                            new_time_points.push((next_visit, t1_earliest_out_var, new_t));
                         }
                     }
 
@@ -278,6 +298,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
                             *iteration_types
                                 .entry(IterationType::ResourceConflict)
                                 .or_default() += 1;
+                            stats.n_conflict += 1;
                             // println!(
                             //         " - RESOURCE conflict between t{}-v{}-r{}-in{}-out{} t{}-v{}-r{}-in{}-out{}",
                             //         train_idx,
@@ -330,7 +351,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
                                 .map(|v| occupations[v].delays[occupations[v].incumbent].0)
                                 .unwrap_or_else(|| true.into());
 
-                            const USE_CHOICE_VAR: bool = false;
+                            const USE_CHOICE_VAR: bool = true;
 
                             if USE_CHOICE_VAR {
                                 let choose = SatInstance::new_var(&mut solver);
@@ -381,7 +402,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
                     solution: extract_solution(problem, &occupations),
                 });
 
-                return Ok(trains);
+                stats.satsolver = format!("{:?}", solver);
+                return Ok((trains, stats));
             }
         }
         enum Soft<L: satcoder::Lit> {
@@ -416,6 +438,18 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
 
             // set the cost for this new time point.
 
+            // WATCH.with(|x| {
+            //     if *x.borrow() == Some((train_idx, visit_idx)) {
+            // println!(
+            //     "Soft constraint for t{}-v{}-r{} t{} cost{} lit{:?}",
+            //     train_idx, visit_idx, resource, new_t, new_var_cost, new_var
+            // );
+            // println!(
+            //     "   new var implies cost {}=>{:?}",
+            //     new_var_cost, occupations[visit].cost[new_var_cost]
+            // );
+            //     }
+            // });
             // println!(
             //     "Soft constraint for t{}-v{}-r{} t{} cost{} lit{:?}",
             //     train_idx, visit_idx, resource, new_t, new_var_cost, new_var
@@ -444,6 +478,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
             match result {
                 satcoder::SatResultWithCore::Sat(model) => {
                     is_sat = true;
+                    stats.n_sat += 1;
                     let _p = hprof::enter("update times");
 
                     for (visit, this_occ) in occupations.iter_mut_enumerated() {
@@ -460,9 +495,20 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
                         }
                         let (train_idx, visit_idx) = visits[visit];
 
+                        let resource = problem.trains[train_idx].visits[visit_idx].0;
+                        let new_time = this_occ.incumbent_time();
+
+                        // WATCH.with(|x| {
+                        //     if *x.borrow() == Some((train_idx, visit_idx))  && touched {
+                        //         println!("Delays {:?}", this_occ.delays);
+                        //         println!(
+                        //             "Updated t{}-v{}-r{}  t={}-->{}",
+                        //             train_idx, visit_idx, resource, old_time, new_time
+                        //         );
+                        //     }
+                        // });
+
                         if touched {
-                            let resource = problem.trains[train_idx].visits[visit_idx].0;
-                            let new_time = this_occ.incumbent_time();
                             // println!(
                             //     "Updated t{}-v{}-r{}  t={}-->{}",
                             //     train_idx, visit_idx, resource, old_time, new_time
@@ -501,11 +547,12 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
                         actions: std::mem::take(&mut debug_actions),
                         solution: extract_solution(problem, &occupations),
                     });
-            
+
                     None
                 }
                 satcoder::SatResultWithCore::Unsat(core) => {
                     is_sat = false;
+                    stats.n_unsat += 1;
                     Some(core)
                 }
             }
@@ -520,13 +567,22 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
                 return Err(SolverError::NoSolution); // UNSAT
             }
 
-            *core_sizes.entry(core.len()).or_default() += 1;
+            let core = core.iter().map(|c| Bool::Lit(*c)).collect::<Vec<_>>();
+
+            // println!("Core size {}", core.len());
+            // *core_sizes.entry(core.len()).or_default() += 1;
+            // trim_core(&mut core, &mut solver);
+            // minimize_core(&mut core, &mut solver);
+
+            // *processed_core_sizes.entry(core.len()).or_default() += 1;
+            // println!("  pre sizes {:?}", core_sizes);
+            // println!("  post sizes {:?}", processed_core_sizes);
             *iteration_types.entry(IterationType::Objective).or_default() += 1;
             debug_actions.push(SolverAction::Core(core.len()));
 
             let min_weight = core
                 .iter()
-                .map(|c| soft_constraints[&Bool::Lit(*c)].1)
+                .map(|c| soft_constraints[c].1)
                 .min()
                 .unwrap();
             assert!(min_weight == 1);
@@ -534,7 +590,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
             // println!("Core min weight {}", min_weight);
 
             for c in core.iter() {
-                let (soft, cost, original_cost) = soft_constraints.remove(&Bool::Lit(*c)).unwrap();
+                let (soft, cost, original_cost) = soft_constraints.remove(c).unwrap();
                 let soft_str = match &soft {
                     Soft::Delay => "delay".to_string(),
                     Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
@@ -570,7 +626,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
                 let bound = 1;
                 let tot = Totalizer::count(
                     &mut solver,
-                    core.iter().map(|c| Bool::Lit(!*c)),
+                    core.iter().map(|c| !*c),
                     bound as u32,
                 );
                 assert!(bound < tot.rhs().len());
@@ -579,7 +635,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy>(
                     (Soft::Totalizer(tot, bound), min_weight, min_weight),
                 );
             } else {
-                SatInstance::add_clause(&mut solver, vec![Bool::Lit(core[0])]);
+                // panic!();
+                SatInstance::add_clause(&mut solver, vec![!core[0]]);
             }
         }
 
