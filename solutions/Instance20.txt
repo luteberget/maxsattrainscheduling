@@ -1,0 +1,79 @@
+Snapshot Time Tue Dec 15 15:23:00 CET 2020
+
+Train=64 Init Delay=80 FinalDelay=80
+T14 TrainID=64 AimedDepartureTime=63 WaitTime=0 Delay=0 RunTime=208 FinalTimeScheduled=143
+T13 TrainID=64 AimedDepartureTime=271 WaitTime=0 Delay=0 RunTime=104 FinalTimeScheduled=351
+T12 TrainID=64 AimedDepartureTime=375 WaitTime=0 Delay=0 RunTime=155 FinalTimeScheduled=455
+T11 TrainID=64 AimedDepartureTime=530 WaitTime=0 Delay=0 RunTime=407 FinalTimeScheduled=610
+T10 TrainID=64 AimedDepartureTime=937 WaitTime=0 Delay=0 RunTime=288 FinalTimeScheduled=1017
+T9 TrainID=64 AimedDepartureTime=1225 WaitTime=0 Delay=0 RunTime=635 FinalTimeScheduled=1305
+T8 TrainID=64 AimedDepartureTime=2160 WaitTime=300 Delay=0 RunTime=770 FinalTimeScheduled=2240
+T7 TrainID=64 AimedDepartureTime=2930 WaitTime=0 Delay=0 RunTime=241 FinalTimeScheduled=3010
+T6 TrainID=64 AimedDepartureTime=3171 WaitTime=0 Delay=0 RunTime=669 FinalTimeScheduled=3251
+T5 TrainID=64 AimedDepartureTime=4080 WaitTime=240 Delay=0 RunTime=613 FinalTimeScheduled=4160
+T4 TrainID=64 AimedDepartureTime=4693 WaitTime=0 Delay=0 RunTime=266 FinalTimeScheduled=4773
+T3 TrainID=64 AimedDepartureTime=4959 WaitTime=0 Delay=0 RunTime=480 FinalTimeScheduled=5039
+T2 TrainID=64 AimedDepartureTime=5439 WaitTime=0 Delay=0 RunTime=215 FinalTimeScheduled=5519
+T1 TrainID=64 AimedDepartureTime=5654 WaitTime=0 Delay=0 RunTime=286 FinalTimeScheduled=5734
+
+Train=65 Init Delay=191 FinalDelay=211
+T22 TrainID=65 AimedDepartureTime=0 WaitTime=30 Delay=0 RunTime=150 FinalTimeScheduled=191
+T21 TrainID=65 AimedDepartureTime=180 WaitTime=30 Delay=0 RunTime=150 FinalTimeScheduled=371
+T20 TrainID=65 AimedDepartureTime=330 WaitTime=0 Delay=0 RunTime=45 FinalTimeScheduled=521
+T19 TrainID=65 AimedDepartureTime=375 WaitTime=0 Delay=0 RunTime=195 FinalTimeScheduled=566
+T18 TrainID=65 AimedDepartureTime=630 WaitTime=60 Delay=0 RunTime=300 FinalTimeScheduled=821
+T17 TrainID=65 AimedDepartureTime=960 WaitTime=30 Delay=0 RunTime=210 FinalTimeScheduled=1151
+T16 TrainID=65 AimedDepartureTime=1200 WaitTime=30 Delay=0 RunTime=210 FinalTimeScheduled=1391
+T15 TrainID=65 AimedDepartureTime=1440 WaitTime=30 Delay=0 RunTime=150 FinalTimeScheduled=1631
+T14 TrainID=65 AimedDepartureTime=1620 WaitTime=30 Delay=0 RunTime=201 FinalTimeScheduled=1811
+T13 TrainID=65 AimedDepartureTime=1821 WaitTime=0 Delay=0 RunTime=84 FinalTimeScheduled=2012
+T12 TrainID=65 AimedDepartureTime=1905 WaitTime=0 Delay=0 RunTime=165 FinalTimeScheduled=2116
+T11 TrainID=65 AimedDepartureTime=2110 WaitTime=40 Delay=0 RunTime=700 FinalTimeScheduled=2321
+T10 TrainID=65 AimedDepartureTime=2990 WaitTime=180 Delay=0 RunTime=420 FinalTimeScheduled=3201
+T9 TrainID=65 AimedDepartureTime=3410 WaitTime=0 Delay=0 RunTime=240 FinalTimeScheduled=3621
+T8 TrainID=65 AimedDepartureTime=3680 WaitTime=30 Delay=0 RunTime=270 FinalTimeScheduled=3891
+T7 TrainID=65 AimedDepartureTime=3950 WaitTime=0 Delay=0 RunTime=180 FinalTimeScheduled=4161
+T6 TrainID=65 AimedDepartureTime=4130 WaitTime=0 Delay=0 RunTime=480 FinalTimeScheduled=4341
+
+Train=66 Init Delay=1 FinalDelay=56
+T19 TrainID=66 AimedDepartureTime=420 WaitTime=180 Delay=0 RunTime=90 FinalTimeScheduled=421
+T20 TrainID=66 AimedDepartureTime=510 WaitTime=0 Delay=0 RunTime=30 FinalTimeScheduled=566
+T21 TrainID=66 AimedDepartureTime=540 WaitTime=0 Delay=0 RunTime=150 FinalTimeScheduled=596
+T22 TrainID=66 AimedDepartureTime=720 WaitTime=30 Delay=0 RunTime=90 FinalTimeScheduled=776
+T23 TrainID=66 AimedDepartureTime=840 WaitTime=30 Delay=0 RunTime=90 FinalTimeScheduled=896
+T24 TrainID=66 AimedDepartureTime=960 WaitTime=30 Delay=0 RunTime=110 FinalTimeScheduled=1016
+T25 TrainID=66 AimedDepartureTime=1070 WaitTime=0 Delay=0 RunTime=190 FinalTimeScheduled=1126
+
+Train=56 Init Delay=1 FinalDelay=1
+T10 TrainID=56 AimedDepartureTime=275 WaitTime=0 Delay=0 RunTime=205 FinalTimeScheduled=276
+T9 TrainID=56 AimedDepartureTime=480 WaitTime=0 Delay=0 RunTime=240 FinalTimeScheduled=481
+T8 TrainID=56 AimedDepartureTime=750 WaitTime=30 Delay=0 RunTime=322 FinalTimeScheduled=751
+T7 TrainID=56 AimedDepartureTime=1072 WaitTime=0 Delay=0 RunTime=368 FinalTimeScheduled=1073
+T6 TrainID=56 AimedDepartureTime=1620 WaitTime=180 Delay=0 RunTime=660 FinalTimeScheduled=1621
+
+Train=73 Init Delay=0 FinalDelay=0
+T24 TrainID=73 AimedDepartureTime=1440 WaitTime=30 Delay=0 RunTime=210 FinalTimeScheduled=1440
+T23 TrainID=73 AimedDepartureTime=1680 WaitTime=30 Delay=0 RunTime=210 FinalTimeScheduled=1680
+T22 TrainID=73 AimedDepartureTime=1920 WaitTime=30 Delay=0 RunTime=90 FinalTimeScheduled=1920
+T21 TrainID=73 AimedDepartureTime=2040 WaitTime=30 Delay=0 RunTime=180 FinalTimeScheduled=2040
+T20 TrainID=73 AimedDepartureTime=2220 WaitTime=0 Delay=0 RunTime=43 FinalTimeScheduled=2220
+T19 TrainID=73 AimedDepartureTime=2263 WaitTime=0 Delay=0 RunTime=167 FinalTimeScheduled=2263
+T18 TrainID=73 AimedDepartureTime=2470 WaitTime=40 Delay=0 RunTime=280 FinalTimeScheduled=2470
+T17 TrainID=73 AimedDepartureTime=2780 WaitTime=30 Delay=0 RunTime=210 FinalTimeScheduled=2780
+T16 TrainID=73 AimedDepartureTime=3020 WaitTime=30 Delay=0 RunTime=150 FinalTimeScheduled=3020
+T15 TrainID=73 AimedDepartureTime=3200 WaitTime=30 Delay=0 RunTime=390 FinalTimeScheduled=3200
+T14 TrainID=73 AimedDepartureTime=3770 WaitTime=180 Delay=0 RunTime=420 FinalTimeScheduled=3770
+T13 TrainID=73 AimedDepartureTime=4220 WaitTime=30 Delay=0 RunTime=114 FinalTimeScheduled=4220
+T12 TrainID=73 AimedDepartureTime=4334 WaitTime=0 Delay=0 RunTime=156 FinalTimeScheduled=4334
+T11 TrainID=73 AimedDepartureTime=4520 WaitTime=30 Delay=0 RunTime=328 FinalTimeScheduled=4520
+T10 TrainID=73 AimedDepartureTime=4848 WaitTime=0 Delay=0 RunTime=205 FinalTimeScheduled=4848
+T9 TrainID=73 AimedDepartureTime=5053 WaitTime=0 Delay=0 RunTime=277 FinalTimeScheduled=5053
+T8 TrainID=73 AimedDepartureTime=5360 WaitTime=30 Delay=0 RunTime=275 FinalTimeScheduled=5360
+T7 TrainID=73 AimedDepartureTime=5635 WaitTime=0 Delay=0 RunTime=355 FinalTimeScheduled=5635
+T6 TrainID=73 AimedDepartureTime=6170 WaitTime=180 Delay=0 RunTime=660 FinalTimeScheduled=6170
+
+Train=63 Init Delay=0 FinalDelay=159
+T4 TrainID=63 AimedDepartureTime=5051 WaitTime=0 Delay=0 RunTime=308 FinalTimeScheduled=5051
+T3 TrainID=63 AimedDepartureTime=5360 WaitTime=0 Delay=0 RunTime=820 FinalTimeScheduled=5519
+T2 TrainID=63 AimedDepartureTime=6420 WaitTime=240 Delay=0 RunTime=549 FinalTimeScheduled=6579
+T1 TrainID=63 AimedDepartureTime=6969 WaitTime=0 Delay=0 RunTime=299 FinalTimeScheduled=7128

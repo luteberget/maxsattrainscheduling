@@ -1,6 +1,7 @@
-use crate::problem::Problem;
+use crate::problem::{DelayMeasurementType, Problem, Visit};
 use chrono::{Duration, NaiveDateTime};
-use std::{collections::HashMap, net::ToSocketAddrs};
+use log::debug;
+use std::{collections::HashMap, mem::take};
 
 enum Pos<'a> {
     OnTrack(&'a str, NaiveDateTime, i32),
@@ -8,66 +9,81 @@ enum Pos<'a> {
     NotStarted(i32),
 }
 
-pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
+pub fn read_file(
+    instance_fn: &str,
+    measurement: DelayMeasurementType,
+) -> (Problem, Vec<String>, Vec<String>) {
     let date_format = "%Y-%m-%dT%H:%M:%S";
     let parse_date = |d| chrono::NaiveDateTime::parse_from_str(d, date_format).unwrap();
     let instance_xml = std::fs::read_to_string(instance_fn).unwrap();
     let doc = roxmltree::Document::parse(&instance_xml).unwrap();
-    let network = doc
+    let network_elem = doc
         .root_element()
         .children()
         .find(|n| n.tag_name().name() == "Network")
         .unwrap();
-    let stations = network
+    let stations_elem = network_elem
         .children()
         .find(|n| n.tag_name().name() == "Stations")
         .unwrap();
-    let tracks = network
+    let tracks_elem = network_elem
         .children()
         .find(|n| n.tag_name().name() == "Tracks")
         .unwrap();
 
-    let connection_ids = get_track_id_map(tracks);
+    let connection_ids = get_track_id_map(tracks_elem);
+
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Debug)]
+    enum ResourceType {
+        Station,
+        Track,
+    }
 
     // Create resource ids for stations in order
-    let mut resource_order = Vec::new();
-    for station in stations.children().filter(|c| c.is_element()) {
+    let mut resource_order: Vec<(ResourceType, &str)> = Vec::new();
+    for station in stations_elem.children().filter(|c| c.is_element()) {
         let id = station.attribute("StationId").unwrap();
-        resource_order.push(Ok(id));
+        resource_order.push((ResourceType::Station, id));
     }
 
     // Insert tracks between stations
-    for track in tracks.children().filter(|c| c.is_element()) {
+    for track in tracks_elem.children().filter(|c| c.is_element()) {
         let t = track.attribute("TrackId").unwrap();
         let sa = track.attribute("StationA").unwrap();
         let sb = track.attribute("StationB").unwrap();
         let p = (0..resource_order.len() - 1).find(|i| {
-            (resource_order[*i] == Ok(sa) && resource_order[*i + 1] == Ok(sb))
-            ||(resource_order[*i] == Ok(sb) && resource_order[*i + 1] == Ok(sa))
-            || (*i < resource_order.len() - 1 && resource_order[*i] == Ok(sa)&& resource_order[*i + 2] == Ok(sb))
-            || (*i < resource_order.len() - 1 && resource_order[*i] == Ok(sb)&& resource_order[*i + 2] == Ok(sa))
+            (resource_order[*i] == (ResourceType::Station, sa)
+                && resource_order[*i + 1] == (ResourceType::Station, sb))
+                || (resource_order[*i] == (ResourceType::Station, sb)
+                    && resource_order[*i + 1] == (ResourceType::Station, sa))
+                || (*i < resource_order.len() - 1
+                    && resource_order[*i] == (ResourceType::Station, sa)
+                    && resource_order[*i + 2] == (ResourceType::Station, sb))
+                || (*i < resource_order.len() - 1
+                    && resource_order[*i] == (ResourceType::Station, sb)
+                    && resource_order[*i + 2] == (ResourceType::Station, sa))
         });
 
         let idx = p.unwrap();
-        resource_order.insert(idx + 1, Err(t));
+        resource_order.insert(idx + 1, (ResourceType::Track, t));
     }
 
     let minimum_running_times = get_runningtimes_map(&doc);
     let _objective_map = get_objective_map(&doc);
     let (time_now, train_positions) = get_train_pos(&doc, date_format);
 
-    let timetable = doc
+    let timetable_node = doc
         .root_element()
         .children()
         .find(|n| n.tag_name().name() == "TimeTable")
         .unwrap();
-    let train_schedules = timetable
+    let train_schedules_noed = timetable_node
         .children()
         .find(|n| n.tag_name().name() == "TrainSchedules")
         .unwrap();
 
     let mut problem_trains = Vec::new();
-    for train_schedule in train_schedules.children().filter(|c| c.is_element()) {
+    for train_schedule in train_schedules_noed.children().filter(|c| c.is_element()) {
         assert!(train_schedule.tag_name().name() == "TrainSchedule");
         let id = train_schedule.attribute("TrainId").unwrap();
         let speed_class = train_schedule.attribute("SpeedClass").unwrap();
@@ -85,15 +101,22 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
             .children()
             .filter(|c| c.is_element())
             .collect::<Vec<_>>();
-        if stop_nodes.len() < 2 {
-            // println!("ignoring train {} too few stations", id);
+        if stop_nodes.len() <= 1 {
+            debug!(
+                "train {} is irrelevant as it visits less than two stations in the network",
+                id
+            );
             continue;
         }
+
+        let last_station_name = stop_nodes.last().unwrap().attribute("StationId").unwrap();
 
         if let Some(pos) = train_positions.get(id) {
             let mut visits = Vec::new();
 
-            let (first_stop_idx, mut current_time) = match pos {
+            // <TrainInfo TrainId="15" Position="InStation" StationId="XX.S7" TrackId="2" TimeIn="2020-12-17T12:20:24" DelayInSeconds="296" />
+
+            let (first_stop_idx, mut earliest_time_cursor) = match pos {
                 Pos::OnTrack(track, enter_time, _delay) => stop_nodes
                     .iter()
                     .zip(stop_nodes.iter().skip(1))
@@ -102,11 +125,19 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
                         let prev_station = n1.attribute("StationId").unwrap();
                         let next_station = n2.attribute("StationId").unwrap();
                         (connection_ids[&(prev_station, next_station)] == *track).then(|| {
-                            let travel_time = Duration::seconds(
+                            let already_traveled = time_now - *enter_time;
+                            let minimum_running_time = Duration::seconds(
                                 minimum_running_times[speed_class][*track] as i64,
                             );
-                            visits.push((Err(*track), *enter_time, travel_time));
-                            (stop_idx + 1, *enter_time + travel_time)
+                            let remaining_travel_time = minimum_running_time - already_traveled;
+                            assert!(time_now + remaining_travel_time == *enter_time + minimum_running_time);
+                            visits.push((
+                                (ResourceType::Track, *track),
+                                *enter_time,
+                                minimum_running_time,
+                                None,
+                            ));
+                            (stop_idx + 1, *enter_time + minimum_running_time)
                         })
                     })
                     .unwrap(),
@@ -117,12 +148,18 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
                         (*sx == n.attribute("StationId").unwrap()).then(|| (stop_idx, *enter_time))
                     })
                     .unwrap(),
-                Pos::NotStarted(delay) => (
-                    0,
-                    parse_date(stop_nodes[0].attribute("AimedArrivalTime").unwrap())
-                        + chrono::Duration::seconds(*delay as i64),
-                ),
+                Pos::NotStarted(delay) => {
+                    let aimed_arrival =
+                        parse_date(stop_nodes[0].attribute("AimedArrivalTime").unwrap());
+                    let delayed_arrival = aimed_arrival + chrono::Duration::seconds(*delay as i64);
+                    (0, delayed_arrival)
+                }
             };
+
+
+            if id == "17" {
+                println!("train 17 with {} nodes", stop_nodes[first_stop_idx..].len());
+            }
 
             for (stop, next_stop) in stop_nodes[first_stop_idx..].iter().zip(
                 stop_nodes[first_stop_idx..]
@@ -131,28 +168,47 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
                     .map(Some)
                     .chain(std::iter::once(None)),
             ) {
+                
                 let station = stop.attribute("StationId").unwrap();
-                let _aimed_arrival = parse_date(stop.attribute("AimedArrivalTime").unwrap());
+                let aimed_arrival = parse_date(stop.attribute("AimedArrivalTime").unwrap());
                 let aimed_departure = parse_date(stop.attribute("AimedDepartureTime").unwrap());
 
+                // println!("Train {} statino {}  aimed_arr {} aimed_dep {}", id, station, aimed_arrival, aimed_departure);
+
                 // Now we enter the station at current_time.
-                visits.push((Ok(station), current_time, Duration::zero()));
+                visits.push((
+                    (ResourceType::Station, station),
+                    earliest_time_cursor,
+                    Duration::zero(),
+                    Some(aimed_arrival),
+                ));
 
                 // Now the earliest time to exit the station, is the max of (the current time + 0) and
                 // the aimed departure time.
-                current_time = (current_time + Duration::zero()).max(aimed_departure);
+                // earliest_time_cursor += Duration::zero();
+
+                earliest_time_cursor = earliest_time_cursor.max(aimed_departure);
+                
+                // TODO check this with Anna Livia
+                //earliest_time_cursor = earliest_time_cursor.max(time_now);
 
                 if let Some(next_stop) = next_stop {
                     let next_station = next_stop.attribute("StationId").unwrap();
                     let track = *connection_ids.get(&(station, next_station)).unwrap();
                     let travel_time =
                         Duration::seconds(minimum_running_times[speed_class][track] as i64);
-                    visits.push((Err(track), current_time, travel_time));
-                    current_time += travel_time;
+                    visits.push((
+                        (ResourceType::Track, track),
+                        earliest_time_cursor,
+                        travel_time,
+                        Some(aimed_departure),
+                    ));
+                    earliest_time_cursor += travel_time;
                 }
             }
 
-            problem_trains.push((id, visits));
+            // println!("Train {} visits {:?}", id, visits);
+            problem_trains.push((id, visits, last_station_name));
         } else {
             // println!("Ignoring train {} has left the network.", id);
         }
@@ -161,10 +217,7 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
     let mut train_names = Vec::new();
     let resource_names = resource_order
         .iter()
-        .map(|i| match i {
-            Ok(x) => x.to_string(),
-            Err(x) => x.to_string(),
-        })
+        .map(|(_type, name)| name.to_string())
         .collect::<Vec<_>>();
 
     let resource_ids = resource_order
@@ -172,21 +225,21 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
         .enumerate()
         .map(|(i, x)| (*x, i))
         .collect::<HashMap<_, _>>();
+
     let mut problem = crate::problem::Problem {
         trains: Vec::new(),
         conflicts: Vec::new(),
     };
-    for (n, i) in resource_ids.iter() {
-        if n.is_err() {
-            // track
+    for ((res_type, _name), i) in resource_ids.iter() {
+        if matches!(res_type, ResourceType::Track) {
             problem.conflicts.push((*i, *i));
         }
     }
-    for (name, visits) in problem_trains.iter() {
+    for (name, visits, last_station_name) in problem_trains.iter() {
         let mut t = Vec::new();
-        for (r, earliest, travel) in visits.iter() {
+        for ((res_type, name), earliest, travel, aimed) in visits.iter() {
             // println!("Looking up resource {:?}", r);
-            let resource = resource_ids[r];
+            let resource_id = resource_ids[&(*res_type, *name)];
             //     let i = resource_idx;
             //     resource_names.push(match r {
             //         Ok(station) => format!("Station {}", station),
@@ -200,11 +253,28 @@ pub fn read_file(instance_fn: &str) -> (Problem, Vec<String>, Vec<String>) {
             //     i
             // });
 
-            t.push((
-                resource,
-                (*earliest - time_now).num_seconds() as i32,
-                travel.num_seconds() as i32,
-            ));
+            let aimed = match measurement {
+                DelayMeasurementType::AllStationArrivals => {
+                    matches!(res_type, ResourceType::Station).then(|| *aimed)
+                },
+                DelayMeasurementType::AllStationDepartures => {
+                    matches!(res_type, ResourceType::Track).then(|| *aimed)
+                }
+                DelayMeasurementType::FinalStationArrival => {
+                    (matches!(res_type, ResourceType::Station) && name == last_station_name)
+                        .then(|| *aimed)
+                }
+                DelayMeasurementType::EverywhereEarliest => Some(Some(*earliest)),
+            };
+
+            let aimed = aimed.flatten().map(|a| (a - time_now).num_seconds() as i32);
+
+            t.push(Visit {
+                resource_id,
+                earliest: (*earliest - time_now).num_seconds() as i32,
+                travel_time: travel.num_seconds() as i32,
+                aimed,
+            });
         }
 
         problem.trains.push(crate::problem::Train { visits: t });
@@ -295,6 +365,15 @@ fn get_train_pos<'a>(
                 //     "  train{} {} delay{} track{} time{}",
                 //     train, position, delay, track, time_in
                 // );
+
+                let inactive_time = (time_now - time_in).num_seconds();
+                if inactive_time > 3600 {
+                    println!(
+                        "Warning: keeping inactive train {} (inactive on track {} for {} seconds)",
+                        train, track, inactive_time
+                    );
+                }
+
                 assert!(train_positions
                     .insert(train, Pos::OnTrack(track, time_in, delay))
                     .is_none());
@@ -310,6 +389,14 @@ fn get_train_pos<'a>(
                 //     "  train{} {} delay{} station{} time{}",
                 //     train, position, delay, station, time_in
                 // );
+
+                // If the train has been standing in the station for over one hour, we assume it is cancelled.
+                let inactive_time = (time_now - time_in).num_seconds();
+                if inactive_time > 3600 {
+                    println!("Warning: removing inactive train {} (inactive n station {} for {} seconds)", train, station, inactive_time);
+                    continue;
+                }
+
                 assert!(train_positions
                     .insert(train, Pos::InStation(station, time_in, delay))
                     .is_none());
@@ -317,6 +404,7 @@ fn get_train_pos<'a>(
             "Offline" => {
                 // println!("  train{} {} delay{}", train, position, delay);
 
+                assert!(delay >= 0);
                 assert!(train_positions
                     .insert(train, Pos::NotStarted(delay))
                     .is_none());
@@ -437,4 +525,121 @@ fn get_runningtimes_map<'a>(
         }
     }
     minimum_running_times
+}
+
+#[derive(Debug)]
+pub struct TxtParseError;
+
+#[derive(Debug)]
+pub struct TxtTrain {
+    pub name: String,
+    pub delay: i32,
+    pub final_delay: i32,
+    pub visits: Vec<TxtVisit>,
+}
+
+#[derive(Debug)]
+pub struct TxtVisit {
+    // T24 TrainID=166 AimedDepartureTime=3118 WaitTime=0 Delay=0 RunTime=143 FinalTimeScheduled=3118
+    pub track_name: String,
+    pub aimed_departure_time: i32,
+    pub wait_time: i32,
+    pub delay: i32,
+    pub run_time: i32,
+    pub final_time_scheduled: i32,
+}
+
+pub fn parse_solution_txt(txt: &str) -> Result<Vec<TxtTrain>, TxtParseError> {
+    let mut trains = Vec::new();
+
+    let mut header: Option<(String, i32, i32)> = None;
+    let mut visits = Vec::new();
+
+    fn parse_kv(s: &str) -> Result<(&str, &str), TxtParseError> {
+        let mut split = s.split('=');
+        let key = split.next().ok_or(TxtParseError)?;
+        let value = split.next().ok_or(TxtParseError)?;
+        Ok((key, value))
+    }
+
+    let mut lines = txt.lines();
+    let _headerline = lines.next().unwrap();
+    // println!("Parsing {}", headerline);
+    let _empty = lines.next().unwrap();
+
+    let mut lines = lines.peekable();
+    while let Some(line) = lines.next() {
+        let mut fields = line.split_ascii_whitespace();
+
+        if header.is_none() {
+            // println!(" parsing header {}", line);
+            // Parse header
+            // Train=166 Init Delay=0 FinalDelay=49
+
+            let (train_key, train) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(train_key == "Train");
+
+            fields.next().ok_or(TxtParseError)?;
+            let (delay_key, delay) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(delay_key == "Delay");
+
+            let (final_delay_key, final_delay) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(final_delay_key == "FinalDelay");
+
+            header = Some((
+                train.to_string(),
+                delay.parse().map_err(|_| TxtParseError)?,
+                final_delay.parse().map_err(|_| TxtParseError)?,
+            ));
+            // println!("Header {:?}", header);
+        } else {
+            // Parse visit
+            // T24 TrainID=166 AimedDepartureTime=3118 WaitTime=0 Delay=0 RunTime=143 FinalTimeScheduled=3118
+
+            let track_name = fields.next().unwrap();
+
+            let (train_id_key, train_id) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(train_id_key == "TrainID");
+            assert!(train_id == header.as_ref().unwrap().0);
+
+            let (aimed_dep_key, aimed_dep) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(aimed_dep_key == "AimedDepartureTime");
+
+            let (wait_time_key, wait_time) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(wait_time_key == "WaitTime");
+
+            let (delay_key, delay) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(delay_key == "Delay");
+
+            assert!(delay == "0", "delay field is not in use?");
+
+            let (run_time_key, run_time) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(run_time_key == "RunTime");
+
+            let (final_time_key, final_time) = parse_kv(fields.next().ok_or(TxtParseError)?)?;
+            assert!(final_time_key == "FinalTimeScheduled");
+
+            visits.push(TxtVisit {
+                track_name: track_name.to_string(),
+                aimed_departure_time: aimed_dep.parse().map_err(|_| TxtParseError)?,
+                wait_time: wait_time.parse().map_err(|_| TxtParseError)?,
+                delay: delay.parse().map_err(|_| TxtParseError)?,
+                run_time: run_time.parse().map_err(|_| TxtParseError)?,
+                final_time_scheduled: final_time.parse().map_err(|_| TxtParseError)?,
+            });
+        }
+
+        if lines.peek() == Some(&"") || lines.peek() == None {
+            let (name, delay, final_delay) = header.take().unwrap();
+            trains.push(TxtTrain {
+                name,
+                delay,
+                final_delay,
+                visits: take(&mut visits),
+            });
+            lines.next();
+        }
+    }
+
+    Ok(trains)
 }

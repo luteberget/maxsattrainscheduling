@@ -1,10 +1,15 @@
 use std::{
-    borrow::Borrow,
     cell::RefCell,
     collections::{BTreeMap, HashMap},
 };
 
-use crate::{debug::{ResourceInterval, SolverAction}, minimize_core, problem::Problem, trim_core};
+#[allow(unused)]
+use crate::{
+    debug::{ResourceInterval, SolverAction},
+    problem::Problem,
+    minimize_core,
+    trim_core,
+};
 use satcoder::{
     constraints::Totalizer, prelude::SymbolicModel, Bool, SatInstance, SatSolverWithCore,
 };
@@ -95,7 +100,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut conflicts: HashMap<_, Vec<_>> = HashMap::new();
     let mut new_time_points = Vec::new();
 
+    #[allow(unused)]
     let mut core_sizes: BTreeMap<usize, usize> = BTreeMap::new();
+    #[allow(unused)]
     let mut processed_core_sizes: BTreeMap<usize, usize> = BTreeMap::new();
     let mut iteration_types: BTreeMap<IterationType, usize> = BTreeMap::new();
 
@@ -105,22 +112,22 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     }
 
     for (train_idx, train) in problem.trains.iter().enumerate() {
-        for (visit_idx, (resource, earliest_t, _travel_time)) in train.visits.iter().enumerate() {
-            let visit: VisitId = visits.push_and_get_key((train_idx, visit_idx));
+        for (visit_idx, visit) in train.visits.iter().enumerate() {
+            let visit_id: VisitId = visits.push_and_get_key((train_idx, visit_idx));
 
             occupations.push(Occ {
                 cost: vec![true.into()],
-                delays: vec![(true.into(), *earliest_t), (false.into(), i32::MAX)],
+                delays: vec![(true.into(), visit.earliest), (false.into(), i32::MAX)],
                 incumbent: 0,
             });
 
-            while resource_visits.len() <= *resource {
+            while resource_visits.len() <= visit.resource_id {
                 resource_visits.push(Vec::new());
             }
 
-            resource_visits[*resource].push(visit);
-            touched_intervals.push(visit);
-            new_time_points.push((visit, true.into(), *earliest_t));
+            resource_visits[visit.resource_id].push(visit_id);
+            touched_intervals.push(visit_id);
+            new_time_points.push((visit_id, true.into(), visit.earliest));
         }
     }
 
@@ -139,28 +146,27 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
             // let mut touched_intervals = visits.keys().collect::<Vec<_>>();
 
-            for visit in touched_intervals.iter().copied() {
+            for visit_id in touched_intervals.iter().copied() {
                 let _p = hprof::enter("travel time check");
-                let (train_idx, visit_idx) = visits[visit];
+                let (train_idx, visit_idx) = visits[visit_id];
                 let next_visit: Option<VisitId> =
                     if visit_idx + 1 < problem.trains[train_idx].visits.len() {
-                        Some((usize::from(visit) + 1).into())
+                        Some((usize::from(visit_id) + 1).into())
                     } else {
                         None
                     };
 
                 // GATHER INFORMATION ABOUT TWO CONSECUTIVE TIME POINTS
-                let t1_in = occupations[visit].incumbent_time();
-                let (this_resource_id, _earliest, travel_time) =
-                    problem.trains[train_idx].visits[visit_idx];
+                let t1_in = occupations[visit_id].incumbent_time();
+                let visit = problem.trains[train_idx].visits[visit_idx];
 
                 if let Some(next_visit) = next_visit {
-                    let v1 = &occupations[visit];
+                    let v1 = &occupations[visit_id];
                     let v2 = &occupations[next_visit];
                     let t1_out = v2.incumbent_time();
 
                     // TRAVEL TIME CONFLICT
-                    if t1_in + travel_time > t1_out {
+                    if t1_in + visit.travel_time > t1_out {
                         found_conflict = true;
                         // println!(
                         //     "  - TRAVEL time conflict train{} visit{} resource{} in{} travel{} out{}",
@@ -173,14 +179,14 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         debug_actions.push(SolverAction::TravelTimeConflict(ResourceInterval {
                             train_idx,
                             visit_idx,
-                            resource_idx: this_resource_id,
+                            resource_idx: visit.resource_id,
                             time_in: t1_in,
                             time_out: t1_out,
                         }));
 
                         // Insert the new time point.
                         let t1_in_var = v1.delays[v1.incumbent].0;
-                        let new_t = v1.incumbent_time() + travel_time;
+                        let new_t = v1.incumbent_time() + visit.travel_time;
                         let (t1_earliest_out_var, t1_is_new) =
                             occupations[next_visit].time_point(&mut solver, new_t);
 
@@ -222,37 +228,36 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
             // SOLVE ALL SIMPLE PRESEDENCES BEFORE CONFLICTS
             // if !found_conflict {
-            for visit in touched_intervals.iter().copied() {
+            for visit_id in touched_intervals.iter().copied() {
                 let _p = hprof::enter("conflict check");
-                let (train_idx, visit_idx) = visits[visit];
+                let (train_idx, visit_idx) = visits[visit_id];
                 let next_visit: Option<VisitId> =
                     if visit_idx + 1 < problem.trains[train_idx].visits.len() {
-                        Some((usize::from(visit) + 1).into())
+                        Some((usize::from(visit_id) + 1).into())
                     } else {
                         None
                     };
 
                 // GATHER INFORMATION ABOUT TWO CONSECUTIVE TIME POINTS
-                let t1_in = occupations[visit].incumbent_time();
-                let (this_resource_id, _earliest, travel_time) =
-                    problem.trains[train_idx].visits[visit_idx];
+                let t1_in = occupations[visit_id].incumbent_time();
+                let visit = problem.trains[train_idx].visits[visit_idx];
 
                 // RESOURCE CONFLICT
 
-                if let Some(conflicting_resources) = conflicts.get(&this_resource_id) {
+                if let Some(conflicting_resources) = conflicts.get(&visit.resource_id) {
                     for other_resource in conflicting_resources.iter().copied() {
                         let t1_out = next_visit
                             .map(|nx| occupations[nx].incumbent_time())
-                            .unwrap_or(t1_in + travel_time);
+                            .unwrap_or(t1_in + visit.travel_time);
 
                         // Waiting in stations, but not in tracks (where conflicts occur).
                         // assert!(t1_in + travel_time == t1_out);
 
                         for other_visit in resource_visits[other_resource].iter().copied() {
-                            if usize::from(visit) == usize::from(other_visit) {
+                            if usize::from(visit_id) == usize::from(other_visit) {
                                 continue;
                             }
-                            let _v1 = &occupations[visit];
+                            let _v1 = &occupations[visit_id];
                             let v2 = &occupations[other_visit];
                             let t2_in = v2.incumbent_time();
                             let (other_train_idx, other_visit_idx) = visits[other_visit];
@@ -273,9 +278,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             let t2_out = other_next_visit
                                 .map(|v| occupations[v].incumbent_time())
                                 .unwrap_or_else(|| {
-                                    let (_other_resource_id, _e, travel_time) =
+                                    let other_visit =
                                         problem.trains[other_train_idx].visits[other_visit_idx];
-                                    t2_in + travel_time
+                                    t2_in + other_visit.travel_time
                                 });
 
                             // let t2_earliest_out = t2_in
@@ -325,21 +330,21 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             let (delay_t2, t2_is_new) =
                                 occupations[other_visit].time_point(&mut solver, t1_out);
                             let (delay_t1, t1_is_new) =
-                                occupations[visit].time_point(&mut solver, t2_out);
+                                occupations[visit_id].time_point(&mut solver, t2_out);
 
                             if !t2_is_new && !t1_is_new {
                                 // println!("Did we solve this before?");
                             }
 
                             if t1_is_new {
-                                new_time_points.push((visit, delay_t1, t2_out));
+                                new_time_points.push((visit_id, delay_t1, t2_out));
                             }
 
                             if t2_is_new {
                                 new_time_points.push((other_visit, delay_t2, t1_out));
                             }
 
-                            let v1 = &occupations[visit];
+                            let v1 = &occupations[visit_id];
                             let v2 = &occupations[other_visit];
 
                             let _t1_in_lit = v1.delays[v1.incumbent].0;
@@ -413,9 +418,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
         for (visit, new_var, new_t) in new_time_points.drain(..) {
             let (train_idx, visit_idx) = visits[visit];
-            let resource = problem.trains[train_idx].visits[visit_idx].0;
+            // let resource = problem.trains[train_idx].visits[visit_idx].resource_id;
 
-            let new_var_cost = problem.trains[train_idx].delay_cost(visit_idx, new_t);
+            let new_var_cost = problem.trains[train_idx].visit_delay_cost(visit_idx, new_t);
             // println!(
             //     "new var for t{} v{} t{} cost{}",
             //     train_idx, visit_idx, new_t, new_var_cost
@@ -468,10 +473,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             let result = {
                 // println!("solving");
                 let _p = hprof::enter("sat check");
+                #[allow(clippy::needless_collect)]
                 let assumptions = soft_constraints.keys().copied().collect::<Vec<_>>();
-                let result =
-                    SatSolverWithCore::solve_with_assumptions(&mut solver, assumptions.into_iter());
-                result
+                SatSolverWithCore::solve_with_assumptions(&mut solver, assumptions.into_iter())
             };
 
             // println!("solving done");
@@ -482,7 +486,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                     let _p = hprof::enter("update times");
 
                     for (visit, this_occ) in occupations.iter_mut_enumerated() {
-                        let old_time = this_occ.incumbent_time();
+                        // let old_time = this_occ.incumbent_time();
                         let mut touched = false;
 
                         while model.value(&this_occ.delays[this_occ.incumbent + 1].0) {
@@ -493,10 +497,10 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             this_occ.incumbent -= 1;
                             touched = true;
                         }
-                        let (train_idx, visit_idx) = visits[visit];
+                        let (_train_idx, visit_idx) = visits[visit];
 
-                        let resource = problem.trains[train_idx].visits[visit_idx].0;
-                        let new_time = this_occ.incumbent_time();
+                        // let resource = problem.trains[train_idx].visits[visit_idx].resource_id;
+                        // let new_time = this_occ.incumbent_time();
 
                         // WATCH.with(|x| {
                         //     if *x.borrow() == Some((train_idx, visit_idx))  && touched {
@@ -580,21 +584,18 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             *iteration_types.entry(IterationType::Objective).or_default() += 1;
             debug_actions.push(SolverAction::Core(core.len()));
 
-            let min_weight = core
-                .iter()
-                .map(|c| soft_constraints[c].1)
-                .min()
-                .unwrap();
+            let min_weight = core.iter().map(|c| soft_constraints[c].1).min().unwrap();
             assert!(min_weight == 1);
 
             // println!("Core min weight {}", min_weight);
 
             for c in core.iter() {
                 let (soft, cost, original_cost) = soft_constraints.remove(c).unwrap();
-                let soft_str = match &soft {
-                    Soft::Delay => "delay".to_string(),
-                    Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
-                };
+                
+                // let soft_str = match &soft {
+                //     Soft::Delay => "delay".to_string(),
+                //     Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
+                // };
                 // println!("{} {}", soft_str, cost);
 
                 assert!(cost >= min_weight);
@@ -624,11 +625,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             total_cost += 1;
             if core.len() > 1 {
                 let bound = 1;
-                let tot = Totalizer::count(
-                    &mut solver,
-                    core.iter().map(|c| !*c),
-                    bound as u32,
-                );
+                let tot = Totalizer::count(&mut solver, core.iter().map(|c| !*c), bound as u32);
                 assert!(bound < tot.rhs().len());
                 soft_constraints.insert(
                     !tot.rhs()[bound], // tot <= 1
@@ -658,9 +655,8 @@ fn extract_solution<L: satcoder::Lit>(
             i += 1;
         }
 
-        let (_last_resource, _, travel_time) =
-            problem.trains[train_idx].visits[train_times.len() - 1];
-        let last_t = train_times[train_times.len() - 1] + travel_time;
+        let visit = problem.trains[train_idx].visits[train_times.len() - 1];
+        let last_t = train_times[train_times.len() - 1] + visit.travel_time;
         train_times.push(last_t);
 
         trains.push(train_times);
