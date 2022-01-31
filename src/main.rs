@@ -2,8 +2,8 @@ use std::{collections::HashSet, fmt::Write};
 
 use ddd::{
     parser,
-    problem::{self, Visit},
-    solver,
+    problem::{self, Visit, DelayCostThresholds},
+    solvers::{maxsatddd, bigm},
 };
 
 fn main() {
@@ -34,7 +34,7 @@ fn main() {
         let refsolscore = ref_solution.as_ref().map(|s| {
             s.iter()
             .map(|t| {
-                let cost = problem::delay_cost(t.final_delay);
+                let cost = DelayCostThresholds::f123().eval(t.final_delay);
                 let last_visit = t.visits.last().unwrap();
                 println!("ref train {} final time scheduled {} aimed departure {} delay {} final delay {} cost {}", t.name, 
                 last_visit.final_time_scheduled, last_visit.aimed_departure_time, last_visit.delay, t.final_delay, cost);
@@ -62,8 +62,10 @@ fn main() {
         println!("Solving.");
         // let problem = problem::problem1();
         hprof::start_frame();
-        let (solution, solvestats) =
-            solver::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
+        // let (solution, solvestats) =
+        //     maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
+        let solution =
+            bigm::solve(&problem, false).unwrap();
         hprof::end_frame();
 
         // for train_idx in 0..problem.trains.len() {
@@ -99,6 +101,38 @@ fn main() {
         // println!("NODE {:?} {}", root.name, root.total_time.get());
         let sol_time = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
 
+
+        println!("Solving.");
+        // let problem = problem::problem1();
+        hprof::start_frame();
+        // let (solution, solvestats) =
+        //     maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
+        let solution2 =
+            bigm::solve(&problem, true).unwrap();
+        hprof::end_frame();
+        hprof::profiler().print_timing();
+
+        let _root = hprof::profiler().root();
+        // println!("NODE {:?} {}", root.name, root.total_time.get());
+        let sol_time2 = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
+        let cost2 = problem.verify_solution(&solution2).unwrap();
+
+        println!("Solving.");
+        // let problem = problem::problem1();
+        hprof::start_frame();
+        // let (solution, solvestats) =
+        //     maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
+        let (solution3,_) =
+            maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
+        hprof::end_frame();
+        hprof::profiler().print_timing();
+
+        let _root = hprof::profiler().root();
+        // println!("NODE {:?} {}", root.name, root.total_time.get());
+        let sol_time3 = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
+        let cost3 = problem.verify_solution(&solution3).unwrap();
+
+
         // table columns
         //  1. intstance name
         //  2. trains
@@ -111,24 +145,24 @@ fn main() {
         //  7. solution time in ms
         //  9.
 
-        let vars = {
-            let varstring = "variables: ";
-            let vars_start = solvestats.satsolver.find(varstring).unwrap();
-            let vars_start = &solvestats.satsolver[vars_start + varstring.as_bytes().len()..];
-            let vars_end = vars_start.find(',').unwrap();
-            &vars_start[..vars_end]
-        };
+        // let vars = {
+        //     let varstring = "variables: ";
+        //     let vars_start = solvestats.satsolver.find(varstring).unwrap();
+        //     let vars_start = &solvestats.satsolver[vars_start + varstring.as_bytes().len()..];
+        //     let vars_end = vars_start.find(',').unwrap();
+        //     &vars_start[..vars_end]
+        // };
 
-        let clausestring = "clauses: ";
-        let clauses_start = solvestats.satsolver.find(clausestring).unwrap();
-        let clauses_start = &solvestats.satsolver[clauses_start + clausestring.as_bytes().len()..];
-        let clauses_end = clauses_start.find(' ').unwrap();
-        let clauses = &clauses_start[..clauses_end];
+        // let clausestring = "clauses: ";
+        // let clauses_start = solvestats.satsolver.find(clausestring).unwrap();
+        // let clauses_start = &solvestats.satsolver[clauses_start + clausestring.as_bytes().len()..];
+        // let clauses_end = clauses_start.find(' ').unwrap();
+        // let clauses = &clauses_start[..clauses_end];
 
         writeln!(
             perf_out,
-            "{}\t & {}\t & {:?}\t & {}",
-            instance_id, cost, refsolscore, sol_time,
+            "{}\t ; {}\t ; {}\t ; {}\t ; {}\t ; {}\t ; {}",
+            instance_id, cost, cost2, cost3, sol_time, sol_time2, sol_time3,
         )
         .unwrap();
 

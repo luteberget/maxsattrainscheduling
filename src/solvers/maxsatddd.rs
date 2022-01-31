@@ -30,10 +30,6 @@ impl From<usize> for VisitId {
     }
 }
 
-#[derive(Debug)]
-pub enum SolverError {
-    NoSolution,
-}
 
 #[derive(Clone, Copy, Debug)]
 struct ResourceId(u32);
@@ -76,6 +72,8 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
 
 use crate::debug::DebugInfo;
+
+use super::SolverError;
 pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     mut solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,

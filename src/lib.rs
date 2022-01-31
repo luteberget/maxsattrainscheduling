@@ -3,7 +3,7 @@ use satcoder::{Bool, SatResultWithCore, SatSolverWithCore};
 pub mod debug;
 pub mod parser;
 pub mod problem;
-pub mod solver;
+pub mod solvers;
 
 pub fn minimize_core<L: satcoder::Lit>(
     core: &mut Vec<Bool<L>>,

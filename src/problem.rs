@@ -120,8 +120,8 @@ impl Problem {
                             let ok = t1_in >= t2_out || t2_in >= t1_out;
                             if !ok {
                                 println!(
-                                    "Resource conflict in t{} v{} t{} v{}",
-                                    train_idx1, visit_idx1, train_idx2, visit_idx2
+                                    "Resource conflict in t{} v{} {}-{} t{} v{} {}-{}",
+                                    train_idx1, visit_idx1, t1_in, t1_out, train_idx2, visit_idx2, t2_in, t2_out
                                 );
                                 return None;
                             }
@@ -139,23 +139,34 @@ impl Problem {
 impl Train {
     pub fn visit_delay_cost(&self, path_idx: usize, t: i32) -> usize {
         if let Some(aimed) = self.visits[path_idx].aimed {
-            delay_cost(t - aimed)
+            DelayCostThresholds::f139().eval(t - aimed)
         } else {
             0
         }
     }
 }
 
-pub fn delay_cost(delay: i32) -> usize {
-    if delay > 360 {
-        9
-    } else if delay > 180 {
-        3
-    } else if delay > 0 {
-        1
-    } else {
+pub struct DelayCostThresholds {
+    pub thresholds :Vec<(i32,usize)>,
+}
+
+impl DelayCostThresholds{
+    pub fn f123() -> DelayCostThresholds {
+        DelayCostThresholds { thresholds:  vec![(360,3),(180,2),(0,1)] }
+    }
+    pub fn f139() -> DelayCostThresholds {
+        DelayCostThresholds { thresholds:  vec![(360,9),(180,3),(0,1)] }
+    }
+
+    pub fn eval(&self, delay :i32) -> usize {
+        for (threshold,cost) in &self.thresholds {
+            if delay > *threshold {
+                return *cost;
+            }
+        }
         0
     }
+
 }
 
 fn visit(resource_id: usize, earliest: i32, travel_time: i32) -> Visit {
