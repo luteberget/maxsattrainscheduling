@@ -1,5 +1,6 @@
 pub mod maxsatddd;
 pub mod bigm;
+mod ddd;
 
 
 #[derive(Debug)]

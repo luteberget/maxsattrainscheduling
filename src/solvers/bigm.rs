@@ -186,7 +186,7 @@ fn add_travel_constraint(
     Ok(())
 }
 
-fn visit_conflicts(problem: &Problem) -> Vec<((usize, usize), (usize, usize))> {
+pub fn visit_conflicts(problem: &Problem) -> Vec<((usize, usize), (usize, usize))> {
     let mut conflicts = Vec::new();
     let resource_conflicts = problem.conflicts.iter().copied().collect::<HashSet<_>>();
     for train_idx1 in 0..problem.trains.len() {
