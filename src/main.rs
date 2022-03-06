@@ -33,15 +33,17 @@ struct Opt {
 }
 
 pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
-    let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let a_instances = [1];
+
+    // let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     #[allow(unused)]
     let c_instances = [21, 22, 23, 24];
 
     for instance_id in a_instances
         .into_iter()
-        .chain(b_instances)
-        .chain(c_instances)
+        // .chain(b_instances)
+        // .chain(c_instances)
     {
         let filename = format!("instances/Instance{}.xml", instance_id);
         println!("Reading {}", filename);
@@ -76,13 +78,13 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
     }
 }
 
-
 #[derive(Debug)]
 enum SolverType {
     BigMEager,
     BigMLazy,
     MaxSatDdd,
     MaxSatIdl,
+    MipDdd,
 }
 
 fn main() {
@@ -97,6 +99,7 @@ fn main() {
             "bigm_lazy" => SolverType::BigMLazy,
             "maxsat_ddd" => SolverType::MaxSatDdd,
             "maxsat_idl" => SolverType::MaxSatIdl,
+            "mip_ddd" => SolverType::MipDdd,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -122,6 +125,7 @@ fn main() {
                         .0
                 }
                 SolverType::MaxSatIdl => ddd::solvers::idl::solve(&p.problem).unwrap(),
+                SolverType::MipDdd => ddd::solvers::mipdddpack::solve(&p.problem).unwrap(),
             };
             hprof::end_frame();
 
