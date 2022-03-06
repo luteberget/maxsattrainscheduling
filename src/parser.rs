@@ -1,4 +1,4 @@
-use crate::problem::{DelayMeasurementType, Problem, Visit, NamedProblem};
+use crate::problem::{DelayMeasurementType, NamedProblem, Problem, Visit};
 use chrono::{Duration, NaiveDateTime};
 use log::debug;
 use std::{collections::HashMap, mem::take};
@@ -9,10 +9,123 @@ enum Pos<'a> {
     NotStarted(i32),
 }
 
-pub fn read_xml_file(
-    instance_fn: &str,
-    measurement: DelayMeasurementType,
-) -> NamedProblem {
+pub fn read_txt_file(instance_fn: &str, measurement: DelayMeasurementType) -> NamedProblem {
+    let instance_txt = std::fs::read_to_string(instance_fn).unwrap();
+    let mut train_names = Vec::new();
+    let mut resource_names = Vec::new();
+    let mut resources = HashMap::new();
+
+    let any_station_resource = 0;
+    resource_names.push("Any station".to_string());
+
+    let mut current_train: Option<Vec<Visit>> = None;
+    let mut problem = Problem {
+        conflicts: Vec::new(),
+        trains: Vec::new(),
+    };
+
+    let mut lines = instance_txt.lines().peekable();
+    while let Some(line) = lines.next() {
+        if line.trim().is_empty() {
+            if let Some(visits) = current_train.take() {
+                problem.trains.push(crate::problem::Train { visits })
+            }
+            continue;
+        }
+
+        let mut fields = line.split_ascii_whitespace();
+        fn get_pair(fields: &mut std::str::SplitAsciiWhitespace) -> (String, i32) {
+            // let name = fields.next().unwrap().to_string();
+            // let value = fields.next().unwrap().parse::<i64>().unwrap();
+            let pair = fields.next().unwrap();
+            let mut split = pair.split("=");
+            let name = split.next().unwrap().to_string();
+            let value = split.next().unwrap().parse::<i32>().unwrap();
+            (name, value)
+        }
+
+        match current_train.as_mut() {
+            None => {
+                // Expect train header
+
+                let (train_id_field, train_id) = get_pair(&mut fields);
+                assert!(train_id_field == "TrainId");
+                let (delay_field, delay) = get_pair(&mut fields);
+                assert!(delay_field == "Delay");
+                let (free_run_field, free_run) = get_pair(&mut fields);
+                assert!(free_run_field == "FreeRun");
+
+                train_names.push(format!("Train{}", train_id));
+                current_train = Some(Vec::new());
+            }
+            Some(train) => {
+                let track_id = fields.next().unwrap();
+                let train_id = fields.next().unwrap();
+                assert!(train_names.last().map(String::as_str) == Some(train_id));
+
+                let (aimeddep_field, aimeddep) = get_pair(&mut fields);
+                assert!(aimeddep_field == "AimedDepartureTime");
+                let (waittime_field, wait_time) = get_pair(&mut fields);
+                assert!(waittime_field == "WaitTime");
+                let (basetime_field, base_time) = get_pair(&mut fields);
+                assert!(basetime_field == "BaseTime");
+                let (runtime_field, run_time) = get_pair(&mut fields);
+                assert!(runtime_field == "RunTime");
+
+                let is_last_track = match lines.peek() {
+                    None => true,
+                    Some(l) => l.trim().is_empty(),
+                };
+
+                let resource_id = *resources.entry(track_id.to_string()).or_insert_with(|| {
+                    let idx = resource_names.len();
+                    resource_names.push(track_id.to_string());
+                    idx
+                });
+
+                let (aimed_in, aimed_out) = match measurement {
+                    DelayMeasurementType::AllStationArrivals => (None, Some(aimeddep + run_time)),
+                    DelayMeasurementType::AllStationDepartures => (Some(aimeddep), None),
+                    DelayMeasurementType::FinalStationArrival => {
+                        (None, is_last_track.then(|| aimeddep + run_time))
+                    }
+                    DelayMeasurementType::EverywhereEarliest => todo!(),
+                };
+
+                train.push(Visit {
+                    aimed: aimed_in,
+                    earliest: base_time as i32,
+                    resource_id,
+                    travel_time: run_time as i32,
+                });
+
+                train.push(Visit {
+                    aimed: aimed_out,
+                    earliest: (base_time + run_time) as i32,
+                    travel_time: 0,
+                    resource_id: any_station_resource,
+                });
+            }
+        }
+    }
+
+    // All tracks are exclusive
+    for (_, id) in resources.iter() {
+        problem.conflicts.push((*id, *id));
+    }
+
+    if let Some(visits) = current_train.take() {
+        problem.trains.push(crate::problem::Train { visits })
+    }
+
+    NamedProblem {
+        problem,
+        train_names,
+        resource_names,
+    }
+}
+
+pub fn read_xml_file(instance_fn: &str, measurement: DelayMeasurementType) -> NamedProblem {
     let date_format = "%Y-%m-%dT%H:%M:%S";
     let parse_date = |d| chrono::NaiveDateTime::parse_from_str(d, date_format).unwrap();
     let instance_xml = std::fs::read_to_string(instance_fn).unwrap();
@@ -130,7 +243,10 @@ pub fn read_xml_file(
                                 minimum_running_times[speed_class][*track] as i64,
                             );
                             let remaining_travel_time = minimum_running_time - already_traveled;
-                            assert!(time_now + remaining_travel_time == *enter_time + minimum_running_time);
+                            assert!(
+                                time_now + remaining_travel_time
+                                    == *enter_time + minimum_running_time
+                            );
                             visits.push((
                                 (ResourceType::Track, *track),
                                 *enter_time,
@@ -156,7 +272,6 @@ pub fn read_xml_file(
                 }
             };
 
-
             if id == "17" {
                 println!("train 17 with {} nodes", stop_nodes[first_stop_idx..].len());
             }
@@ -168,7 +283,6 @@ pub fn read_xml_file(
                     .map(Some)
                     .chain(std::iter::once(None)),
             ) {
-                
                 let station = stop.attribute("StationId").unwrap();
                 let aimed_arrival = parse_date(stop.attribute("AimedArrivalTime").unwrap());
                 let aimed_departure = parse_date(stop.attribute("AimedDepartureTime").unwrap());
@@ -188,7 +302,7 @@ pub fn read_xml_file(
                 // earliest_time_cursor += Duration::zero();
 
                 earliest_time_cursor = earliest_time_cursor.max(aimed_departure);
-                
+
                 // TODO check this with Anna Livia
                 //earliest_time_cursor = earliest_time_cursor.max(time_now);
 
@@ -256,7 +370,7 @@ pub fn read_xml_file(
             let aimed = match measurement {
                 DelayMeasurementType::AllStationArrivals => {
                     matches!(res_type, ResourceType::Station).then(|| *aimed)
-                },
+                }
                 DelayMeasurementType::AllStationDepartures => {
                     matches!(res_type, ResourceType::Track).then(|| *aimed)
                 }
@@ -281,7 +395,11 @@ pub fn read_xml_file(
         train_names.push(name.to_string());
     }
 
-    NamedProblem { problem, train_names, resource_names }
+    NamedProblem {
+        problem,
+        train_names,
+        resource_names,
+    }
 }
 
 #[allow(unused)]

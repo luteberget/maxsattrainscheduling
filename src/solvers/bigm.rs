@@ -9,7 +9,9 @@ pub fn solve(problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError
     use grb::prelude::*;
     let mut model = Model::new("model1").map_err(SolverError::GurobiError)?;
 
-    model.set_param(param::IntFeasTol, 1e-9).map_err(SolverError::GurobiError)?;
+    model
+        .set_param(param::IntFeasTol, 1e-9)
+        .map_err(SolverError::GurobiError)?;
 
     // timing variables
     let t_vars = problem
@@ -52,39 +54,39 @@ pub fn solve(problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError
     // Objective
     let delay_cost = DelayCostThresholds::f139();
     for (train_idx, train) in problem.trains.iter().enumerate() {
-        let visit_idx = train.visits.len() - 1;
+        for visit_idx in 0..train.visits.len() {
+            if let Some(aimed) = train.visits[visit_idx].aimed {
+                let last_t = t_vars[train_idx][visit_idx];
 
-        if let Some(aimed) = train.visits[visit_idx].aimed {
-            let last_t = t_vars[train_idx][visit_idx];
+                // create a variable for each delay threshold
+                let thresholds = &delay_cost.thresholds;
+                for threshold_idx in (0..thresholds.len()).rev() {
+                    let (_prev_threshold, prev_cost) =
+                        thresholds.get(threshold_idx + 1).unwrap_or(&(0, 0));
+                    let (threshold, cost) = thresholds[threshold_idx];
 
-            // create a variable for each delay threshold
-            let thresholds = &delay_cost.thresholds;
-            for threshold_idx in (0..thresholds.len()).rev() {
-                let (_prev_threshold, prev_cost) =
-                    thresholds.get(threshold_idx + 1).unwrap_or(&(0, 0));
-                let (threshold, cost) = thresholds[threshold_idx];
+                    let cost_diff = cost - prev_cost;
+                    assert!(cost_diff > 0);
 
-                let cost_diff = cost - prev_cost;
-                assert!(cost_diff > 0);
+                    let threshold_var_name =
+                        format!("t{}_v{}_delay{}", train_idx, visit_idx, threshold);
 
-                let threshold_var_name =
-                    format!("t{}_v{}_delay{}", train_idx, visit_idx, threshold);
+                    // Add threshold_var to the objective with cost `diff_cost`.
+                    #[allow(clippy::unnecessary_cast)]
+                    let threshold_var =
+                        add_intvar!(model, name: &threshold_var_name, bounds: 0..1, obj: cost_diff)
+                            .map_err(SolverError::GurobiError)?;
 
-                // Add threshold_var to the objective with cost `diff_cost`.
-                #[allow(clippy::unnecessary_cast)]
-                let threshold_var =
-                    add_intvar!(model, name: &threshold_var_name, bounds: 0..1, obj: cost_diff)
+                    // If last_t - aimed >= threshold+1 then threshold_var must be 1
+
+                    #[allow(clippy::useless_conversion)]
+                    model
+                        .add_constr(
+                            &format!("has_{}", threshold_var_name),
+                            c!(last_t - aimed <= threshold + M * threshold_var),
+                        )
                         .map_err(SolverError::GurobiError)?;
-
-                // If last_t - aimed >= threshold+1 then threshold_var must be 1
-
-                #[allow(clippy::useless_conversion)]
-                model
-                    .add_constr(
-                        &format!("has_{}", threshold_var_name),
-                        c!(last_t - aimed <= threshold + M * threshold_var),
-                    )
-                    .map_err(SolverError::GurobiError)?;
+                }
             }
         }
     }
@@ -149,7 +151,8 @@ pub fn solve(problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError
                 for visit_start_t_var in train_ts {
                     let t = model
                         .get_obj_attr(attr::X, visit_start_t_var)
-                        .map_err(SolverError::GurobiError)?.round() as i32;
+                        .map_err(SolverError::GurobiError)?
+                        .round() as i32;
                     train_solution.push(t);
                 }
 

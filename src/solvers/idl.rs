@@ -7,7 +7,7 @@ use crate::problem::{DelayCostThresholds, Problem};
 use super::SolverError;
 
 pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, SolverError> {
-    let _p = hprof::enter("mip-ddd solver");
+    let _p = hprof::enter("maxsat_idl solver");
     let mut solver = idl::IdlSolver::new();
 
     let zero = solver.zero();
@@ -56,36 +56,36 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, SolverError> {
     // Objective
     let delay_cost = DelayCostThresholds::f139();
     for (train_idx, train) in problem.trains.iter().enumerate() {
-        let visit_idx = train.visits.len() - 1;
+        for visit_idx in 0..train.visits.len() {
+            if let Some(aimed) = train.visits[visit_idx].aimed {
+                let last_t = t_vars[train_idx][visit_idx];
 
-        if let Some(aimed) = train.visits[visit_idx].aimed {
-            let last_t = t_vars[train_idx][visit_idx];
+                // create a variable for each delay threshold
+                let thresholds = &delay_cost.thresholds;
+                for threshold_idx in (0..thresholds.len()).rev() {
+                    let (_prev_threshold, prev_cost) =
+                        thresholds.get(threshold_idx + 1).unwrap_or(&(0, 0));
+                    let (threshold, cost) = thresholds[threshold_idx];
 
-            // create a variable for each delay threshold
-            let thresholds = &delay_cost.thresholds;
-            for threshold_idx in (0..thresholds.len()).rev() {
-                let (_prev_threshold, prev_cost) =
-                    thresholds.get(threshold_idx + 1).unwrap_or(&(0, 0));
-                let (threshold, cost) = thresholds[threshold_idx];
+                    let cost_diff = cost - prev_cost;
+                    assert!(cost_diff > 0);
 
-                let cost_diff = cost - prev_cost;
-                assert!(cost_diff > 0);
-
-                let threshold_var = solver.new_bool();
-                solver.add_diff(
-                    Some(threshold_var),
-                    last_t,
-                    zero,
-                    (aimed + threshold) as i64,
-                );
-                soft_constraints.insert(
-                    threshold_var,
-                    SoftConstraint {
-                        weight: cost_diff as i32,
-                        original_weight: cost_diff as i32,
-                        constraint: Soft::Delay,
-                    },
-                );
+                    let threshold_var = solver.new_bool();
+                    solver.add_diff(
+                        Some(threshold_var),
+                        last_t,
+                        zero,
+                        (aimed + threshold) as i64,
+                    );
+                    soft_constraints.insert(
+                        threshold_var,
+                        SoftConstraint {
+                            weight: cost_diff as i32,
+                            original_weight: cost_diff as i32,
+                            constraint: Soft::Delay,
+                        },
+                    );
+                }
             }
         }
     }

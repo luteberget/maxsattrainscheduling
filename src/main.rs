@@ -26,7 +26,7 @@ struct Opt {
     xml_instances: bool,
 
     #[structopt(long)]
-    raw_instances: bool,
+    txt_instances: bool,
 
     #[structopt(long)]
     instance_name_filter: Option<String>,
@@ -53,6 +53,29 @@ pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
         x(format!("xml {}", instance_id), problem);
     }
 }
+
+pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
+    let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+    #[allow(unused)]
+    let c_instances = [21, 22, 23, 24];
+
+    for instance_id in a_instances
+        .into_iter()
+        .chain(b_instances)
+        .chain(c_instances)
+    {
+        let filename = format!("txtinstances/Instance{}.txt", instance_id);
+        println!("Reading {}", filename);
+        #[allow(unused)]
+        let problem = parser::read_txt_file(
+            &filename,
+            problem::DelayMeasurementType::AllStationDepartures,
+        );
+        x(format!("txt {}", instance_id), problem);
+    }
+}
+
 
 #[derive(Debug)]
 enum SolverType {
@@ -83,11 +106,13 @@ fn main() {
     }
 
     let mut perf_out = String::new();
-    xml_instances(|name, p| {
+
+    let mut solve_it = |name: String, p: NamedProblem| {
         let problemstats = print_problem_stats(&p.problem);
 
         for solver in solvers.iter() {
             hprof::start_frame();
+            println!("Starting solver {:?}", solver);
             let solution = match solver {
                 SolverType::BigMEager => bigm::solve(&p.problem, false).unwrap(),
                 SolverType::BigMLazy => bigm::solve(&p.problem, true).unwrap(),
@@ -112,7 +137,14 @@ fn main() {
             )
             .unwrap();
         }
-    });
+    };
+
+    if opt.xml_instances {
+        xml_instances(|name, p| solve_it(name, p));
+    }
+    if opt.txt_instances {
+        txt_instances(|name, p| solve_it(name, p));
+    }
     println!("{}", perf_out);
 }
 
