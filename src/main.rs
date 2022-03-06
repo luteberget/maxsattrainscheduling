@@ -2,17 +2,41 @@ use std::{collections::HashSet, fmt::Write};
 
 use ddd::{
     parser,
-    problem::{self, Visit, DelayCostThresholds},
-    solvers::{maxsatddd, bigm},
+    problem::{self, DelayCostThresholds, NamedProblem, Visit},
+    solvers::{bigm, maxsatddd},
 };
 
-fn main() {
+use std::path::PathBuf;
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+#[structopt(
+    name = "trainscheduler",
+    about = "Optimal train scheduling experiments."
+)]
+struct Opt {
+    /// Activate debug mode
+    #[structopt(short, long)]
+    debug: bool,
+
+    #[structopt(short, long)]
+    solvers: Vec<String>,
+
+    #[structopt(long)]
+    xml_instances: bool,
+
+    #[structopt(long)]
+    raw_instances: bool,
+
+    #[structopt(long)]
+    instance_name_filter: Option<String>,
+}
+
+pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
     let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     #[allow(unused)]
     let c_instances = [21, 22, 23, 24];
-
-    let mut perf_out = String::new();
 
     for instance_id in a_instances
         .into_iter()
@@ -22,169 +46,73 @@ fn main() {
         let filename = format!("instances/Instance{}.xml", instance_id);
         println!("Reading {}", filename);
         #[allow(unused)]
-        let (problem, train_names, res_names) =
-            parser::read_file(&filename, problem::DelayMeasurementType::FinalStationArrival);
-        let problemstats = print_problem_stats(&problem);
-
-        let ref_solution =
-            std::fs::read_to_string(&format!("solutions/Instance{}.txt", instance_id))
-                .ok()
-                .map(|txt| parser::parse_solution_txt(&txt).unwrap());
-
-        let refsolscore = ref_solution.as_ref().map(|s| {
-            s.iter()
-            .map(|t| {
-                let cost = DelayCostThresholds::f123().eval(t.final_delay);
-                let last_visit = t.visits.last().unwrap();
-                println!("ref train {} final time scheduled {} aimed departure {} delay {} final delay {} cost {}", t.name, 
-                last_visit.final_time_scheduled, last_visit.aimed_departure_time, last_visit.delay, t.final_delay, cost);
-                assert!(last_visit.final_time_scheduled - last_visit.aimed_departure_time == t.final_delay);
-
-                cost
-            })
-            .sum::<usize>()
-        });
-
-        if let Some(ref_solution) = ref_solution.as_ref() {
-            let problemtrains = train_names.iter().collect::<HashSet<_>>();
-            let solutiontrains = ref_solution.iter().map(|t| &t.name).collect::<HashSet<_>>();
-            let diff1 = problemtrains
-                .difference(&solutiontrains)
-                .collect::<Vec<_>>();
-            let diff2 = solutiontrains
-                .difference(&problemtrains)
-                .collect::<Vec<_>>();
-            println!("Trains not in solution: {:?}", diff1);
-            println!("Trains not in problem: {:?}", diff2);
-            // assert!(diff1.is_empty() && diff2.is_empty());
-        }
-
-        println!("Solving.");
-        // let problem = problem::problem1();
-        hprof::start_frame();
-        // let (solution, solvestats) =
-        //     maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
-        let solution =
-            bigm::solve(&problem, false).unwrap();
-        hprof::end_frame();
-
-        // for train_idx in 0..problem.trains.len() {
-        //     let after_earliest = solution[train_idx].last().unwrap() - problem.trains[train_idx].visits.last().unwrap().earliest;
-        //     println!("Train {:?}", train_names[train_idx]);
-        //     for visit in problem.trains[train_idx].visits.iter() {
-        //         println!("  visit {} {:?}", res_names[visit.resource_id], visit);
-        //     }
-        //     println!(
-        //         "sol train {} delay {} cost {} afterearliest {}",
-        //         train_names[train_idx],
-        //         solution[train_idx].last().unwrap(),
-        //         problem.train_cost(&solution, train_idx),
-        //         after_earliest
-        //     );
-        // }
-
-        let cost = problem.verify_solution(&solution);
-
-        println!(
-            "Verifying solution {:?} trains {} (ref.sol. cost {:?} trains {:?})",
-            cost,
-            problem.trains.len(),
-            refsolscore,
-            ref_solution.map(|s| s.len())
+        let problem = parser::read_xml_file(
+            &filename,
+            problem::DelayMeasurementType::FinalStationArrival,
         );
-        let cost = cost.unwrap();
-        // assert!(cost == refsolscore as i32);
-
-        hprof::profiler().print_timing();
-
-        let _root = hprof::profiler().root();
-        // println!("NODE {:?} {}", root.name, root.total_time.get());
-        let sol_time = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
-
-
-        println!("Solving.");
-        // let problem = problem::problem1();
-        hprof::start_frame();
-        // let (solution, solvestats) =
-        //     maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
-        let solution2 =
-            bigm::solve(&problem, true).unwrap();
-        hprof::end_frame();
-        hprof::profiler().print_timing();
-
-        let _root = hprof::profiler().root();
-        // println!("NODE {:?} {}", root.name, root.total_time.get());
-        let sol_time2 = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
-        let cost2 = problem.verify_solution(&solution2).unwrap();
-
-        println!("Solving.");
-        // let problem = problem::problem1();
-        hprof::start_frame();
-        // let (solution, solvestats) =
-        //     maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
-        let (solution3,_) =
-            maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem).unwrap();
-        hprof::end_frame();
-        hprof::profiler().print_timing();
-
-        let _root = hprof::profiler().root();
-        // println!("NODE {:?} {}", root.name, root.total_time.get());
-        let sol_time3 = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
-        let cost3 = problem.verify_solution(&solution3).unwrap();
-
-
-        // table columns
-        //  1. intstance name
-        //  2. trains
-        //  3. tracks/resources
-        //  4. avg tracks
-        //  5. conflicting track pairs
-        //  6. cost
-        //  8. sat iterations
-        //  8. unsat iterations
-        //  7. solution time in ms
-        //  9.
-
-        // let vars = {
-        //     let varstring = "variables: ";
-        //     let vars_start = solvestats.satsolver.find(varstring).unwrap();
-        //     let vars_start = &solvestats.satsolver[vars_start + varstring.as_bytes().len()..];
-        //     let vars_end = vars_start.find(',').unwrap();
-        //     &vars_start[..vars_end]
-        // };
-
-        // let clausestring = "clauses: ";
-        // let clauses_start = solvestats.satsolver.find(clausestring).unwrap();
-        // let clauses_start = &solvestats.satsolver[clauses_start + clausestring.as_bytes().len()..];
-        // let clauses_end = clauses_start.find(' ').unwrap();
-        // let clauses = &clauses_start[..clauses_end];
-
-        writeln!(
-            perf_out,
-            "{}\t ; {}\t ; {}\t ; {}\t ; {}\t ; {}\t ; {}",
-            instance_id, cost, cost2, cost3, sol_time, sol_time2, sol_time3,
-        )
-        .unwrap();
-
-        // writeln!(
-        //     perf_out,
-        //     "{}\t& {}\t& {}\t& {:.2}\t& {}\t& {}\t& {}\t& {}\t& {}\t& {}\t& {}\t& {}\t& {:.2}",
-        //     instance_id,
-        //     problemstats.trains,
-        //     problemstats.conflicts,
-        //     problemstats.avg_tracks,
-        //     problemstats.conflicting_visit_pairs,
-        //     cost,
-        //     solvestats.n_sat,
-        //     solvestats.n_unsat,
-        //     solvestats.n_travel,
-        //     solvestats.n_conflict,
-        //     vars,
-        //     clauses,
-        //     sol_time,
-        // )
-        // .unwrap();
+        x(format!("xml {}", instance_id), problem);
     }
+}
+
+#[derive(Debug)]
+enum SolverType {
+    BigMEager,
+    BigMLazy,
+    MaxSatDdd,
+    MaxSatIdl,
+}
+
+fn main() {
+    let opt = Opt::from_args();
+    println!("{:?}", opt);
+    println!("Using solvers {:?}", opt.solvers);
+    let solvers = opt
+        .solvers
+        .iter()
+        .map(|x| match x.as_str() {
+            "bigm_eager" => SolverType::BigMEager,
+            "bigm_lazy" => SolverType::BigMLazy,
+            "maxsat_ddd" => SolverType::MaxSatDdd,
+            "maxsat_idl" => SolverType::MaxSatIdl,
+            _ => panic!("unknown solver type"),
+        })
+        .collect::<Vec<_>>();
+
+    if solvers.is_empty() {
+        panic!("no solver specified");
+    }
+
+    let mut perf_out = String::new();
+    xml_instances(|name, p| {
+        let problemstats = print_problem_stats(&p.problem);
+
+        for solver in solvers.iter() {
+            hprof::start_frame();
+            let solution = match solver {
+                SolverType::BigMEager => bigm::solve(&p.problem, false).unwrap(),
+                SolverType::BigMLazy => bigm::solve(&p.problem, true).unwrap(),
+                SolverType::MaxSatDdd => {
+                    maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &p.problem)
+                        .unwrap()
+                        .0
+                }
+                SolverType::MaxSatIdl => ddd::solvers::idl::solve(&p.problem).unwrap(),
+            };
+            hprof::end_frame();
+
+            let cost = p.problem.verify_solution(&solution).unwrap();
+            hprof::profiler().print_timing();
+            let _root = hprof::profiler().root();
+            let sol_time = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
+            let solver_name = format!("{:?}", solver);
+            writeln!(
+                perf_out,
+                "{:>10} {:<12} {:>5} {:>10.0}",
+                name, solver_name, cost, sol_time,
+            )
+            .unwrap();
+        }
+    });
     println!("{}", perf_out);
 }
 
@@ -245,12 +173,15 @@ fn print_problem_stats(problem: &problem::Problem) -> ProblemStats {
 
 #[cfg(test)]
 mod tests {
+    use ddd::problem::NamedProblem;
+
     #[test]
     pub fn testproblem() {
         let problem = crate::problem::problem1_with_stations();
-        let result = crate::solver::solve(satcoder::solvers::minisat::Solver::new(), &problem)
-            .unwrap()
-            .0;
+        let result =
+            ddd::solvers::maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem)
+                .unwrap()
+                .0;
         let score = problem.verify_solution(&result);
         assert!(score.is_some());
     }
@@ -259,15 +190,17 @@ mod tests {
     pub fn samescore_trivial() {
         let problem = crate::problem::problem1_with_stations();
 
-        let result = crate::solver::solve(satcoder::solvers::minisat::Solver::new(), &problem)
-            .unwrap()
-            .0;
+        let result =
+            ddd::solvers::maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem)
+                .unwrap()
+                .0;
         let first_score = problem.verify_solution(&result);
 
         for _ in 0..100 {
-            let result = crate::solver::solve(satcoder::solvers::minisat::Solver::new(), &problem)
-                .unwrap()
-                .0;
+            let result =
+                ddd::solvers::maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem)
+                    .unwrap()
+                    .0;
             let score = problem.verify_solution(&result);
             assert!(score == first_score);
         }
@@ -284,23 +217,27 @@ mod tests {
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
             ] {
                 println!("{}", instance_number);
-                let (problem, _train_names, _res_names) = crate::parser::read_file(
+                let NamedProblem { problem, .. } = crate::parser::read_xml_file(
                     &format!("instances/Instance{}.xml", instance_number,),
                     delaytype,
                 );
 
-                let result =
-                    crate::solver::solve(satcoder::solvers::minisat::Solver::new(), &problem)
-                        .unwrap()
-                        .0;
+                let result = ddd::solvers::maxsatddd::solve(
+                    satcoder::solvers::minisat::Solver::new(),
+                    &problem,
+                )
+                .unwrap()
+                .0;
                 let first_score = problem.verify_solution(&result);
 
                 for iteration in 0..100 {
                     println!("iteration {} {}", instance_number, iteration);
-                    let result =
-                        crate::solver::solve(satcoder::solvers::minisat::Solver::new(), &problem)
-                            .unwrap()
-                            .0;
+                    let result = ddd::solvers::maxsatddd::solve(
+                        satcoder::solvers::minisat::Solver::new(),
+                        &problem,
+                    )
+                    .unwrap()
+                    .0;
                     let score = problem.verify_solution(&result);
                     assert!(score == first_score);
                 }

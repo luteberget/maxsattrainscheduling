@@ -15,9 +15,9 @@ impl TimingVariable {
         }
     }
 
-    pub fn get_interval(&mut self, model: &mut grb::Model, t1: i32, t2: i32) -> grb::Var {
+    // pub fn get_interval(&mut self, model: &mut grb::Model, t1: i32, t2: i32) -> grb::Var {
         
-    }
+    // }
 
     fn get_time_var(&mut self, model: &mut grb::Model, time: i32) -> grb::Var {
         match self.intervals.binary_search_by_key(&time, |(t, _)| *t) {
@@ -100,8 +100,8 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, SolverError> {
             let ok = t1out <= t2in || t2out <= t1in;
             if !ok {
                 // Delay T1
-                let new_t1v1_time = t_vars[t1][v1].get_time(&mut model, t2out);
-                let new_t2v2_time = t_vars[t2][v2].get_time(&mut model, t1out);
+                let new_t1v1_time = t_vars[t1][v1].get_time_var(&mut model, t2out);
+                let new_t2v2_time = t_vars[t2][v2].get_time_var(&mut model, t1out);
             }
         }
     }

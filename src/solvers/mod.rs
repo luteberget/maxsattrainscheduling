@@ -1,6 +1,8 @@
 pub mod maxsatddd;
 pub mod bigm;
-mod ddd;
+pub mod mipddd;
+pub mod greedy;
+pub mod idl;
 
 
 #[derive(Debug)]

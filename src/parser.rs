@@ -1,4 +1,4 @@
-use crate::problem::{DelayMeasurementType, Problem, Visit};
+use crate::problem::{DelayMeasurementType, Problem, Visit, NamedProblem};
 use chrono::{Duration, NaiveDateTime};
 use log::debug;
 use std::{collections::HashMap, mem::take};
@@ -9,10 +9,10 @@ enum Pos<'a> {
     NotStarted(i32),
 }
 
-pub fn read_file(
+pub fn read_xml_file(
     instance_fn: &str,
     measurement: DelayMeasurementType,
-) -> (Problem, Vec<String>, Vec<String>) {
+) -> NamedProblem {
     let date_format = "%Y-%m-%dT%H:%M:%S";
     let parse_date = |d| chrono::NaiveDateTime::parse_from_str(d, date_format).unwrap();
     let instance_xml = std::fs::read_to_string(instance_fn).unwrap();
@@ -281,7 +281,7 @@ pub fn read_file(
         train_names.push(name.to_string());
     }
 
-    (problem, train_names, resource_names)
+    NamedProblem { problem, train_names, resource_names }
 }
 
 #[allow(unused)]

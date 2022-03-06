@@ -7,6 +7,13 @@ pub enum DelayMeasurementType {
 }
 
 #[derive(Debug)]
+pub struct NamedProblem {
+    pub problem: Problem,
+    pub train_names: Vec<String>,
+    pub resource_names: Vec<String>,
+}
+
+#[derive(Debug)]
 pub struct Problem {
     pub trains: Vec<Train>,
     pub conflicts: Vec<(usize, usize)>,
@@ -29,13 +36,7 @@ impl Problem {
     pub fn train_cost(&self, solution: &[Vec<i32>], train_idx: usize) -> i32 {
         let mut sum_cost = 0;
         let train = &self.trains[train_idx];
-        for (
-            visit_idx,
-            Visit {
-                ..
-            },
-        ) in train.visits.iter().enumerate()
-        {
+        for (visit_idx, Visit { .. }) in train.visits.iter().enumerate() {
             let t1_in = solution[train_idx][visit_idx];
 
             let cost = train.visit_delay_cost(visit_idx, t1_in) as i32;
@@ -121,7 +122,14 @@ impl Problem {
                             if !ok {
                                 println!(
                                     "Resource conflict in t{} v{} {}-{} t{} v{} {}-{}",
-                                    train_idx1, visit_idx1, t1_in, t1_out, train_idx2, visit_idx2, t2_in, t2_out
+                                    train_idx1,
+                                    visit_idx1,
+                                    t1_in,
+                                    t1_out,
+                                    train_idx2,
+                                    visit_idx2,
+                                    t2_in,
+                                    t2_out
                                 );
                                 return None;
                             }
@@ -147,26 +155,29 @@ impl Train {
 }
 
 pub struct DelayCostThresholds {
-    pub thresholds :Vec<(i32,usize)>,
+    pub thresholds: Vec<(i32, usize)>,
 }
 
-impl DelayCostThresholds{
+impl DelayCostThresholds {
     pub fn f123() -> DelayCostThresholds {
-        DelayCostThresholds { thresholds:  vec![(360,3),(180,2),(0,1)] }
+        DelayCostThresholds {
+            thresholds: vec![(360, 3), (180, 2), (0, 1)],
+        }
     }
     pub fn f139() -> DelayCostThresholds {
-        DelayCostThresholds { thresholds:  vec![(360,9),(180,3),(0,1)] }
+        DelayCostThresholds {
+            thresholds: vec![(360, 9), (180, 3), (0, 1)],
+        }
     }
 
-    pub fn eval(&self, delay :i32) -> usize {
-        for (threshold,cost) in &self.thresholds {
+    pub fn eval(&self, delay: i32) -> usize {
+        for (threshold, cost) in &self.thresholds {
             if delay > *threshold {
                 return *cost;
             }
         }
         0
     }
-
 }
 
 fn visit(resource_id: usize, earliest: i32, travel_time: i32) -> Visit {
