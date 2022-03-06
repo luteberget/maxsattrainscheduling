@@ -70,7 +70,7 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
         #[allow(unused)]
         let problem = parser::read_txt_file(
             &filename,
-            problem::DelayMeasurementType::AllStationDepartures,
+            problem::DelayMeasurementType::FinalStationArrival,
         );
         x(format!("txt {}", instance_id), problem);
     }

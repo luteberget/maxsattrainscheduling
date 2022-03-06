@@ -87,7 +87,8 @@ pub fn read_txt_file(instance_fn: &str, measurement: DelayMeasurementType) -> Na
                     DelayMeasurementType::AllStationArrivals => (None, Some(aimeddep + run_time)),
                     DelayMeasurementType::AllStationDepartures => (Some(aimeddep), None),
                     DelayMeasurementType::FinalStationArrival => {
-                        (None, is_last_track.then(|| aimeddep + run_time))
+                        // (None, is_last_track.then(|| aimeddep + run_time))
+                        (is_last_track.then(|| aimeddep), None)
                     }
                     DelayMeasurementType::EverywhereEarliest => todo!(),
                 };

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use super::SolverError;
 use crate::problem::{DelayCostThresholds, Problem, DEFAULT_COST_THRESHOLDS};
-const M: f64 = 1_000_000.0;
+const M: f64 = 100_000.0;
 
 pub fn solve(problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
@@ -10,7 +10,7 @@ pub fn solve(problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError
     let mut model = Model::new("model1").map_err(SolverError::GurobiError)?;
 
     model
-        .set_param(param::IntFeasTol, 1e-9)
+        .set_param(param::IntFeasTol, 1e-8)
         .map_err(SolverError::GurobiError)?;
 
     // timing variables
