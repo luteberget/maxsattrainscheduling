@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use satcoder::constraints::Totalizer;
 
-use crate::problem::{DelayCostThresholds, Problem};
+use crate::problem::{DelayCostThresholds, Problem, DEFAULT_COST_THRESHOLDS};
 
 use super::SolverError;
 
@@ -54,7 +54,7 @@ pub fn solve(problem: &Problem) -> Result<Vec<Vec<i32>>, SolverError> {
     let mut soft_constraints: HashMap<idl::Lit, SoftConstraint<idl::Lit>> = HashMap::new();
 
     // Objective
-    let delay_cost = DelayCostThresholds::f139();
+    let delay_cost = &DEFAULT_COST_THRESHOLDS;
     for (train_idx, train) in problem.trains.iter().enumerate() {
         for visit_idx in 0..train.visits.len() {
             if let Some(aimed) = train.visits[visit_idx].aimed {

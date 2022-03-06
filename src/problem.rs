@@ -147,7 +147,7 @@ impl Problem {
 impl Train {
     pub fn visit_delay_cost(&self, path_idx: usize, t: i32) -> usize {
         if let Some(aimed) = self.visits[path_idx].aimed {
-            DelayCostThresholds::f139().eval(t - aimed)
+            DEFAULT_COST_THRESHOLDS.eval(t - aimed)
         } else {
             0
         }
@@ -158,13 +158,20 @@ pub struct DelayCostThresholds {
     pub thresholds: Vec<(i32, usize)>,
 }
 
+
+use lazy_static::lazy_static;
+lazy_static! {
+    pub static ref DEFAULT_COST_THRESHOLDS : DelayCostThresholds = DelayCostThresholds::f123();
+}
+
+
 impl DelayCostThresholds {
-    pub fn f123() -> DelayCostThresholds {
+    fn f123() -> DelayCostThresholds {
         DelayCostThresholds {
             thresholds: vec![(360, 3), (180, 2), (0, 1)],
         }
     }
-    pub fn f139() -> DelayCostThresholds {
+    fn f139() -> DelayCostThresholds {
         DelayCostThresholds {
             thresholds: vec![(360, 9), (180, 3), (0, 1)],
         }

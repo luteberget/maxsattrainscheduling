@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use super::SolverError;
-use crate::problem::{DelayCostThresholds, Problem};
+use crate::problem::{DelayCostThresholds, Problem, DEFAULT_COST_THRESHOLDS};
 const M: f64 = 1_000_000.0;
 
 pub fn solve(problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError> {
@@ -52,7 +52,7 @@ pub fn solve(problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError
     }
 
     // Objective
-    let delay_cost = DelayCostThresholds::f139();
+    let delay_cost = &DEFAULT_COST_THRESHOLDS;
     for (train_idx, train) in problem.trains.iter().enumerate() {
         for visit_idx in 0..train.visits.len() {
             if let Some(aimed) = train.visits[visit_idx].aimed {
