@@ -33,17 +33,16 @@ struct Opt {
 }
 
 pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
-    let a_instances = [1];
+    let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     // let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     #[allow(unused)]
     let c_instances = [21, 22, 23, 24];
 
-    for instance_id in a_instances
-        .into_iter()
-        // .chain(b_instances)
-        // .chain(c_instances)
+    for instance_id in a_instances.into_iter()
+    // .chain(b_instances)
+    // .chain(c_instances)
     {
         let filename = format!("instances/Instance{}.xml", instance_id);
         println!("Reading {}", filename);
@@ -88,6 +87,11 @@ enum SolverType {
 }
 
 fn main() {
+    pretty_env_logger::env_logger::Builder::from_env(
+        pretty_env_logger::env_logger::Env::default().default_filter_or("trace"),
+    )
+    .init();
+
     let opt = Opt::from_args();
     println!("{:?}", opt);
     println!("Using solvers {:?}", opt.solvers);
@@ -110,6 +114,9 @@ fn main() {
 
     let mut perf_out = String::new();
 
+    let mut env = grb::Env::new("").unwrap();
+    env.set(grb::param::OutputFlag, 0).unwrap();
+
     let mut solve_it = |name: String, p: NamedProblem| {
         let problemstats = print_problem_stats(&p.problem);
 
@@ -117,15 +124,15 @@ fn main() {
             hprof::start_frame();
             println!("Starting solver {:?}", solver);
             let solution = match solver {
-                SolverType::BigMEager => bigm::solve(&p.problem, false).unwrap(),
-                SolverType::BigMLazy => bigm::solve(&p.problem, true).unwrap(),
+                SolverType::BigMEager => bigm::solve(&env, &p.problem, false).unwrap(),
+                SolverType::BigMLazy => bigm::solve(&env, &p.problem, true).unwrap(),
                 SolverType::MaxSatDdd => {
                     maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &p.problem)
                         .unwrap()
                         .0
                 }
                 SolverType::MaxSatIdl => ddd::solvers::idl::solve(&p.problem).unwrap(),
-                SolverType::MipDdd => ddd::solvers::mipdddpack::solve(&p.problem).unwrap(),
+                SolverType::MipDdd => ddd::solvers::mipdddpack::solve(&env, &p.problem).unwrap(),
             };
             hprof::end_frame();
 
@@ -212,12 +219,23 @@ mod tests {
     use ddd::problem::NamedProblem;
 
     #[test]
-    pub fn testproblem() {
+    pub fn testproblem_maxsatddd() {
         let problem = crate::problem::problem1_with_stations();
         let result =
             ddd::solvers::maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem)
                 .unwrap()
                 .0;
+        let score = problem.verify_solution(&result);
+        assert!(score.is_some());
+    }
+
+    #[test]
+    pub fn testproblem_mipdddpack() {
+        let mut env = grb::Env::new("").unwrap();
+        env.set(grb::param::OutputFlag, 0).unwrap();
+
+        let problem = crate::problem::problem1_with_stations();
+        let result = ddd::solvers::mipdddpack::solve(&env, &problem).unwrap();
         let score = problem.verify_solution(&result);
         assert!(score.is_some());
     }

@@ -4,10 +4,11 @@ use super::SolverError;
 use crate::problem::{DelayCostThresholds, Problem, DEFAULT_COST_THRESHOLDS};
 const M: f64 = 100_000.0;
 
-pub fn solve(problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError> {
+pub fn solve(env: &grb::Env, problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
-    let mut model = Model::new("model1").map_err(SolverError::GurobiError)?;
+
+    let mut model = Model::with_env("model1", env).map_err(SolverError::GurobiError)?;
 
     model
         .set_param(param::IntFeasTol, 1e-8)
@@ -194,8 +195,8 @@ pub fn visit_conflicts(problem: &Problem) -> Vec<((usize, usize), (usize, usize)
     let resource_conflicts = problem.conflicts.iter().copied().collect::<HashSet<_>>();
     for train_idx1 in 0..problem.trains.len() {
         for train_idx2 in (train_idx1 + 1)..problem.trains.len() {
-            for visit_idx1 in 0..problem.trains[train_idx1].visits.len() - 1 {
-                for visit_idx2 in 0..problem.trains[train_idx2].visits.len() - 1 {
+            for visit_idx1 in 0..problem.trains[train_idx1].visits.len() {
+                for visit_idx2 in 0..problem.trains[train_idx2].visits.len() {
                     let resource1 = problem.trains[train_idx1].visits[visit_idx1].resource_id;
                     let resource2 = problem.trains[train_idx2].visits[visit_idx2].resource_id;
 
