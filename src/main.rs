@@ -61,19 +61,21 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
     #[allow(unused)]
     let c_instances = [21, 22, 23, 24];
 
-    for instance_id in a_instances
-        .into_iter()
-        .chain(b_instances)
-        .chain(c_instances)
-    {
-        let filename = format!("txtinstances/Instance{}.txt", instance_id);
-        println!("Reading {}", filename);
-        #[allow(unused)]
-        let problem = parser::read_txt_file(
-            &filename,
-            problem::DelayMeasurementType::FinalStationArrival,
-        );
-        x(format!("txt {}", instance_id), problem);
+    for (dir, shortname) in [("txtinstances", "txt1"), ("txtinstances2", "txt2")] {
+        for instance_id in a_instances
+            .into_iter()
+            .chain(b_instances)
+            .chain(c_instances)
+        {
+            let filename = format!("{}/Instance{}.txt", dir, instance_id);
+            println!("Reading {}", filename);
+            #[allow(unused)]
+            let problem = parser::read_txt_file(
+                &filename,
+                problem::DelayMeasurementType::FinalStationArrival,
+            );
+            x(format!("{} {}", shortname, instance_id), problem);
+        }
     }
 }
 

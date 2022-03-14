@@ -161,7 +161,7 @@ pub struct DelayCostThresholds {
 
 use lazy_static::lazy_static;
 lazy_static! {
-    pub static ref DEFAULT_COST_THRESHOLDS : DelayCostThresholds = DelayCostThresholds::f123();
+    pub static ref DEFAULT_COST_THRESHOLDS : DelayCostThresholds = DelayCostThresholds::f12345();
 }
 
 
@@ -169,6 +169,11 @@ impl DelayCostThresholds {
     fn f123() -> DelayCostThresholds {
         DelayCostThresholds {
             thresholds: vec![(360, 3), (180, 2), (0, 1)],
+        }
+    }
+    fn f12345() -> DelayCostThresholds {
+        DelayCostThresholds {
+            thresholds: vec![(3*360, 5), (2*360, 4), (360, 3), (180, 2), (0, 1)],
         }
     }
     fn f139() -> DelayCostThresholds {

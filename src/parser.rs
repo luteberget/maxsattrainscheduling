@@ -103,7 +103,7 @@ pub fn read_txt_file(instance_fn: &str, measurement: DelayMeasurementType) -> Na
                 train.push(Visit {
                     aimed: aimed_out,
                     earliest: (base_time + run_time) as i32,
-                    travel_time: 0,
+                    travel_time: wait_time,
                     resource_id: any_station_resource,
                 });
             }
