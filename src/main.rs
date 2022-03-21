@@ -1,4 +1,4 @@
-use std::{collections::HashSet, fmt::Write};
+use std::{cell::RefCell, collections::HashSet, fmt::Write};
 
 use ddd::{
     parser,
@@ -30,6 +30,9 @@ struct Opt {
 
     #[structopt(long)]
     instance_name_filter: Option<String>,
+
+    #[structopt(long)]
+    verify_instances: bool,
 }
 
 pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
@@ -70,11 +73,54 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
             let filename = format!("{}/Instance{}.txt", dir, instance_id);
             println!("Reading {}", filename);
             #[allow(unused)]
-            let problem = parser::read_txt_file(
+            let (problem, _) = parser::read_txt_file(
                 &filename,
                 problem::DelayMeasurementType::FinalStationArrival,
+                false,
+                None,
+                |_| {},
             );
             x(format!("{} {}", shortname, instance_id), problem);
+        }
+    }
+}
+
+pub fn verify_instances(mut x: impl FnMut(String, NamedProblem, Vec<Vec<i32>>) -> Vec<Vec<i32>>) {
+    let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+    #[allow(unused)]
+    let c_instances = [21, 22, 23, 24];
+    let instances = [20];
+
+    for solvertype in ["BigMComplete",  "BigMLazyCon" ] {
+        for instance_id in a_instances.iter().chain(b_instances.iter()).chain(c_instances.iter()) {
+            let filename = format!("InstanceResults/{}Sol{}.txt", solvertype, instance_id);
+            println!("Reading {}", filename);
+            #[allow(unused)]
+            let (problem, solution) = parser::read_txt_file(
+                &filename,
+                problem::DelayMeasurementType::FinalStationArrival,
+                true,
+                None,
+                |_| {},
+            );
+            let new_solution = x(
+                format!("{} {}", solvertype, instance_id),
+                problem,
+                solution.unwrap(),
+            );
+
+            // let mut f = std::fs::File::create(&format!("{}.bl.txt", filename)).unwrap();
+            // use std::io::Write;
+            // parser::read_txt_file(
+            //     &filename,
+            //     problem::DelayMeasurementType::FinalStationArrival,
+            //     true,
+            //     Some(new_solution),
+            //     |l| {
+            //         writeln!(f, "{}", l).unwrap();
+            //     },
+            // );
         }
     }
 }
@@ -110,24 +156,28 @@ fn main() {
         })
         .collect::<Vec<_>>();
 
-    if solvers.is_empty() {
-        panic!("no solver specified");
-    }
-
-    let mut perf_out = String::new();
+    let perf_out = RefCell::new(String::new());
 
     let mut env = grb::Env::new("").unwrap();
     env.set(grb::param::OutputFlag, 0).unwrap();
 
-    let mut solve_it = |name: String, p: NamedProblem| {
+    let solve_it = |name: String, p: NamedProblem| -> Vec<Vec<i32>> {
+        if solvers.is_empty() {
+            panic!("no solver specified");
+        }
         let problemstats = print_problem_stats(&p.problem);
 
+        let mut solution = Vec::new();
         for solver in solvers.iter() {
             hprof::start_frame();
             println!("Starting solver {:?}", solver);
-            let solution = match solver {
-                SolverType::BigMEager => bigm::solve(&env, &p.problem, false).unwrap(),
-                SolverType::BigMLazy => bigm::solve(&env, &p.problem, true).unwrap(),
+            solution = match solver {
+                SolverType::BigMEager => {
+                    bigm::solve(&env, &p.problem, false, &p.train_names, &p.resource_names).unwrap()
+                }
+                SolverType::BigMLazy => {
+                    bigm::solve(&env, &p.problem, true, &p.train_names, &p.resource_names).unwrap()
+                }
                 SolverType::MaxSatDdd => {
                     maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &p.problem)
                         .unwrap()
@@ -144,21 +194,36 @@ fn main() {
             let sol_time = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
             let solver_name = format!("{:?}", solver);
             writeln!(
-                perf_out,
+                perf_out.borrow_mut(),
                 "{:>10} {:<12} {:>5} {:>10.0}",
-                name, solver_name, cost, sol_time,
+                name,
+                solver_name,
+                cost,
+                sol_time,
             )
             .unwrap();
         }
+        solution
     };
 
     if opt.xml_instances {
-        xml_instances(|name, p| solve_it(name, p));
+        xml_instances(|name, p| {
+            solve_it(name, p);
+        });
     }
     if opt.txt_instances {
-        txt_instances(|name, p| solve_it(name, p));
+        txt_instances(|name, p| {
+            solve_it(name, p);
+        });
     }
-    println!("{}", perf_out);
+    if opt.verify_instances {
+        verify_instances(|name, p, solution| {
+            let cost = p.problem.verify_solution(&solution).unwrap();
+            writeln!(perf_out.borrow_mut(), "{:>10} {:>5}", name, cost,).unwrap();
+            solve_it(name, p)
+        })
+    }
+    println!("{}", perf_out.into_inner());
 }
 
 struct ProblemStats {

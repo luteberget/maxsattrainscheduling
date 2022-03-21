@@ -1,0 +1,72 @@
+BigMComplete 1    37
+BigMComplete 1 BigMLazy        37       1470
+BigMComplete 1 MaxSatDdd       37        122
+BigMComplete 2    40
+BigMComplete 2 BigMLazy        40        632
+BigMComplete 2 MaxSatDdd       40         69
+BigMComplete 3    19
+BigMComplete 3 BigMLazy        19         84
+BigMComplete 3 MaxSatDdd       19         29
+BigMComplete 4    17
+BigMComplete 4 BigMLazy        17        121
+BigMComplete 4 MaxSatDdd       17         14
+BigMComplete 5    16
+BigMComplete 5 BigMLazy        16         44
+BigMComplete 5 MaxSatDdd       16          9
+BigMComplete 6    10
+BigMComplete 6 BigMLazy        10         11
+BigMComplete 6 MaxSatDdd       10          3
+BigMComplete 7    12
+BigMComplete 7 BigMLazy        12         10
+BigMComplete 7 MaxSatDdd       12          5
+BigMComplete 8    43
+BigMComplete 8 BigMLazy        43       7188
+BigMComplete 8 MaxSatDdd       43        203
+BigMComplete 9    27
+BigMComplete 9 BigMLazy        27        237
+BigMComplete 9 MaxSatDdd       27         25
+BigMComplete 10    21
+BigMComplete 10 BigMLazy        21         60
+BigMComplete 10 MaxSatDdd       21         17
+BigMComplete 11    19
+BigMComplete 11 BigMLazy        19        191
+BigMComplete 11 MaxSatDdd       19         13
+BigMComplete 12     7
+BigMComplete 12 BigMLazy         7         14
+BigMComplete 12 MaxSatDdd        7          1
+BigMComplete 13     5
+BigMComplete 13 BigMLazy         5         12
+BigMComplete 13 MaxSatDdd        5          3
+BigMComplete 14    31
+BigMComplete 14 BigMLazy        31        122
+BigMComplete 14 MaxSatDdd       31         21
+BigMComplete 15     6
+BigMComplete 15 BigMLazy         6         28
+BigMComplete 15 MaxSatDdd        6          3
+BigMComplete 16     5
+BigMComplete 16 BigMLazy         5         17
+BigMComplete 16 MaxSatDdd        5          1
+BigMComplete 17    41
+BigMComplete 17 BigMLazy        40        286
+BigMComplete 17 MaxSatDdd       40         25
+BigMComplete 18    10
+BigMComplete 18 BigMLazy        10         12
+BigMComplete 18 MaxSatDdd       10          2
+BigMComplete 19    11
+BigMComplete 19 BigMLazy        11         25
+BigMComplete 19 MaxSatDdd       11          3
+BigMComplete 20    11
+BigMComplete 20 BigMLazy        11         10
+BigMComplete 20 MaxSatDdd       11          1
+BigMComplete 21    41
+BigMComplete 21 BigMLazy        41       1705
+BigMComplete 21 MaxSatDdd       41        215
+BigMComplete 22    44
+BigMComplete 22 BigMLazy        44       4326
+BigMComplete 22 MaxSatDdd       44        375
+BigMComplete 23    44
+BigMComplete 23 BigMLazy        44        258
+BigMComplete 23 MaxSatDdd       44         26
+BigMComplete 24    19
+BigMComplete 24 BigMLazy        19         80
+BigMComplete 24 MaxSatDdd       19         14

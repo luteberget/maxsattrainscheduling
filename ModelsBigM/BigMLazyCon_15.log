@@ -1,0 +1,39 @@
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+Lazy constraint(s) or lazy constraint callback is present.
+    Disabling dual reductions (CPX_PARAM_REDUCE) in presolve.
+    Disabling non-linear reductions (CPX_PARAM_PRELINEAR) in presolve.
+         Disabling repeat represolve because of lazy constraint/incumbent callback.
+Tried aggregator 1 time.
+MIP Presolve eliminated 214 rows and 1 columns.
+Reduced MIP has 122 rows, 239 columns, and 268 nonzeros.
+Reduced MIP has 150 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (0.22 ticks)
+Probing time = 0.00 sec. (0.14 ticks)
+Clique table members: 74.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: traditional branch-and-cut.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.00 sec. (0.14 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap         Variable B NodeID Parent  Depth
+
+      0     0        1.0000    12                      1.0000       12         
+      0     0        5.0006     1                    Cuts: 74      113         
+*     0     0      integral     0        6.0000       Cuts: 5      119    0.00%
+      0     0        cutoff              6.0000        6.0000      119    0.00%                        0             0
+Elapsed time = 0.02 sec. (2.59 ticks, tree = 0.01 MB, solutions = 1)
+
+Clique cuts applied:  35
+Cover cuts applied:  1
+Implied bound cuts applied:  1
+Mixed integer rounding cuts applied:  5
+Gomory fractional cuts applied:  1
+User cuts applied:  4
+
+Root node processing (before b&c):
+  Real time             =    0.02 sec. (2.61 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    0.02 sec. (2.61 ticks)

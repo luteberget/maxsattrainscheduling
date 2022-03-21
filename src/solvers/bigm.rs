@@ -4,7 +4,13 @@ use super::SolverError;
 use crate::problem::{DelayCostThresholds, Problem, DEFAULT_COST_THRESHOLDS};
 const M: f64 = 100_000.0;
 
-pub fn solve(env: &grb::Env, problem: &Problem, lazy: bool) -> Result<Vec<Vec<i32>>, SolverError> {
+pub fn solve(
+    env: &grb::Env,
+    problem: &Problem,
+    lazy: bool,
+    train_names: &Vec<String>,
+    resource_names: &Vec<String>,
+) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
 
@@ -26,7 +32,7 @@ pub fn solve(env: &grb::Env, problem: &Problem, lazy: bool) -> Result<Vec<Vec<i3
                 .enumerate()
                 .map(|(visit_idx, visit)| {
                     add_ctsvar!(model,
-                name : &format!("t{}_v{}", train_idx, visit_idx), 
+                name : &format!("tn{}_v{}_tk{}", train_names[train_idx], visit_idx, resource_names[visit.resource_id]), 
                 bounds: visit.earliest..)
                     .map_err(SolverError::GurobiError)
                 })
@@ -37,7 +43,14 @@ pub fn solve(env: &grb::Env, problem: &Problem, lazy: bool) -> Result<Vec<Vec<i3
     // Travel time constraints
     for train_idx in 0..problem.trains.len() {
         for visit_idx in 0..problem.trains[train_idx].visits.len() - 1 {
-            add_travel_constraint(problem, (train_idx, visit_idx), &mut model, &t_vars)?;
+            add_travel_constraint(
+                problem,
+                (train_idx, visit_idx),
+                &mut model,
+                &t_vars,
+                train_names,
+                resource_names,
+            )?;
         }
     }
 
@@ -47,7 +60,7 @@ pub fn solve(env: &grb::Env, problem: &Problem, lazy: bool) -> Result<Vec<Vec<i3
 
     if !lazy {
         for visit_pair in visit_conflicts.iter().copied() {
-            add_conflict_constraint(visit_pair, &mut model, &t_vars)?;
+            add_conflict_constraint(visit_pair, &mut model, &t_vars, train_names, resource_names)?;
             assert!(added_conflicts.insert(visit_pair));
         }
     }
@@ -65,12 +78,18 @@ pub fn solve(env: &grb::Env, problem: &Problem, lazy: bool) -> Result<Vec<Vec<i3
                     let (_prev_threshold, prev_cost) =
                         thresholds.get(threshold_idx + 1).unwrap_or(&(0, 0));
                     let (threshold, cost) = thresholds[threshold_idx];
+                    let threshold = threshold;
 
                     let cost_diff = cost - prev_cost;
                     assert!(cost_diff > 0);
 
-                    let threshold_var_name =
-                        format!("t{}_v{}_delay{}", train_idx, visit_idx, threshold);
+                    let threshold_var_name = format!(
+                        "tn{}_v{}_tk{}_dly{}",
+                        train_names[train_idx],
+                        visit_idx,
+                        resource_names[train.visits[visit_idx].resource_id],
+                        threshold
+                    );
 
                     // Add threshold_var to the objective with cost `diff_cost`.
                     #[allow(clippy::unnecessary_cast)]
@@ -92,6 +111,7 @@ pub fn solve(env: &grb::Env, problem: &Problem, lazy: bool) -> Result<Vec<Vec<i3
         }
     }
 
+    let mut refinement_iterations = 0;
     loop {
         {
             let _p = hprof::enter("optimize");
@@ -134,17 +154,28 @@ pub fn solve(env: &grb::Env, problem: &Problem, lazy: bool) -> Result<Vec<Vec<i3
         };
 
         if !violated_conflicts.is_empty() {
+            refinement_iterations += 1;
             for visit_pair in violated_conflicts {
-                add_conflict_constraint(visit_pair, &mut model, &t_vars)?;
+                add_conflict_constraint(
+                    visit_pair,
+                    &mut model,
+                    &t_vars,
+                    train_names,
+                    resource_names,
+                )?;
                 assert!(added_conflicts.insert(visit_pair));
             }
         } else {
             // success
             println!(
-                "Solved with cost {} and {} conflict constraints",
+                "Solved with cost {} and {} conflict constraints after {} refinements",
                 cost,
-                added_conflicts.len()
+                added_conflicts.len(),
+                refinement_iterations
             );
+
+            model.write("model.lp").unwrap();
+            model.write("model.sol").unwrap();
 
             let mut solution = Vec::new();
             for (train_idx, train_ts) in t_vars.iter().enumerate() {
@@ -173,6 +204,8 @@ fn add_travel_constraint(
     (train_idx, visit_idx): (usize, usize),
     model: &mut grb::Model,
     t_vars: &[Vec<grb::Var>],
+    train_names: &Vec<String>,
+    resource_names: &Vec<String>,
 ) -> Result<(), SolverError> {
     use grb::prelude::*;
 
@@ -180,7 +213,12 @@ fn add_travel_constraint(
     #[allow(clippy::useless_conversion)]
     model
         .add_constr(
-            &format!("t{}_v{}_travel", train_idx, visit_idx),
+            &format!(
+                "tn{}_v{}_tk{}_travel",
+                train_names[train_idx],
+                visit_idx,
+                resource_names[problem.trains[train_idx].visits[visit_idx].resource_id]
+            ),
             c!(
                 (t_vars[train_idx][visit_idx + 1]) - (t_vars[train_idx][visit_idx])
                     >= visits[visit_idx].travel_time
@@ -256,12 +294,17 @@ fn add_conflict_constraint(
     ((t1, v1), (t2, v2)): ((usize, usize), (usize, usize)),
     model: &mut grb::Model,
     t_vars: &[Vec<grb::Var>],
+    train_names: &Vec<String>,
+    resource_names: &Vec<String>,
 ) -> Result<(), SolverError> {
     use grb::prelude::*;
 
     // println!("adding conflict {:?}", ((t1, v1), (t2, v2)));
 
-    let choice_var_name = format!("confl_t{}_v{}_t{}_v{}", t1, v1, t2, v2);
+    let choice_var_name = format!(
+        "confl_tn{}_v{}_tn{}_v{}",
+        train_names[t1], v1, train_names[t2], v2
+    );
 
     #[allow(clippy::unnecessary_cast)]
     let choice_var = add_intvar!(model, name: &choice_var_name, bounds: 0..1)

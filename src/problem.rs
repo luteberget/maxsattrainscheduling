@@ -75,11 +75,15 @@ impl Problem {
 
                 if t1_in < *earliest {
                     println!("Earliest entry conflict t{} v{}", train_idx, visit_idx);
+                    println!("train {}: {:?}", train_idx, train);
+                    println!("  train solution: {:?}", solution[train_idx]);
                     return None;
                 }
 
                 if t1_in + travel_time > t1_out {
                     println!("Travel time conflict t{} v{}", train_idx, visit_idx);
+                    println!("train {}: {:?}", train_idx, train);
+                    println!("  train solution: {:?}", solution[train_idx]);
                     return None;
                 }
 
@@ -118,7 +122,7 @@ impl Problem {
                             let t2_in = solution[train_idx2][visit_idx2];
                             let t2_out = solution[train_idx2][visit_idx2 + 1];
 
-                            let ok = t1_in >= t2_out || t2_in >= t1_out;
+                            let ok = t1_in >= t2_out  -1|| t2_in >= t1_out -1;
                             if !ok {
                                 println!(
                                     "Resource conflict in t{} v{} {}-{} t{} v{} {}-{}",
@@ -131,6 +135,10 @@ impl Problem {
                                     t2_in,
                                     t2_out
                                 );
+                                println!("train1 {}: {:?}", train_idx1, train1);
+                                println!("  train1 solution: {:?}", solution[train_idx1]);
+                                println!("train2 {}: {:?}", train_idx2, train2);
+                                println!("  train2 solution: {:?}", solution[train_idx2]);
                                 return None;
                             }
                         }
@@ -161,7 +169,7 @@ pub struct DelayCostThresholds {
 
 use lazy_static::lazy_static;
 lazy_static! {
-    pub static ref DEFAULT_COST_THRESHOLDS : DelayCostThresholds = DelayCostThresholds::f12345();
+    pub static ref DEFAULT_COST_THRESHOLDS : DelayCostThresholds = DelayCostThresholds::f123();
 }
 
 

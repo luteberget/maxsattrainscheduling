@@ -1,0 +1,349 @@
+
+
+TrainId=67 Delay=0 FreeRun=7386 	Final Delay=1540
+T25 Train67 AimedDepartureTime=2626 WaitTime=60 BaseTime=2626 RunTime=212	OptSolTime=2626
+T24 Train67 AimedDepartureTime=2838 WaitTime=0 BaseTime=2838 RunTime=148	OptSolTime=2838
+T23 Train67 AimedDepartureTime=3016 WaitTime=30 BaseTime=3016 RunTime=150	OptSolTime=3016
+T22 Train67 AimedDepartureTime=3196 WaitTime=30 BaseTime=3196 RunTime=150	OptSolTime=3196
+T21 Train67 AimedDepartureTime=3376 WaitTime=30 BaseTime=3376 RunTime=149	OptSolTime=3376
+T20 Train67 AimedDepartureTime=3525 WaitTime=0 BaseTime=3525 RunTime=45	OptSolTime=3586
+T19 Train67 AimedDepartureTime=3570 WaitTime=0 BaseTime=3570 RunTime=196	OptSolTime=3631
+T18 Train67 AimedDepartureTime=3826 WaitTime=60 BaseTime=3826 RunTime=300	OptSolTime=3887
+T17 Train67 AimedDepartureTime=4156 WaitTime=30 BaseTime=4156 RunTime=210	OptSolTime=4217
+T16 Train67 AimedDepartureTime=4396 WaitTime=30 BaseTime=4396 RunTime=210	OptSolTime=4457
+T15 Train67 AimedDepartureTime=4636 WaitTime=30 BaseTime=4636 RunTime=150	OptSolTime=4697
+T14 Train67 AimedDepartureTime=4816 WaitTime=30 BaseTime=4816 RunTime=208	OptSolTime=4877
+T13 Train67 AimedDepartureTime=5024 WaitTime=0 BaseTime=5024 RunTime=80	OptSolTime=5085
+T12 Train67 AimedDepartureTime=5104 WaitTime=0 BaseTime=5104 RunTime=162	OptSolTime=5165
+T11 Train67 AimedDepartureTime=5306 WaitTime=40 BaseTime=5306 RunTime=700	OptSolTime=6846
+T10 Train67 AimedDepartureTime=6186 WaitTime=180 BaseTime=6186 RunTime=420	OptSolTime=7726
+T9 Train67 AimedDepartureTime=6606 WaitTime=0 BaseTime=6606 RunTime=240	OptSolTime=8146
+T8 Train67 AimedDepartureTime=6876 WaitTime=30 BaseTime=6876 RunTime=330	OptSolTime=8416
+T7 Train67 AimedDepartureTime=7206 WaitTime=0 BaseTime=7206 RunTime=180	OptSolTime=8746
+T6 Train67 AimedDepartureTime=7386 WaitTime=0 BaseTime=7386 RunTime=480	OptSolTime=8926
+
+TrainId=68 Delay=0 FreeRun=4116 	Final Delay=0
+T6 Train68 AimedDepartureTime=466 WaitTime=0 BaseTime=466 RunTime=300	OptSolTime=466
+T7 Train68 AimedDepartureTime=766 WaitTime=0 BaseTime=766 RunTime=180	OptSolTime=766
+T8 Train68 AimedDepartureTime=946 WaitTime=0 BaseTime=946 RunTime=270	OptSolTime=946
+T9 Train68 AimedDepartureTime=1246 WaitTime=30 BaseTime=1246 RunTime=240	OptSolTime=1246
+T10 Train68 AimedDepartureTime=1486 WaitTime=0 BaseTime=1486 RunTime=240	OptSolTime=1486
+T11 Train68 AimedDepartureTime=1726 WaitTime=0 BaseTime=1726 RunTime=320	OptSolTime=1726
+T12 Train68 AimedDepartureTime=2086 WaitTime=40 BaseTime=2086 RunTime=107	OptSolTime=2086
+T13 Train68 AimedDepartureTime=2193 WaitTime=0 BaseTime=2193 RunTime=72	OptSolTime=2193
+T14 Train68 AimedDepartureTime=2265 WaitTime=0 BaseTime=2265 RunTime=211	OptSolTime=2265
+T15 Train68 AimedDepartureTime=2506 WaitTime=30 BaseTime=2506 RunTime=150	OptSolTime=2506
+T16 Train68 AimedDepartureTime=2686 WaitTime=30 BaseTime=2686 RunTime=90	OptSolTime=2686
+T17 Train68 AimedDepartureTime=2806 WaitTime=30 BaseTime=2806 RunTime=150	OptSolTime=2806
+T18 Train68 AimedDepartureTime=2986 WaitTime=30 BaseTime=2986 RunTime=300	OptSolTime=2986
+T19 Train68 AimedDepartureTime=3466 WaitTime=180 BaseTime=3466 RunTime=90	OptSolTime=3466
+T20 Train68 AimedDepartureTime=3556 WaitTime=0 BaseTime=3556 RunTime=30	OptSolTime=3556
+T21 Train68 AimedDepartureTime=3586 WaitTime=0 BaseTime=3586 RunTime=150	OptSolTime=3586
+T22 Train68 AimedDepartureTime=3766 WaitTime=30 BaseTime=3766 RunTime=90	OptSolTime=3766
+T23 Train68 AimedDepartureTime=3886 WaitTime=30 BaseTime=3886 RunTime=90	OptSolTime=3886
+T24 Train68 AimedDepartureTime=4006 WaitTime=30 BaseTime=4006 RunTime=110	OptSolTime=4006
+T25 Train68 AimedDepartureTime=4116 WaitTime=0 BaseTime=4116 RunTime=250	OptSolTime=4116
+
+TrainId=69 Delay=0 FreeRun=7621 	Final Delay=0
+T1 Train69 AimedDepartureTime=3483 WaitTime=0 BaseTime=3483 RunTime=199	OptSolTime=3483
+T2 Train69 AimedDepartureTime=3682 WaitTime=0 BaseTime=3682 RunTime=159	OptSolTime=3682
+T3 Train69 AimedDepartureTime=3841 WaitTime=0 BaseTime=3841 RunTime=326	OptSolTime=3841
+T4 Train69 AimedDepartureTime=4167 WaitTime=0 BaseTime=4167 RunTime=208	OptSolTime=4167
+T5 Train69 AimedDepartureTime=4375 WaitTime=0 BaseTime=4375 RunTime=291	OptSolTime=4375
+T6 Train69 AimedDepartureTime=4726 WaitTime=60 BaseTime=4726 RunTime=356	OptSolTime=4726
+T7 Train69 AimedDepartureTime=5082 WaitTime=0 BaseTime=5082 RunTime=190	OptSolTime=5082
+T8 Train69 AimedDepartureTime=5272 WaitTime=0 BaseTime=5272 RunTime=354	OptSolTime=5272
+T9 Train69 AimedDepartureTime=5806 WaitTime=180 BaseTime=5806 RunTime=242	OptSolTime=5806
+T10 Train69 AimedDepartureTime=6048 WaitTime=0 BaseTime=6048 RunTime=212	OptSolTime=6048
+T11 Train69 AimedDepartureTime=6260 WaitTime=0 BaseTime=6260 RunTime=302	OptSolTime=6260
+T12 Train69 AimedDepartureTime=6562 WaitTime=0 BaseTime=6562 RunTime=97	OptSolTime=6562
+T13 Train69 AimedDepartureTime=6659 WaitTime=0 BaseTime=6659 RunTime=66	OptSolTime=6659
+T14 Train69 AimedDepartureTime=6725 WaitTime=0 BaseTime=6725 RunTime=164	OptSolTime=6725
+T15 Train69 AimedDepartureTime=6889 WaitTime=0 BaseTime=6889 RunTime=64	OptSolTime=6889
+T16 Train69 AimedDepartureTime=6953 WaitTime=0 BaseTime=6953 RunTime=83	OptSolTime=6953
+T17 Train69 AimedDepartureTime=7036 WaitTime=0 BaseTime=7036 RunTime=150	OptSolTime=7036
+T18 Train69 AimedDepartureTime=7366 WaitTime=180 BaseTime=7366 RunTime=255	OptSolTime=7366
+T19 Train69 AimedDepartureTime=7621 WaitTime=0 BaseTime=7621 RunTime=168	OptSolTime=7621
+
+TrainId=70 Delay=0 FreeRun=5551 	Final Delay=0
+T1 Train70 AimedDepartureTime=4471 WaitTime=0 BaseTime=4471 RunTime=234	OptSolTime=4471
+T2 Train70 AimedDepartureTime=4705 WaitTime=0 BaseTime=4705 RunTime=221	OptSolTime=4705
+T3 Train70 AimedDepartureTime=4926 WaitTime=0 BaseTime=4926 RunTime=401	OptSolTime=4926
+T4 Train70 AimedDepartureTime=5327 WaitTime=0 BaseTime=5327 RunTime=224	OptSolTime=5327
+T5 Train70 AimedDepartureTime=5551 WaitTime=0 BaseTime=5551 RunTime=315	OptSolTime=5551
+
+TrainId=71 Delay=0 FreeRun=10986 	Final Delay=340
+T25 Train71 AimedDepartureTime=6226 WaitTime=60 BaseTime=6226 RunTime=212	OptSolTime=6226
+T24 Train71 AimedDepartureTime=6438 WaitTime=0 BaseTime=6438 RunTime=148	OptSolTime=6438
+T23 Train71 AimedDepartureTime=6616 WaitTime=30 BaseTime=6616 RunTime=150	OptSolTime=6616
+T22 Train71 AimedDepartureTime=6796 WaitTime=30 BaseTime=6796 RunTime=150	OptSolTime=6796
+T21 Train71 AimedDepartureTime=6976 WaitTime=30 BaseTime=6976 RunTime=149	OptSolTime=6976
+T20 Train71 AimedDepartureTime=7125 WaitTime=0 BaseTime=7125 RunTime=45	OptSolTime=7186
+T19 Train71 AimedDepartureTime=7170 WaitTime=0 BaseTime=7170 RunTime=196	OptSolTime=7231
+T18 Train71 AimedDepartureTime=7426 WaitTime=60 BaseTime=7426 RunTime=300	OptSolTime=7621
+T17 Train71 AimedDepartureTime=7756 WaitTime=30 BaseTime=7756 RunTime=210	OptSolTime=7951
+T16 Train71 AimedDepartureTime=7996 WaitTime=30 BaseTime=7996 RunTime=210	OptSolTime=8191
+T15 Train71 AimedDepartureTime=8236 WaitTime=30 BaseTime=8236 RunTime=150	OptSolTime=8431
+T14 Train71 AimedDepartureTime=8416 WaitTime=30 BaseTime=8416 RunTime=208	OptSolTime=8611
+T13 Train71 AimedDepartureTime=8624 WaitTime=0 BaseTime=8624 RunTime=80	OptSolTime=8819
+T12 Train71 AimedDepartureTime=8704 WaitTime=0 BaseTime=8704 RunTime=162	OptSolTime=8899
+T11 Train71 AimedDepartureTime=8906 WaitTime=40 BaseTime=8906 RunTime=700	OptSolTime=9246
+T10 Train71 AimedDepartureTime=9786 WaitTime=180 BaseTime=9786 RunTime=420	OptSolTime=10126
+T9 Train71 AimedDepartureTime=10206 WaitTime=0 BaseTime=10206 RunTime=240	OptSolTime=10546
+T8 Train71 AimedDepartureTime=10476 WaitTime=30 BaseTime=10476 RunTime=330	OptSolTime=10816
+T7 Train71 AimedDepartureTime=10806 WaitTime=0 BaseTime=10806 RunTime=180	OptSolTime=11146
+T6 Train71 AimedDepartureTime=10986 WaitTime=0 BaseTime=10986 RunTime=420	OptSolTime=11326
+
+TrainId=72 Delay=0 FreeRun=7716 	Final Delay=0
+T6 Train72 AimedDepartureTime=4066 WaitTime=0 BaseTime=4066 RunTime=300	OptSolTime=4066
+T7 Train72 AimedDepartureTime=4366 WaitTime=0 BaseTime=4366 RunTime=180	OptSolTime=4366
+T8 Train72 AimedDepartureTime=4546 WaitTime=0 BaseTime=4546 RunTime=270	OptSolTime=4546
+T9 Train72 AimedDepartureTime=4846 WaitTime=30 BaseTime=4846 RunTime=240	OptSolTime=4846
+T10 Train72 AimedDepartureTime=5086 WaitTime=0 BaseTime=5086 RunTime=240	OptSolTime=5086
+T11 Train72 AimedDepartureTime=5326 WaitTime=0 BaseTime=5326 RunTime=320	OptSolTime=5326
+T12 Train72 AimedDepartureTime=5686 WaitTime=40 BaseTime=5686 RunTime=107	OptSolTime=5686
+T13 Train72 AimedDepartureTime=5793 WaitTime=0 BaseTime=5793 RunTime=72	OptSolTime=5793
+T14 Train72 AimedDepartureTime=5865 WaitTime=0 BaseTime=5865 RunTime=211	OptSolTime=5865
+T15 Train72 AimedDepartureTime=6106 WaitTime=30 BaseTime=6106 RunTime=150	OptSolTime=6106
+T16 Train72 AimedDepartureTime=6286 WaitTime=30 BaseTime=6286 RunTime=90	OptSolTime=6286
+T17 Train72 AimedDepartureTime=6406 WaitTime=30 BaseTime=6406 RunTime=150	OptSolTime=6406
+T18 Train72 AimedDepartureTime=6586 WaitTime=30 BaseTime=6586 RunTime=300	OptSolTime=6586
+T19 Train72 AimedDepartureTime=7066 WaitTime=180 BaseTime=7066 RunTime=90	OptSolTime=7066
+T20 Train72 AimedDepartureTime=7156 WaitTime=0 BaseTime=7156 RunTime=30	OptSolTime=7156
+T21 Train72 AimedDepartureTime=7186 WaitTime=0 BaseTime=7186 RunTime=150	OptSolTime=7186
+T22 Train72 AimedDepartureTime=7366 WaitTime=30 BaseTime=7366 RunTime=90	OptSolTime=7366
+T23 Train72 AimedDepartureTime=7486 WaitTime=30 BaseTime=7486 RunTime=90	OptSolTime=7486
+T24 Train72 AimedDepartureTime=7606 WaitTime=30 BaseTime=7606 RunTime=110	OptSolTime=7606
+T25 Train72 AimedDepartureTime=7716 WaitTime=0 BaseTime=7716 RunTime=250	OptSolTime=7716
+
+TrainId=73 Delay=0 FreeRun=8961 	Final Delay=0
+T1 Train73 AimedDepartureTime=7696 WaitTime=0 BaseTime=7696 RunTime=280	OptSolTime=7696
+T2 Train73 AimedDepartureTime=7976 WaitTime=0 BaseTime=7976 RunTime=252	OptSolTime=7976
+T3 Train73 AimedDepartureTime=8228 WaitTime=0 BaseTime=8228 RunTime=458	OptSolTime=8228
+T4 Train73 AimedDepartureTime=8686 WaitTime=0 BaseTime=8686 RunTime=275	OptSolTime=8686
+T5 Train73 AimedDepartureTime=8961 WaitTime=0 BaseTime=8961 RunTime=385	OptSolTime=8961
+
+TrainId=74 Delay=0 FreeRun=14646 	Final Delay=0
+T25 Train74 AimedDepartureTime=9826 WaitTime=60 BaseTime=9826 RunTime=240	OptSolTime=9826
+T24 Train74 AimedDepartureTime=10066 WaitTime=0 BaseTime=10066 RunTime=180	OptSolTime=10066
+T23 Train74 AimedDepartureTime=10276 WaitTime=30 BaseTime=10276 RunTime=150	OptSolTime=10276
+T22 Train74 AimedDepartureTime=10456 WaitTime=30 BaseTime=10456 RunTime=150	OptSolTime=10456
+T21 Train74 AimedDepartureTime=10636 WaitTime=30 BaseTime=10636 RunTime=150	OptSolTime=10636
+T20 Train74 AimedDepartureTime=10786 WaitTime=0 BaseTime=10786 RunTime=45	OptSolTime=10786
+T19 Train74 AimedDepartureTime=10831 WaitTime=0 BaseTime=10831 RunTime=195	OptSolTime=10831
+T18 Train74 AimedDepartureTime=11086 WaitTime=60 BaseTime=11086 RunTime=300	OptSolTime=11086
+T17 Train74 AimedDepartureTime=11416 WaitTime=30 BaseTime=11416 RunTime=210	OptSolTime=11416
+T16 Train74 AimedDepartureTime=11656 WaitTime=30 BaseTime=11656 RunTime=210	OptSolTime=11656
+T15 Train74 AimedDepartureTime=11896 WaitTime=30 BaseTime=11896 RunTime=150	OptSolTime=11896
+T14 Train74 AimedDepartureTime=12076 WaitTime=30 BaseTime=12076 RunTime=201	OptSolTime=12076
+T13 Train74 AimedDepartureTime=12277 WaitTime=0 BaseTime=12277 RunTime=83	OptSolTime=12277
+T12 Train74 AimedDepartureTime=12360 WaitTime=0 BaseTime=12360 RunTime=166	OptSolTime=12360
+T11 Train74 AimedDepartureTime=12566 WaitTime=40 BaseTime=12566 RunTime=700	OptSolTime=12566
+T10 Train74 AimedDepartureTime=13446 WaitTime=180 BaseTime=13446 RunTime=420	OptSolTime=13446
+T9 Train74 AimedDepartureTime=13866 WaitTime=0 BaseTime=13866 RunTime=240	OptSolTime=13866
+T8 Train74 AimedDepartureTime=14136 WaitTime=30 BaseTime=14136 RunTime=330	OptSolTime=14136
+T7 Train74 AimedDepartureTime=14466 WaitTime=0 BaseTime=14466 RunTime=180	OptSolTime=14466
+T6 Train74 AimedDepartureTime=14646 WaitTime=0 BaseTime=14646 RunTime=420	OptSolTime=14646
+
+TrainId=75 Delay=0 FreeRun=11356 	Final Delay=15
+T6 Train75 AimedDepartureTime=7666 WaitTime=0 BaseTime=7666 RunTime=300	OptSolTime=7666
+T7 Train75 AimedDepartureTime=7966 WaitTime=0 BaseTime=7966 RunTime=180	OptSolTime=7966
+T8 Train75 AimedDepartureTime=8146 WaitTime=0 BaseTime=8146 RunTime=270	OptSolTime=8146
+T9 Train75 AimedDepartureTime=8446 WaitTime=30 BaseTime=8446 RunTime=240	OptSolTime=8446
+T10 Train75 AimedDepartureTime=8686 WaitTime=0 BaseTime=8686 RunTime=240	OptSolTime=8686
+T11 Train75 AimedDepartureTime=8926 WaitTime=0 BaseTime=8926 RunTime=320	OptSolTime=8926
+T12 Train75 AimedDepartureTime=9286 WaitTime=40 BaseTime=9286 RunTime=107	OptSolTime=9286
+T13 Train75 AimedDepartureTime=9393 WaitTime=0 BaseTime=9393 RunTime=72	OptSolTime=9393
+T14 Train75 AimedDepartureTime=9465 WaitTime=0 BaseTime=9465 RunTime=211	OptSolTime=9465
+T15 Train75 AimedDepartureTime=9706 WaitTime=30 BaseTime=9706 RunTime=150	OptSolTime=9706
+T16 Train75 AimedDepartureTime=9886 WaitTime=30 BaseTime=9886 RunTime=90	OptSolTime=9886
+T17 Train75 AimedDepartureTime=10006 WaitTime=30 BaseTime=10006 RunTime=150	OptSolTime=10006
+T18 Train75 AimedDepartureTime=10186 WaitTime=30 BaseTime=10186 RunTime=300	OptSolTime=10186
+T19 Train75 AimedDepartureTime=10726 WaitTime=240 BaseTime=10726 RunTime=90	OptSolTime=10726
+T20 Train75 AimedDepartureTime=10816 WaitTime=0 BaseTime=10816 RunTime=30	OptSolTime=10831
+T21 Train75 AimedDepartureTime=10846 WaitTime=0 BaseTime=10846 RunTime=150	OptSolTime=10861
+T22 Train75 AimedDepartureTime=11026 WaitTime=30 BaseTime=11026 RunTime=90	OptSolTime=11041
+T23 Train75 AimedDepartureTime=11146 WaitTime=30 BaseTime=11146 RunTime=90	OptSolTime=11161
+T24 Train75 AimedDepartureTime=11266 WaitTime=30 BaseTime=11266 RunTime=90	OptSolTime=11281
+T25 Train75 AimedDepartureTime=11356 WaitTime=0 BaseTime=11356 RunTime=210	OptSolTime=11371
+
+TrainId=76 Delay=0 FreeRun=18186 	Final Delay=0
+T25 Train76 AimedDepartureTime=13426 WaitTime=60 BaseTime=13426 RunTime=217	OptSolTime=13426
+T24 Train76 AimedDepartureTime=13643 WaitTime=0 BaseTime=13643 RunTime=143	OptSolTime=13643
+T23 Train76 AimedDepartureTime=13816 WaitTime=30 BaseTime=13816 RunTime=210	OptSolTime=13816
+T22 Train76 AimedDepartureTime=14056 WaitTime=30 BaseTime=14056 RunTime=150	OptSolTime=14056
+T21 Train76 AimedDepartureTime=14236 WaitTime=30 BaseTime=14236 RunTime=150	OptSolTime=14236
+T20 Train76 AimedDepartureTime=14386 WaitTime=0 BaseTime=14386 RunTime=45	OptSolTime=14386
+T19 Train76 AimedDepartureTime=14431 WaitTime=0 BaseTime=14431 RunTime=195	OptSolTime=14431
+T18 Train76 AimedDepartureTime=14686 WaitTime=60 BaseTime=14686 RunTime=300	OptSolTime=14686
+T17 Train76 AimedDepartureTime=15016 WaitTime=30 BaseTime=15016 RunTime=210	OptSolTime=15016
+T16 Train76 AimedDepartureTime=15256 WaitTime=30 BaseTime=15256 RunTime=210	OptSolTime=15256
+T15 Train76 AimedDepartureTime=15496 WaitTime=30 BaseTime=15496 RunTime=150	OptSolTime=15496
+T14 Train76 AimedDepartureTime=15676 WaitTime=30 BaseTime=15676 RunTime=201	OptSolTime=15676
+T13 Train76 AimedDepartureTime=15877 WaitTime=0 BaseTime=15877 RunTime=83	OptSolTime=15877
+T12 Train76 AimedDepartureTime=15960 WaitTime=0 BaseTime=15960 RunTime=166	OptSolTime=15960
+T11 Train76 AimedDepartureTime=16166 WaitTime=40 BaseTime=16166 RunTime=700	OptSolTime=16166
+T10 Train76 AimedDepartureTime=17046 WaitTime=180 BaseTime=17046 RunTime=420	OptSolTime=17046
+T9 Train76 AimedDepartureTime=17466 WaitTime=0 BaseTime=17466 RunTime=240	OptSolTime=17466
+T8 Train76 AimedDepartureTime=17736 WaitTime=30 BaseTime=17736 RunTime=270	OptSolTime=17736
+T7 Train76 AimedDepartureTime=18006 WaitTime=0 BaseTime=18006 RunTime=180	OptSolTime=18006
+T6 Train76 AimedDepartureTime=18186 WaitTime=0 BaseTime=18186 RunTime=480	OptSolTime=18186
+
+TrainId=77 Delay=0 FreeRun=14976 	Final Delay=1080
+T6 Train77 AimedDepartureTime=11386 WaitTime=0 BaseTime=11386 RunTime=300	OptSolTime=11746
+T7 Train77 AimedDepartureTime=11686 WaitTime=0 BaseTime=11686 RunTime=180	OptSolTime=12046
+T8 Train77 AimedDepartureTime=11866 WaitTime=0 BaseTime=11866 RunTime=270	OptSolTime=12226
+T9 Train77 AimedDepartureTime=12166 WaitTime=30 BaseTime=12166 RunTime=240	OptSolTime=12526
+T10 Train77 AimedDepartureTime=12406 WaitTime=0 BaseTime=12406 RunTime=180	OptSolTime=12766
+T11 Train77 AimedDepartureTime=12586 WaitTime=0 BaseTime=12586 RunTime=380	OptSolTime=13266
+T12 Train77 AimedDepartureTime=13006 WaitTime=40 BaseTime=13006 RunTime=120	OptSolTime=13686
+T13 Train77 AimedDepartureTime=13126 WaitTime=0 BaseTime=13126 RunTime=81	OptSolTime=13806
+T14 Train77 AimedDepartureTime=13207 WaitTime=0 BaseTime=13207 RunTime=189	OptSolTime=13887
+T15 Train77 AimedDepartureTime=13426 WaitTime=30 BaseTime=13426 RunTime=150	OptSolTime=14106
+T16 Train77 AimedDepartureTime=13606 WaitTime=30 BaseTime=13606 RunTime=90	OptSolTime=14286
+T17 Train77 AimedDepartureTime=13726 WaitTime=30 BaseTime=13726 RunTime=150	OptSolTime=14406
+T18 Train77 AimedDepartureTime=13906 WaitTime=30 BaseTime=13906 RunTime=240	OptSolTime=14986
+T19 Train77 AimedDepartureTime=14326 WaitTime=180 BaseTime=14326 RunTime=90	OptSolTime=15406
+T20 Train77 AimedDepartureTime=14416 WaitTime=0 BaseTime=14416 RunTime=30	OptSolTime=15496
+T21 Train77 AimedDepartureTime=14446 WaitTime=0 BaseTime=14446 RunTime=150	OptSolTime=15526
+T22 Train77 AimedDepartureTime=14626 WaitTime=30 BaseTime=14626 RunTime=90	OptSolTime=15706
+T23 Train77 AimedDepartureTime=14746 WaitTime=30 BaseTime=14746 RunTime=90	OptSolTime=15826
+T24 Train77 AimedDepartureTime=14866 WaitTime=30 BaseTime=14866 RunTime=110	OptSolTime=15946
+T25 Train77 AimedDepartureTime=14976 WaitTime=0 BaseTime=14976 RunTime=190	OptSolTime=16056
+
+TrainId=78 Delay=0 FreeRun=22508 	Final Delay=0
+T19 Train78 AimedDepartureTime=17096 WaitTime=0 BaseTime=17096 RunTime=104	OptSolTime=17096
+T18 Train78 AimedDepartureTime=17200 WaitTime=0 BaseTime=17200 RunTime=366	OptSolTime=17200
+T17 Train78 AimedDepartureTime=17746 WaitTime=180 BaseTime=17746 RunTime=339	OptSolTime=17746
+T16 Train78 AimedDepartureTime=18085 WaitTime=0 BaseTime=18085 RunTime=59	OptSolTime=18085
+T15 Train78 AimedDepartureTime=18144 WaitTime=0 BaseTime=18144 RunTime=73	OptSolTime=18144
+T14 Train78 AimedDepartureTime=18217 WaitTime=0 BaseTime=18217 RunTime=146	OptSolTime=18217
+T13 Train78 AimedDepartureTime=18363 WaitTime=0 BaseTime=18363 RunTime=65	OptSolTime=18363
+T12 Train78 AimedDepartureTime=18428 WaitTime=0 BaseTime=18428 RunTime=98	OptSolTime=18428
+T11 Train78 AimedDepartureTime=18526 WaitTime=0 BaseTime=18526 RunTime=300	OptSolTime=18526
+T10 Train78 AimedDepartureTime=18826 WaitTime=0 BaseTime=18826 RunTime=201	OptSolTime=18826
+T9 Train78 AimedDepartureTime=19027 WaitTime=0 BaseTime=19027 RunTime=699	OptSolTime=19027
+T8 Train78 AimedDepartureTime=20146 WaitTime=420 BaseTime=20146 RunTime=717	OptSolTime=20146
+T7 Train78 AimedDepartureTime=20863 WaitTime=0 BaseTime=20863 RunTime=163	OptSolTime=20863
+T6 Train78 AimedDepartureTime=21026 WaitTime=0 BaseTime=21026 RunTime=440	OptSolTime=21026
+T5 Train78 AimedDepartureTime=21526 WaitTime=60 BaseTime=21526 RunTime=323	OptSolTime=21526
+T4 Train78 AimedDepartureTime=21849 WaitTime=0 BaseTime=21849 RunTime=188	OptSolTime=21849
+T3 Train78 AimedDepartureTime=22037 WaitTime=0 BaseTime=22037 RunTime=326	OptSolTime=22037
+T2 Train78 AimedDepartureTime=22363 WaitTime=0 BaseTime=22363 RunTime=145	OptSolTime=22363
+T1 Train78 AimedDepartureTime=22508 WaitTime=0 BaseTime=22508 RunTime=199	OptSolTime=22508
+
+TrainId=79 Delay=0 FreeRun=21846 	Final Delay=0
+T25 Train79 AimedDepartureTime=17026 WaitTime=60 BaseTime=17026 RunTime=217	OptSolTime=17026
+T24 Train79 AimedDepartureTime=17243 WaitTime=0 BaseTime=17243 RunTime=143	OptSolTime=17243
+T23 Train79 AimedDepartureTime=17416 WaitTime=30 BaseTime=17416 RunTime=210	OptSolTime=17416
+T22 Train79 AimedDepartureTime=17656 WaitTime=30 BaseTime=17656 RunTime=150	OptSolTime=17656
+T21 Train79 AimedDepartureTime=17836 WaitTime=30 BaseTime=17836 RunTime=150	OptSolTime=17836
+T20 Train79 AimedDepartureTime=17986 WaitTime=0 BaseTime=17986 RunTime=45	OptSolTime=17986
+T19 Train79 AimedDepartureTime=18031 WaitTime=0 BaseTime=18031 RunTime=195	OptSolTime=18031
+T18 Train79 AimedDepartureTime=18286 WaitTime=60 BaseTime=18286 RunTime=300	OptSolTime=18286
+T17 Train79 AimedDepartureTime=18616 WaitTime=30 BaseTime=18616 RunTime=210	OptSolTime=18616
+T16 Train79 AimedDepartureTime=18856 WaitTime=30 BaseTime=18856 RunTime=210	OptSolTime=18856
+T15 Train79 AimedDepartureTime=19096 WaitTime=30 BaseTime=19096 RunTime=150	OptSolTime=19096
+T14 Train79 AimedDepartureTime=19276 WaitTime=30 BaseTime=19276 RunTime=201	OptSolTime=19276
+T13 Train79 AimedDepartureTime=19477 WaitTime=0 BaseTime=19477 RunTime=83	OptSolTime=19477
+T12 Train79 AimedDepartureTime=19560 WaitTime=0 BaseTime=19560 RunTime=166	OptSolTime=19560
+T11 Train79 AimedDepartureTime=19766 WaitTime=40 BaseTime=19766 RunTime=700	OptSolTime=19766
+T10 Train79 AimedDepartureTime=20646 WaitTime=180 BaseTime=20646 RunTime=409	OptSolTime=20646
+T9 Train79 AimedDepartureTime=21055 WaitTime=0 BaseTime=21055 RunTime=251	OptSolTime=21055
+T8 Train79 AimedDepartureTime=21336 WaitTime=30 BaseTime=21336 RunTime=333	OptSolTime=21336
+T7 Train79 AimedDepartureTime=21669 WaitTime=0 BaseTime=21669 RunTime=177	OptSolTime=21669
+T6 Train79 AimedDepartureTime=21846 WaitTime=0 BaseTime=21846 RunTime=420	OptSolTime=21846
+
+TrainId=80 Delay=0 FreeRun=18588 	Final Delay=1860
+T6 Train80 AimedDepartureTime=14986 WaitTime=0 BaseTime=14986 RunTime=300	OptSolTime=15066
+T7 Train80 AimedDepartureTime=15286 WaitTime=0 BaseTime=15286 RunTime=180	OptSolTime=15366
+T8 Train80 AimedDepartureTime=15466 WaitTime=0 BaseTime=15466 RunTime=270	OptSolTime=15546
+T9 Train80 AimedDepartureTime=15766 WaitTime=30 BaseTime=15766 RunTime=240	OptSolTime=15846
+T10 Train80 AimedDepartureTime=16006 WaitTime=0 BaseTime=16006 RunTime=180	OptSolTime=16086
+T11 Train80 AimedDepartureTime=16186 WaitTime=0 BaseTime=16186 RunTime=380	OptSolTime=16866
+T12 Train80 AimedDepartureTime=16606 WaitTime=40 BaseTime=16606 RunTime=103	OptSolTime=17286
+T13 Train80 AimedDepartureTime=16709 WaitTime=0 BaseTime=16709 RunTime=69	OptSolTime=17389
+T14 Train80 AimedDepartureTime=16778 WaitTime=0 BaseTime=16778 RunTime=218	OptSolTime=18638
+T15 Train80 AimedDepartureTime=17026 WaitTime=30 BaseTime=17026 RunTime=150	OptSolTime=18886
+T16 Train80 AimedDepartureTime=17206 WaitTime=30 BaseTime=17206 RunTime=90	OptSolTime=19066
+T17 Train80 AimedDepartureTime=17326 WaitTime=30 BaseTime=17326 RunTime=150	OptSolTime=19186
+T18 Train80 AimedDepartureTime=17506 WaitTime=30 BaseTime=17506 RunTime=240	OptSolTime=19366
+T19 Train80 AimedDepartureTime=17926 WaitTime=180 BaseTime=17926 RunTime=90	OptSolTime=19786
+T20 Train80 AimedDepartureTime=18016 WaitTime=0 BaseTime=18016 RunTime=30	OptSolTime=19876
+T21 Train80 AimedDepartureTime=18046 WaitTime=0 BaseTime=18046 RunTime=150	OptSolTime=19906
+T22 Train80 AimedDepartureTime=18226 WaitTime=30 BaseTime=18226 RunTime=90	OptSolTime=20086
+T23 Train80 AimedDepartureTime=18346 WaitTime=30 BaseTime=18346 RunTime=90	OptSolTime=20206
+T24 Train80 AimedDepartureTime=18466 WaitTime=30 BaseTime=18466 RunTime=122	OptSolTime=20326
+T25 Train80 AimedDepartureTime=18588 WaitTime=0 BaseTime=18588 RunTime=178	OptSolTime=20448
+
+TrainId=81 Delay=0 FreeRun=25386 	Final Delay=0
+T25 Train81 AimedDepartureTime=20626 WaitTime=60 BaseTime=20626 RunTime=212	OptSolTime=20626
+T24 Train81 AimedDepartureTime=20838 WaitTime=0 BaseTime=20838 RunTime=148	OptSolTime=20838
+T23 Train81 AimedDepartureTime=21016 WaitTime=30 BaseTime=21016 RunTime=150	OptSolTime=21016
+T22 Train81 AimedDepartureTime=21196 WaitTime=30 BaseTime=21196 RunTime=150	OptSolTime=21196
+T21 Train81 AimedDepartureTime=21376 WaitTime=30 BaseTime=21376 RunTime=149	OptSolTime=21376
+T20 Train81 AimedDepartureTime=21525 WaitTime=0 BaseTime=21525 RunTime=45	OptSolTime=21525
+T19 Train81 AimedDepartureTime=21570 WaitTime=0 BaseTime=21570 RunTime=196	OptSolTime=21570
+T18 Train81 AimedDepartureTime=21826 WaitTime=60 BaseTime=21826 RunTime=300	OptSolTime=21826
+T17 Train81 AimedDepartureTime=22156 WaitTime=30 BaseTime=22156 RunTime=210	OptSolTime=22156
+T16 Train81 AimedDepartureTime=22396 WaitTime=30 BaseTime=22396 RunTime=210	OptSolTime=22396
+T15 Train81 AimedDepartureTime=22636 WaitTime=30 BaseTime=22636 RunTime=150	OptSolTime=22636
+T14 Train81 AimedDepartureTime=22816 WaitTime=30 BaseTime=22816 RunTime=208	OptSolTime=22816
+T13 Train81 AimedDepartureTime=23024 WaitTime=0 BaseTime=23024 RunTime=80	OptSolTime=23024
+T12 Train81 AimedDepartureTime=23104 WaitTime=0 BaseTime=23104 RunTime=162	OptSolTime=23104
+T11 Train81 AimedDepartureTime=23306 WaitTime=40 BaseTime=23306 RunTime=700	OptSolTime=23306
+T10 Train81 AimedDepartureTime=24186 WaitTime=180 BaseTime=24186 RunTime=420	OptSolTime=24186
+T9 Train81 AimedDepartureTime=24606 WaitTime=0 BaseTime=24606 RunTime=240	OptSolTime=24606
+T8 Train81 AimedDepartureTime=24876 WaitTime=30 BaseTime=24876 RunTime=330	OptSolTime=24876
+T7 Train81 AimedDepartureTime=25206 WaitTime=0 BaseTime=25206 RunTime=180	OptSolTime=25206
+T6 Train81 AimedDepartureTime=25386 WaitTime=0 BaseTime=25386 RunTime=420	OptSolTime=25386
+
+TrainId=82 Delay=0 FreeRun=22176 	Final Delay=1080
+T6 Train82 AimedDepartureTime=18586 WaitTime=0 BaseTime=18586 RunTime=300	OptSolTime=18666
+T7 Train82 AimedDepartureTime=18886 WaitTime=0 BaseTime=18886 RunTime=180	OptSolTime=18966
+T8 Train82 AimedDepartureTime=19066 WaitTime=0 BaseTime=19066 RunTime=270	OptSolTime=19146
+T9 Train82 AimedDepartureTime=19366 WaitTime=30 BaseTime=19366 RunTime=240	OptSolTime=19726
+T10 Train82 AimedDepartureTime=19606 WaitTime=0 BaseTime=19606 RunTime=180	OptSolTime=19966
+T11 Train82 AimedDepartureTime=19786 WaitTime=0 BaseTime=19786 RunTime=320	OptSolTime=20466
+T12 Train82 AimedDepartureTime=20146 WaitTime=40 BaseTime=20146 RunTime=107	OptSolTime=20826
+T13 Train82 AimedDepartureTime=20253 WaitTime=0 BaseTime=20253 RunTime=72	OptSolTime=20933
+T14 Train82 AimedDepartureTime=20325 WaitTime=0 BaseTime=20325 RunTime=211	OptSolTime=21405
+T15 Train82 AimedDepartureTime=20566 WaitTime=30 BaseTime=20566 RunTime=150	OptSolTime=21646
+T16 Train82 AimedDepartureTime=20746 WaitTime=30 BaseTime=20746 RunTime=90	OptSolTime=21826
+T17 Train82 AimedDepartureTime=20866 WaitTime=30 BaseTime=20866 RunTime=150	OptSolTime=21946
+T18 Train82 AimedDepartureTime=21046 WaitTime=30 BaseTime=21046 RunTime=300	OptSolTime=22126
+T19 Train82 AimedDepartureTime=21526 WaitTime=180 BaseTime=21526 RunTime=90	OptSolTime=22606
+T20 Train82 AimedDepartureTime=21616 WaitTime=0 BaseTime=21616 RunTime=30	OptSolTime=22696
+T21 Train82 AimedDepartureTime=21646 WaitTime=0 BaseTime=21646 RunTime=150	OptSolTime=22726
+T22 Train82 AimedDepartureTime=21826 WaitTime=30 BaseTime=21826 RunTime=90	OptSolTime=22906
+T23 Train82 AimedDepartureTime=21946 WaitTime=30 BaseTime=21946 RunTime=90	OptSolTime=23026
+T24 Train82 AimedDepartureTime=22066 WaitTime=30 BaseTime=22066 RunTime=110	OptSolTime=23146
+T25 Train82 AimedDepartureTime=22176 WaitTime=0 BaseTime=22176 RunTime=190	OptSolTime=23256
+
+TrainId=59 Delay=444 FreeRun=4190 	Final Delay=1262
+T22 Train59 AimedDepartureTime=0 WaitTime=30 BaseTime=444 RunTime=150	OptSolTime=444
+T21 Train59 AimedDepartureTime=0 WaitTime=30 BaseTime=624 RunTime=149	OptSolTime=624
+T20 Train59 AimedDepartureTime=0 WaitTime=0 BaseTime=773 RunTime=45	OptSolTime=773
+T19 Train59 AimedDepartureTime=0 WaitTime=0 BaseTime=818 RunTime=196	OptSolTime=818
+T18 Train59 AimedDepartureTime=0 WaitTime=60 BaseTime=1074 RunTime=300	OptSolTime=1074
+T17 Train59 AimedDepartureTime=960 WaitTime=30 BaseTime=1404 RunTime=210	OptSolTime=1404
+T16 Train59 AimedDepartureTime=1200 WaitTime=30 BaseTime=1644 RunTime=210	OptSolTime=1644
+T15 Train59 AimedDepartureTime=1440 WaitTime=30 BaseTime=1884 RunTime=150	OptSolTime=1884
+T14 Train59 AimedDepartureTime=1620 WaitTime=30 BaseTime=2064 RunTime=208	OptSolTime=2816
+T13 Train59 AimedDepartureTime=1828 WaitTime=0 BaseTime=2272 RunTime=80	OptSolTime=3024
+T12 Train59 AimedDepartureTime=1908 WaitTime=0 BaseTime=2352 RunTime=162	OptSolTime=3104
+T11 Train59 AimedDepartureTime=2110 WaitTime=40 BaseTime=2554 RunTime=700	OptSolTime=3306
+T10 Train59 AimedDepartureTime=2990 WaitTime=180 BaseTime=3434 RunTime=420	OptSolTime=4186
+T9 Train59 AimedDepartureTime=3410 WaitTime=0 BaseTime=3854 RunTime=240	OptSolTime=4606
+T8 Train59 AimedDepartureTime=3680 WaitTime=30 BaseTime=4124 RunTime=330	OptSolTime=4942
+T7 Train59 AimedDepartureTime=4010 WaitTime=0 BaseTime=4454 RunTime=180	OptSolTime=5272
+T6 Train59 AimedDepartureTime=4190 WaitTime=0 BaseTime=4634 RunTime=480	OptSolTime=5452
+
+TrainId=60 Delay=11 FreeRun=650 	Final Delay=11
+T19 Train60 AimedDepartureTime=0 WaitTime=180 BaseTime=11 RunTime=90	OptSolTime=11
+T20 Train60 AimedDepartureTime=0 WaitTime=0 BaseTime=101 RunTime=30	OptSolTime=101
+T21 Train60 AimedDepartureTime=0 WaitTime=0 BaseTime=131 RunTime=150	OptSolTime=131
+T22 Train60 AimedDepartureTime=300 WaitTime=30 BaseTime=311 RunTime=90	OptSolTime=311
+T23 Train60 AimedDepartureTime=420 WaitTime=30 BaseTime=431 RunTime=90	OptSolTime=431
+T24 Train60 AimedDepartureTime=540 WaitTime=30 BaseTime=551 RunTime=110	OptSolTime=551
+T25 Train60 AimedDepartureTime=650 WaitTime=0 BaseTime=661 RunTime=250	OptSolTime=661

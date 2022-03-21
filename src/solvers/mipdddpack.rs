@@ -25,6 +25,18 @@ pub fn solve(env: &grb::Env,problem: &Problem) -> Result<Vec<Vec<i32>>, SolverEr
         })
         .collect::<Vec<_>>();
 
+    // Check if earliest times are feasible with travel times.
+    for (train_idx,train) in problem.trains.iter().enumerate() {
+        for visit_idx in 0..(train.visits.len()-1) {
+            if train.visits[visit_idx].earliest + train.visits[visit_idx].travel_time
+            > train.visits[visit_idx+1].earliest {
+                warn!("Train {} visit {} earliest {} travel {} is later than visit {} earliest {}", 
+                train_idx, visit_idx, train.visits[visit_idx].earliest, train.visits[visit_idx].travel_time,
+                visit_idx+1, train.visits[visit_idx+1].earliest)
+            }
+        }
+    }
+
     let mut resource_usage: HashMap<usize, Vec<(usize, usize)>> = HashMap::new();
     for (train_idx, train) in problem.trains.iter().enumerate() {
         for (visit_idx, visit) in train.visits.iter().enumerate() {
@@ -53,12 +65,21 @@ pub fn solve(env: &grb::Env,problem: &Problem) -> Result<Vec<Vec<i32>>, SolverEr
         let interval_vars = intervals.iter().enumerate().map(|(train_idx,t)| {
             t.iter().enumerate().map(|(visit_idx,v)| {
 
+
+
                 let intervals = v.iter().map(|(time,time_out)| {
+                    let mut cost = problem.trains[train_idx].visit_delay_cost(visit_idx, *time) as f64;
+
+                    // if cost > 1e-5 {
+                    //     cost = 1800.0 * cost + ((*time) - problem.trains[train_idx].visits[visit_idx].earliest) as f64;
+                    // }
+
                     #[allow(clippy::unnecessary_cast)]
                     add_intvar!(model, 
                         name: &format!("t{}v{}-in{}_{}", train_idx, visit_idx, time, time_out),
                         bounds: 0..1.0_f64,
-                        obj: problem.trains[train_idx].visit_delay_cost(visit_idx, *time) as f64 + (*time as f64)/(20_000.0*10.0))
+                        obj: cost
+                    )
                     .map_err(SolverError::GurobiError).unwrap()
                 }).collect::<Vec<_>>();
 
@@ -125,7 +146,7 @@ pub fn solve(env: &grb::Env,problem: &Problem) -> Result<Vec<Vec<i32>>, SolverEr
                                 model
                                     .add_constr(
                                         &format!(
-                                            "t{}v{}i{} x t{}v{}i{}",
+                                            "t{}v{}i{}--t{}v{}i{}",
                                             t1, v1, t1_idx, t2, v2, t2_idx
                                         ),
                                         c!(i1 + i2 <= 1.0),
@@ -141,6 +162,8 @@ pub fn solve(env: &grb::Env,problem: &Problem) -> Result<Vec<Vec<i32>>, SolverEr
         }
 
         drop(_p_enc);
+
+        model.write(&format!("mipddd_it{}.lp", iteration)).unwrap();
 
         {
             let _p = hprof::enter("mip solve");
