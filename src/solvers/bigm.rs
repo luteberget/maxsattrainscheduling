@@ -1,15 +1,16 @@
 use std::collections::HashSet;
 
 use super::SolverError;
-use crate::problem::{DelayCostThresholds, Problem, DEFAULT_COST_THRESHOLDS};
+use crate::problem::{DelayCostType, Problem, DEFAULT_COST_THRESHOLDS};
 const M: f64 = 100_000.0;
 
 pub fn solve(
     env: &grb::Env,
     problem: &Problem,
+    delay_cost_type: DelayCostType,
     lazy: bool,
-    train_names: &Vec<String>,
-    resource_names: &Vec<String>,
+    train_names: &[String],
+    resource_names: &[String],
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
@@ -66,46 +67,76 @@ pub fn solve(
     }
 
     // Objective
-    let delay_cost = &DEFAULT_COST_THRESHOLDS;
-    for (train_idx, train) in problem.trains.iter().enumerate() {
-        for visit_idx in 0..train.visits.len() {
-            if let Some(aimed) = train.visits[visit_idx].aimed {
-                let last_t = t_vars[train_idx][visit_idx];
+    match delay_cost_type {
+        DelayCostType::Step123 => {
+            let delay_cost = &DEFAULT_COST_THRESHOLDS;
+            for (train_idx, train) in problem.trains.iter().enumerate() {
+                for visit_idx in 0..train.visits.len() {
+                    if let Some(aimed) = train.visits[visit_idx].aimed {
+                        let time_var = t_vars[train_idx][visit_idx];
 
-                // create a variable for each delay threshold
-                let thresholds = &delay_cost.thresholds;
-                for threshold_idx in (0..thresholds.len()).rev() {
-                    let (_prev_threshold, prev_cost) =
-                        thresholds.get(threshold_idx + 1).unwrap_or(&(0, 0));
-                    let (threshold, cost) = thresholds[threshold_idx];
-                    let threshold = threshold;
+                        // create a variable for each delay threshold
+                        let thresholds = &delay_cost.thresholds;
+                        for threshold_idx in (0..thresholds.len()).rev() {
+                            let (_prev_threshold, prev_cost) =
+                                thresholds.get(threshold_idx + 1).unwrap_or(&(0, 0));
+                            let (threshold, cost) = thresholds[threshold_idx];
+                            let threshold = threshold;
 
-                    let cost_diff = cost - prev_cost;
-                    assert!(cost_diff > 0);
+                            let cost_diff = cost - prev_cost;
+                            assert!(cost_diff > 0);
 
-                    let threshold_var_name = format!(
-                        "tn{}_v{}_tk{}_dly{}",
-                        train_names[train_idx],
-                        visit_idx,
-                        resource_names[train.visits[visit_idx].resource_id],
-                        threshold
-                    );
+                            let threshold_var_name = format!(
+                                "tn{}_v{}_tk{}_dly{}",
+                                train_names[train_idx],
+                                visit_idx,
+                                resource_names[train.visits[visit_idx].resource_id],
+                                threshold
+                            );
 
-                    // Add threshold_var to the objective with cost `diff_cost`.
-                    #[allow(clippy::unnecessary_cast)]
-                    let threshold_var =
-                        add_intvar!(model, name: &threshold_var_name, bounds: 0..1, obj: cost_diff)
+                            // Add threshold_var to the objective with cost `diff_cost`.
+                            #[allow(clippy::unnecessary_cast)]
+                            let threshold_var =
+                                add_intvar!(model, name: &threshold_var_name, bounds: 0..1, obj: cost_diff)
+                                    .map_err(SolverError::GurobiError)?;
+
+                            // If last_t - aimed >= threshold+1 then threshold_var must be 1
+
+                            #[allow(clippy::useless_conversion)]
+                            model
+                                .add_constr(
+                                    &format!("has_{}", threshold_var_name),
+                                    c!(time_var - aimed <= threshold + M * threshold_var),
+                                )
+                                .map_err(SolverError::GurobiError)?;
+                        }
+                    }
+                }
+            }
+        }
+        DelayCostType::Continuous => {
+            for (train_idx, train) in problem.trains.iter().enumerate() {
+                for visit_idx in 0..train.visits.len() {
+                    if let Some(aimed) = train.visits[visit_idx].aimed {
+                        let time_var = t_vars[train_idx][visit_idx];
+                        let objective_var_name = format!(
+                            "tn{}_v{}_tk{}",
+                            train_names[train_idx],
+                            visit_idx,
+                            resource_names[train.visits[visit_idx].resource_id],
+                        );
+                        let objective_var =
+                            add_ctsvar!(model, name:&objective_var_name,bounds:0.., obj: 1.0)
+                                .map_err(SolverError::GurobiError)?;
+
+                        #[allow(clippy::useless_conversion)]
+                        model
+                            .add_constr(
+                                &format!("bound_{}", objective_var_name),
+                                c!(objective_var >= time_var - aimed),
+                            )
                             .map_err(SolverError::GurobiError)?;
-
-                    // If last_t - aimed >= threshold+1 then threshold_var must be 1
-
-                    #[allow(clippy::useless_conversion)]
-                    model
-                        .add_constr(
-                            &format!("has_{}", threshold_var_name),
-                            c!(last_t - aimed <= threshold + M * threshold_var),
-                        )
-                        .map_err(SolverError::GurobiError)?;
+                    }
                 }
             }
         }
@@ -204,8 +235,8 @@ fn add_travel_constraint(
     (train_idx, visit_idx): (usize, usize),
     model: &mut grb::Model,
     t_vars: &[Vec<grb::Var>],
-    train_names: &Vec<String>,
-    resource_names: &Vec<String>,
+    train_names: &[String],
+    resource_names: &[String],
 ) -> Result<(), SolverError> {
     use grb::prelude::*;
 
@@ -294,8 +325,8 @@ fn add_conflict_constraint(
     ((t1, v1), (t2, v2)): ((usize, usize), (usize, usize)),
     model: &mut grb::Model,
     t_vars: &[Vec<grb::Var>],
-    train_names: &Vec<String>,
-    resource_names: &Vec<String>,
+    train_names: &[String],
+    resource_names: &[String],
 ) -> Result<(), SolverError> {
     use grb::prelude::*;
 

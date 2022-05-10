@@ -7,6 +7,14 @@ pub enum DelayMeasurementType {
 }
 
 #[derive(Debug)]
+#[derive(Clone, Copy)]
+pub enum DelayCostType {
+    Step123,
+    Continuous,
+}
+
+
+#[derive(Debug)]
 pub struct NamedProblem {
     pub problem: Problem,
     pub train_names: Vec<String>,

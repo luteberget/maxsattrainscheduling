@@ -69,6 +69,8 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
     solve_debug(solver, problem, |_| {})
 }
 
+
+
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
 
 use crate::debug::DebugInfo;

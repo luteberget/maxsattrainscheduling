@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::HashSet, fmt::Write};
 
 use ddd::{
     parser,
-    problem::{self, DelayCostThresholds, NamedProblem, Visit},
+    problem::{self, DelayCostThresholds, NamedProblem, Visit, DelayCostType},
     solvers::{bigm, maxsatddd},
 };
 
@@ -33,6 +33,9 @@ struct Opt {
 
     #[structopt(long)]
     verify_instances: bool,
+
+    #[structopt(long)]
+    objective: Option<String>,
 }
 
 pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
@@ -92,8 +95,12 @@ pub fn verify_instances(mut x: impl FnMut(String, NamedProblem, Vec<Vec<i32>>) -
     let c_instances = [21, 22, 23, 24];
     let instances = [20];
 
-    for solvertype in ["BigMComplete",  "BigMLazyCon" ] {
-        for instance_id in a_instances.iter().chain(b_instances.iter()).chain(c_instances.iter()) {
+    for solvertype in ["BigMComplete", "BigMLazyCon"] {
+        for instance_id in a_instances
+            .iter()
+            .chain(b_instances.iter())
+            .chain(c_instances.iter())
+        {
             let filename = format!("InstanceResults/{}Sol{}.txt", solvertype, instance_id);
             println!("Reading {}", filename);
             #[allow(unused)]
@@ -156,6 +163,15 @@ fn main() {
         })
         .collect::<Vec<_>>();
 
+    let delay_cost_type = opt
+        .objective
+        .map(|obj| match obj.as_str() {
+            "step123" => DelayCostType::Step123,
+            "cont" => DelayCostType::Continuous,
+            _ => panic!("Unknown objective type."),
+        })
+        .unwrap_or(DelayCostType::Step123);
+
     let perf_out = RefCell::new(String::new());
 
     let mut env = grb::Env::new("").unwrap();
@@ -172,19 +188,47 @@ fn main() {
             hprof::start_frame();
             println!("Starting solver {:?}", solver);
             solution = match solver {
-                SolverType::BigMEager => {
-                    bigm::solve(&env, &p.problem, false, &p.train_names, &p.resource_names).unwrap()
-                }
-                SolverType::BigMLazy => {
-                    bigm::solve(&env, &p.problem, true, &p.train_names, &p.resource_names).unwrap()
-                }
+                SolverType::BigMEager => bigm::solve(
+                    &env,
+                    &p.problem,
+                    delay_cost_type,
+                    false,
+                    &p.train_names,
+                    &p.resource_names,
+                )
+                .unwrap(),
+                SolverType::BigMLazy => bigm::solve(
+                    &env,
+                    &p.problem,
+                    delay_cost_type,
+                    true,
+                    &p.train_names,
+                    &p.resource_names,
+                )
+                .unwrap(),
                 SolverType::MaxSatDdd => {
-                    maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &p.problem)
-                        .unwrap()
-                        .0
+                    if let DelayCostType::Step123 = delay_cost_type {
+                        maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &p.problem)
+                            .unwrap()
+                            .0
+                    } else {
+                        panic!("Unsupported delay cost type for MaxSATDDD solver.");
+                    }
                 }
-                SolverType::MaxSatIdl => ddd::solvers::idl::solve(&p.problem).unwrap(),
-                SolverType::MipDdd => ddd::solvers::mipdddpack::solve(&env, &p.problem).unwrap(),
+                SolverType::MaxSatIdl => {
+                    if let DelayCostType::Step123 = delay_cost_type {
+                        ddd::solvers::idl::solve(&p.problem).unwrap()
+                    } else {
+                        panic!("Unsupported delay cost type for IDL solver.");
+                    }
+                }
+                SolverType::MipDdd => {
+                    if let DelayCostType::Step123 = delay_cost_type {
+                        ddd::solvers::mipdddpack::solve(&env, &p.problem).unwrap()
+                    } else {
+                        panic!("Unsupported delay cost type for MipDDD solver.")
+                    }
+                }
             };
             hprof::end_frame();
 
