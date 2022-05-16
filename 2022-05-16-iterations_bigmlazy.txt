@@ -1,0 +1,579 @@
+Opt { debug: false, solvers: ["bigm_lazy"], xml_instances: false, txt_instances: true, instance_name_filter: None, verify_instances: false, objective: None }
+Using solvers ["bigm_lazy"]
+Reading txtinstances/Instance1.txt
+trains 29 tracks 33 avgtracks 20.93 trackpairs 5915 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 23 and 164 conflict constraints after 14 refinements
+BIGMSTATS 15 1214 164
+Solution verified. Cost 23
+Timing information for root profiler:
+  bigm solver - 1 * 781.5ms = 781.5ms (100.0%)
+    optimize - 15 * 45.9ms = 688.2ms (88.1%)
+    check conflicts - 15 * 2.1ms = 32.2ms (4.1%)
+  verify_solution - 1 * 38.7ms = 38.7ms (4.9%)
+Reading txtinstances/Instance2.txt
+trains 25 tracks 33 avgtracks 19.00 trackpairs 3735 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 33 and 119 conflict constraints after 9 refinements
+BIGMSTATS 10 950 119
+Solution verified. Cost 33
+Timing information for root profiler:
+  bigm solver - 1 * 478.2ms = 478.2ms (100.0%)
+    optimize - 10 * 42.0ms = 420.2ms (87.9%)
+    check conflicts - 10 * 1.6ms = 15.6ms (3.3%)
+  verify_solution - 1 * 23.7ms = 23.7ms (5.0%)
+Reading txtinstances/Instance3.txt
+trains 16 tracks 33 avgtracks 22.38 trackpairs 2061 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 15 and 53 conflict constraints after 8 refinements
+BIGMSTATS 9 716 53
+Solution verified. Cost 15
+Timing information for root profiler:
+  bigm solver - 1 * 261.7ms = 261.7ms (100.0%)
+    optimize - 9 * 25.8ms = 232.0ms (88.6%)
+    check conflicts - 9 * 760.7us = 6.8ms (2.6%)
+  verify_solution - 1 * 12.2ms = 12.2ms (4.6%)
+Reading txtinstances/Instance4.txt
+trains 14 tracks 33 avgtracks 19.21 trackpairs 1175 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 15 and 22 conflict constraints after 1 refinements
+BIGMSTATS 2 538 22
+Solution verified. Cost 15
+Timing information for root profiler:
+  bigm solver - 1 * 29.6ms = 29.6ms (100.0%)
+    optimize - 2 * 7.3ms = 14.6ms (49.5%)
+    check conflicts - 2 * 421.4us = 842.9us (2.8%)
+  verify_solution - 1 * 7.3ms = 7.3ms (24.8%)
+Reading txtinstances/Instance5.txt
+trains 12 tracks 33 avgtracks 19.25 trackpairs 876 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 12 and 23 conflict constraints after 5 refinements
+BIGMSTATS 6 462 23
+Solution verified. Cost 12
+Timing information for root profiler:
+  bigm solver - 1 * 47.3ms = 47.3ms (100.0%)
+    optimize - 6 * 5.4ms = 32.2ms (68.1%)
+    check conflicts - 6 * 388.1us = 2.3ms (4.9%)
+  verify_solution - 1 * 5.7ms = 5.7ms (12.1%)
+Reading txtinstances/Instance6.txt
+trains 8 tracks 33 avgtracks 18.62 trackpairs 307 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 8 and 25 conflict constraints after 3 refinements
+BIGMSTATS 4 298 25
+Solution verified. Cost 8
+Timing information for root profiler:
+  bigm solver - 1 * 26.9ms = 26.9ms (100.0%)
+    optimize - 4 * 4.0ms = 16.0ms (59.4%)
+    check conflicts - 4 * 180.2us = 720.6us (2.7%)
+  verify_solution - 1 * 3.3ms = 3.3ms (12.2%)
+Reading txtinstances/Instance7.txt
+trains 8 tracks 33 avgtracks 12.62 trackpairs 126 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 8 and 6 conflict constraints after 1 refinements
+BIGMSTATS 2 202 6
+Solution verified. Cost 8
+Timing information for root profiler:
+  bigm solver - 1 * 10.1ms = 10.1ms (99.9%)
+    optimize - 2 * 2.5ms = 5.0ms (49.3%)
+    check conflicts - 2 * 66.2us = 132.3us (1.3%)
+  verify_solution - 1 * 1.2ms = 1.2ms (11.6%)
+Reading txtinstances/Instance8.txt
+trains 27 tracks 33 avgtracks 19.89 trackpairs 4862 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 34 and 276 conflict constraints after 16 refinements
+BIGMSTATS 17 1074 276
+Solution verified. Cost 34
+Timing information for root profiler:
+  bigm solver - 1 * 1.7s = 1.7s (100.0%)
+    optimize - 17 * 96.8ms = 1.6s (95.5%)
+    check conflicts - 17 * 1.7ms = 29.5ms (1.7%)
+  verify_solution - 1 * 28.4ms = 28.4ms (1.6%)
+Reading txtinstances/Instance9.txt
+trains 20 tracks 33 avgtracks 20.05 trackpairs 2616 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 25 and 90 conflict constraints after 8 refinements
+BIGMSTATS 9 802 90
+Solution verified. Cost 25
+Timing information for root profiler:
+  bigm solver - 1 * 220.3ms = 220.3ms (100.0%)
+    optimize - 9 * 20.2ms = 181.9ms (82.6%)
+    check conflicts - 9 * 1.0ms = 9.2ms (4.2%)
+  verify_solution - 1 * 16.2ms = 16.2ms (7.4%)
+Reading txtinstances/Instance10.txt
+trains 17 tracks 33 avgtracks 18.18 trackpairs 1632 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 17 and 23 conflict constraints after 3 refinements
+BIGMSTATS 4 618 23
+Solution verified. Cost 17
+Timing information for root profiler:
+  bigm solver - 1 * 52.4ms = 52.4ms (100.0%)
+    optimize - 4 * 8.0ms = 32.1ms (61.1%)
+    check conflicts - 4 * 573.5us = 2.3ms (4.4%)
+  verify_solution - 1 * 9.6ms = 9.6ms (18.3%)
+Reading txtinstances/Instance11.txt
+trains 18 tracks 25 avgtracks 17.33 trackpairs 2022 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 13 and 16 conflict constraints after 2 refinements
+BIGMSTATS 3 624 16
+Solution verified. Cost 13
+Timing information for root profiler:
+  bigm solver - 1 * 61.2ms = 61.2ms (100.0%)
+    optimize - 3 * 13.8ms = 41.3ms (67.4%)
+    check conflicts - 3 * 719.6us = 2.2ms (3.5%)
+  verify_solution - 1 * 4.5ms = 4.5ms (7.3%)
+Reading txtinstances/Instance12.txt
+trains 5 tracks 25 avgtracks 14.80 trackpairs 87 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 5 and 5 conflict constraints after 1 refinements
+BIGMSTATS 2 148 5
+Solution verified. Cost 5
+Timing information for root profiler:
+  bigm solver - 1 * 8.3ms = 8.3ms (99.9%)
+    optimize - 2 * 1.9ms = 3.8ms (45.4%)
+    check conflicts - 2 * 51.2us = 102.4us (1.2%)
+  verify_solution - 1 * 496.9us = 496.9us (6.0%)
+Reading txtinstances/Instance13.txt
+trains 5 tracks 20 avgtracks 16.80 trackpairs 136 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 4 and 10 conflict constraints after 2 refinements
+BIGMSTATS 3 168 10
+Solution verified. Cost 4
+Timing information for root profiler:
+  bigm solver - 1 * 12.3ms = 12.3ms (99.9%)
+    optimize - 3 * 2.7ms = 8.2ms (66.4%)
+    check conflicts - 3 * 64.3us = 193.0us (1.6%)
+  verify_solution - 1 * 314.8us = 314.8us (2.6%)
+Reading txtinstances/Instance14.txt
+trains 20 tracks 25 avgtracks 15.95 trackpairs 2246 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 19 and 52 conflict constraints after 5 refinements
+BIGMSTATS 6 638 52
+Solution verified. Cost 19
+Timing information for root profiler:
+  bigm solver - 1 * 93.3ms = 93.3ms (100.0%)
+    optimize - 6 * 11.3ms = 67.9ms (72.7%)
+    check conflicts - 6 * 903.5us = 5.4ms (5.8%)
+  verify_solution - 1 * 4.7ms = 4.7ms (5.0%)
+Reading txtinstances/Instance15.txt
+trains 5 tracks 25 avgtracks 17.80 trackpairs 136 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 7 and 6 conflict constraints after 1 refinements
+BIGMSTATS 2 178 6
+Solution verified. Cost 7
+Timing information for root profiler:
+  bigm solver - 1 * 25.0ms = 25.0ms (100.0%)
+    optimize - 2 * 4.0ms = 8.1ms (32.3%)
+    check conflicts - 2 * 55.5us = 111.0us (0.4%)
+  verify_solution - 1 * 473.1us = 473.1us (1.9%)
+Reading txtinstances/Instance16.txt
+trains 5 tracks 25 avgtracks 15.20 trackpairs 93 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 2 and 3 conflict constraints after 1 refinements
+BIGMSTATS 2 152 3
+Solution verified. Cost 2
+Timing information for root profiler:
+  bigm solver - 1 * 7.0ms = 7.0ms (99.9%)
+    optimize - 2 * 1.6ms = 3.1ms (44.8%)
+    check conflicts - 2 * 37.5us = 74.9us (1.1%)
+  verify_solution - 1 * 295.4us = 295.4us (4.2%)
+Reading txtinstances/Instance17.txt
+trains 24 tracks 25 avgtracks 15.25 trackpairs 2865 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 27 and 132 conflict constraints after 8 refinements
+BIGMSTATS 9 732 132
+Solution verified. Cost 27
+Timing information for root profiler:
+  bigm solver - 1 * 241.3ms = 241.3ms (100.0%)
+    optimize - 9 * 22.9ms = 205.8ms (85.3%)
+    check conflicts - 9 * 1.0ms = 9.3ms (3.9%)
+  verify_solution - 1 * 6.1ms = 6.1ms (2.5%)
+Reading txtinstances/Instance18.txt
+trains 5 tracks 25 avgtracks 13.40 trackpairs 72 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 8 and 10 conflict constraints after 3 refinements
+BIGMSTATS 4 134 10
+Solution verified. Cost 8
+Timing information for root profiler:
+  bigm solver - 1 * 14.3ms = 14.3ms (99.9%)
+    optimize - 4 * 2.6ms = 10.6ms (74.0%)
+    check conflicts - 4 * 48.2us = 192.7us (1.3%)
+  verify_solution - 1 * 398.6us = 398.6us (2.8%)
+Reading txtinstances/Instance19.txt
+trains 7 tracks 25 avgtracks 13.57 trackpairs 150 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 9 and 13 conflict constraints after 4 refinements
+BIGMSTATS 5 190 13
+Solution verified. Cost 9
+Timing information for root profiler:
+  bigm solver - 1 * 24.2ms = 24.2ms (100.0%)
+    optimize - 5 * 3.8ms = 19.1ms (78.9%)
+    check conflicts - 5 * 91.7us = 458.5us (1.9%)
+  verify_solution - 1 * 741.0us = 741.0us (3.1%)
+Reading txtinstances/Instance20.txt
+trains 7 tracks 25 avgtracks 12.86 trackpairs 126 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 8 and 3 conflict constraints after 1 refinements
+BIGMSTATS 2 180 3
+Solution verified. Cost 8
+Timing information for root profiler:
+  bigm solver - 1 * 5.8ms = 5.8ms (99.9%)
+    optimize - 2 * 918.9us = 1.8ms (31.7%)
+    check conflicts - 2 * 44.0us = 88.1us (1.5%)
+  verify_solution - 1 * 426.4us = 426.4us (7.3%)
+Reading txtinstances/Instance21.txt
+trains 29 tracks 33 avgtracks 20.48 trackpairs 6144 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 33 and 303 conflict constraints after 11 refinements
+BIGMSTATS 12 1188 303
+Solution verified. Cost 33
+Timing information for root profiler:
+  bigm solver - 1 * 4.1s = 4.1s (100.0%)
+    optimize - 12 * 337.5ms = 4.0s (98.0%)
+    check conflicts - 12 * 2.1ms = 25.6ms (0.6%)
+  verify_solution - 1 * 34.6ms = 34.6ms (0.8%)
+Reading txtinstances/Instance22.txt
+trains 28 tracks 33 avgtracks 21.71 trackpairs 6393 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 36 and 362 conflict constraints after 14 refinements
+BIGMSTATS 15 1216 362
+Solution verified. Cost 36
+Timing information for root profiler:
+  bigm solver - 1 * 3.4s = 3.4s (100.0%)
+    optimize - 15 * 217.8ms = 3.3s (97.2%)
+    check conflicts - 15 * 2.3ms = 34.5ms (1.0%)
+  verify_solution - 1 * 36.6ms = 36.6ms (1.1%)
+Reading txtinstances/Instance23.txt
+trains 25 tracks 25 avgtracks 15.40 trackpairs 3202 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 31 and 164 conflict constraints after 8 refinements
+BIGMSTATS 9 770 164
+Solution verified. Cost 31
+Timing information for root profiler:
+  bigm solver - 1 * 362.3ms = 362.3ms (100.0%)
+    optimize - 9 * 35.8ms = 322.3ms (89.0%)
+    check conflicts - 9 * 1.1ms = 10.3ms (2.8%)
+  verify_solution - 1 * 6.6ms = 6.6ms (1.8%)
+Reading txtinstances/Instance24.txt
+trains 14 tracks 25 avgtracks 16.21 trackpairs 970 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 16 and 50 conflict constraints after 8 refinements
+BIGMSTATS 9 454 50
+Solution verified. Cost 16
+Timing information for root profiler:
+  bigm solver - 1 * 170.0ms = 170.0ms (100.0%)
+    optimize - 9 * 16.9ms = 152.3ms (89.6%)
+    check conflicts - 9 * 407.6us = 3.7ms (2.2%)
+  verify_solution - 1 * 4.2ms = 4.2ms (2.5%)
+Reading txtinstances2/Instance1.txt
+trains 29 tracks 33 avgtracks 20.93 trackpairs 5915 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 37 and 208 conflict constraints after 14 refinements
+BIGMSTATS 15 1214 208
+Solution verified. Cost 37
+Timing information for root profiler:
+  bigm solver - 1 * 1.4s = 1.4s (100.0%)
+    optimize - 15 * 86.3ms = 1.3s (93.8%)
+    check conflicts - 15 * 2.2ms = 33.0ms (2.4%)
+  verify_solution - 1 * 39.4ms = 39.4ms (2.9%)
+Reading txtinstances2/Instance2.txt
+trains 25 tracks 33 avgtracks 19.00 trackpairs 3735 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 40 and 214 conflict constraints after 11 refinements
+BIGMSTATS 12 950 214
+Solution verified. Cost 40
+Timing information for root profiler:
+  bigm solver - 1 * 712.7ms = 712.7ms (100.0%)
+    optimize - 12 * 54.7ms = 656.9ms (92.2%)
+    check conflicts - 12 * 1.4ms = 17.3ms (2.4%)
+  verify_solution - 1 * 25.7ms = 25.7ms (3.6%)
+Reading txtinstances2/Instance3.txt
+trains 16 tracks 33 avgtracks 22.38 trackpairs 2061 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 19 and 29 conflict constraints after 4 refinements
+BIGMSTATS 5 716 29
+Solution verified. Cost 19
+Timing information for root profiler:
+  bigm solver - 1 * 98.7ms = 98.7ms (100.0%)
+    optimize - 5 * 14.3ms = 71.5ms (72.4%)
+    check conflicts - 5 * 799.6us = 4.0ms (4.0%)
+  verify_solution - 1 * 13.6ms = 13.6ms (13.7%)
+Reading txtinstances2/Instance4.txt
+trains 14 tracks 33 avgtracks 19.21 trackpairs 1175 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 17 and 61 conflict constraints after 7 refinements
+BIGMSTATS 8 538 61
+Solution verified. Cost 17
+Timing information for root profiler:
+  bigm solver - 1 * 126.6ms = 126.6ms (100.0%)
+    optimize - 8 * 13.0ms = 103.8ms (82.0%)
+    check conflicts - 8 * 509.9us = 4.1ms (3.2%)
+  verify_solution - 1 * 7.3ms = 7.3ms (5.8%)
+Reading txtinstances2/Instance5.txt
+trains 12 tracks 33 avgtracks 19.25 trackpairs 876 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 16 and 22 conflict constraints after 3 refinements
+BIGMSTATS 4 462 22
+Solution verified. Cost 16
+Timing information for root profiler:
+  bigm solver - 1 * 53.3ms = 53.3ms (100.0%)
+    optimize - 4 * 9.7ms = 38.6ms (72.5%)
+    check conflicts - 4 * 412.4us = 1.6ms (3.1%)
+  verify_solution - 1 * 6.0ms = 6.0ms (11.3%)
+Reading txtinstances2/Instance6.txt
+trains 8 tracks 33 avgtracks 18.62 trackpairs 307 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 10 and 7 conflict constraints after 1 refinements
+BIGMSTATS 2 298 7
+Solution verified. Cost 10
+Timing information for root profiler:
+  bigm solver - 1 * 12.8ms = 12.8ms (99.9%)
+    optimize - 2 * 2.8ms = 5.6ms (43.9%)
+    check conflicts - 2 * 152.3us = 304.6us (2.4%)
+  verify_solution - 1 * 3.1ms = 3.1ms (24.5%)
+Reading txtinstances2/Instance7.txt
+trains 8 tracks 33 avgtracks 12.62 trackpairs 126 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 12 and 5 conflict constraints after 1 refinements
+BIGMSTATS 2 202 5
+Solution verified. Cost 12
+Timing information for root profiler:
+  bigm solver - 1 * 9.5ms = 9.5ms (99.9%)
+    optimize - 2 * 2.4ms = 4.8ms (50.7%)
+    check conflicts - 2 * 64.4us = 128.8us (1.4%)
+  verify_solution - 1 * 1.1ms = 1.1ms (11.8%)
+Reading txtinstances2/Instance8.txt
+trains 27 tracks 33 avgtracks 19.89 trackpairs 4862 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 43 and 646 conflict constraints after 29 refinements
+BIGMSTATS 30 1074 646
+Solution verified. Cost 43
+Timing information for root profiler:
+  bigm solver - 1 * 7.9s = 7.9s (100.0%)
+    optimize - 30 * 257.9ms = 7.7s (98.5%)
+    check conflicts - 30 * 1.8ms = 54.5ms (0.7%)
+  verify_solution - 1 * 30.5ms = 30.5ms (0.4%)
+Reading txtinstances2/Instance9.txt
+trains 20 tracks 33 avgtracks 20.05 trackpairs 2616 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 27 and 124 conflict constraints after 7 refinements
+BIGMSTATS 8 802 124
+Solution verified. Cost 27
+Timing information for root profiler:
+  bigm solver - 1 * 263.5ms = 263.5ms (100.0%)
+    optimize - 8 * 27.9ms = 223.3ms (84.7%)
+    check conflicts - 8 * 947.8us = 7.6ms (2.9%)
+  verify_solution - 1 * 16.6ms = 16.6ms (6.3%)
+Reading txtinstances2/Instance10.txt
+trains 17 tracks 33 avgtracks 18.18 trackpairs 1632 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 21 and 36 conflict constraints after 3 refinements
+BIGMSTATS 4 618 36
+Solution verified. Cost 21
+Timing information for root profiler:
+  bigm solver - 1 * 64.0ms = 64.0ms (100.0%)
+    optimize - 4 * 10.8ms = 43.3ms (67.7%)
+    check conflicts - 4 * 650.1us = 2.6ms (4.1%)
+  verify_solution - 1 * 12.2ms = 12.2ms (19.1%)
+Reading txtinstances2/Instance11.txt
+trains 18 tracks 25 avgtracks 17.33 trackpairs 2022 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 19 and 85 conflict constraints after 8 refinements
+BIGMSTATS 9 624 85
+Solution verified. Cost 19
+Timing information for root profiler:
+  bigm solver - 1 * 196.1ms = 196.1ms (100.0%)
+    optimize - 9 * 18.8ms = 169.4ms (86.4%)
+    check conflicts - 9 * 793.6us = 7.1ms (3.6%)
+  verify_solution - 1 * 6.4ms = 6.4ms (3.3%)
+Reading txtinstances2/Instance12.txt
+trains 5 tracks 25 avgtracks 14.80 trackpairs 87 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 7 and 6 conflict constraints after 2 refinements
+BIGMSTATS 3 148 6
+Solution verified. Cost 7
+Timing information for root profiler:
+  bigm solver - 1 * 19.0ms = 19.0ms (99.9%)
+    optimize - 3 * 4.4ms = 13.3ms (69.9%)
+    check conflicts - 3 * 74.2us = 222.5us (1.2%)
+  verify_solution - 1 * 308.4us = 308.4us (1.6%)
+Reading txtinstances2/Instance13.txt
+trains 5 tracks 20 avgtracks 16.80 trackpairs 136 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 5 and 6 conflict constraints after 2 refinements
+BIGMSTATS 3 168 6
+Solution verified. Cost 5
+Timing information for root profiler:
+  bigm solver - 1 * 11.4ms = 11.4ms (99.9%)
+    optimize - 3 * 2.5ms = 7.6ms (66.4%)
+    check conflicts - 3 * 61.2us = 183.6us (1.6%)
+  verify_solution - 1 * 309.4us = 309.4us (2.7%)
+Reading txtinstances2/Instance14.txt
+trains 20 tracks 25 avgtracks 15.95 trackpairs 2246 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 31 and 64 conflict constraints after 5 refinements
+BIGMSTATS 6 638 64
+Solution verified. Cost 31
+Timing information for root profiler:
+  bigm solver - 1 * 154.5ms = 154.5ms (100.0%)
+    optimize - 6 * 21.0ms = 126.1ms (81.6%)
+    check conflicts - 6 * 959.5us = 5.8ms (3.7%)
+  verify_solution - 1 * 4.7ms = 4.7ms (3.1%)
+Reading txtinstances2/Instance15.txt
+trains 5 tracks 25 avgtracks 17.80 trackpairs 136 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 6 and 16 conflict constraints after 3 refinements
+BIGMSTATS 4 178 16
+Solution verified. Cost 6
+Timing information for root profiler:
+  bigm solver - 1 * 25.2ms = 25.2ms (100.0%)
+    optimize - 4 * 4.9ms = 19.7ms (78.3%)
+    check conflicts - 4 * 61.6us = 246.4us (1.0%)
+  verify_solution - 1 * 386.3us = 386.3us (1.5%)
+Reading txtinstances2/Instance16.txt
+trains 5 tracks 25 avgtracks 15.20 trackpairs 93 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 5 and 7 conflict constraints after 3 refinements
+BIGMSTATS 4 152 7
+Solution verified. Cost 5
+Timing information for root profiler:
+  bigm solver - 1 * 16.2ms = 16.2ms (100.0%)
+    optimize - 4 * 3.1ms = 12.4ms (76.5%)
+    check conflicts - 4 * 47.0us = 188.1us (1.2%)
+  verify_solution - 1 * 368.0us = 368.0us (2.3%)
+Reading txtinstances2/Instance17.txt
+trains 24 tracks 25 avgtracks 15.25 trackpairs 2865 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 40 and 127 conflict constraints after 8 refinements
+BIGMSTATS 9 732 127
+Solution verified. Cost 40
+Timing information for root profiler:
+  bigm solver - 1 * 318.1ms = 318.1ms (100.0%)
+    optimize - 9 * 31.1ms = 280.1ms (88.0%)
+    check conflicts - 9 * 1.2ms = 10.5ms (3.3%)
+  verify_solution - 1 * 8.0ms = 8.0ms (2.5%)
+Reading txtinstances2/Instance18.txt
+trains 5 tracks 25 avgtracks 13.40 trackpairs 72 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 10 and 7 conflict constraints after 2 refinements
+BIGMSTATS 3 134 7
+Solution verified. Cost 10
+Timing information for root profiler:
+  bigm solver - 1 * 13.9ms = 13.9ms (100.0%)
+    optimize - 3 * 3.4ms = 10.3ms (74.2%)
+    check conflicts - 3 * 33.1us = 99.4us (0.7%)
+  verify_solution - 1 * 429.6us = 429.6us (3.1%)
+Reading txtinstances2/Instance19.txt
+trains 7 tracks 25 avgtracks 13.57 trackpairs 150 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 11 and 16 conflict constraints after 4 refinements
+BIGMSTATS 5 190 16
+Solution verified. Cost 11
+Timing information for root profiler:
+  bigm solver - 1 * 26.3ms = 26.3ms (100.0%)
+    optimize - 5 * 4.2ms = 21.2ms (80.6%)
+    check conflicts - 5 * 84.1us = 420.4us (1.6%)
+  verify_solution - 1 * 437.4us = 437.4us (1.7%)
+Reading txtinstances2/Instance20.txt
+trains 7 tracks 25 avgtracks 12.86 trackpairs 126 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 11 and 7 conflict constraints after 2 refinements
+BIGMSTATS 3 180 7
+Solution verified. Cost 11
+Timing information for root profiler:
+  bigm solver - 1 * 12.2ms = 12.2ms (99.9%)
+    optimize - 3 * 2.4ms = 7.3ms (59.8%)
+    check conflicts - 3 * 47.1us = 141.3us (1.2%)
+  verify_solution - 1 * 828.0us = 828.0us (6.8%)
+Reading txtinstances2/Instance21.txt
+trains 29 tracks 33 avgtracks 20.48 trackpairs 6144 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 41 and 335 conflict constraints after 12 refinements
+BIGMSTATS 13 1188 335
+Solution verified. Cost 41
+Timing information for root profiler:
+  bigm solver - 1 * 1.8s = 1.8s (100.0%)
+    optimize - 13 * 132.5ms = 1.7s (95.0%)
+    check conflicts - 13 * 2.5ms = 32.0ms (1.8%)
+  verify_solution - 1 * 38.3ms = 38.3ms (2.1%)
+Reading txtinstances2/Instance22.txt
+trains 28 tracks 33 avgtracks 21.71 trackpairs 6393 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 44 and 550 conflict constraints after 19 refinements
+BIGMSTATS 20 1216 550
+Solution verified. Cost 44
+Timing information for root profiler:
+  bigm solver - 1 * 4.6s = 4.6s (100.0%)
+    optimize - 20 * 222.0ms = 4.4s (97.5%)
+    check conflicts - 20 * 2.2ms = 44.5ms (1.0%)
+  verify_solution - 1 * 36.5ms = 36.5ms (0.8%)
+Reading txtinstances2/Instance23.txt
+trains 25 tracks 25 avgtracks 15.40 trackpairs 3202 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 44 and 150 conflict constraints after 6 refinements
+BIGMSTATS 7 770 150
+Solution verified. Cost 44
+Timing information for root profiler:
+  bigm solver - 1 * 307.0ms = 307.0ms (100.0%)
+    optimize - 7 * 38.0ms = 266.1ms (86.7%)
+    check conflicts - 7 * 1.3ms = 8.9ms (2.9%)
+  verify_solution - 1 * 7.1ms = 7.1ms (2.3%)
+Reading txtinstances2/Instance24.txt
+trains 14 tracks 25 avgtracks 16.21 trackpairs 970 delays 0 avgdelay0
+Starting solver BigMLazy
+Solved with cost 19 and 53 conflict constraints after 3 refinements
+BIGMSTATS 4 454 53
+Solution verified. Cost 19
+Timing information for root profiler:
+  bigm solver - 1 * 91.9ms = 91.9ms (100.0%)
+    optimize - 4 * 18.4ms = 73.7ms (80.2%)
+    check conflicts - 4 * 468.6us = 1.9ms (2.0%)
+  verify_solution - 1 * 4.4ms = 4.4ms (4.8%)
+    txt1 1 BigMLazy        23        782
+    txt1 2 BigMLazy        33        478
+    txt1 3 BigMLazy        15        262
+    txt1 4 BigMLazy        15         30
+    txt1 5 BigMLazy        12         47
+    txt1 6 BigMLazy         8         27
+    txt1 7 BigMLazy         8         10
+    txt1 8 BigMLazy        34       1724
+    txt1 9 BigMLazy        25        220
+   txt1 10 BigMLazy        17         52
+   txt1 11 BigMLazy        13         61
+   txt1 12 BigMLazy         5          8
+   txt1 13 BigMLazy         4         12
+   txt1 14 BigMLazy        19         93
+   txt1 15 BigMLazy         7         25
+   txt1 16 BigMLazy         2          7
+   txt1 17 BigMLazy        27        241
+   txt1 18 BigMLazy         8         14
+   txt1 19 BigMLazy         9         24
+   txt1 20 BigMLazy         8          6
+   txt1 21 BigMLazy        33       4133
+   txt1 22 BigMLazy        36       3360
+   txt1 23 BigMLazy        31        362
+   txt1 24 BigMLazy        16        170
+    txt2 1 BigMLazy        37       1380
+    txt2 2 BigMLazy        40        713
+    txt2 3 BigMLazy        19         99
+    txt2 4 BigMLazy        17        127
+    txt2 5 BigMLazy        16         53
+    txt2 6 BigMLazy        10         13
+    txt2 7 BigMLazy        12          9
+    txt2 8 BigMLazy        43       7853
+    txt2 9 BigMLazy        27        264
+   txt2 10 BigMLazy        21         64
+   txt2 11 BigMLazy        19        196
+   txt2 12 BigMLazy         7         19
+   txt2 13 BigMLazy         5         11
+   txt2 14 BigMLazy        31        154
+   txt2 15 BigMLazy         6         25
+   txt2 16 BigMLazy         5         16
+   txt2 17 BigMLazy        40        318
+   txt2 18 BigMLazy        10         14
+   txt2 19 BigMLazy        11         26
+   txt2 20 BigMLazy        11         12
+   txt2 21 BigMLazy        41       1815
+   txt2 22 BigMLazy        44       4553
+   txt2 23 BigMLazy        44        307
+   txt2 24 BigMLazy        19         92
+
