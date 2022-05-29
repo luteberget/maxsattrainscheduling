@@ -4,13 +4,36 @@ use super::SolverError;
 use crate::problem::{DelayCostType, Problem, DEFAULT_COST_THRESHOLDS};
 const M: f64 = 100_000.0;
 
-pub fn solve(
+pub fn solve_bigm(
     env: &grb::Env,
     problem: &Problem,
     delay_cost_type: DelayCostType,
     lazy: bool,
     train_names: &[String],
     resource_names: &[String],
+) -> Result<Vec<Vec<i32>>, SolverError> {
+    solve(env, problem, delay_cost_type, lazy, train_names, resource_names, add_bigm_conflict_constraint)
+}
+
+pub fn solve_hull(
+    env: &grb::Env,
+    problem: &Problem,
+    delay_cost_type: DelayCostType,
+    lazy: bool,
+    train_names: &[String],
+    resource_names: &[String],
+) -> Result<Vec<Vec<i32>>, SolverError> {
+    solve(env, problem, delay_cost_type, lazy, train_names, resource_names, add_hull_conflict_constraint)
+}
+
+fn solve(
+    env: &grb::Env,
+    problem: &Problem,
+    delay_cost_type: DelayCostType,
+    lazy: bool,
+    train_names: &[String],
+    resource_names: &[String],
+    add_conflict_constraint :ConflictHandler,
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
@@ -61,7 +84,14 @@ pub fn solve(
 
     if !lazy {
         for visit_pair in visit_conflicts.iter().copied() {
-            add_conflict_constraint(visit_pair, &mut model, &t_vars, train_names, resource_names)?;
+            let conflict = ConflictInformation {
+                problem,
+                visit_pair,
+                t_vars: &t_vars,
+                train_names,
+                resource_names,
+            };
+            add_conflict_constraint(&mut model, &conflict)?;
             assert!(added_conflicts.insert(visit_pair));
         }
     }
@@ -171,6 +201,8 @@ pub fn solve(
             .get_attr(attr::ObjVal)
             .map_err(SolverError::GurobiError)?;
 
+        println!("Iteration {} cost {}", refinement_iterations, cost);
+
         // Check the conflicts
         let violated_conflicts = {
             let _p = hprof::enter("check conflicts");
@@ -187,13 +219,15 @@ pub fn solve(
         if !violated_conflicts.is_empty() {
             refinement_iterations += 1;
             for visit_pair in violated_conflicts {
-                add_conflict_constraint(
+                let conflict = ConflictInformation {
+                    problem,
                     visit_pair,
-                    &mut model,
-                    &t_vars,
+                    t_vars: &t_vars,
                     train_names,
                     resource_names,
-                )?;
+                };
+
+                add_conflict_constraint(&mut model, &conflict)?;
                 assert!(added_conflicts.insert(visit_pair));
             }
         } else {
@@ -205,8 +239,8 @@ pub fn solve(
                 refinement_iterations
             );
 
-            model.write("model.lp").unwrap();
-            model.write("model.sol").unwrap();
+            // model.write("model.lp").unwrap();
+            // model.write("model.sol").unwrap();
 
             let mut solution = Vec::new();
             for (train_idx, train_ts) in t_vars.iter().enumerate() {
@@ -321,14 +355,29 @@ fn check_conflict(
     }
 }
 
-fn add_conflict_constraint(
-    ((t1, v1), (t2, v2)): ((usize, usize), (usize, usize)),
+struct ConflictInformation<'a> {
+    problem: &'a Problem,
+    visit_pair: ((usize, usize), (usize, usize)),
+    t_vars: &'a [Vec<grb::Var>],
+    train_names: &'a [String],
+    resource_names: &'a [String],
+}
+
+type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<(), SolverError>;
+
+fn add_bigm_conflict_constraint(
     model: &mut grb::Model,
-    t_vars: &[Vec<grb::Var>],
-    train_names: &[String],
-    resource_names: &[String],
+    conflict: &ConflictInformation,
 ) -> Result<(), SolverError> {
     use grb::prelude::*;
+
+    let &ConflictInformation {
+        problem: _,
+        visit_pair: ((t1, v1), (t2, v2)),
+        t_vars,
+        resource_names: _,
+        train_names,
+    } = conflict;
 
     // println!("adding conflict {:?}", ((t1, v1), (t2, v2)));
 
@@ -359,5 +408,125 @@ fn add_conflict_constraint(
             c!(t_vars[t2][v2 + 1] <= t_vars[t1][v1] + M * (1 - choice_var)),
         )
         .map_err(SolverError::GurobiError)?;
+    Ok(())
+}
+
+
+fn add_hull_conflict_constraint(
+    model: &mut grb::Model,
+    conflict: &ConflictInformation,
+) -> Result<(), SolverError> {
+    use grb::prelude::*;
+
+    let &ConflictInformation {
+        problem,
+        visit_pair: ((t1, v1), (t2, v2)),
+        t_vars,
+        resource_names: _,
+        train_names,
+    } = conflict;
+
+    // println!("adding conflict {:?}", ((t1, v1), (t2, v2)));
+
+    let choice_var_name = format!(
+        "confl_tn{}_v{}_tn{}_v{}",
+        //train_names[t1], v1, train_names[t2], v2
+        t1, v1, t2, v2
+    );
+
+    #[allow(clippy::unnecessary_cast)]
+    let choice_var = add_intvar!(model, name: &choice_var_name, bounds: 0..1)
+        .map_err(SolverError::GurobiError)?;
+
+    // #[allow(clippy::useless_conversion)]
+    // model
+    //     .add_constr(
+    //         &format!("{}_first", choice_var_name),
+    //         // t1 goes first: it reaches v1+1 before t2 reaches v2
+    //         // if choice_var is 1, the constraint is disabled.
+    //         c!(t_vars[t1][v1 + 1] <= t_vars[t2][v2] + M * choice_var),
+    //     )
+    //     .map_err(SolverError::GurobiError)?;
+
+    // #[allow(clippy::useless_conversion)]
+    // model
+    //     .add_constr(
+    //         &format!("{}_second", choice_var_name),
+    //         // t2 goes first: it reaches v2+1 before t1 reaches v1
+    //         c!(t_vars[t2][v2 + 1] <= t_vars[t1][v1] + M * (1 - choice_var)),
+    //     )
+    //     .map_err(SolverError::GurobiError)?;
+
+    
+    // we have 
+    //  OR (
+    //    t_vars[t2][v2+1] <= t_vars[t1][v1], 
+    //    t_vars[t1][v1+1] <= t_vars[t2][v2], 
+    //  )
+    // 
+    //  ... and instead of the Big-M formulation:
+    //      t2f <= t1s + M*y
+    //      t1f <= t2s + M*(1-y)
+    //
+    //  ... we will use the convex hull formulation:
+    //
+    //     t1s = t1s_a + t1s_b
+    //     t1f = t1f_a + t1f_b
+    //     t2s = t2s_a + t2s_b
+    //     t2f = t2f_a + t2f_b
+    //     t1s_a <= M * y
+    //     t1f_a <= M * y
+    //     t2s_a <= M * y
+    //     t2f_a <= M * y
+    //     t1s_b <= M * (1 - y)
+    //     t1f_b <= M * (1 - y)
+    //     t2s_b <= M * (1 - y)
+    //     t2f_b <= M * (1 - y)
+    //     constraint_A: -M(1-y) <= t2f_a - t1s_a <= 0
+    //     constraint_B: -My     <= t1f_b - t2s_b <= 0
+    //     
+    // See https://optimization.cbe.cornell.edu/index.php?title=Disjunctive_inequalities 
+    // for the general transformation.
+    //
+
+
+    
+    let split_vars  = [(t1,v1),(t1,v1+1),(t2,v2),(t2,v2+1)].iter().copied().map(|(t,v)| {
+        let t_a = add_ctsvar!(model, name :&format!("a_{}_{}", t, v), bounds: 0..)
+            .map_err(SolverError::GurobiError)?;
+        let t_b = add_ctsvar!(model, name :&format!("b_{}_{}", t, v), bounds: 0..)
+            .map_err(SolverError::GurobiError)?;
+        let lb = problem.trains[t].visits[v].earliest;
+    
+        #[allow(clippy::useless_conversion)]
+        model.add_constr(&format!("{}_t{}v{}_split", choice_var_name, t, v), c!(t_vars[t][v] == lb + t_a + t_b))
+            .map_err(SolverError::GurobiError)?;
+        #[allow(clippy::useless_conversion)]
+        model.add_constr(&format!("{}_t{}v{}_sel1", choice_var_name, t, v), c!(t_a <= M * (1.0f64 - choice_var)))
+            .map_err(SolverError::GurobiError)?;
+        #[allow(clippy::useless_conversion)]
+        model.add_constr(&format!("{}_t{}v{}_sel2", choice_var_name, t, v), c!(t_b <= M * choice_var))
+            .map_err(SolverError::GurobiError)?;
+
+        Ok((t_a,t_b))
+    }).collect::<Result<Vec<(grb::Var, grb::Var)>,SolverError>>()?;
+
+    let t1s_a = split_vars[0].0;
+    let t1s_lb = problem.trains[t1].visits[v1].earliest;
+    let t2f_a = split_vars[3].0;
+    let t2f_lb = problem.trains[t2].visits[v2+1].earliest;
+
+    let t2s_b = split_vars[2].1;
+    let t2s_lb = problem.trains[t2].visits[v2].earliest;
+    let t1f_b = split_vars[1].1;
+    let t1f_lb = problem.trains[t1].visits[v1+1].earliest;
+
+    #[allow(clippy::useless_conversion)]
+    model.add_constr(&format!("{}_a", choice_var_name), c!(  (t2f_a + (1-choice_var)*t2f_lb) - (t1s_a + (1-choice_var)* t1s_lb) <= 0.0f64  ))
+        .map_err(SolverError::GurobiError)?;
+        #[allow(clippy::useless_conversion)]
+    model.add_constr(&format!("{}_b", choice_var_name), c!(  (t1f_b + choice_var*t1f_lb) - (t2s_b + choice_var*t2s_lb) <= 0.0f64  ))
+        .map_err(SolverError::GurobiError)?;
+
     Ok(())
 }

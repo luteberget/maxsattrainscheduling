@@ -139,6 +139,7 @@ enum SolverType {
     MaxSatDdd,
     MaxSatIdl,
     MipDdd,
+    MipHull,
 }
 
 fn main() {
@@ -159,6 +160,7 @@ fn main() {
             "maxsat_ddd" => SolverType::MaxSatDdd,
             "maxsat_idl" => SolverType::MaxSatIdl,
             "mip_ddd" => SolverType::MipDdd,
+            "mip_hull" => SolverType::MipHull,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -188,7 +190,7 @@ fn main() {
             hprof::start_frame();
             println!("Starting solver {:?}", solver);
             solution = match solver {
-                SolverType::BigMEager => bigm::solve(
+                SolverType::BigMEager => bigm::solve_bigm(
                     &env,
                     &p.problem,
                     delay_cost_type,
@@ -197,7 +199,16 @@ fn main() {
                     &p.resource_names,
                 )
                 .unwrap(),
-                SolverType::BigMLazy => bigm::solve(
+                SolverType::MipHull => bigm::solve_hull(
+                    &env,
+                    &p.problem,
+                    delay_cost_type,
+                    true,
+                    &p.train_names,
+                    &p.resource_names,
+                )
+                .unwrap(),
+                SolverType::BigMLazy => bigm::solve_bigm(
                     &env,
                     &p.problem,
                     delay_cost_type,
