@@ -9,5 +9,6 @@ pub mod mipdddpack;
 #[derive(Debug)]
 pub enum SolverError {
     NoSolution,
-    GurobiError(grb::Error)
+    GurobiError(grb::Error),
+    Timeout,
 }

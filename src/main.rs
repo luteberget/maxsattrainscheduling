@@ -2,8 +2,8 @@ use std::{cell::RefCell, collections::HashSet, fmt::Write};
 
 use ddd::{
     parser,
-    problem::{self, DelayCostThresholds, NamedProblem, Visit, DelayCostType},
-    solvers::{bigm, maxsatddd},
+    problem::{self, DelayCostThresholds, DelayCostType, NamedProblem, Visit},
+    solvers::{bigm, maxsatddd, SolverError},
 };
 
 use std::path::PathBuf;
@@ -46,9 +46,10 @@ pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
     #[allow(unused)]
     let c_instances = [21, 22, 23, 24];
 
-    for instance_id in a_instances.into_iter()
-    // .chain(b_instances)
-    // .chain(c_instances)
+    for instance_id in a_instances
+        .into_iter()
+        .chain(b_instances)
+        .chain(c_instances)
     {
         let filename = format!("instances/Instance{}.xml", instance_id);
         println!("Reading {}", filename);
@@ -67,12 +68,19 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
     #[allow(unused)]
     let c_instances = [21, 22, 23, 24];
 
-    for (dir, shortname) in [("txtinstances", "txt1"), ("txtinstances2", "txt2")] {
-        for instance_id in a_instances
+    for (dir, shortname) in [
+        ("txtinstances", "txt1"),
+        ("txtinstances2", "txt2"),
+        ("txtinstances3", "txt3"),
+    ] {
+        let instances = a_instances
             .into_iter()
             .chain(b_instances)
-            .chain(c_instances)
-        {
+            .chain(c_instances);
+
+        // let instances = [16].iter();
+
+        for instance_id in instances {
             let filename = format!("{}/Instance{}.txt", dir, instance_id);
             println!("Reading {}", filename);
             #[allow(unused)]
@@ -179,13 +187,13 @@ fn main() {
     let mut env = grb::Env::new("").unwrap();
     env.set(grb::param::OutputFlag, 0).unwrap();
 
-    let solve_it = |name: String, p: NamedProblem| -> Vec<Vec<i32>> {
+    let solve_it = |name: String, p: NamedProblem| -> Result<Vec<Vec<i32>>, SolverError> {
         if solvers.is_empty() {
             panic!("no solver specified");
         }
         let problemstats = print_problem_stats(&p.problem);
 
-        let mut solution = Vec::new();
+        let mut solution = Result::Err(SolverError::NoSolution);
         for solver in solvers.iter() {
             hprof::start_frame();
             println!("Starting solver {:?}", solver);
@@ -195,6 +203,7 @@ fn main() {
                     &p.problem,
                     delay_cost_type,
                     false,
+                    30.0,
                     &p.train_names,
                     &p.resource_names,
                 )
@@ -213,50 +222,65 @@ fn main() {
                     &p.problem,
                     delay_cost_type,
                     true,
+                    30.0,
                     &p.train_names,
                     &p.resource_names,
-                )
-                .unwrap(),
+                ),
                 SolverType::MaxSatDdd => {
                     if let DelayCostType::Step123 = delay_cost_type {
-                        maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &p.problem)
-                            .unwrap()
-                            .0
+                        maxsatddd::solve(
+                            satcoder::solvers::minisat::Solver::new(),
+                            &p.problem,
+                            30.0,
+                        )
+                        .map(|(v, _)| v)
                     } else {
                         panic!("Unsupported delay cost type for MaxSATDDD solver.");
                     }
                 }
                 SolverType::MaxSatIdl => {
                     if let DelayCostType::Step123 = delay_cost_type {
-                        ddd::solvers::idl::solve(&p.problem).unwrap()
+                        ddd::solvers::idl::solve(&p.problem)
                     } else {
                         panic!("Unsupported delay cost type for IDL solver.");
                     }
                 }
                 SolverType::MipDdd => {
                     if let DelayCostType::Step123 = delay_cost_type {
-                        ddd::solvers::mipdddpack::solve(&env, &p.problem).unwrap()
+                        ddd::solvers::mipdddpack::solve(&env, &p.problem)
                     } else {
                         panic!("Unsupported delay cost type for MipDDD solver.")
                     }
                 }
             };
             hprof::end_frame();
-
-            let cost = p.problem.verify_solution(&solution).unwrap();
-            hprof::profiler().print_timing();
-            let _root = hprof::profiler().root();
-            let sol_time = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
             let solver_name = format!("{:?}", solver);
-            writeln!(
-                perf_out.borrow_mut(),
-                "{:>10} {:<12} {:>5} {:>10.0}",
-                name,
-                solver_name,
-                cost,
-                sol_time,
-            )
-            .unwrap();
+
+            if let Ok(solution) = solution.as_ref() {
+                let cost = p.problem.verify_solution(solution).unwrap();
+                hprof::profiler().print_timing();
+                let _root = hprof::profiler().root();
+                let sol_time = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
+                writeln!(
+                    perf_out.borrow_mut(),
+                    "{:>10} {:<12} {:>5} {:>10.0}",
+                    name,
+                    solver_name,
+                    cost,
+                    sol_time,
+                )
+                .unwrap();
+            } else {
+                writeln!(
+                    perf_out.borrow_mut(),
+                    "{:>10} {:<12} {:>5} {:>10.0}",
+                    name,
+                    solver_name,
+                    9999.0,
+                    9999.0,
+                )
+                .unwrap();
+            }
         }
         solution
     };
@@ -275,7 +299,7 @@ fn main() {
         verify_instances(|name, p, solution| {
             let cost = p.problem.verify_solution(&solution).unwrap();
             writeln!(perf_out.borrow_mut(), "{:>10} {:>5}", name, cost,).unwrap();
-            solve_it(name, p)
+            solve_it(name, p).unwrap()
         })
     }
     println!("{}", perf_out.into_inner());

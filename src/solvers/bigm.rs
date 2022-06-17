@@ -1,14 +1,18 @@
-use std::collections::HashSet;
+use std::{
+    collections::{HashMap, HashSet},
+    time::Instant,
+};
 
 use super::SolverError;
 use crate::problem::{DelayCostType, Problem, DEFAULT_COST_THRESHOLDS};
-const M: f64 = 100_000.0;
+const M: f64 = 2.0 * 6.0 * 3600.0;
 
 pub fn solve_bigm(
     env: &grb::Env,
     problem: &Problem,
     delay_cost_type: DelayCostType,
     lazy: bool,
+    timeout: f64,
     train_names: &[String],
     resource_names: &[String],
 ) -> Result<Vec<Vec<i32>>, SolverError> {
@@ -39,6 +43,10 @@ fn solve(
     use grb::prelude::*;
 
     let mut model = Model::with_env("model1", env).map_err(SolverError::GurobiError)?;
+    let mut n_travel_constraints = 0;
+    let mut n_resource_constraints = 0;
+    let mut iteration = 0;
+    let start_time = Instant::now();
 
     model
         .set_param(param::IntFeasTol, 1e-8)
@@ -75,6 +83,7 @@ fn solve(
                 train_names,
                 resource_names,
             )?;
+            n_travel_constraints += 1;
         }
     }
 
@@ -92,6 +101,7 @@ fn solve(
                 resource_names,
             };
             add_conflict_constraint(&mut model, &conflict)?;
+            n_resource_constraints += 1;
             assert!(added_conflicts.insert(visit_pair));
         }
     }
@@ -150,7 +160,7 @@ fn solve(
                     if let Some(aimed) = train.visits[visit_idx].aimed {
                         let time_var = t_vars[train_idx][visit_idx];
                         let objective_var_name = format!(
-                            "tn{}_v{}_tk{}",
+                            "tn{}_v{}_tk{}_dly",
                             train_names[train_idx],
                             visit_idx,
                             resource_names[train.visits[visit_idx].resource_id],
@@ -175,11 +185,29 @@ fn solve(
     let mut refinement_iterations = 0;
     loop {
         {
+            log::debug!(
+                "Starting optimize on iteration {} with {} conflict constraints",
+                refinement_iterations + 1,
+                added_conflicts.len()
+            );
+            model
+                .write(&format!("model{}.lp", refinement_iterations + 1))
+                .unwrap();
             let _p = hprof::enter("optimize");
+            model
+                .set_param(
+                    param::TimeLimit,
+                    timeout - start_time.elapsed().as_secs_f64(),
+                )
+                .map_err(SolverError::GurobiError)?;
             model.optimize().map_err(SolverError::GurobiError)?;
+            iteration += 1;
         }
 
-        if model.status().map_err(SolverError::GurobiError)? != Status::Optimal {
+        let status = model.status().map_err(SolverError::GurobiError)?;
+        if status == Status::TimeLimit {
+            return Err(SolverError::Timeout);
+        } else if status == Status::Infeasible {
             model.compute_iis().map_err(SolverError::GurobiError)?;
             model
                 .write("infeasible.ilp")
@@ -196,7 +224,11 @@ fn solve(
 
             // println!("IIS {:?}", iis_constrs);
             return Err(SolverError::NoSolution);
+        } else if status != Status::Optimal {
+            dbg!(status);
+            panic!("Unknown status type.");
         }
+
         let cost = model
             .get_attr(attr::ObjVal)
             .map_err(SolverError::GurobiError)?;
@@ -207,10 +239,10 @@ fn solve(
         let violated_conflicts = {
             let _p = hprof::enter("check conflicts");
 
-            let mut cs = Vec::new();
-            for visit_pair in visit_conflicts.iter().copied() {
+            let mut cs: HashMap<(usize, usize), Vec<(usize, usize)>> = HashMap::new();
+            for visit_pair @ ((t1, v1), (t2, v2)) in visit_conflicts.iter().copied() {
                 if !check_conflict(visit_pair, &model, &t_vars)? {
-                    cs.push(visit_pair);
+                    cs.entry((t1, t2)).or_default().push((v1, v2));
                 }
             }
             cs
@@ -219,6 +251,10 @@ fn solve(
         if !violated_conflicts.is_empty() {
             refinement_iterations += 1;
             for visit_pair in violated_conflicts {
+
+            for ((t1, t2), pairs) in violated_conflicts {
+                let (v1, v2) = *pairs.iter().min_by_key(|(v1, v2)| v1 + v2).unwrap();
+                let visit_pair = ((t1, v1), (t2, v2));
                 let conflict = ConflictInformation {
                     problem,
                     visit_pair,
@@ -226,8 +262,8 @@ fn solve(
                     train_names,
                     resource_names,
                 };
-
-                add_conflict_constraint(&mut model, &conflict)?;
+                add_conflict_constraint( &conflict)?;
+                n_resource_constraints += 1;
                 assert!(added_conflicts.insert(visit_pair));
             }
         } else {
@@ -239,7 +275,6 @@ fn solve(
                 refinement_iterations
             );
 
-            // model.write("model.lp").unwrap();
             // model.write("model.sol").unwrap();
 
             let mut solution = Vec::new();
@@ -259,6 +294,10 @@ fn solve(
                 );
                 solution.push(train_solution);
             }
+            println!(
+                "BIGMSTATS {} {} {}",
+                iteration, n_travel_constraints, n_resource_constraints
+            );
             return Ok(solution);
         }
     }
@@ -387,8 +426,8 @@ fn add_bigm_conflict_constraint(
     );
 
     #[allow(clippy::unnecessary_cast)]
-    let choice_var = add_intvar!(model, name: &choice_var_name, bounds: 0..1)
-        .map_err(SolverError::GurobiError)?;
+    let choice_var =
+        add_binvar!(model, name: &choice_var_name).map_err(SolverError::GurobiError)?;
 
     #[allow(clippy::useless_conversion)]
     model

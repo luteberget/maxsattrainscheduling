@@ -1,13 +1,13 @@
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, HashMap}, time::Instant,
 };
 
 #[allow(unused)]
 use crate::{
     debug::{ResourceInterval, SolverAction},
-    problem::Problem,
     minimize_core,
+    problem::Problem,
     trim_core,
 };
 use satcoder::{
@@ -30,7 +30,6 @@ impl From<usize> for VisitId {
     }
 }
 
-
 #[derive(Clone, Copy, Debug)]
 struct ResourceId(u32);
 
@@ -51,6 +50,8 @@ pub enum IterationType {
     Objective,
     TravelTimeConflict,
     ResourceConflict,
+    TravelAndResourceConflict,
+    Solution,
 }
 
 #[derive(Default)]
@@ -65,22 +66,25 @@ pub struct SolveStats {
 pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
     solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
+    timeout: f64,
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
-    solve_debug(solver, problem, |_| {})
+    solve_debug(solver, problem, timeout, |_| {})
 }
-
-
 
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
 
 use crate::debug::DebugInfo;
 
+
+
 use super::SolverError;
 pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     mut solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
+    timeout :f64,
     debug_out: impl Fn(DebugInfo),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
+
     // TODO
     //  - more eager constraint generation
     //    - propagate simple presedences?
@@ -90,7 +94,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     //  - cadical doesn't use false polarity, so it can generate unlimited conflicts when cost is maxed. Two trains pushing each other forward.
 
     let _p = hprof::enter("solver");
-
+    
+    let start_time = Instant::now();
     let mut stats = SolveStats::default();
 
     let mut visits: TiVec<VisitId, (usize, usize)> = TiVec::new();
@@ -131,18 +136,26 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
         }
     }
 
-    let mut iteration = 0;
+    // The first iteration (0) does not need a solve call; we 
+    // know it's SAT because there are no constraints yet.
+    let mut iteration = 1;
+    let mut is_sat = true;
+
     let mut total_cost = 0;
     let mut soft_constraints = HashMap::new();
-    let mut is_sat = true;
     let mut debug_actions = Vec::new();
 
     loop {
+        if start_time.elapsed().as_secs_f64() > timeout {
+            return Err(SolverError::Timeout);
+        }
+        
         let _p = hprof::enter("iteration");
         if is_sat {
             // println!("Iteration {} conflict detection starting...", iteration);
 
-            let mut found_conflict = false;
+            let mut found_travel_time_conflict = false;
+            let mut found_resource_conflict = false;
 
             // let mut touched_intervals = visits.keys().collect::<Vec<_>>();
 
@@ -167,14 +180,11 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
                     // TRAVEL TIME CONFLICT
                     if t1_in + visit.travel_time > t1_out {
-                        found_conflict = true;
+                        found_travel_time_conflict = true;
                         // println!(
                         //     "  - TRAVEL time conflict train{} visit{} resource{} in{} travel{} out{}",
                         //     train_idx, visit_idx, this_resource_id, t1_in, travel_time, t1_out
                         // );
-                        *iteration_types
-                            .entry(IterationType::TravelTimeConflict)
-                            .or_default() += 1;
 
                         debug_actions.push(SolverAction::TravelTimeConflict(ResourceInterval {
                             train_idx,
@@ -299,11 +309,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             //     panic!("kejks");
                             // }
 
-                            found_conflict = true;
-                            *iteration_types
-                                .entry(IterationType::ResourceConflict)
-                                .or_default() += 1;
+                            found_resource_conflict = true;
                             stats.n_conflict += 1;
+
                             // println!(
                             //         " - RESOURCE conflict between t{}-v{}-r{}-in{}-out{} t{}-v{}-r{}-in{}-out{}",
                             //         train_idx,
@@ -390,7 +398,20 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             assert!(touched_intervals.is_empty());
             // }
 
-            if !found_conflict {
+            let iterationtype = if found_travel_time_conflict && found_resource_conflict {
+                IterationType::TravelAndResourceConflict
+            } else if found_travel_time_conflict {
+                IterationType::TravelTimeConflict
+            } else if found_resource_conflict {
+                println!("Iteration {}", iteration);
+                IterationType::ResourceConflict
+            } else {
+                IterationType::Solution
+            };
+
+            *iteration_types.entry(iterationtype).or_default() += 1;
+
+            if !(found_resource_conflict || found_travel_time_conflict) {
                 // Incumbent times are feasible and optimal.
 
                 let trains = extract_solution(problem, &occupations);
@@ -408,6 +429,18 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 });
 
                 stats.satsolver = format!("{:?}", solver);
+
+                println!("STATS {} {} {} {} {} {} {} {}",
+                /* iter */ iteration,
+                /* objective iters */ iteration_types.get(&IterationType::Objective).unwrap_or(&0),
+                /* travel iters */ iteration_types.get(&IterationType::TravelTimeConflict).unwrap_or(&0),
+                /* resource iters */ iteration_types.get(&IterationType::ResourceConflict).unwrap_or(&0),
+                /* both iters */ iteration_types.get(&IterationType::TravelAndResourceConflict).unwrap_or(&0),
+                /* solution iters */ iteration_types.get(&IterationType::Solution).unwrap_or(&0),
+                /* num traveltime */ stats.n_travel,
+                /* num conflicts */ stats.n_conflict,
+            );
+
                 return Ok((trains, stats));
             }
         }
@@ -591,7 +624,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
             for c in core.iter() {
                 let (soft, cost, original_cost) = soft_constraints.remove(c).unwrap();
-                
+
                 // let soft_str = match &soft {
                 //     Soft::Delay => "delay".to_string(),
                 //     Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),

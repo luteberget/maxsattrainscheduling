@@ -1,0 +1,435 @@
+
+TrainId=9 Delay=9999999 FreeRun=9999999
+T22_S22_to_S23 Train9 AimedDepartureTime=-20300 WaitTime=0 BaseTime=0 RunTime=90
+T21_S21_to_S22 Train9 AimedDepartureTime=-20180 WaitTime=30 BaseTime=120 RunTime=120
+T20_S20_to_S21 Train9 AimedDepartureTime=-20060 WaitTime=0 BaseTime=240 RunTime=45
+T19_S19_to_S20 Train9 AimedDepartureTime=-20015 WaitTime=0 BaseTime=285 RunTime=135
+T18_S18_to_S19 Train9 AimedDepartureTime=-19820 WaitTime=60 BaseTime=480 RunTime=210
+T17_S17_to_S18 Train9 AimedDepartureTime=-19580 WaitTime=30 BaseTime=720 RunTime=150
+T16_S16_to_S17 Train9 AimedDepartureTime=-19400 WaitTime=30 BaseTime=900 RunTime=150
+T15_S15_to_S16 Train9 AimedDepartureTime=-19220 WaitTime=30 BaseTime=1080 RunTime=90
+T14_S14_to_S15 Train9 AimedDepartureTime=-19100 WaitTime=30 BaseTime=1200 RunTime=171
+T13_S13_to_S14 Train9 AimedDepartureTime=-18929 WaitTime=0 BaseTime=1371 RunTime=83
+
+TrainId=31 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train31 AimedDepartureTime=-17120 WaitTime=0 BaseTime=0 RunTime=0
+T24_S24_to_S25 Train31 AimedDepartureTime=-16968 WaitTime=0 BaseTime=0 RunTime=118
+T23_S23_to_S24 Train31 AimedDepartureTime=-16820 WaitTime=30 BaseTime=148 RunTime=90
+T22_S22_to_S23 Train31 AimedDepartureTime=-16700 WaitTime=30 BaseTime=268 RunTime=90
+T21_S21_to_S22 Train31 AimedDepartureTime=-16580 WaitTime=30 BaseTime=388 RunTime=119
+T20_S20_to_S21 Train31 AimedDepartureTime=-16461 WaitTime=0 BaseTime=507 RunTime=45
+T19_S19_to_S20 Train31 AimedDepartureTime=-16416 WaitTime=0 BaseTime=552 RunTime=136
+T18_S18_to_S19 Train31 AimedDepartureTime=-16220 WaitTime=60 BaseTime=748 RunTime=210
+T17_S17_to_S18 Train31 AimedDepartureTime=-15980 WaitTime=30 BaseTime=988 RunTime=150
+T16_S16_to_S17 Train31 AimedDepartureTime=-15800 WaitTime=30 BaseTime=1168 RunTime=150
+T15_S15_to_S16 Train31 AimedDepartureTime=-15620 WaitTime=30 BaseTime=1348 RunTime=90
+T14_S14_to_S15 Train31 AimedDepartureTime=-15500 WaitTime=30 BaseTime=1468 RunTime=178
+T13_S13_to_S14 Train31 AimedDepartureTime=-15322 WaitTime=0 BaseTime=1646 RunTime=80
+
+TrainId=54 Delay=9999999 FreeRun=9999999
+T22_S22_to_S23 Train54 AimedDepartureTime=-13100 WaitTime=0 BaseTime=0 RunTime=90
+T21_S21_to_S22 Train54 AimedDepartureTime=-12980 WaitTime=30 BaseTime=120 RunTime=119
+T20_S20_to_S21 Train54 AimedDepartureTime=-12861 WaitTime=0 BaseTime=239 RunTime=45
+T19_S19_to_S20 Train54 AimedDepartureTime=-12816 WaitTime=0 BaseTime=284 RunTime=136
+T18_S18_to_S19 Train54 AimedDepartureTime=-12620 WaitTime=60 BaseTime=480 RunTime=210
+T17_S17_to_S18 Train54 AimedDepartureTime=-12380 WaitTime=30 BaseTime=720 RunTime=150
+T16_S16_to_S17 Train54 AimedDepartureTime=-12200 WaitTime=30 BaseTime=900 RunTime=150
+T15_S15_to_S16 Train54 AimedDepartureTime=-12020 WaitTime=30 BaseTime=1080 RunTime=90
+T14_S14_to_S15 Train54 AimedDepartureTime=-11900 WaitTime=30 BaseTime=1200 RunTime=178
+T13_S13_to_S14 Train54 AimedDepartureTime=-11722 WaitTime=0 BaseTime=1378 RunTime=80
+
+TrainId=79 Delay=9999999 FreeRun=9999999
+T22_S22_to_S23 Train79 AimedDepartureTime=-9500 WaitTime=0 BaseTime=0 RunTime=90
+T21_S21_to_S22 Train79 AimedDepartureTime=-9380 WaitTime=30 BaseTime=120 RunTime=119
+T20_S20_to_S21 Train79 AimedDepartureTime=-9261 WaitTime=0 BaseTime=239 RunTime=45
+T19_S19_to_S20 Train79 AimedDepartureTime=-9216 WaitTime=0 BaseTime=284 RunTime=136
+T18_S18_to_S19 Train79 AimedDepartureTime=-9020 WaitTime=60 BaseTime=480 RunTime=210
+T17_S17_to_S18 Train79 AimedDepartureTime=-8780 WaitTime=30 BaseTime=720 RunTime=150
+T16_S16_to_S17 Train79 AimedDepartureTime=-8600 WaitTime=30 BaseTime=900 RunTime=150
+T15_S15_to_S16 Train79 AimedDepartureTime=-8420 WaitTime=30 BaseTime=1080 RunTime=90
+T14_S14_to_S15 Train79 AimedDepartureTime=-8300 WaitTime=30 BaseTime=1200 RunTime=178
+T13_S13_to_S14 Train79 AimedDepartureTime=-8122 WaitTime=0 BaseTime=1378 RunTime=80
+
+TrainId=99 Delay=9999999 FreeRun=9999999
+T11_S11_to_S12 Train99 AimedDepartureTime=1890 WaitTime=0 BaseTime=0 RunTime=267
+T10_S10_to_S11 Train99 AimedDepartureTime=2297 WaitTime=0 BaseTime=2297 RunTime=288
+T9_S9_to_S10 Train99 AimedDepartureTime=2585 WaitTime=0 BaseTime=2585 RunTime=335
+T8_S8_to_S9 Train99 AimedDepartureTime=3220 WaitTime=300 BaseTime=3220 RunTime=470
+T7_S7_to_S8 Train99 AimedDepartureTime=3690 WaitTime=0 BaseTime=3690 RunTime=241
+T6_S6_to_S7 Train99 AimedDepartureTime=3931 WaitTime=0 BaseTime=3931 RunTime=429
+T5_S5_to_S6 Train99 AimedDepartureTime=4600 WaitTime=240 BaseTime=4600 RunTime=372
+T4_S4_to_S5 Train99 AimedDepartureTime=4972 WaitTime=0 BaseTime=4972 RunTime=266
+T3_S3_to_S4 Train99 AimedDepartureTime=5238 WaitTime=0 BaseTime=5238 RunTime=485
+T2_S2_to_S3 Train99 AimedDepartureTime=5723 WaitTime=0 BaseTime=5723 RunTime=217
+T1_S1_to_S2 Train99 AimedDepartureTime=5940 WaitTime=0 BaseTime=5940 RunTime=289
+
+TrainId=120 Delay=9999999 FreeRun=9999999
+T11_S11_to_S12 Train120 AimedDepartureTime=-7220 WaitTime=0 BaseTime=1 RunTime=415
+T10_S10_to_S11 Train120 AimedDepartureTime=-6805 WaitTime=0 BaseTime=416 RunTime=365
+
+TrainId=123 Delay=9999999 FreeRun=9999999
+T1_S1_to_S2 Train123 AimedDepartureTime=-4850 WaitTime=0 BaseTime=1 RunTime=280
+T2_S2_to_S3 Train123 AimedDepartureTime=-4570 WaitTime=0 BaseTime=281 RunTime=252
+T3_S3_to_S4 Train123 AimedDepartureTime=-4318 WaitTime=0 BaseTime=533 RunTime=458
+T4_S4_to_S5 Train123 AimedDepartureTime=-3860 WaitTime=0 BaseTime=991 RunTime=275
+T5_S5_to_S6 Train123 AimedDepartureTime=-3585 WaitTime=0 BaseTime=1266 RunTime=385
+
+TrainId=135 Delay=9999999 FreeRun=9999999
+T10_S10_to_S11 Train135 AimedDepartureTime=40 WaitTime=3 BaseTime=40 RunTime=240
+T9_S9_to_S10 Train135 AimedDepartureTime=280 WaitTime=0 BaseTime=280 RunTime=210
+T8_S8_to_S9 Train135 AimedDepartureTime=520 WaitTime=30 BaseTime=520 RunTime=300
+T7_S7_to_S8 Train135 AimedDepartureTime=820 WaitTime=0 BaseTime=820 RunTime=180
+T6_S6_to_S7 Train135 AimedDepartureTime=1000 WaitTime=0 BaseTime=1000 RunTime=300
+
+TrainId=153 Delay=9999999 FreeRun=9999999
+T18_S18_to_S19 Train153 AimedDepartureTime=-20 WaitTime=3 BaseTime=3 RunTime=210
+T17_S17_to_S18 Train153 AimedDepartureTime=220 WaitTime=30 BaseTime=243 RunTime=150
+T16_S16_to_S17 Train153 AimedDepartureTime=400 WaitTime=30 BaseTime=423 RunTime=90
+T15_S15_to_S16 Train153 AimedDepartureTime=520 WaitTime=30 BaseTime=543 RunTime=180
+T14_S14_to_S15 Train153 AimedDepartureTime=880 WaitTime=180 BaseTime=903 RunTime=210
+T13_S13_to_S14 Train153 AimedDepartureTime=1120 WaitTime=30 BaseTime=1143 RunTime=84
+T12_S12_to_S13 Train153 AimedDepartureTime=1204 WaitTime=0 BaseTime=1227 RunTime=126
+T11_S11_to_S12 Train153 AimedDepartureTime=1360 WaitTime=30 BaseTime=1383 RunTime=275
+T10_S10_to_S11 Train153 AimedDepartureTime=1635 WaitTime=0 BaseTime=1658 RunTime=205
+T9_S9_to_S10 Train153 AimedDepartureTime=1840 WaitTime=0 BaseTime=1863 RunTime=210
+T8_S8_to_S9 Train153 AimedDepartureTime=2080 WaitTime=30 BaseTime=2103 RunTime=292
+T7_S7_to_S8 Train153 AimedDepartureTime=2372 WaitTime=0 BaseTime=2395 RunTime=188
+T6_S6_to_S7 Train153 AimedDepartureTime=2740 WaitTime=180 BaseTime=2763 RunTime=360
+
+TrainId=154 Delay=9999999 FreeRun=9999999
+T5_S5_to_S6 Train154 AimedDepartureTime=-1400 WaitTime=0 BaseTime=1 RunTime=381
+T4_S4_to_S5 Train154 AimedDepartureTime=-1019 WaitTime=0 BaseTime=382 RunTime=273
+T3_S3_to_S4 Train154 AimedDepartureTime=-746 WaitTime=0 BaseTime=655 RunTime=480
+T2_S2_to_S3 Train154 AimedDepartureTime=-266 WaitTime=0 BaseTime=1135 RunTime=215
+T1_S1_to_S2 Train154 AimedDepartureTime=-51 WaitTime=0 BaseTime=1350 RunTime=285
+
+TrainId=155 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train155 AimedDepartureTime=880 WaitTime=60 BaseTime=880 RunTime=157
+T24_S24_to_S25 Train155 AimedDepartureTime=1037 WaitTime=0 BaseTime=1037 RunTime=113
+T23_S23_to_S24 Train155 AimedDepartureTime=1180 WaitTime=30 BaseTime=1180 RunTime=150
+T22_S22_to_S23 Train155 AimedDepartureTime=1360 WaitTime=30 BaseTime=1360 RunTime=90
+T21_S21_to_S22 Train155 AimedDepartureTime=1480 WaitTime=30 BaseTime=1480 RunTime=120
+T20_S20_to_S21 Train155 AimedDepartureTime=1600 WaitTime=0 BaseTime=1600 RunTime=45
+T19_S19_to_S20 Train155 AimedDepartureTime=1645 WaitTime=0 BaseTime=1645 RunTime=135
+T18_S18_to_S19 Train155 AimedDepartureTime=1840 WaitTime=60 BaseTime=1840 RunTime=210
+T17_S17_to_S18 Train155 AimedDepartureTime=2080 WaitTime=30 BaseTime=2080 RunTime=150
+T16_S16_to_S17 Train155 AimedDepartureTime=2260 WaitTime=30 BaseTime=2260 RunTime=150
+T15_S15_to_S16 Train155 AimedDepartureTime=2440 WaitTime=30 BaseTime=2440 RunTime=90
+T14_S14_to_S15 Train155 AimedDepartureTime=2560 WaitTime=30 BaseTime=2560 RunTime=171
+T13_S13_to_S14 Train155 AimedDepartureTime=2731 WaitTime=0 BaseTime=2731 RunTime=83
+T12_S12_to_S13 Train155 AimedDepartureTime=2814 WaitTime=0 BaseTime=2814 RunTime=126
+T11_S11_to_S12 Train155 AimedDepartureTime=2980 WaitTime=40 BaseTime=2980 RunTime=480
+T10_S10_to_S11 Train155 AimedDepartureTime=3640 WaitTime=180 BaseTime=3640 RunTime=240
+T9_S9_to_S10 Train155 AimedDepartureTime=3880 WaitTime=0 BaseTime=3880 RunTime=210
+T8_S8_to_S9 Train155 AimedDepartureTime=4120 WaitTime=30 BaseTime=4120 RunTime=240
+T7_S7_to_S8 Train155 AimedDepartureTime=4360 WaitTime=0 BaseTime=4360 RunTime=180
+T6_S6_to_S7 Train155 AimedDepartureTime=4540 WaitTime=0 BaseTime=4540 RunTime=360
+
+TrainId=158 Delay=9999999 FreeRun=9999999
+T10_S10_to_S11 Train158 AimedDepartureTime=-140 WaitTime=0 BaseTime=0 RunTime=28
+T11_S11_to_S12 Train158 AimedDepartureTime=40 WaitTime=0 BaseTime=40 RunTime=380
+T12_S12_to_S13 Train158 AimedDepartureTime=460 WaitTime=40 BaseTime=460 RunTime=120
+T13_S13_to_S14 Train158 AimedDepartureTime=580 WaitTime=0 BaseTime=580 RunTime=81
+T14_S14_to_S15 Train158 AimedDepartureTime=661 WaitTime=0 BaseTime=661 RunTime=189
+T15_S15_to_S16 Train158 AimedDepartureTime=880 WaitTime=30 BaseTime=880 RunTime=150
+T16_S16_to_S17 Train158 AimedDepartureTime=1060 WaitTime=30 BaseTime=1060 RunTime=90
+T17_S17_to_S18 Train158 AimedDepartureTime=1180 WaitTime=30 BaseTime=1180 RunTime=150
+T18_S18_to_S19 Train158 AimedDepartureTime=1360 WaitTime=30 BaseTime=1360 RunTime=240
+T19_S19_to_S20 Train158 AimedDepartureTime=1780 WaitTime=180 BaseTime=1780 RunTime=90
+T20_S20_to_S21 Train158 AimedDepartureTime=1870 WaitTime=0 BaseTime=1870 RunTime=30
+T21_S21_to_S22 Train158 AimedDepartureTime=1900 WaitTime=0 BaseTime=1900 RunTime=150
+T22_S22_to_S23 Train158 AimedDepartureTime=2080 WaitTime=30 BaseTime=2080 RunTime=90
+T23_S23_to_S24 Train158 AimedDepartureTime=2200 WaitTime=30 BaseTime=2200 RunTime=90
+T24_S24_to_S25 Train158 AimedDepartureTime=2320 WaitTime=30 BaseTime=2320 RunTime=110
+T25_S25_to_S26 Train158 AimedDepartureTime=2430 WaitTime=0 BaseTime=2430 RunTime=190
+
+TrainId=160 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train160 AimedDepartureTime=2620 WaitTime=120 BaseTime=2620 RunTime=150
+T24_S24_to_S25 Train160 AimedDepartureTime=2800 WaitTime=30 BaseTime=2800 RunTime=150
+T23_S23_to_S24 Train160 AimedDepartureTime=2980 WaitTime=30 BaseTime=2980 RunTime=150
+T22_S22_to_S23 Train160 AimedDepartureTime=3160 WaitTime=30 BaseTime=3160 RunTime=30
+T21_S21_to_S22 Train160 AimedDepartureTime=3220 WaitTime=30 BaseTime=3220 RunTime=150
+T20_S20_to_S21 Train160 AimedDepartureTime=3370 WaitTime=0 BaseTime=3370 RunTime=42
+T19_S19_to_S20 Train160 AimedDepartureTime=3412 WaitTime=0 BaseTime=3412 RunTime=128
+T18_S18_to_S19 Train160 AimedDepartureTime=3580 WaitTime=40 BaseTime=3580 RunTime=210
+T17_S17_to_S18 Train160 AimedDepartureTime=3820 WaitTime=30 BaseTime=3820 RunTime=150
+T16_S16_to_S17 Train160 AimedDepartureTime=4000 WaitTime=30 BaseTime=4000 RunTime=90
+T15_S15_to_S16 Train160 AimedDepartureTime=4120 WaitTime=30 BaseTime=4120 RunTime=180
+T14_S14_to_S15 Train160 AimedDepartureTime=4480 WaitTime=180 BaseTime=4480 RunTime=210
+T13_S13_to_S14 Train160 AimedDepartureTime=4720 WaitTime=30 BaseTime=4720 RunTime=84
+T12_S12_to_S13 Train160 AimedDepartureTime=4804 WaitTime=0 BaseTime=4804 RunTime=126
+T11_S11_to_S12 Train160 AimedDepartureTime=4960 WaitTime=30 BaseTime=4960 RunTime=298
+T10_S10_to_S11 Train160 AimedDepartureTime=5258 WaitTime=0 BaseTime=5258 RunTime=205
+T9_S9_to_S10 Train160 AimedDepartureTime=5463 WaitTime=0 BaseTime=5463 RunTime=247
+T8_S8_to_S9 Train160 AimedDepartureTime=5740 WaitTime=30 BaseTime=5740 RunTime=245
+T7_S7_to_S8 Train160 AimedDepartureTime=5985 WaitTime=0 BaseTime=5985 RunTime=175
+T6_S6_to_S7 Train160 AimedDepartureTime=6340 WaitTime=180 BaseTime=6340 RunTime=360
+
+TrainId=161 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train161 AimedDepartureTime=4480 WaitTime=60 BaseTime=4480 RunTime=157
+T24_S24_to_S25 Train161 AimedDepartureTime=4637 WaitTime=0 BaseTime=4637 RunTime=113
+T23_S23_to_S24 Train161 AimedDepartureTime=4780 WaitTime=30 BaseTime=4780 RunTime=150
+T22_S22_to_S23 Train161 AimedDepartureTime=4960 WaitTime=30 BaseTime=4960 RunTime=90
+T21_S21_to_S22 Train161 AimedDepartureTime=5080 WaitTime=30 BaseTime=5080 RunTime=120
+T20_S20_to_S21 Train161 AimedDepartureTime=5200 WaitTime=0 BaseTime=5200 RunTime=45
+T19_S19_to_S20 Train161 AimedDepartureTime=5245 WaitTime=0 BaseTime=5245 RunTime=135
+T18_S18_to_S19 Train161 AimedDepartureTime=5440 WaitTime=60 BaseTime=5440 RunTime=210
+T17_S17_to_S18 Train161 AimedDepartureTime=5680 WaitTime=30 BaseTime=5680 RunTime=150
+T16_S16_to_S17 Train161 AimedDepartureTime=5860 WaitTime=30 BaseTime=5860 RunTime=150
+T15_S15_to_S16 Train161 AimedDepartureTime=6040 WaitTime=30 BaseTime=6040 RunTime=90
+T14_S14_to_S15 Train161 AimedDepartureTime=6160 WaitTime=30 BaseTime=6160 RunTime=171
+T13_S13_to_S14 Train161 AimedDepartureTime=6331 WaitTime=0 BaseTime=6331 RunTime=83
+T12_S12_to_S13 Train161 AimedDepartureTime=6414 WaitTime=0 BaseTime=6414 RunTime=126
+T11_S11_to_S12 Train161 AimedDepartureTime=6580 WaitTime=40 BaseTime=6580 RunTime=480
+T10_S10_to_S11 Train161 AimedDepartureTime=7240 WaitTime=180 BaseTime=7240 RunTime=229
+T9_S9_to_S10 Train161 AimedDepartureTime=7469 WaitTime=0 BaseTime=7469 RunTime=221
+T8_S8_to_S9 Train161 AimedDepartureTime=7720 WaitTime=30 BaseTime=7720 RunTime=303
+T7_S7_to_S8 Train161 AimedDepartureTime=8023 WaitTime=0 BaseTime=8023 RunTime=177
+T6_S6_to_S7 Train161 AimedDepartureTime=8200 WaitTime=0 BaseTime=8200 RunTime=300
+
+TrainId=162 Delay=9999999 FreeRun=9999999
+T6_S6_to_S7 Train162 AimedDepartureTime=2440 WaitTime=0 BaseTime=2440 RunTime=300
+T7_S7_to_S8 Train162 AimedDepartureTime=2740 WaitTime=0 BaseTime=2740 RunTime=180
+T8_S8_to_S9 Train162 AimedDepartureTime=2920 WaitTime=0 BaseTime=2920 RunTime=270
+T9_S9_to_S10 Train162 AimedDepartureTime=3220 WaitTime=30 BaseTime=3220 RunTime=240
+T10_S10_to_S11 Train162 AimedDepartureTime=3460 WaitTime=0 BaseTime=3460 RunTime=180
+T11_S11_to_S12 Train162 AimedDepartureTime=3640 WaitTime=0 BaseTime=3640 RunTime=380
+T12_S12_to_S13 Train162 AimedDepartureTime=4060 WaitTime=40 BaseTime=4060 RunTime=103
+T13_S13_to_S14 Train162 AimedDepartureTime=4163 WaitTime=0 BaseTime=4163 RunTime=69
+T14_S14_to_S15 Train162 AimedDepartureTime=4232 WaitTime=0 BaseTime=4232 RunTime=218
+T15_S15_to_S16 Train162 AimedDepartureTime=4480 WaitTime=30 BaseTime=4480 RunTime=150
+T16_S16_to_S17 Train162 AimedDepartureTime=4660 WaitTime=30 BaseTime=4660 RunTime=90
+T17_S17_to_S18 Train162 AimedDepartureTime=4780 WaitTime=30 BaseTime=4780 RunTime=150
+T18_S18_to_S19 Train162 AimedDepartureTime=4960 WaitTime=30 BaseTime=4960 RunTime=240
+T19_S19_to_S20 Train162 AimedDepartureTime=5380 WaitTime=180 BaseTime=5380 RunTime=90
+T20_S20_to_S21 Train162 AimedDepartureTime=5470 WaitTime=0 BaseTime=5470 RunTime=30
+T21_S21_to_S22 Train162 AimedDepartureTime=5500 WaitTime=0 BaseTime=5500 RunTime=150
+T22_S22_to_S23 Train162 AimedDepartureTime=5680 WaitTime=30 BaseTime=5680 RunTime=90
+T23_S23_to_S24 Train162 AimedDepartureTime=5800 WaitTime=30 BaseTime=5800 RunTime=90
+T24_S24_to_S25 Train162 AimedDepartureTime=5920 WaitTime=30 BaseTime=5920 RunTime=122
+T25_S25_to_S26 Train162 AimedDepartureTime=6042 WaitTime=0 BaseTime=6042 RunTime=178
+
+TrainId=163 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train163 AimedDepartureTime=15400 WaitTime=0 BaseTime=15400 RunTime=242
+T24_S24_to_S25 Train163 AimedDepartureTime=15642 WaitTime=0 BaseTime=15642 RunTime=238
+T23_S23_to_S24 Train163 AimedDepartureTime=15880 WaitTime=0 BaseTime=15880 RunTime=77
+T22_S22_to_S23 Train163 AimedDepartureTime=15957 WaitTime=0 BaseTime=15957 RunTime=43
+T21_S21_to_S22 Train163 AimedDepartureTime=16000 WaitTime=0 BaseTime=16000 RunTime=180
+T20_S20_to_S21 Train163 AimedDepartureTime=16240 WaitTime=60 BaseTime=16240 RunTime=83
+T19_S19_to_S20 Train163 AimedDepartureTime=16323 WaitTime=0 BaseTime=16323 RunTime=249
+T18_S18_to_S19 Train163 AimedDepartureTime=16572 WaitTime=0 BaseTime=16572 RunTime=282
+T17_S17_to_S18 Train163 AimedDepartureTime=16854 WaitTime=0 BaseTime=16854 RunTime=202
+T16_S16_to_S17 Train163 AimedDepartureTime=17056 WaitTime=0 BaseTime=17056 RunTime=119
+T15_S15_to_S16 Train163 AimedDepartureTime=17175 WaitTime=0 BaseTime=17175 RunTime=145
+T14_S14_to_S15 Train163 AimedDepartureTime=17320 WaitTime=0 BaseTime=17320 RunTime=282
+T13_S13_to_S14 Train163 AimedDepartureTime=17602 WaitTime=0 BaseTime=17602 RunTime=151
+T12_S12_to_S13 Train163 AimedDepartureTime=17753 WaitTime=0 BaseTime=17753 RunTime=227
+T11_S11_to_S12 Train163 AimedDepartureTime=18340 WaitTime=360 BaseTime=18340 RunTime=460
+T10_S10_to_S11 Train163 AimedDepartureTime=18800 WaitTime=0 BaseTime=18800 RunTime=286
+T9_S9_to_S10 Train163 AimedDepartureTime=19086 WaitTime=0 BaseTime=19086 RunTime=288
+T8_S8_to_S9 Train163 AimedDepartureTime=19374 WaitTime=0 BaseTime=19374 RunTime=406
+T7_S7_to_S8 Train163 AimedDepartureTime=20800 WaitTime=1020 BaseTime=20800 RunTime=281
+T6_S6_to_S7 Train163 AimedDepartureTime=21081 WaitTime=0 BaseTime=21081 RunTime=499
+T5_S5_to_S6 Train163 AimedDepartureTime=22600 WaitTime=1020 BaseTime=22600 RunTime=392
+T4_S4_to_S5 Train163 AimedDepartureTime=22992 WaitTime=0 BaseTime=22992 RunTime=281
+T3_S3_to_S4 Train163 AimedDepartureTime=23273 WaitTime=0 BaseTime=23273 RunTime=553
+T2_S2_to_S3 Train163 AimedDepartureTime=24100 WaitTime=274 BaseTime=24100 RunTime=298
+T1_S1_to_S2 Train163 AimedDepartureTime=24398 WaitTime=0 BaseTime=24398 RunTime=302
+
+TrainId=164 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train164 AimedDepartureTime=8080 WaitTime=60 BaseTime=8080 RunTime=152
+T24_S24_to_S25 Train164 AimedDepartureTime=8232 WaitTime=0 BaseTime=8232 RunTime=118
+T23_S23_to_S24 Train164 AimedDepartureTime=8380 WaitTime=30 BaseTime=8380 RunTime=90
+T22_S22_to_S23 Train164 AimedDepartureTime=8500 WaitTime=30 BaseTime=8500 RunTime=90
+T21_S21_to_S22 Train164 AimedDepartureTime=8620 WaitTime=30 BaseTime=8620 RunTime=119
+T20_S20_to_S21 Train164 AimedDepartureTime=8739 WaitTime=0 BaseTime=8739 RunTime=45
+T19_S19_to_S20 Train164 AimedDepartureTime=8784 WaitTime=0 BaseTime=8784 RunTime=136
+T18_S18_to_S19 Train164 AimedDepartureTime=8980 WaitTime=60 BaseTime=8980 RunTime=210
+T17_S17_to_S18 Train164 AimedDepartureTime=9220 WaitTime=30 BaseTime=9220 RunTime=150
+T16_S16_to_S17 Train164 AimedDepartureTime=9400 WaitTime=30 BaseTime=9400 RunTime=150
+T15_S15_to_S16 Train164 AimedDepartureTime=9580 WaitTime=30 BaseTime=9580 RunTime=90
+T14_S14_to_S15 Train164 AimedDepartureTime=9700 WaitTime=30 BaseTime=9700 RunTime=178
+T13_S13_to_S14 Train164 AimedDepartureTime=9878 WaitTime=0 BaseTime=9878 RunTime=80
+T12_S12_to_S13 Train164 AimedDepartureTime=9958 WaitTime=0 BaseTime=9958 RunTime=122
+T11_S11_to_S12 Train164 AimedDepartureTime=10120 WaitTime=40 BaseTime=10120 RunTime=480
+T10_S10_to_S11 Train164 AimedDepartureTime=10780 WaitTime=180 BaseTime=10780 RunTime=240
+T9_S9_to_S10 Train164 AimedDepartureTime=11020 WaitTime=0 BaseTime=11020 RunTime=210
+T8_S8_to_S9 Train164 AimedDepartureTime=11260 WaitTime=30 BaseTime=11260 RunTime=300
+T7_S7_to_S8 Train164 AimedDepartureTime=11560 WaitTime=0 BaseTime=11560 RunTime=180
+T6_S6_to_S7 Train164 AimedDepartureTime=11740 WaitTime=0 BaseTime=11740 RunTime=300
+
+TrainId=165 Delay=9999999 FreeRun=9999999
+T6_S6_to_S7 Train165 AimedDepartureTime=6040 WaitTime=0 BaseTime=6040 RunTime=300
+T7_S7_to_S8 Train165 AimedDepartureTime=6340 WaitTime=0 BaseTime=6340 RunTime=180
+T8_S8_to_S9 Train165 AimedDepartureTime=6520 WaitTime=0 BaseTime=6520 RunTime=270
+T9_S9_to_S10 Train165 AimedDepartureTime=6820 WaitTime=30 BaseTime=6820 RunTime=240
+T10_S10_to_S11 Train165 AimedDepartureTime=7060 WaitTime=0 BaseTime=7060 RunTime=180
+T11_S11_to_S12 Train165 AimedDepartureTime=7240 WaitTime=0 BaseTime=7240 RunTime=320
+T12_S12_to_S13 Train165 AimedDepartureTime=7600 WaitTime=40 BaseTime=7600 RunTime=107
+T13_S13_to_S14 Train165 AimedDepartureTime=7707 WaitTime=0 BaseTime=7707 RunTime=72
+T14_S14_to_S15 Train165 AimedDepartureTime=7779 WaitTime=0 BaseTime=7779 RunTime=211
+T15_S15_to_S16 Train165 AimedDepartureTime=8020 WaitTime=30 BaseTime=8020 RunTime=150
+T16_S16_to_S17 Train165 AimedDepartureTime=8200 WaitTime=30 BaseTime=8200 RunTime=90
+T17_S17_to_S18 Train165 AimedDepartureTime=8320 WaitTime=30 BaseTime=8320 RunTime=150
+T18_S18_to_S19 Train165 AimedDepartureTime=8500 WaitTime=30 BaseTime=8500 RunTime=300
+T19_S19_to_S20 Train165 AimedDepartureTime=8980 WaitTime=180 BaseTime=8980 RunTime=90
+T20_S20_to_S21 Train165 AimedDepartureTime=9070 WaitTime=0 BaseTime=9070 RunTime=30
+T21_S21_to_S22 Train165 AimedDepartureTime=9100 WaitTime=0 BaseTime=9100 RunTime=150
+T22_S22_to_S23 Train165 AimedDepartureTime=9280 WaitTime=30 BaseTime=9280 RunTime=90
+T23_S23_to_S24 Train165 AimedDepartureTime=9400 WaitTime=30 BaseTime=9400 RunTime=90
+T24_S24_to_S25 Train165 AimedDepartureTime=9520 WaitTime=30 BaseTime=9520 RunTime=110
+T25_S25_to_S26 Train165 AimedDepartureTime=9630 WaitTime=0 BaseTime=9630 RunTime=190
+
+TrainId=166 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train166 AimedDepartureTime=11680 WaitTime=60 BaseTime=11680 RunTime=152
+T24_S24_to_S25 Train166 AimedDepartureTime=11832 WaitTime=0 BaseTime=11832 RunTime=118
+T23_S23_to_S24 Train166 AimedDepartureTime=11980 WaitTime=30 BaseTime=11980 RunTime=90
+T22_S22_to_S23 Train166 AimedDepartureTime=12100 WaitTime=30 BaseTime=12100 RunTime=90
+T21_S21_to_S22 Train166 AimedDepartureTime=12220 WaitTime=30 BaseTime=12220 RunTime=119
+T20_S20_to_S21 Train166 AimedDepartureTime=12339 WaitTime=0 BaseTime=12339 RunTime=45
+T19_S19_to_S20 Train166 AimedDepartureTime=12384 WaitTime=0 BaseTime=12384 RunTime=136
+T18_S18_to_S19 Train166 AimedDepartureTime=12580 WaitTime=60 BaseTime=12580 RunTime=210
+T17_S17_to_S18 Train166 AimedDepartureTime=12820 WaitTime=30 BaseTime=12820 RunTime=150
+T16_S16_to_S17 Train166 AimedDepartureTime=13000 WaitTime=30 BaseTime=13000 RunTime=150
+T15_S15_to_S16 Train166 AimedDepartureTime=13180 WaitTime=30 BaseTime=13180 RunTime=90
+T14_S14_to_S15 Train166 AimedDepartureTime=13300 WaitTime=30 BaseTime=13300 RunTime=178
+T13_S13_to_S14 Train166 AimedDepartureTime=13478 WaitTime=0 BaseTime=13478 RunTime=80
+T12_S12_to_S13 Train166 AimedDepartureTime=13558 WaitTime=0 BaseTime=13558 RunTime=122
+T11_S11_to_S12 Train166 AimedDepartureTime=13720 WaitTime=40 BaseTime=13720 RunTime=480
+T10_S10_to_S11 Train166 AimedDepartureTime=14380 WaitTime=180 BaseTime=14380 RunTime=240
+T9_S9_to_S10 Train166 AimedDepartureTime=14620 WaitTime=0 BaseTime=14620 RunTime=210
+T8_S8_to_S9 Train166 AimedDepartureTime=14860 WaitTime=30 BaseTime=14860 RunTime=300
+T7_S7_to_S8 Train166 AimedDepartureTime=15160 WaitTime=0 BaseTime=15160 RunTime=180
+T6_S6_to_S7 Train166 AimedDepartureTime=15340 WaitTime=0 BaseTime=15340 RunTime=300
+
+TrainId=167 Delay=9999999 FreeRun=9999999
+T6_S6_to_S7 Train167 AimedDepartureTime=9520 WaitTime=0 BaseTime=9520 RunTime=362
+T7_S7_to_S8 Train167 AimedDepartureTime=9882 WaitTime=0 BaseTime=9882 RunTime=163
+T8_S8_to_S9 Train167 AimedDepartureTime=10045 WaitTime=0 BaseTime=10045 RunTime=225
+T9_S9_to_S10 Train167 AimedDepartureTime=10300 WaitTime=30 BaseTime=10300 RunTime=240
+T10_S10_to_S11 Train167 AimedDepartureTime=10540 WaitTime=0 BaseTime=10540 RunTime=240
+T11_S11_to_S12 Train167 AimedDepartureTime=10780 WaitTime=0 BaseTime=10780 RunTime=320
+T12_S12_to_S13 Train167 AimedDepartureTime=11140 WaitTime=40 BaseTime=11140 RunTime=107
+T13_S13_to_S14 Train167 AimedDepartureTime=11247 WaitTime=0 BaseTime=11247 RunTime=72
+T14_S14_to_S15 Train167 AimedDepartureTime=11319 WaitTime=0 BaseTime=11319 RunTime=211
+T15_S15_to_S16 Train167 AimedDepartureTime=11560 WaitTime=30 BaseTime=11560 RunTime=150
+T16_S16_to_S17 Train167 AimedDepartureTime=11740 WaitTime=30 BaseTime=11740 RunTime=90
+T17_S17_to_S18 Train167 AimedDepartureTime=11860 WaitTime=30 BaseTime=11860 RunTime=150
+T18_S18_to_S19 Train167 AimedDepartureTime=12040 WaitTime=30 BaseTime=12040 RunTime=300
+T19_S19_to_S20 Train167 AimedDepartureTime=12520 WaitTime=180 BaseTime=12520 RunTime=90
+T20_S20_to_S21 Train167 AimedDepartureTime=12610 WaitTime=0 BaseTime=12610 RunTime=30
+T21_S21_to_S22 Train167 AimedDepartureTime=12640 WaitTime=0 BaseTime=12640 RunTime=150
+T22_S22_to_S23 Train167 AimedDepartureTime=12820 WaitTime=30 BaseTime=12820 RunTime=90
+T23_S23_to_S24 Train167 AimedDepartureTime=12940 WaitTime=30 BaseTime=12940 RunTime=90
+T24_S24_to_S25 Train167 AimedDepartureTime=13060 WaitTime=30 BaseTime=13060 RunTime=110
+T25_S25_to_S26 Train167 AimedDepartureTime=13170 WaitTime=0 BaseTime=13170 RunTime=250
+
+TrainId=168 Delay=9999999 FreeRun=9999999
+T6_S6_to_S7 Train168 AimedDepartureTime=13000 WaitTime=0 BaseTime=13000 RunTime=324
+T7_S7_to_S8 Train168 AimedDepartureTime=13324 WaitTime=0 BaseTime=13324 RunTime=216
+T8_S8_to_S9 Train168 AimedDepartureTime=13720 WaitTime=180 BaseTime=13720 RunTime=270
+T9_S9_to_S10 Train168 AimedDepartureTime=14020 WaitTime=30 BaseTime=14020 RunTime=209
+T10_S10_to_S11 Train168 AimedDepartureTime=14229 WaitTime=0 BaseTime=14229 RunTime=151
+T11_S11_to_S12 Train168 AimedDepartureTime=14380 WaitTime=0 BaseTime=14380 RunTime=320
+T12_S12_to_S13 Train168 AimedDepartureTime=14740 WaitTime=40 BaseTime=14740 RunTime=107
+T13_S13_to_S14 Train168 AimedDepartureTime=14847 WaitTime=0 BaseTime=14847 RunTime=72
+T14_S14_to_S15 Train168 AimedDepartureTime=14919 WaitTime=0 BaseTime=14919 RunTime=211
+T15_S15_to_S16 Train168 AimedDepartureTime=15160 WaitTime=30 BaseTime=15160 RunTime=150
+T16_S16_to_S17 Train168 AimedDepartureTime=15340 WaitTime=30 BaseTime=15340 RunTime=90
+T17_S17_to_S18 Train168 AimedDepartureTime=15460 WaitTime=30 BaseTime=15460 RunTime=150
+T18_S18_to_S19 Train168 AimedDepartureTime=15640 WaitTime=30 BaseTime=15640 RunTime=300
+T19_S19_to_S20 Train168 AimedDepartureTime=16120 WaitTime=180 BaseTime=16120 RunTime=90
+T20_S20_to_S21 Train168 AimedDepartureTime=16210 WaitTime=0 BaseTime=16210 RunTime=30
+T21_S21_to_S22 Train168 AimedDepartureTime=16240 WaitTime=0 BaseTime=16240 RunTime=150
+T22_S22_to_S23 Train168 AimedDepartureTime=16420 WaitTime=30 BaseTime=16420 RunTime=90
+T23_S23_to_S24 Train168 AimedDepartureTime=16540 WaitTime=30 BaseTime=16540 RunTime=90
+T24_S24_to_S25 Train168 AimedDepartureTime=16660 WaitTime=30 BaseTime=16660 RunTime=110
+T25_S25_to_S26 Train168 AimedDepartureTime=16770 WaitTime=0 BaseTime=16770 RunTime=250
+
+TrainId=169 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train169 AimedDepartureTime=15280 WaitTime=60 BaseTime=15280 RunTime=152
+T24_S24_to_S25 Train169 AimedDepartureTime=15432 WaitTime=0 BaseTime=15432 RunTime=118
+T23_S23_to_S24 Train169 AimedDepartureTime=15580 WaitTime=30 BaseTime=15580 RunTime=90
+T22_S22_to_S23 Train169 AimedDepartureTime=15700 WaitTime=30 BaseTime=15700 RunTime=90
+T21_S21_to_S22 Train169 AimedDepartureTime=15820 WaitTime=30 BaseTime=15820 RunTime=119
+T20_S20_to_S21 Train169 AimedDepartureTime=15939 WaitTime=0 BaseTime=15939 RunTime=45
+T19_S19_to_S20 Train169 AimedDepartureTime=15984 WaitTime=0 BaseTime=15984 RunTime=136
+T18_S18_to_S19 Train169 AimedDepartureTime=16180 WaitTime=60 BaseTime=16180 RunTime=210
+T17_S17_to_S18 Train169 AimedDepartureTime=16420 WaitTime=30 BaseTime=16420 RunTime=150
+T16_S16_to_S17 Train169 AimedDepartureTime=16600 WaitTime=30 BaseTime=16600 RunTime=150
+T15_S15_to_S16 Train169 AimedDepartureTime=16780 WaitTime=30 BaseTime=16780 RunTime=90
+T14_S14_to_S15 Train169 AimedDepartureTime=16900 WaitTime=30 BaseTime=16900 RunTime=178
+T13_S13_to_S14 Train169 AimedDepartureTime=17078 WaitTime=0 BaseTime=17078 RunTime=80
+T12_S12_to_S13 Train169 AimedDepartureTime=17158 WaitTime=0 BaseTime=17158 RunTime=122
+T11_S11_to_S12 Train169 AimedDepartureTime=17320 WaitTime=40 BaseTime=17320 RunTime=480
+T10_S10_to_S11 Train169 AimedDepartureTime=17980 WaitTime=180 BaseTime=17980 RunTime=240
+T9_S9_to_S10 Train169 AimedDepartureTime=18220 WaitTime=0 BaseTime=18220 RunTime=210
+T8_S8_to_S9 Train169 AimedDepartureTime=18460 WaitTime=30 BaseTime=18460 RunTime=300
+T7_S7_to_S8 Train169 AimedDepartureTime=18760 WaitTime=0 BaseTime=18760 RunTime=180
+T6_S6_to_S7 Train169 AimedDepartureTime=18940 WaitTime=0 BaseTime=18940 RunTime=300
+
+TrainId=170 Delay=9999999 FreeRun=9999999
+T25_S25_to_S26 Train170 AimedDepartureTime=18880 WaitTime=60 BaseTime=18880 RunTime=152
+T24_S24_to_S25 Train170 AimedDepartureTime=19032 WaitTime=0 BaseTime=19032 RunTime=118
+T23_S23_to_S24 Train170 AimedDepartureTime=19180 WaitTime=30 BaseTime=19180 RunTime=90
+T22_S22_to_S23 Train170 AimedDepartureTime=19300 WaitTime=30 BaseTime=19300 RunTime=90
+T21_S21_to_S22 Train170 AimedDepartureTime=19420 WaitTime=30 BaseTime=19420 RunTime=119
+T20_S20_to_S21 Train170 AimedDepartureTime=19539 WaitTime=0 BaseTime=19539 RunTime=45
+T19_S19_to_S20 Train170 AimedDepartureTime=19584 WaitTime=0 BaseTime=19584 RunTime=136
+T18_S18_to_S19 Train170 AimedDepartureTime=19780 WaitTime=60 BaseTime=19780 RunTime=210
+T17_S17_to_S18 Train170 AimedDepartureTime=20020 WaitTime=30 BaseTime=20020 RunTime=150
+T16_S16_to_S17 Train170 AimedDepartureTime=20200 WaitTime=30 BaseTime=20200 RunTime=150
+T15_S15_to_S16 Train170 AimedDepartureTime=20380 WaitTime=30 BaseTime=20380 RunTime=90
+T14_S14_to_S15 Train170 AimedDepartureTime=20500 WaitTime=30 BaseTime=20500 RunTime=178
+T13_S13_to_S14 Train170 AimedDepartureTime=20678 WaitTime=0 BaseTime=20678 RunTime=80
+T12_S12_to_S13 Train170 AimedDepartureTime=20758 WaitTime=0 BaseTime=20758 RunTime=122
+T11_S11_to_S12 Train170 AimedDepartureTime=20920 WaitTime=40 BaseTime=20920 RunTime=480
+T10_S10_to_S11 Train170 AimedDepartureTime=21580 WaitTime=180 BaseTime=21580 RunTime=240
+T9_S9_to_S10 Train170 AimedDepartureTime=21820 WaitTime=0 BaseTime=21820 RunTime=210
+T8_S8_to_S9 Train170 AimedDepartureTime=22060 WaitTime=30 BaseTime=22060 RunTime=300
+T7_S7_to_S8 Train170 AimedDepartureTime=22360 WaitTime=0 BaseTime=22360 RunTime=180
+T6_S6_to_S7 Train170 AimedDepartureTime=22540 WaitTime=0 BaseTime=22540 RunTime=300
+
+TrainId=171 Delay=9999999 FreeRun=9999999
+T6_S6_to_S7 Train171 AimedDepartureTime=16720 WaitTime=0 BaseTime=16720 RunTime=300
+T7_S7_to_S8 Train171 AimedDepartureTime=17020 WaitTime=0 BaseTime=17020 RunTime=180
+T8_S8_to_S9 Train171 AimedDepartureTime=17200 WaitTime=0 BaseTime=17200 RunTime=270
+T9_S9_to_S10 Train171 AimedDepartureTime=17500 WaitTime=30 BaseTime=17500 RunTime=240
+T10_S10_to_S11 Train171 AimedDepartureTime=17740 WaitTime=0 BaseTime=17740 RunTime=240
+T11_S11_to_S12 Train171 AimedDepartureTime=17980 WaitTime=0 BaseTime=17980 RunTime=320
+T12_S12_to_S13 Train171 AimedDepartureTime=18340 WaitTime=40 BaseTime=18340 RunTime=107
+T13_S13_to_S14 Train171 AimedDepartureTime=18447 WaitTime=0 BaseTime=18447 RunTime=72
+T14_S14_to_S15 Train171 AimedDepartureTime=18519 WaitTime=0 BaseTime=18519 RunTime=211
+T15_S15_to_S16 Train171 AimedDepartureTime=18760 WaitTime=30 BaseTime=18760 RunTime=150
+T16_S16_to_S17 Train171 AimedDepartureTime=18940 WaitTime=30 BaseTime=18940 RunTime=90
+T17_S17_to_S18 Train171 AimedDepartureTime=19060 WaitTime=30 BaseTime=19060 RunTime=150
+T18_S18_to_S19 Train171 AimedDepartureTime=19240 WaitTime=30 BaseTime=19240 RunTime=300
+T19_S19_to_S20 Train171 AimedDepartureTime=19720 WaitTime=180 BaseTime=19720 RunTime=90
+T20_S20_to_S21 Train171 AimedDepartureTime=19810 WaitTime=0 BaseTime=19810 RunTime=30
+T21_S21_to_S22 Train171 AimedDepartureTime=19840 WaitTime=0 BaseTime=19840 RunTime=150
+T22_S22_to_S23 Train171 AimedDepartureTime=20020 WaitTime=30 BaseTime=20020 RunTime=90
+T23_S23_to_S24 Train171 AimedDepartureTime=20140 WaitTime=30 BaseTime=20140 RunTime=90
+T24_S24_to_S25 Train171 AimedDepartureTime=20260 WaitTime=30 BaseTime=20260 RunTime=110
+T25_S25_to_S26 Train171 AimedDepartureTime=20370 WaitTime=0 BaseTime=20370 RunTime=250
+
+TrainId=172 Delay=9999999 FreeRun=9999999
+T6_S6_to_S7 Train172 AimedDepartureTime=20320 WaitTime=0 BaseTime=20320 RunTime=300
+T7_S7_to_S8 Train172 AimedDepartureTime=20620 WaitTime=0 BaseTime=20620 RunTime=180
+T8_S8_to_S9 Train172 AimedDepartureTime=20800 WaitTime=0 BaseTime=20800 RunTime=270
+T9_S9_to_S10 Train172 AimedDepartureTime=21100 WaitTime=30 BaseTime=21100 RunTime=240
+T10_S10_to_S11 Train172 AimedDepartureTime=21340 WaitTime=0 BaseTime=21340 RunTime=240
+T11_S11_to_S12 Train172 AimedDepartureTime=21580 WaitTime=0 BaseTime=21580 RunTime=320
+T12_S12_to_S13 Train172 AimedDepartureTime=21940 WaitTime=40 BaseTime=21940 RunTime=107
+T13_S13_to_S14 Train172 AimedDepartureTime=22047 WaitTime=0 BaseTime=22047 RunTime=72
+T14_S14_to_S15 Train172 AimedDepartureTime=22119 WaitTime=0 BaseTime=22119 RunTime=211
+T15_S15_to_S16 Train172 AimedDepartureTime=22360 WaitTime=30 BaseTime=22360 RunTime=150
+T16_S16_to_S17 Train172 AimedDepartureTime=22540 WaitTime=30 BaseTime=22540 RunTime=90
+T17_S17_to_S18 Train172 AimedDepartureTime=22660 WaitTime=30 BaseTime=22660 RunTime=150
+T18_S18_to_S19 Train172 AimedDepartureTime=22840 WaitTime=30 BaseTime=22840 RunTime=300
+T19_S19_to_S20 Train172 AimedDepartureTime=23320 WaitTime=180 BaseTime=23320 RunTime=90
+T20_S20_to_S21 Train172 AimedDepartureTime=23410 WaitTime=0 BaseTime=23410 RunTime=30
+T21_S21_to_S22 Train172 AimedDepartureTime=23440 WaitTime=0 BaseTime=23440 RunTime=150
+T22_S22_to_S23 Train172 AimedDepartureTime=23620 WaitTime=30 BaseTime=23620 RunTime=90
+T23_S23_to_S24 Train172 AimedDepartureTime=23740 WaitTime=30 BaseTime=23740 RunTime=90
+T24_S24_to_S25 Train172 AimedDepartureTime=23860 WaitTime=30 BaseTime=23860 RunTime=110
+T25_S25_to_S26 Train172 AimedDepartureTime=23970 WaitTime=0 BaseTime=23970 RunTime=250

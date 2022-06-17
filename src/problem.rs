@@ -163,7 +163,9 @@ impl Problem {
 impl Train {
     pub fn visit_delay_cost(&self, path_idx: usize, t: i32) -> usize {
         if let Some(aimed) = self.visits[path_idx].aimed {
-            DEFAULT_COST_THRESHOLDS.eval(t - aimed)
+            // DEFAULT_COST_THRESHOLDS.eval(t - aimed)
+            let d =(t-aimed);
+            if d <= 0 { 0 } else { (d as usize / 180) + 1}
         } else {
             0
         }
