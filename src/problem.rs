@@ -6,13 +6,16 @@ pub enum DelayMeasurementType {
     FinalStationArrival,
 }
 
-#[derive(Debug)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum DelayCostType {
-    Step123,
+    FiniteSteps123,
+    FiniteSteps12345,
+    FiniteSteps139,
+    InfiniteSteps60,
+    InfiniteSteps180,
+    InfiniteSteps360,
     Continuous,
 }
-
 
 #[derive(Debug)]
 pub struct NamedProblem {
@@ -41,13 +44,18 @@ pub struct Visit {
 }
 
 impl Problem {
-    pub fn train_cost(&self, solution: &[Vec<i32>], train_idx: usize) -> i32 {
+    pub fn train_cost(
+        &self,
+        solution: &[Vec<i32>],
+        delay_cost_type: DelayCostType,
+        train_idx: usize,
+    ) -> i32 {
         let mut sum_cost = 0;
         let train = &self.trains[train_idx];
         for (visit_idx, Visit { .. }) in train.visits.iter().enumerate() {
             let t1_in = solution[train_idx][visit_idx];
 
-            let cost = train.visit_delay_cost(visit_idx, t1_in) as i32;
+            let cost = train.visit_delay_cost(delay_cost_type, visit_idx, t1_in) as i32;
             if cost > 0 {
                 // println!("Added cost for t{} v{} = {}", train_idx, visit_idx, cost);
                 sum_cost += cost;
@@ -57,7 +65,11 @@ impl Problem {
         sum_cost
     }
 
-    pub fn verify_solution(&self, solution: &[Vec<i32>]) -> Option<i32> {
+    pub fn verify_solution(
+        &self,
+        solution: &[Vec<i32>],
+        delay_cost_type: DelayCostType,
+    ) -> Option<i32> {
         let _p = hprof::enter("verify_solution");
         // Check the shape of the solution
         assert!(self.trains.len() == solution.len());
@@ -95,7 +107,7 @@ impl Problem {
                     return None;
                 }
 
-                let cost = train.visit_delay_cost(visit_idx, t1_in) as i32;
+                let cost = train.visit_delay_cost(delay_cost_type, visit_idx, t1_in) as i32;
                 if cost > 0 {
                     // println!("Added cost for t{} v{} = {}", train_idx, visit_idx, cost);
                     sum_cost += cost;
@@ -130,7 +142,7 @@ impl Problem {
                             let t2_in = solution[train_idx2][visit_idx2];
                             let t2_out = solution[train_idx2][visit_idx2 + 1];
 
-                            let ok = t1_in >= t2_out  -1|| t2_in >= t1_out -1;
+                            let ok = t1_in >= t2_out - 1 || t2_in >= t1_out - 1;
                             if !ok {
                                 println!(
                                     "Resource conflict in t{} v{} {}-{} t{} v{} {}-{}",
@@ -161,15 +173,39 @@ impl Problem {
 }
 
 impl Train {
-    pub fn visit_delay_cost(&self, path_idx: usize, t: i32) -> usize {
+    pub fn visit_delay_cost(
+        &self,
+        delay_cost_type: DelayCostType,
+        path_idx: usize,
+        t: i32,
+    ) -> usize {
         if let Some(aimed) = self.visits[path_idx].aimed {
-            // DEFAULT_COST_THRESHOLDS.eval(t - aimed)
-            let d =(t-aimed);
-            if d <= 0 { 0 } else { (d as usize / 180) + 1}
+            let d = (t - aimed).max(0);
+            match delay_cost_type {
+                DelayCostType::FiniteSteps123 => DelayCostThresholds::f123().eval(d),
+                DelayCostType::FiniteSteps12345 => DelayCostThresholds::f12345().eval(d),
+                DelayCostType::FiniteSteps139 => DelayCostThresholds::f139().eval(d),
+                DelayCostType::InfiniteSteps60 => infinite_staircase(d, 60),
+                DelayCostType::InfiniteSteps180 => infinite_staircase(d, 180),
+                DelayCostType::InfiniteSteps360 => infinite_staircase(d, 360),
+                DelayCostType::Continuous => d as usize,
+            }
         } else {
             0
         }
     }
+}
+
+pub fn infinite_staircase(delay: i32, interval: usize) -> usize {
+    if delay <= 0 {
+        0
+    } else {
+        (delay as usize / interval) + 1
+    }
+}
+
+pub fn iter_infinite_staircase(interval :usize) -> impl Iterator<Item = (i32, usize)> {
+    std::iter::once((1,1)).chain((1..).map(move |x| (interval as i32 * x, x as usize +1) ))
 }
 
 pub struct DelayCostThresholds {
@@ -177,24 +213,18 @@ pub struct DelayCostThresholds {
 }
 
 
-use lazy_static::lazy_static;
-lazy_static! {
-    pub static ref DEFAULT_COST_THRESHOLDS : DelayCostThresholds = DelayCostThresholds::f123();
-}
-
-
 impl DelayCostThresholds {
-    fn f123() -> DelayCostThresholds {
+    pub fn f123() -> DelayCostThresholds {
         DelayCostThresholds {
             thresholds: vec![(360, 3), (180, 2), (0, 1)],
         }
     }
-    fn f12345() -> DelayCostThresholds {
+    pub fn f12345() -> DelayCostThresholds {
         DelayCostThresholds {
-            thresholds: vec![(3*360, 5), (2*360, 4), (360, 3), (180, 2), (0, 1)],
+            thresholds: vec![(3 * 360, 5), (2 * 360, 4), (360, 3), (180, 2), (0, 1)],
         }
     }
-    fn f139() -> DelayCostThresholds {
+    pub fn f139() -> DelayCostThresholds {
         DelayCostThresholds {
             thresholds: vec![(360, 9), (180, 3), (0, 1)],
         }

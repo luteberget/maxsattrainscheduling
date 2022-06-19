@@ -78,7 +78,7 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
             .chain(b_instances)
             .chain(c_instances);
 
-        // let instances = [16].iter();
+        // let instances = instances.take(1);
 
         for instance_id in instances {
             let filename = format!("{}/Instance{}.txt", dir, instance_id);
@@ -158,7 +158,6 @@ fn main() {
 
     let opt = Opt::from_args();
     println!("{:?}", opt);
-    println!("Using solvers {:?}", opt.solvers);
     let solvers = opt
         .solvers
         .iter()
@@ -172,20 +171,29 @@ fn main() {
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
+    println!("Using solvers {:?}", solvers);
 
     let delay_cost_type = opt
         .objective
         .map(|obj| match obj.as_str() {
-            "step123" => DelayCostType::Step123,
+            "finsteps123" => DelayCostType::FiniteSteps123,
+            "finsteps12345" => DelayCostType::FiniteSteps12345,
+            "finsteps139" => DelayCostType::FiniteSteps139,
+            "infsteps60" => DelayCostType::InfiniteSteps60,
+            "infsteps180" => DelayCostType::InfiniteSteps180,
+            "infsteps360" => DelayCostType::InfiniteSteps360,
             "cont" => DelayCostType::Continuous,
             _ => panic!("Unknown objective type."),
         })
-        .unwrap_or(DelayCostType::Step123);
+        .unwrap_or(DelayCostType::FiniteSteps123);
+        println!("Using delay cost type {:?}", delay_cost_type);
 
     let perf_out = RefCell::new(String::new());
 
+    println!("Starting gurobi environment...");
     let mut env = grb::Env::new("").unwrap();
     env.set(grb::param::OutputFlag, 0).unwrap();
+    println!("...ok.");
 
     let solve_it = |name: String, p: NamedProblem| -> Result<Vec<Vec<i32>>, SolverError> {
         if solvers.is_empty() {
@@ -206,17 +214,16 @@ fn main() {
                     30.0,
                     &p.train_names,
                     &p.resource_names,
-                )
-                .unwrap(),
+                ),
                 SolverType::MipHull => bigm::solve_hull(
                     &env,
                     &p.problem,
                     delay_cost_type,
                     true,
+                    30.0,
                     &p.train_names,
                     &p.resource_names,
-                )
-                .unwrap(),
+                ),
                 SolverType::BigMLazy => bigm::solve_bigm(
                     &env,
                     &p.problem,
@@ -226,28 +233,23 @@ fn main() {
                     &p.train_names,
                     &p.resource_names,
                 ),
-                SolverType::MaxSatDdd => {
-                    if let DelayCostType::Step123 = delay_cost_type {
-                        maxsatddd::solve(
-                            satcoder::solvers::minisat::Solver::new(),
-                            &p.problem,
-                            30.0,
-                        )
-                        .map(|(v, _)| v)
-                    } else {
-                        panic!("Unsupported delay cost type for MaxSATDDD solver.");
-                    }
-                }
+                SolverType::MaxSatDdd => maxsatddd::solve(
+                    satcoder::solvers::minisat::Solver::new(),
+                    &p.problem,
+                    30.0,
+                    delay_cost_type,
+                )
+                .map(|(v, _)| v),
                 SolverType::MaxSatIdl => {
-                    if let DelayCostType::Step123 = delay_cost_type {
+                    if let DelayCostType::FiniteSteps123 = delay_cost_type {
                         ddd::solvers::idl::solve(&p.problem)
                     } else {
                         panic!("Unsupported delay cost type for IDL solver.");
                     }
                 }
                 SolverType::MipDdd => {
-                    if let DelayCostType::Step123 = delay_cost_type {
-                        ddd::solvers::mipdddpack::solve(&env, &p.problem)
+                    if let DelayCostType::FiniteSteps123 = delay_cost_type {
+                        ddd::solvers::mipdddpack::solve(&env, &p.problem, delay_cost_type)
                     } else {
                         panic!("Unsupported delay cost type for MipDDD solver.")
                     }
@@ -257,7 +259,10 @@ fn main() {
             let solver_name = format!("{:?}", solver);
 
             if let Ok(solution) = solution.as_ref() {
-                let cost = p.problem.verify_solution(solution).unwrap();
+                let cost = p
+                    .problem
+                    .verify_solution(solution, delay_cost_type)
+                    .unwrap();
                 hprof::profiler().print_timing();
                 let _root = hprof::profiler().root();
                 let sol_time = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
@@ -297,7 +302,10 @@ fn main() {
     }
     if opt.verify_instances {
         verify_instances(|name, p, solution| {
-            let cost = p.problem.verify_solution(&solution).unwrap();
+            let cost = p
+                .problem
+                .verify_solution(&solution, delay_cost_type)
+                .unwrap();
             writeln!(perf_out.borrow_mut(), "{:>10} {:>5}", name, cost,).unwrap();
             solve_it(name, p).unwrap()
         })
@@ -362,46 +370,62 @@ fn print_problem_stats(problem: &problem::Problem) -> ProblemStats {
 
 #[cfg(test)]
 mod tests {
-    use ddd::problem::NamedProblem;
+    use ddd::problem::{DelayCostType, NamedProblem};
 
     #[test]
     pub fn testproblem_maxsatddd() {
+        let delay_cost_type = DelayCostType::FiniteSteps123;
+
         let problem = crate::problem::problem1_with_stations();
-        let result =
-            ddd::solvers::maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem)
-                .unwrap()
-                .0;
-        let score = problem.verify_solution(&result);
+        let result = ddd::solvers::maxsatddd::solve(
+            satcoder::solvers::minisat::Solver::new(),
+            &problem,
+            30.0,
+            DelayCostType::FiniteSteps123,
+        )
+        .unwrap()
+        .0;
+        let score = problem.verify_solution(&result, delay_cost_type);
         assert!(score.is_some());
     }
 
     #[test]
     pub fn testproblem_mipdddpack() {
+        let delay_cost_type = DelayCostType::FiniteSteps123;
         let mut env = grb::Env::new("").unwrap();
         env.set(grb::param::OutputFlag, 0).unwrap();
 
         let problem = crate::problem::problem1_with_stations();
-        let result = ddd::solvers::mipdddpack::solve(&env, &problem).unwrap();
-        let score = problem.verify_solution(&result);
+        let result = ddd::solvers::mipdddpack::solve(&env, &problem, delay_cost_type).unwrap();
+        let score = problem.verify_solution(&result, delay_cost_type);
         assert!(score.is_some());
     }
 
     #[test]
     pub fn samescore_trivial() {
         let problem = crate::problem::problem1_with_stations();
+        let delay_cost_type = DelayCostType::FiniteSteps123;
 
-        let result =
-            ddd::solvers::maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem)
-                .unwrap()
-                .0;
-        let first_score = problem.verify_solution(&result);
+        let result = ddd::solvers::maxsatddd::solve(
+            satcoder::solvers::minisat::Solver::new(),
+            &problem,
+            30.0,
+            delay_cost_type,
+        )
+        .unwrap()
+        .0;
+        let first_score = problem.verify_solution(&result, delay_cost_type);
 
         for _ in 0..100 {
-            let result =
-                ddd::solvers::maxsatddd::solve(satcoder::solvers::minisat::Solver::new(), &problem)
-                    .unwrap()
-                    .0;
-            let score = problem.verify_solution(&result);
+            let result = ddd::solvers::maxsatddd::solve(
+                satcoder::solvers::minisat::Solver::new(),
+                &problem,
+                30.0,
+                DelayCostType::FiniteSteps123,
+            )
+            .unwrap()
+            .0;
+            let score = problem.verify_solution(&result, delay_cost_type);
             assert!(score == first_score);
         }
         println!("ALL COSTS WERE {:?}", first_score);
@@ -409,13 +433,15 @@ mod tests {
 
     #[test]
     pub fn samescore_all_instances() {
+        let delay_cost_type = DelayCostType::FiniteSteps123;
         for delaytype in [
             ddd::problem::DelayMeasurementType::AllStationArrivals,
             ddd::problem::DelayMeasurementType::FinalStationArrival,
         ] {
-            for instance_number in [
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-            ] {
+            for instance_number in
+                // [                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,            ]
+                [3, 4, 5]
+            {
                 println!("{}", instance_number);
                 let NamedProblem { problem, .. } = crate::parser::read_xml_file(
                     &format!("instances/Instance{}.xml", instance_number,),
@@ -425,20 +451,24 @@ mod tests {
                 let result = ddd::solvers::maxsatddd::solve(
                     satcoder::solvers::minisat::Solver::new(),
                     &problem,
+                    30.0,
+                    delay_cost_type,
                 )
                 .unwrap()
                 .0;
-                let first_score = problem.verify_solution(&result);
+                let first_score = problem.verify_solution(&result, delay_cost_type);
 
                 for iteration in 0..100 {
                     println!("iteration {} {}", instance_number, iteration);
                     let result = ddd::solvers::maxsatddd::solve(
                         satcoder::solvers::minisat::Solver::new(),
                         &problem,
+                        30.0,
+                        DelayCostType::FiniteSteps123,
                     )
                     .unwrap()
                     .0;
-                    let score = problem.verify_solution(&result);
+                    let score = problem.verify_solution(&result, delay_cost_type);
                     assert!(score == first_score);
                 }
 

@@ -4,8 +4,10 @@ use std::{
 };
 
 use super::SolverError;
-use crate::problem::{DelayCostType, Problem, DEFAULT_COST_THRESHOLDS};
+use crate::problem::{iter_infinite_staircase, DelayCostThresholds, DelayCostType, Problem};
 const M: f64 = 2.0 * 6.0 * 3600.0;
+
+type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<(), SolverError>;
 
 pub fn solve_bigm(
     env: &grb::Env,
@@ -16,7 +18,16 @@ pub fn solve_bigm(
     train_names: &[String],
     resource_names: &[String],
 ) -> Result<Vec<Vec<i32>>, SolverError> {
-    solve(env, problem, delay_cost_type, lazy, train_names, resource_names, add_bigm_conflict_constraint)
+    solve(
+        env,
+        problem,
+        delay_cost_type,
+        lazy,
+        timeout,
+        train_names,
+        resource_names,
+        add_bigm_conflict_constraint,
+    )
 }
 
 pub fn solve_hull(
@@ -24,20 +35,33 @@ pub fn solve_hull(
     problem: &Problem,
     delay_cost_type: DelayCostType,
     lazy: bool,
+    timeout: f64,
+
     train_names: &[String],
     resource_names: &[String],
 ) -> Result<Vec<Vec<i32>>, SolverError> {
-    solve(env, problem, delay_cost_type, lazy, train_names, resource_names, add_hull_conflict_constraint)
+    solve(
+        env,
+        problem,
+        delay_cost_type,
+        lazy,
+        timeout,
+        train_names,
+        resource_names,
+        add_hull_conflict_constraint,
+    )
 }
 
+#[allow(clippy::too_many_arguments)]
 fn solve(
     env: &grb::Env,
     problem: &Problem,
     delay_cost_type: DelayCostType,
-    lazy: bool,
+    lazy_constraints: bool,
+    timeout: f64,
     train_names: &[String],
     resource_names: &[String],
-    add_conflict_constraint :ConflictHandler,
+    add_conflict_constraint: ConflictHandler,
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
@@ -48,9 +72,9 @@ fn solve(
     let mut iteration = 0;
     let start_time = Instant::now();
 
-    model
-        .set_param(param::IntFeasTol, 1e-8)
-        .map_err(SolverError::GurobiError)?;
+    // model
+    //     .set_param(param::IntFeasTol, 1e-8)
+    //     .map_err(SolverError::GurobiError)?;
 
     // timing variables
     let t_vars = problem
@@ -91,7 +115,7 @@ fn solve(
     let visit_conflicts = visit_conflicts(problem);
     let mut added_conflicts = HashSet::new();
 
-    if !lazy {
+    if !lazy_constraints {
         for visit_pair in visit_conflicts.iter().copied() {
             let conflict = ConflictInformation {
                 problem,
@@ -106,10 +130,19 @@ fn solve(
         }
     }
 
+    let mut lazy_stepfunction: Option<HashMap<(usize, usize), Vec<()>>> = None;
+
     // Objective
     match delay_cost_type {
-        DelayCostType::Step123 => {
-            let delay_cost = &DEFAULT_COST_THRESHOLDS;
+        DelayCostType::FiniteSteps123
+        | DelayCostType::FiniteSteps12345
+        | DelayCostType::FiniteSteps139 => {
+            let delay_cost = match delay_cost_type {
+                DelayCostType::FiniteSteps123 => DelayCostThresholds::f123(),
+                DelayCostType::FiniteSteps12345 => DelayCostThresholds::f12345(),
+                DelayCostType::FiniteSteps139 => DelayCostThresholds::f139(),
+                _ => panic!(),
+            };
             for (train_idx, train) in problem.trains.iter().enumerate() {
                 for visit_idx in 0..train.visits.len() {
                     if let Some(aimed) = train.visits[visit_idx].aimed {
@@ -154,6 +187,12 @@ fn solve(
                 }
             }
         }
+        DelayCostType::InfiniteSteps60
+        | DelayCostType::InfiniteSteps180
+        | DelayCostType::InfiniteSteps360 => {
+            // this is done lazily when a solution has been found
+            lazy_stepfunction = Some(Default::default());
+        }
         DelayCostType::Continuous => {
             for (train_idx, train) in problem.trains.iter().enumerate() {
                 for visit_idx in 0..train.visits.len() {
@@ -186,9 +225,10 @@ fn solve(
     loop {
         {
             log::debug!(
-                "Starting optimize on iteration {} with {} conflict constraints",
+                "Starting optimize on iteration {} with {} conflict constraints {:?} lazy objectives",
                 refinement_iterations + 1,
-                added_conflicts.len()
+                added_conflicts.len(),
+                lazy_stepfunction.as_ref().map(|l| l.values().map(|x| x.len()).sum::<usize>()),
             );
             model
                 .write(&format!("model{}.lp", refinement_iterations + 1))
@@ -233,7 +273,7 @@ fn solve(
             .get_attr(attr::ObjVal)
             .map_err(SolverError::GurobiError)?;
 
-        println!("Iteration {} cost {}", refinement_iterations, cost);
+        // println!("Iteration {} cost {}", refinement_iterations, cost);
 
         // Check the conflicts
         let violated_conflicts = {
@@ -248,10 +288,82 @@ fn solve(
             cs
         };
 
-        if !violated_conflicts.is_empty() {
-            refinement_iterations += 1;
-            for visit_pair in violated_conflicts {
+        // Check the lazy objective
+        let mut refined_objective = false;
+        if let Some(lazy_stepfunction) = lazy_stepfunction.as_mut() {
+            let interval = match delay_cost_type {
+                DelayCostType::InfiniteSteps60 => 60,
+                DelayCostType::InfiniteSteps180 => 180,
+                DelayCostType::InfiniteSteps360 => 360,
+                _ => panic!(),
+            };
 
+            for (train_idx, train) in problem.trains.iter().enumerate() {
+                for visit_idx in 0..train.visits.len() {
+                    if let Some(aimed) = train.visits[visit_idx].aimed {
+                        let time_var = t_vars[train_idx][visit_idx];
+                        let curr_t = model
+                            .get_obj_attr(attr::X, &time_var)
+                            .map_err(SolverError::GurobiError)?
+                            .round() as i32;
+                        // println!("t{} {} @ {}  delay {}", train_idx, visit_idx, curr_t, (curr_t - aimed).max(0));
+
+                        let steps = lazy_stepfunction.entry((train_idx, visit_idx)).or_default();
+                        // let mut added_this = false;
+                        for (threshold, cost) in
+                            iter_infinite_staircase(interval).skip(steps.len()).take(5)
+                        {
+                            if cost > train.visit_delay_cost(delay_cost_type, visit_idx, curr_t) {
+                                // println!("  next cost {} exceeds {}", cost, train.visit_delay_cost(delay_cost_type, visit_idx, curr_t));
+                                break;
+                            }
+
+                            let threshold = threshold -1;
+
+                            // added_this = true;
+                            // println!("Adding t{} v{} thr{} cost{} on {}", train_idx, visit_idx, threshold, cost, train.visit_delay_cost(delay_cost_type, visit_idx, curr_t));
+
+                            let cost_diff = 1;
+                            let threshold_var_name = format!(
+                                "tn{}_v{}_tk{}_dly{}",
+                                train_names[train_idx],
+                                visit_idx,
+                                resource_names[train.visits[visit_idx].resource_id],
+                                threshold
+                            );
+
+                            // Add threshold_var to the objective with cost `diff_cost`.
+                            #[allow(clippy::unnecessary_cast)]
+                            let threshold_var =
+                                add_binvar!(model, name: &threshold_var_name, obj: cost_diff)
+                                    .map_err(SolverError::GurobiError)?;
+
+                            // If last_t - aimed >= threshold+1 then threshold_var must be 1
+
+                            #[allow(clippy::useless_conversion)]
+                            model
+                                .add_constr(
+                                    &format!("has_{}", threshold_var_name),
+                                    c!(time_var - aimed <= threshold + M * threshold_var),
+                                )
+                                .map_err(SolverError::GurobiError)?;
+
+                            // println!("added time step {} {} {} {} {}", train_idx, visit_idx, aimed, curr_t, threshold);
+
+                            steps.push(());
+                            refined_objective = true;
+                        }
+
+                        // if added_this {
+                        //     println!("Train {} v {} steps {}", train_idx, visit_idx, steps.len());
+                        // }
+                    }
+                }
+            }
+        };
+
+        if !violated_conflicts.is_empty() || refined_objective {
+            refinement_iterations += 1;
             for ((t1, t2), pairs) in violated_conflicts {
                 let (v1, v2) = *pairs.iter().min_by_key(|(v1, v2)| v1 + v2).unwrap();
                 let visit_pair = ((t1, v1), (t2, v2));
@@ -262,7 +374,7 @@ fn solve(
                     train_names,
                     resource_names,
                 };
-                add_conflict_constraint( &conflict)?;
+                add_conflict_constraint(&mut model, &conflict)?;
                 n_resource_constraints += 1;
                 assert!(added_conflicts.insert(visit_pair));
             }
@@ -275,7 +387,11 @@ fn solve(
                 refinement_iterations
             );
 
-            // model.write("model.sol").unwrap();
+            // let mip_objective =  model.get_attr(grb::attr::ObjVal).unwrap();
+            // println!("MIP obj {}", mip_objective);
+
+            // model.write("model_final.sol").unwrap();
+            // model.write("model_final.lp").unwrap();
 
             let mut solution = Vec::new();
             for (train_idx, train_ts) in t_vars.iter().enumerate() {
@@ -292,8 +408,14 @@ fn solve(
                     train_solution.last().copied().unwrap()
                         + problem.trains[train_idx].visits.last().unwrap().travel_time,
                 );
+
+                
                 solution.push(train_solution);
             }
+
+            // let t0v11 = solution[0][11];
+            //     println!("SOlutino [0][11] {} cost {}", t0v11, problem.trains[0].visit_delay_cost(delay_cost_type, 11, t0v11));
+
             println!(
                 "BIGMSTATS {} {} {}",
                 iteration, n_travel_constraints, n_resource_constraints
@@ -402,8 +524,6 @@ struct ConflictInformation<'a> {
     resource_names: &'a [String],
 }
 
-type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<(), SolverError>;
-
 fn add_bigm_conflict_constraint(
     model: &mut grb::Model,
     conflict: &ConflictInformation,
@@ -450,7 +570,6 @@ fn add_bigm_conflict_constraint(
     Ok(())
 }
 
-
 fn add_hull_conflict_constraint(
     model: &mut grb::Model,
     conflict: &ConflictInformation,
@@ -470,7 +589,10 @@ fn add_hull_conflict_constraint(
     let choice_var_name = format!(
         "confl_tn{}_v{}_tn{}_v{}",
         //train_names[t1], v1, train_names[t2], v2
-        t1, v1, t2, v2
+        t1,
+        v1,
+        t2,
+        v2
     );
 
     #[allow(clippy::unnecessary_cast)]
@@ -496,13 +618,12 @@ fn add_hull_conflict_constraint(
     //     )
     //     .map_err(SolverError::GurobiError)?;
 
-    
-    // we have 
+    // we have
     //  OR (
-    //    t_vars[t2][v2+1] <= t_vars[t1][v1], 
-    //    t_vars[t1][v1+1] <= t_vars[t2][v2], 
+    //    t_vars[t2][v2+1] <= t_vars[t1][v1],
+    //    t_vars[t1][v1+1] <= t_vars[t2][v2],
     //  )
-    // 
+    //
     //  ... and instead of the Big-M formulation:
     //      t2f <= t1s + M*y
     //      t1f <= t2s + M*(1-y)
@@ -523,48 +644,70 @@ fn add_hull_conflict_constraint(
     //     t2f_b <= M * (1 - y)
     //     constraint_A: -M(1-y) <= t2f_a - t1s_a <= 0
     //     constraint_B: -My     <= t1f_b - t2s_b <= 0
-    //     
-    // See https://optimization.cbe.cornell.edu/index.php?title=Disjunctive_inequalities 
+    //
+    // See https://optimization.cbe.cornell.edu/index.php?title=Disjunctive_inequalities
     // for the general transformation.
     //
 
+    let split_vars = [(t1, v1), (t1, v1 + 1), (t2, v2), (t2, v2 + 1)]
+        .iter()
+        .copied()
+        .map(|(t, v)| {
+            let t_a = add_ctsvar!(model, name :&format!("a_{}_{}", t, v), bounds: 0..)
+                .map_err(SolverError::GurobiError)?;
+            let t_b = add_ctsvar!(model, name :&format!("b_{}_{}", t, v), bounds: 0..)
+                .map_err(SolverError::GurobiError)?;
+            let lb = problem.trains[t].visits[v].earliest;
 
-    
-    let split_vars  = [(t1,v1),(t1,v1+1),(t2,v2),(t2,v2+1)].iter().copied().map(|(t,v)| {
-        let t_a = add_ctsvar!(model, name :&format!("a_{}_{}", t, v), bounds: 0..)
-            .map_err(SolverError::GurobiError)?;
-        let t_b = add_ctsvar!(model, name :&format!("b_{}_{}", t, v), bounds: 0..)
-            .map_err(SolverError::GurobiError)?;
-        let lb = problem.trains[t].visits[v].earliest;
-    
-        #[allow(clippy::useless_conversion)]
-        model.add_constr(&format!("{}_t{}v{}_split", choice_var_name, t, v), c!(t_vars[t][v] == lb + t_a + t_b))
-            .map_err(SolverError::GurobiError)?;
-        #[allow(clippy::useless_conversion)]
-        model.add_constr(&format!("{}_t{}v{}_sel1", choice_var_name, t, v), c!(t_a <= M * (1.0f64 - choice_var)))
-            .map_err(SolverError::GurobiError)?;
-        #[allow(clippy::useless_conversion)]
-        model.add_constr(&format!("{}_t{}v{}_sel2", choice_var_name, t, v), c!(t_b <= M * choice_var))
-            .map_err(SolverError::GurobiError)?;
+            #[allow(clippy::useless_conversion)]
+            model
+                .add_constr(
+                    &format!("{}_t{}v{}_split", choice_var_name, t, v),
+                    c!(t_vars[t][v] == lb + t_a + t_b),
+                )
+                .map_err(SolverError::GurobiError)?;
+            #[allow(clippy::useless_conversion)]
+            model
+                .add_constr(
+                    &format!("{}_t{}v{}_sel1", choice_var_name, t, v),
+                    c!(t_a <= M * (1.0f64 - choice_var)),
+                )
+                .map_err(SolverError::GurobiError)?;
+            #[allow(clippy::useless_conversion)]
+            model
+                .add_constr(
+                    &format!("{}_t{}v{}_sel2", choice_var_name, t, v),
+                    c!(t_b <= M * choice_var),
+                )
+                .map_err(SolverError::GurobiError)?;
 
-        Ok((t_a,t_b))
-    }).collect::<Result<Vec<(grb::Var, grb::Var)>,SolverError>>()?;
+            Ok((t_a, t_b))
+        })
+        .collect::<Result<Vec<(grb::Var, grb::Var)>, SolverError>>()?;
 
     let t1s_a = split_vars[0].0;
     let t1s_lb = problem.trains[t1].visits[v1].earliest;
     let t2f_a = split_vars[3].0;
-    let t2f_lb = problem.trains[t2].visits[v2+1].earliest;
+    let t2f_lb = problem.trains[t2].visits[v2 + 1].earliest;
 
     let t2s_b = split_vars[2].1;
     let t2s_lb = problem.trains[t2].visits[v2].earliest;
     let t1f_b = split_vars[1].1;
-    let t1f_lb = problem.trains[t1].visits[v1+1].earliest;
+    let t1f_lb = problem.trains[t1].visits[v1 + 1].earliest;
 
     #[allow(clippy::useless_conversion)]
-    model.add_constr(&format!("{}_a", choice_var_name), c!(  (t2f_a + (1-choice_var)*t2f_lb) - (t1s_a + (1-choice_var)* t1s_lb) <= 0.0f64  ))
+    model
+        .add_constr(
+            &format!("{}_a", choice_var_name),
+            c!((t2f_a + (1 - choice_var) * t2f_lb) - (t1s_a + (1 - choice_var) * t1s_lb) <= 0.0f64),
+        )
         .map_err(SolverError::GurobiError)?;
-        #[allow(clippy::useless_conversion)]
-    model.add_constr(&format!("{}_b", choice_var_name), c!(  (t1f_b + choice_var*t1f_lb) - (t2s_b + choice_var*t2s_lb) <= 0.0f64  ))
+    #[allow(clippy::useless_conversion)]
+    model
+        .add_constr(
+            &format!("{}_b", choice_var_name),
+            c!((t1f_b + choice_var * t1f_lb) - (t2s_b + choice_var * t2s_lb) <= 0.0f64),
+        )
         .map_err(SolverError::GurobiError)?;
 
     Ok(())

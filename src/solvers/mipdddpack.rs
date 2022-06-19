@@ -7,12 +7,13 @@ use std::collections::{HashMap, VecDeque};
 use grb::prelude::*;
 use log::{warn, info};
 
-use crate::problem::Problem;
+use crate::problem::{Problem, DelayCostType};
 
 use super::SolverError;
 const M: f64 = 100_000.0;
 
-pub fn solve(env: &grb::Env,problem: &Problem) -> Result<Vec<Vec<i32>>, SolverError> {
+pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -> Result<Vec<Vec<i32>>, SolverError> {
+    assert!(matches!(delay_cost_type, DelayCostType::FiniteSteps123));
     let _p_init = hprof::enter("mip solve init");
     let mut intervals = problem
         .trains
@@ -68,7 +69,7 @@ pub fn solve(env: &grb::Env,problem: &Problem) -> Result<Vec<Vec<i32>>, SolverEr
 
 
                 let intervals = v.iter().map(|(time,time_out)| {
-                    let mut cost = problem.trains[train_idx].visit_delay_cost(visit_idx, *time) as f64;
+                    let mut cost = problem.trains[train_idx].visit_delay_cost(delay_cost_type, visit_idx, *time) as f64;
 
                     // if cost > 1e-5 {
                     //     cost = 1800.0 * cost + ((*time) - problem.trains[train_idx].visits[visit_idx].earliest) as f64;

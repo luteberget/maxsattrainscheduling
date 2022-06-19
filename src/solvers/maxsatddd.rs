@@ -67,13 +67,14 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
     solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
+    delay_cost_type :DelayCostType,
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
-    solve_debug(solver, problem, timeout, |_| {})
+    solve_debug(solver, problem, timeout, delay_cost_type, |_| {})
 }
 
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
 
-use crate::debug::DebugInfo;
+use crate::{debug::DebugInfo, problem::DelayCostType};
 
 
 
@@ -82,6 +83,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     mut solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout :f64,
+    delay_cost_type :DelayCostType,
     debug_out: impl Fn(DebugInfo),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
 
@@ -453,7 +455,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             let (train_idx, visit_idx) = visits[visit];
             // let resource = problem.trains[train_idx].visits[visit_idx].resource_id;
 
-            let new_var_cost = problem.trains[train_idx].visit_delay_cost(visit_idx, new_t);
+            let new_var_cost = problem.trains[train_idx].visit_delay_cost(delay_cost_type, visit_idx, new_t);
             // println!(
             //     "new var for t{} v{} t{} cost{}",
             //     train_idx, visit_idx, new_t, new_var_cost
