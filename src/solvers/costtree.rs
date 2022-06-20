@@ -29,7 +29,7 @@ impl<L: satcoder::Lit + std::fmt::Debug> CostTree<L> {
     ) {
         assert!(cost > 0);
 
-        println!("Add cost {} to tree {:?}", cost, self.nodes);
+        // println!("Add cost {} to tree {:?}", cost, self.nodes);
 
         if !self.nodes.iter().any(|n| n.cost == cost) {
             // Add a new node.
@@ -64,7 +64,7 @@ impl<L: satcoder::Lit + std::fmt::Debug> CostTree<L> {
                 });
 
                 let cost_diff = cost - parent_cost;
-                println!("  - added cost duff {}", cost_diff);
+                // println!("  - added cost duff {}", cost_diff);
 
                 notify_vars(
                     format!("{}_c{}_d{}", name, cost, cost_diff),
