@@ -40,7 +40,7 @@ pub fn read_txt_file(
                 // let name = fields.next().unwrap().to_string();
                 // let value = fields.next().unwrap().parse::<i64>().unwrap();
                 let pair = fields.next().unwrap();
-                let mut split = pair.split("=");
+                let mut split = pair.split('=');
                 let name = split.next().unwrap().to_string();
                 let value = split.next().unwrap().parse::<i32>().unwrap();
                 (name, value)
@@ -53,9 +53,9 @@ pub fn read_txt_file(
 
                     let (train_id_field, train_id) = get_pair(&mut fields);
                     assert!(train_id_field == "TrainId");
-                    let (delay_field, delay) = get_pair(&mut fields);
+                    let (delay_field, _delay) = get_pair(&mut fields);
                     assert!(delay_field == "Delay");
-                    let (free_run_field, free_run) = get_pair(&mut fields);
+                    let (free_run_field, _free_run) = get_pair(&mut fields);
                     assert!(free_run_field == "FreeRun");
 
                     train_names.push(format!("Train{}", train_id));

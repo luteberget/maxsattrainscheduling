@@ -521,6 +521,8 @@ struct ConflictInformation<'a> {
     visit_pair: ((usize, usize), (usize, usize)),
     t_vars: &'a [Vec<grb::Var>],
     train_names: &'a [String],
+
+    #[allow(dead_code)]
     resource_names: &'a [String],
 }
 

@@ -69,8 +69,8 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
     let c_instances = [21, 22, 23, 24];
 
     for (dir, shortname) in [
-        ("txtinstances", "txt1"),
-        ("txtinstances2", "txt2"),
+        // ("txtinstances", "txt1"),
+        // ("txtinstances2", "txt2"),
         ("txtinstances3", "txt3"),
     ] {
         let instances = a_instances
@@ -78,7 +78,7 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
             .chain(b_instances)
             .chain(c_instances);
 
-        // let instances = instances.take(1);
+        let instances = instances.skip(0).take(1);
 
         for instance_id in instances {
             let filename = format!("{}/Instance{}.txt", dir, instance_id);

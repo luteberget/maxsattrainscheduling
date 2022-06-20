@@ -5,7 +5,7 @@ pub mod parser;
 pub mod problem;
 pub mod solvers;
 
-pub fn minimize_core<L: satcoder::Lit>(
+pub fn minimize_core<L: satcoder::Lit + std::fmt::Debug>(
     core: &mut Vec<Bool<L>>,
     solver: &mut impl SatSolverWithCore<Lit = L>,
 ) {
@@ -18,12 +18,13 @@ pub fn minimize_core<L: satcoder::Lit>(
             let mut assumptions = core.clone();
             let remove_idx = i % assumptions.len();
             assumptions.remove(remove_idx);
-            // println!(
-            //     "Solving core #{}->{} removed {}",
-            //     core.len(),
-            //     assumptions.len(),
-            //     remove_idx
-            // );
+            println!(
+                "Solving core #{}->{} removed {}  {:?}",
+                core.len(),
+                assumptions.len(),
+                remove_idx,
+                assumptions
+            );
             let result = solver.solve_with_assumptions(assumptions.iter().copied());
             if let SatResultWithCore::Unsat(new_core) = result {
                 printed = true;

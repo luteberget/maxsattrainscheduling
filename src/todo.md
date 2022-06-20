@@ -1,7 +1,7 @@
 # solvers:
- * mip bigm
+ * X mip bigm
  * mip ddd (unary vs. one-hot??)
- * maxsat ddd
+ * X maxsat ddd
 
 # features
  * solver: mip ddd one-hot

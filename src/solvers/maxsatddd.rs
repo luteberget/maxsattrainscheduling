@@ -1,6 +1,7 @@
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, HashMap}, time::Instant,
+    collections::{BTreeMap, HashMap},
+    time::Instant,
 };
 
 #[allow(unused)]
@@ -67,7 +68,7 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
     solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
-    delay_cost_type :DelayCostType,
+    delay_cost_type: DelayCostType,
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     solve_debug(solver, problem, timeout, delay_cost_type, |_| {})
 }
@@ -76,17 +77,14 @@ thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  =
 
 use crate::{debug::DebugInfo, problem::DelayCostType};
 
-
-
-use super::SolverError;
+use super::{costtree::CostTree, SolverError};
 pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     mut solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
-    timeout :f64,
-    delay_cost_type :DelayCostType,
+    timeout: f64,
+    delay_cost_type: DelayCostType,
     debug_out: impl Fn(DebugInfo),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
-
     // TODO
     //  - more eager constraint generation
     //    - propagate simple presedences?
@@ -96,7 +94,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     //  - cadical doesn't use false polarity, so it can generate unlimited conflicts when cost is maxed. Two trains pushing each other forward.
 
     let _p = hprof::enter("solver");
-    
+
     let start_time = Instant::now();
     let mut stats = SolveStats::default();
 
@@ -124,6 +122,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
             occupations.push(Occ {
                 cost: vec![true.into()],
+                cost_tree: CostTree::new(),
                 delays: vec![(true.into(), visit.earliest), (false.into(), i32::MAX)],
                 incumbent: 0,
             });
@@ -138,7 +137,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
         }
     }
 
-    // The first iteration (0) does not need a solve call; we 
+    // The first iteration (0) does not need a solve call; we
     // know it's SAT because there are no constraints yet.
     let mut iteration = 1;
     let mut is_sat = true;
@@ -146,12 +145,13 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut total_cost = 0;
     let mut soft_constraints = HashMap::new();
     let mut debug_actions = Vec::new();
+    let mut cost_var_names :HashMap<Bool<L>, String> = HashMap::new();
 
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
             return Err(SolverError::Timeout);
         }
-        
+
         let _p = hprof::enter("iteration");
         if is_sat {
             // println!("Iteration {} conflict detection starting...", iteration);
@@ -432,16 +432,28 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
                 stats.satsolver = format!("{:?}", solver);
 
-                println!("STATS {} {} {} {} {} {} {} {}",
-                /* iter */ iteration,
-                /* objective iters */ iteration_types.get(&IterationType::Objective).unwrap_or(&0),
-                /* travel iters */ iteration_types.get(&IterationType::TravelTimeConflict).unwrap_or(&0),
-                /* resource iters */ iteration_types.get(&IterationType::ResourceConflict).unwrap_or(&0),
-                /* both iters */ iteration_types.get(&IterationType::TravelAndResourceConflict).unwrap_or(&0),
-                /* solution iters */ iteration_types.get(&IterationType::Solution).unwrap_or(&0),
-                /* num traveltime */ stats.n_travel,
-                /* num conflicts */ stats.n_conflict,
-            );
+                println!(
+                    "STATS {} {} {} {} {} {} {} {}",
+                    /* iter */ iteration,
+                    /* objective iters */
+                    iteration_types.get(&IterationType::Objective).unwrap_or(&0),
+                    /* travel iters */
+                    iteration_types
+                        .get(&IterationType::TravelTimeConflict)
+                        .unwrap_or(&0),
+                    /* resource iters */
+                    iteration_types
+                        .get(&IterationType::ResourceConflict)
+                        .unwrap_or(&0),
+                    /* both iters */
+                    iteration_types
+                        .get(&IterationType::TravelAndResourceConflict)
+                        .unwrap_or(&0),
+                    /* solution iters */
+                    iteration_types.get(&IterationType::Solution).unwrap_or(&0),
+                    /* num traveltime */ stats.n_travel,
+                    /* num conflicts */ stats.n_conflict,
+                );
 
                 return Ok((trains, stats));
             }
@@ -451,29 +463,72 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             Totalizer(Totalizer<L>, usize),
         }
 
-        for (visit, new_var, new_t) in new_time_points.drain(..) {
+        for (visit, new_timepoint_var, new_t) in new_time_points.drain(..) {
             let (train_idx, visit_idx) = visits[visit];
             // let resource = problem.trains[train_idx].visits[visit_idx].resource_id;
 
-            let new_var_cost = problem.trains[train_idx].visit_delay_cost(delay_cost_type, visit_idx, new_t);
-            // println!(
-            //     "new var for t{} v{} t{} cost{}",
-            //     train_idx, visit_idx, new_t, new_var_cost
-            // );
-            for cost in occupations[visit].cost.len()..=new_var_cost {
-                let prev_cost_var = occupations[visit].cost[cost - 1];
-                let next_cost_var = SatInstance::new_var(&mut solver);
+            let new_timepoint_cost =
+                problem.trains[train_idx].visit_delay_cost(delay_cost_type, visit_idx, new_t);
 
-                SatInstance::add_clause(&mut solver, vec![!next_cost_var, prev_cost_var]);
+            if new_timepoint_cost > 0 {
+                println!(
+                    "new var for t{} v{} t{} cost{}",
+                    train_idx, visit_idx, new_t, new_timepoint_cost
+                );
 
-                occupations[visit].cost.push(next_cost_var);
-                assert!(cost + 1 == occupations[visit].cost.len());
+                let var_name = format!(
+                    "t{}v{}t{}cost{}",
+                    train_idx, visit_idx, new_t, new_timepoint_cost
+                );
 
-                soft_constraints.insert(!next_cost_var, (Soft::Delay, 1, 1));
-                // println!(
-                //     "Extending t{}v{} to cost {} {:?}",
-                //     train_idx, visit_idx, cost, next_cost_var
-                // );
+                const USE_COST_TREE: bool = true;
+                if !USE_COST_TREE {
+                    for cost in occupations[visit].cost.len()..=new_timepoint_cost {
+                        let prev_cost_var = occupations[visit].cost[cost - 1];
+                        let next_cost_var = SatInstance::new_var(&mut solver);
+
+                        SatInstance::add_clause(&mut solver, vec![!next_cost_var, prev_cost_var]);
+
+                        occupations[visit].cost.push(next_cost_var);
+                        assert!(cost + 1 == occupations[visit].cost.len());
+
+                        soft_constraints.insert(!next_cost_var, (Soft::Delay, 1, 1));
+                        println!(
+                            "Extending t{}v{} to cost {} {:?}",
+                            train_idx, visit_idx, cost, next_cost_var
+                        );
+                    }
+
+                    SatInstance::add_clause(
+                        &mut solver,
+                        vec![
+                            !new_timepoint_var,
+                            occupations[visit].cost[new_timepoint_cost],
+                        ],
+                    );
+
+                    // println!("  highest cost {}", occupations[visit].cost.len() - 1);
+                } else {
+                    // if let Some((weight, cost_var)) = occupations[visit].cost_tree.add_cost(
+                    //     &mut solver,
+                    //     new_timepoint_var,
+                    //     new_timepoint_cost,
+                    // ) {
+                    //     assert!(weight > 0);
+                    //     soft_constraints.insert(!cost_var, (Soft::Delay, weight, weight));
+                    // }
+
+                    occupations[visit].cost_tree.add_cost(
+                        &mut solver,
+                        new_timepoint_var,
+                        new_timepoint_cost,
+                        var_name,
+                        &mut |name, weight, cost_var| {
+                            cost_var_names.insert(!cost_var, name);
+                            soft_constraints.insert(!cost_var, (Soft::Delay, weight, weight));
+                        },
+                    );
+                }
             }
 
             // set the cost for this new time point.
@@ -498,10 +553,10 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             //     "   new var implies cost {}=>{:?}",
             //     new_var_cost, occupations[visit].cost[new_var_cost]
             // );
-            SatInstance::add_clause(
-                &mut solver,
-                vec![!new_var, occupations[visit].cost[new_var_cost]],
-            );
+            // SatInstance::add_clause(
+            //     &mut solver,
+            //     vec![!new_var, occupations[visit].cost[new_var_cost]],
+            // );
         }
 
         let core = {
@@ -564,15 +619,15 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             touched_intervals.push(visit);
                         }
 
-                        let cost = this_occ
-                            .cost
-                            .iter()
-                            .map(|c| if model.value(c) { 1 } else { 0 })
-                            .sum::<isize>()
-                            - 1;
-                        if cost > 0 {
-                            // println!("t{}-v{}  cost={}", train_idx, visit_idx, cost);
-                        }
+                        // let cost = this_occ
+                        //     .cost
+                        //     .iter()
+                        //     .map(|c| if model.value(c) { 1 } else { 0 })
+                        //     .sum::<isize>()
+                        //     - 1;
+                        // if cost > 0 {
+                        //     // println!("t{}-v{}  cost={}", train_idx, visit_idx, cost);
+                        // }
                     }
 
                     // println!(
@@ -606,12 +661,14 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 return Err(SolverError::NoSolution); // UNSAT
             }
 
-            let core = core.iter().map(|c| Bool::Lit(*c)).collect::<Vec<_>>();
+            let mut core = core.iter().map(|c| Bool::Lit(*c)).collect::<Vec<_>>();
 
-            // println!("Core size {}", core.len());
+            println!("Core size {}", core.len());
             // *core_sizes.entry(core.len()).or_default() += 1;
-            // trim_core(&mut core, &mut solver);
-            // minimize_core(&mut core, &mut solver);
+            trim_core(&mut core, &mut solver);
+            minimize_core(&mut core, &mut solver);
+            println!("Post core size {}", core.len());
+
 
             // *processed_core_sizes.entry(core.len()).or_default() += 1;
             // println!("  pre sizes {:?}", core_sizes);
@@ -620,48 +677,90 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             debug_actions.push(SolverAction::Core(core.len()));
 
             let min_weight = core.iter().map(|c| soft_constraints[c].1).min().unwrap();
-            assert!(min_weight == 1);
+            assert!(min_weight >= 1);
 
-            // println!("Core min weight {}", min_weight);
+            println!("Core min weight {}", min_weight);
 
             for c in core.iter() {
                 let (soft, cost, original_cost) = soft_constraints.remove(c).unwrap();
 
-                // let soft_str = match &soft {
-                //     Soft::Delay => "delay".to_string(),
-                //     Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
-                // };
-                // println!("{} {}", soft_str, cost);
+                let soft_str = match &soft {
+                    Soft::Delay => "delay".to_string(),
+                    Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
+                };
+
+                println!("  * {:?} {:?} {} {}", c, cost_var_names.get(c), soft_str, cost);
 
                 assert!(cost >= min_weight);
                 let new_cost = cost - min_weight;
-                assert!(new_cost == 0);
-                assert!(original_cost == 1);
+                // assert!(new_cost >= 0);
+                // assert!(original_cost == 1);
                 match soft {
-                    Soft::Delay => { /* primary soft constraint, when we relax we are done */ }
+                    Soft::Delay => {
+                        if new_cost > 0 {
+                            println!("  ** Reducing delay cost from {} to {}", cost, new_cost);
+                            soft_constraints.insert(*c, (Soft::Delay, new_cost, new_cost));
+                        } else {
+                            println!("  ** Removing delay cost {}", cost);
+                        }
+                        /* primary soft constraint, when we relax to new_cost=0 we are done */
+                    }
                     Soft::Totalizer(mut tot, bound) => {
-                        // totalizer: need to extend its bound
-                        let new_bound = bound + 1;
-                        tot.increase_bound(&mut solver, new_bound as u32);
-                        if new_bound < tot.rhs().len() {
-                            soft_constraints.insert(
-                                !tot.rhs()[new_bound], // tot <= 2, 3, 4...
-                                (
-                                    Soft::Totalizer(tot, new_bound),
-                                    original_cost,
-                                    original_cost,
-                                ),
-                            );
+                        panic!();
+                        if new_cost > 0 {
+                            println!("  ** Reducing totalizer cost from {} to {}", cost, new_cost);
+
+                            soft_constraints
+                                .insert(*c, (Soft::Totalizer(tot, bound), new_cost, original_cost));
+                        } else {
+                            // panic!();
+                            // totalizer: need to extend its bound
+                            let new_bound = bound + 1;
+                            println!("Increasing totalizer bound to {}", new_bound);
+                            tot.increase_bound(&mut solver, new_bound as u32);
+                            if new_bound < tot.rhs().len() {
+                                println!(
+                                    "  ** Expanding totalizer original cost {}",
+                                    original_cost
+                                );
+
+                                let mut name = cost_var_names[c].clone();
+                                name.push_str(&format!("<={}", new_bound));
+                                cost_var_names.insert(!tot.rhs()[new_bound], name);
+
+                                soft_constraints.insert(
+                                    !tot.rhs()[new_bound], // tot <= 2, 3, 4...
+                                    (
+                                        Soft::Totalizer(tot, new_bound),
+                                        original_cost,
+                                        original_cost,
+                                    ),
+                                );
+                            } else {
+                                println!("  ** Totalizer fully expanded {}", cost);
+                            }
                         }
                     }
                 }
             }
 
-            total_cost += 1;
+            println!(
+                "increasing cost from {} to {}",
+                total_cost,
+                total_cost + min_weight
+            );
+            total_cost += min_weight;
             if core.len() > 1 {
                 let bound = 1;
                 let tot = Totalizer::count(&mut solver, core.iter().map(|c| !*c), bound as u32);
                 assert!(bound < tot.rhs().len());
+
+                let mut name = String::new();
+                for c in core {
+                    name.push_str(&format!("{}+", cost_var_names[&c]));
+                }
+                name.push_str(&format!("<={}", bound));
+                cost_var_names.insert(!tot.rhs()[bound], name);
                 soft_constraints.insert(
                     !tot.rhs()[bound], // tot <= 1
                     (Soft::Totalizer(tot, bound), min_weight, min_weight),
@@ -702,6 +801,7 @@ fn extract_solution<L: satcoder::Lit>(
 #[derive(Debug)]
 struct Occ<L: satcoder::Lit> {
     cost: Vec<Bool<L>>,
+    cost_tree: CostTree<L>,
     delays: Vec<(Bool<L>, i32)>,
     incumbent: usize,
 }

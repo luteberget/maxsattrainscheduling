@@ -4,6 +4,7 @@ pub mod mipddd;
 pub mod greedy;
 pub mod idl;
 pub mod mipdddpack;
+pub mod costtree;
 
 
 #[derive(Debug)]
