@@ -706,7 +706,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         /* primary soft constraint, when we relax to new_cost=0 we are done */
                     }
                     Soft::Totalizer(mut tot, bound) => {
-                        panic!();
+                        // panic!();
                         if new_cost > 0 {
                             println!("  ** Reducing totalizer cost from {} to {}", cost, new_cost);
 
