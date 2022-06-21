@@ -43,10 +43,13 @@ impl<L: satcoder::Lit + std::fmt::Debug> CostTree<L> {
                 .max_by_key(|(_, n)| n.cost)
                 .map(|(i, _n)| i);
 
-            let linear_mode = false;
+            let dist_prev = cost - parent_node_idx.map(|i| self.nodes[i].cost).unwrap_or(0);
+            let linear_mode = dist_prev < 10;
+            // let linear_mode = false;
+
             if linear_mode && parent_node_idx.map(|i| self.nodes[i].cost).unwrap_or(0) + 1 != cost {
                 self.add_cost(solver, false.into(), cost - 1, name.clone(), notify_vars);
-                // return self.add_cost(solver, input, cost, name, notify_vars);
+                return self.add_cost(solver, input, cost, name, notify_vars);
             } else {
                 let new_var = solver.new_var();
 

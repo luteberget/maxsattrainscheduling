@@ -145,7 +145,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut total_cost = 0;
     let mut soft_constraints = HashMap::new();
     let mut debug_actions = Vec::new();
-    let mut cost_var_names :HashMap<Bool<L>, String> = HashMap::new();
+    let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
 
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
@@ -559,17 +559,22 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             // );
         }
 
-        let core = {
+        let mut n_assumps = 20;
+        let mut assumptions = soft_constraints.iter().map(|(k,(_,w,_))| (*k, *w)).collect::<Vec<_>>();
+        assumptions.sort_by_key(|(_,w)| -(*w as isize));
+
+        let core = loop {
             let result = {
                 // println!("solving");
                 let _p = hprof::enter("sat check");
-                #[allow(clippy::needless_collect)]
-                let assumptions = soft_constraints.keys().copied().collect::<Vec<_>>();
-                SatSolverWithCore::solve_with_assumptions(&mut solver, assumptions.into_iter())
+                SatSolverWithCore::solve_with_assumptions(&mut solver, assumptions.iter().map(|(k,_)| *k).take(n_assumps))
             };
 
             // println!("solving done");
             match result {
+                satcoder::SatResultWithCore::Sat(_) if n_assumps < soft_constraints.len() => {
+                    n_assumps += 20;
+                },
                 satcoder::SatResultWithCore::Sat(model) => {
                     is_sat = true;
                     stats.n_sat += 1;
@@ -642,12 +647,12 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         solution: extract_solution(problem, &occupations),
                     });
 
-                    None
+                    break None;
                 }
                 satcoder::SatResultWithCore::Unsat(core) => {
                     is_sat = false;
                     stats.n_unsat += 1;
-                    Some(core)
+                    break Some(core);
                 }
             }
         };
@@ -665,10 +670,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
             // println!("Core size {}", core.len());
             // // *core_sizes.entry(core.len()).or_default() += 1;
-            // trim_core(&mut core, &mut solver);
-            // minimize_core(&mut core, &mut solver);
+            trim_core(&mut core, &mut solver);
+            minimize_core(&mut core, &mut solver);
             // println!("Post core size {}", core.len());
-
 
             // *processed_core_sizes.entry(core.len()).or_default() += 1;
             // println!("  pre sizes {:?}", core_sizes);
@@ -677,9 +681,10 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             debug_actions.push(SolverAction::Core(core.len()));
 
             let min_weight = core.iter().map(|c| soft_constraints[c].1).min().unwrap();
+            let max_weight = core.iter().map(|c| soft_constraints[c].1).max().unwrap();
             assert!(min_weight >= 1);
 
-            // println!("Core min weight {}", min_weight);
+            // println!("Core sz{} weight range {} -- {} assumps {}/{}",  core.len(), min_weight, max_weight, n_assumps, soft_constraints.len());
 
             for c in core.iter() {
                 let (soft, cost, original_cost) = soft_constraints.remove(c).unwrap();

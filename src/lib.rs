@@ -18,17 +18,17 @@ pub fn minimize_core<L: satcoder::Lit + std::fmt::Debug>(
             let mut assumptions = core.clone();
             let remove_idx = i % assumptions.len();
             assumptions.remove(remove_idx);
-            println!(
-                "Solving core #{}->{} removed {}  {:?}",
-                core.len(),
-                assumptions.len(),
-                remove_idx,
-                assumptions
-            );
+            // println!(
+            //     "Solving core #{}->{} removed {}  {:?}",
+            //     core.len(),
+            //     assumptions.len(),
+            //     remove_idx,
+            //     assumptions
+            // );
             let result = solver.solve_with_assumptions(assumptions.iter().copied());
             if let SatResultWithCore::Unsat(new_core) = result {
-                printed = true;
-                print!("  mz {}->{}", last_core_size, new_core.len());
+                // printed = true;
+                // print!("  mz {}->{}", last_core_size, new_core.len());
                 *core = new_core.iter().map(|c| Bool::Lit(*c)).collect();
                 continue 'minimize_loop;
             }
@@ -53,8 +53,8 @@ pub fn trim_core<L: satcoder::Lit>(
         let result = solver.solve_with_assumptions(core.iter().copied());
         if let SatResultWithCore::Unsat(new_core) = result {
             if new_core.len() < last_core_size {
-                trimmed = true;
-                print!("  tr {}->{}", last_core_size, new_core.len());
+                // trimmed = true;
+                // print!("  tr {}->{}", last_core_size, new_core.len());
                 *core = new_core.iter().map(|c| Bool::Lit(*c)).collect();
             } else {
                 break;
