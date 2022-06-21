@@ -4,10 +4,10 @@ use std::{
 };
 
 use super::SolverError;
-use crate::problem::{iter_infinite_staircase, DelayCostThresholds, DelayCostType, Problem};
+use crate::{problem::{iter_infinite_staircase, DelayCostThresholds, DelayCostType, Problem}, solvers::minimize};
 const M: f64 = 2.0 * 6.0 * 3600.0;
 
-type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<(), SolverError>;
+type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<grb::Var, SolverError>;
 
 pub fn solve_bigm(
     env: &grb::Env,
@@ -113,6 +113,7 @@ fn solve(
 
     // List all conflicting visits
     let visit_conflicts = visit_conflicts(problem);
+    let mut priority_vars = HashMap::new();
     let mut added_conflicts = HashSet::new();
 
     if !lazy_constraints {
@@ -124,7 +125,8 @@ fn solve(
                 train_names,
                 resource_names,
             };
-            add_conflict_constraint(&mut model, &conflict)?;
+            let var = add_conflict_constraint(&mut model, &conflict)?;
+            assert!(priority_vars.insert(visit_pair, var).is_none());
             n_resource_constraints += 1;
             assert!(added_conflicts.insert(visit_pair));
         }
@@ -273,6 +275,49 @@ fn solve(
             .get_attr(attr::ObjVal)
             .map_err(SolverError::GurobiError)?;
 
+        let priorities = priority_vars
+            .iter()
+            .map(|((a, b), v)| {
+                let choice = model
+                    .get_obj_attr(attr::X, v)
+                    .map_err(SolverError::GurobiError)
+                    .unwrap()
+                    > 0.5;
+
+                if choice {
+                    (*a, *b)
+                } else {
+                    (*b, *a)
+                }
+            })
+            .collect::<Vec<_>>();
+
+            const USE_MINIMIZE :bool = true;
+
+        let solution = if USE_MINIMIZE {
+            minimize::minimize_solution(env, problem, delay_cost_type, priorities, train_names, resource_names)?
+        } else {
+            let mut solution = Vec::new();
+            for (train_idx, train_ts) in t_vars.iter().enumerate() {
+                let mut train_solution = Vec::new();
+                for visit_start_t_var in train_ts {
+                    let t = model
+                        .get_obj_attr(attr::X, visit_start_t_var)
+                        .map_err(SolverError::GurobiError)?
+                        .round() as i32;
+                    train_solution.push(t);
+                }
+
+                train_solution.push(
+                    train_solution.last().copied().unwrap()
+                        + problem.trains[train_idx].visits.last().unwrap().travel_time,
+                );
+
+                solution.push(train_solution);
+            }
+            solution
+        };
+
         // println!("Iteration {} cost {}", refinement_iterations, cost);
 
         // Check the conflicts
@@ -281,7 +326,7 @@ fn solve(
 
             let mut cs: HashMap<(usize, usize), Vec<(usize, usize)>> = HashMap::new();
             for visit_pair @ ((t1, v1), (t2, v2)) in visit_conflicts.iter().copied() {
-                if !check_conflict(visit_pair, &model, &t_vars)? {
+                if !check_conflict(visit_pair, |t,v| solution[t][v])? {
                     cs.entry((t1, t2)).or_default().push((v1, v2));
                 }
             }
@@ -302,23 +347,20 @@ fn solve(
                 for visit_idx in 0..train.visits.len() {
                     if let Some(aimed) = train.visits[visit_idx].aimed {
                         let time_var = t_vars[train_idx][visit_idx];
-                        let curr_t = model
-                            .get_obj_attr(attr::X, &time_var)
-                            .map_err(SolverError::GurobiError)?
-                            .round() as i32;
+                        let curr_t = solution[train_idx][visit_idx];
                         // println!("t{} {} @ {}  delay {}", train_idx, visit_idx, curr_t, (curr_t - aimed).max(0));
 
                         let steps = lazy_stepfunction.entry((train_idx, visit_idx)).or_default();
                         // let mut added_this = false;
                         for (threshold, cost) in
-                            iter_infinite_staircase(interval).skip(steps.len()).take(5)
+                            iter_infinite_staircase(interval).skip(steps.len())
                         {
                             if cost > train.visit_delay_cost(delay_cost_type, visit_idx, curr_t) {
                                 // println!("  next cost {} exceeds {}", cost, train.visit_delay_cost(delay_cost_type, visit_idx, curr_t));
                                 break;
                             }
 
-                            let threshold = threshold -1;
+                            let threshold = threshold - 1;
 
                             // added_this = true;
                             // println!("Adding t{} v{} thr{} cost{} on {}", train_idx, visit_idx, threshold, cost, train.visit_delay_cost(delay_cost_type, visit_idx, curr_t));
@@ -374,7 +416,8 @@ fn solve(
                     train_names,
                     resource_names,
                 };
-                add_conflict_constraint(&mut model, &conflict)?;
+                let var = add_conflict_constraint(&mut model, &conflict)?;
+                assert!(priority_vars.insert(visit_pair, var).is_none());
                 n_resource_constraints += 1;
                 assert!(added_conflicts.insert(visit_pair));
             }
@@ -393,28 +436,27 @@ fn solve(
             // model.write("model_final.sol").unwrap();
             // model.write("model_final.lp").unwrap();
 
-            let mut solution = Vec::new();
-            for (train_idx, train_ts) in t_vars.iter().enumerate() {
-                let mut train_solution = Vec::new();
-                for visit_start_t_var in train_ts {
-                    let t = model
-                        .get_obj_attr(attr::X, visit_start_t_var)
-                        .map_err(SolverError::GurobiError)?
-                        .round() as i32;
-                    train_solution.push(t);
-                }
+            // let mut solution = Vec::new();
+            // for (train_idx, train_ts) in t_vars.iter().enumerate() {
+            //     let mut train_solution = Vec::new();
+            //     for visit_start_t_var in train_ts {
+            //         let t = model
+            //             .get_obj_attr(attr::X, visit_start_t_var)
+            //             .map_err(SolverError::GurobiError)?
+            //             .round() as i32;
+            //         train_solution.push(t);
+            //     }
 
-                train_solution.push(
-                    train_solution.last().copied().unwrap()
-                        + problem.trains[train_idx].visits.last().unwrap().travel_time,
-                );
+            //     train_solution.push(
+            //         train_solution.last().copied().unwrap()
+            //             + problem.trains[train_idx].visits.last().unwrap().travel_time,
+            //     );
 
-                
-                solution.push(train_solution);
-            }
+            //     solution.push(train_solution);
+            // }
 
-            // let t0v11 = solution[0][11];
-            //     println!("SOlutino [0][11] {} cost {}", t0v11, problem.trains[0].visit_delay_cost(delay_cost_type, 11, t0v11));
+            // // let t0v11 = solution[0][11];
+            // //     println!("SOlutino [0][11] {} cost {}", t0v11, problem.trains[0].visit_delay_cost(delay_cost_type, 11, t0v11));
 
             println!(
                 "BIGMSTATS {} {} {}",
@@ -481,29 +523,19 @@ pub fn visit_conflicts(problem: &Problem) -> Vec<((usize, usize), (usize, usize)
 
 fn check_conflict(
     ((t1, v1), (t2, v2)): ((usize, usize), (usize, usize)),
-    model: &grb::Model,
-    t_vars: &[Vec<grb::Var>],
+    t_vars: impl Fn(usize,usize) -> i32,
 ) -> Result<bool, SolverError> {
-    use grb::prelude::*;
 
-    let t_t1v1 = model
-        .get_obj_attr(attr::X, &t_vars[t1][v1])
-        .map_err(SolverError::GurobiError)?;
-    let t_t1v1next = model
-        .get_obj_attr(attr::X, &t_vars[t1][v1 + 1])
-        .map_err(SolverError::GurobiError)?;
-    let t_t2v2 = model
-        .get_obj_attr(attr::X, &t_vars[t2][v2])
-        .map_err(SolverError::GurobiError)?;
-    let t_t2v2next = model
-        .get_obj_attr(attr::X, &t_vars[t2][v2 + 1])
-        .map_err(SolverError::GurobiError)?;
+    let t_t1v1 = t_vars(t1,v1);
+    let t_t1v1next = t_vars(t1,v1+1);
+    let t_t2v2 = t_vars(t2,v2);
+    let t_t2v2next = t_vars(t2,v2+1);
 
     let separation = (t_t2v2 - t_t1v1next).max(t_t1v1 - t_t2v2next);
 
     // let t1_first = t_t1v1next <= t_t2v2;
     // let t2_first = t_t2v2next <= t_t1v1;
-    let has_separation = separation >= -1e-5;
+    let has_separation = separation >= 0;
     // println!("t1v1 {}-{}  t2v2 {}-{}  separation {} is_separated {}", t_t1v1, t_t1v1next, t_t2v2, t_t2v2next, separation, has_separation);
     // assert!((separation >= 1e-5) == has_separation);
 
@@ -529,7 +561,7 @@ struct ConflictInformation<'a> {
 fn add_bigm_conflict_constraint(
     model: &mut grb::Model,
     conflict: &ConflictInformation,
-) -> Result<(), SolverError> {
+) -> Result<grb::Var, SolverError> {
     use grb::prelude::*;
 
     let &ConflictInformation {
@@ -557,7 +589,7 @@ fn add_bigm_conflict_constraint(
             &format!("{}_first", choice_var_name),
             // t1 goes first: it reaches v1+1 before t2 reaches v2
             // if choice_var is 1, the constraint is disabled.
-            c!(t_vars[t1][v1 + 1] <= t_vars[t2][v2] + M * choice_var),
+            c!(t_vars[t1][v1 + 1] <= t_vars[t2][v2] + M * (1 - choice_var)),
         )
         .map_err(SolverError::GurobiError)?;
 
@@ -566,16 +598,16 @@ fn add_bigm_conflict_constraint(
         .add_constr(
             &format!("{}_second", choice_var_name),
             // t2 goes first: it reaches v2+1 before t1 reaches v1
-            c!(t_vars[t2][v2 + 1] <= t_vars[t1][v1] + M * (1 - choice_var)),
+            c!(t_vars[t2][v2 + 1] <= t_vars[t1][v1] + M * (choice_var)),
         )
         .map_err(SolverError::GurobiError)?;
-    Ok(())
+    Ok(choice_var)
 }
 
 fn add_hull_conflict_constraint(
     model: &mut grb::Model,
     conflict: &ConflictInformation,
-) -> Result<(), SolverError> {
+) -> Result<grb::Var, SolverError> {
     use grb::prelude::*;
 
     let &ConflictInformation {
@@ -712,5 +744,5 @@ fn add_hull_conflict_constraint(
         )
         .map_err(SolverError::GurobiError)?;
 
-    Ok(())
+    Ok(choice_var)
 }
