@@ -295,7 +295,7 @@ fn solve(
             const USE_MINIMIZE :bool = true;
 
         let solution = if USE_MINIMIZE {
-            minimize::minimize_solution(env, problem, delay_cost_type, priorities, train_names, resource_names)?
+            minimize::minimize_solution(env, problem, priorities)?
         } else {
             let mut solution = Vec::new();
             for (train_idx, train_ts) in t_vars.iter().enumerate() {
