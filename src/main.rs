@@ -36,6 +36,9 @@ struct Opt {
 
     #[structopt(long)]
     objective: Option<String>,
+
+    #[structopt(long)]
+    other_objective: Option<String>,
 }
 
 pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
@@ -69,8 +72,8 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
     let c_instances = [21, 22, 23, 24];
 
     for (dir, shortname) in [
-        // ("txtinstances", "txt1"),
-        // ("txtinstances2", "txt2"),
+        ("txtinstances", "txt1"),
+        ("txtinstances2", "txt2"),
         ("txtinstances3", "txt3"),
     ] {
         let instances = a_instances
@@ -145,6 +148,7 @@ enum SolverType {
     BigMEager,
     BigMLazy,
     MaxSatDdd,
+    MaxSatDddCadical,
     MaxSatIdl,
     MipDdd,
     MipHull,
@@ -165,6 +169,7 @@ fn main() {
             "bigm_eager" => SolverType::BigMEager,
             "bigm_lazy" => SolverType::BigMLazy,
             "maxsat_ddd" => SolverType::MaxSatDdd,
+            "maxsat_ddd_cdc" => SolverType::MaxSatDddCadical,
             "maxsat_idl" => SolverType::MaxSatIdl,
             "mip_ddd" => SolverType::MipDdd,
             "mip_hull" => SolverType::MipHull,
@@ -186,7 +191,18 @@ fn main() {
             _ => panic!("Unknown objective type."),
         })
         .unwrap_or(DelayCostType::FiniteSteps123);
-        println!("Using delay cost type {:?}", delay_cost_type);
+    println!("Using delay cost type {:?}", delay_cost_type);
+
+    let other_delay_cost_type = opt.other_objective.map(|obj| match obj.as_str() {
+        "finsteps123" => DelayCostType::FiniteSteps123,
+        "finsteps12345" => DelayCostType::FiniteSteps12345,
+        "finsteps139" => DelayCostType::FiniteSteps139,
+        "infsteps60" => DelayCostType::InfiniteSteps60,
+        "infsteps180" => DelayCostType::InfiniteSteps180,
+        "infsteps360" => DelayCostType::InfiniteSteps360,
+        "cont" => DelayCostType::Continuous,
+        _ => panic!("Unknown objective type."),
+    });
 
     let perf_out = RefCell::new(String::new());
 
@@ -234,7 +250,16 @@ fn main() {
                     &p.resource_names,
                 ),
                 SolverType::MaxSatDdd => maxsatddd::solve(
+                    &env,
                     satcoder::solvers::minisat::Solver::new(),
+                    &p.problem,
+                    30.0,
+                    delay_cost_type,
+                )
+                .map(|(v, _)| v),
+                SolverType::MaxSatDddCadical => maxsatddd::solve(
+                    &env,
+                    satcoder::solvers::cadical::Solver::new(),
                     &p.problem,
                     30.0,
                     delay_cost_type,
@@ -263,28 +288,59 @@ fn main() {
                     .problem
                     .verify_solution(solution, delay_cost_type)
                     .unwrap();
+
+                let other_cost =
+                    other_delay_cost_type.map(|c| p.problem.verify_solution(solution, c).unwrap());
+
                 hprof::profiler().print_timing();
                 let _root = hprof::profiler().root();
                 let sol_time = hprof::profiler().root().total_time.get() as f64 / 1_000_000f64;
                 writeln!(
                     perf_out.borrow_mut(),
-                    "{:>10} {:<12} {:>5} {:>10.0}",
+                    "{:>10} {:<25?} {:<12} {:>5} {:>10.0}",
                     name,
+                    delay_cost_type,
                     solver_name,
                     cost,
                     sol_time,
                 )
                 .unwrap();
+
+                if let Some(other_cost) = other_cost {
+                    writeln!(
+                        perf_out.borrow_mut(),
+                        "{:>10} {:<25?} {:<12} {:>5} {:>10.0}",
+                        name,
+                        other_delay_cost_type,
+                        solver_name,
+                        other_cost,
+                        sol_time,
+                    )
+                    .unwrap();
+                }
             } else {
                 writeln!(
                     perf_out.borrow_mut(),
-                    "{:>10} {:<12} {:>5} {:>10.0}",
+                    "{:>10} {:<25?} {:<12} {:>5} {:>10.0}",
                     name,
+                    delay_cost_type,
                     solver_name,
                     9999.0,
                     9999.0,
                 )
                 .unwrap();
+                if other_delay_cost_type.is_some() {
+                    writeln!(
+                        perf_out.borrow_mut(),
+                        "{:>10} {:<25?} {:<12} {:>5} {:>10.0}",
+                        name,
+                        delay_cost_type,
+                        solver_name,
+                        9999.0,
+                        9999.0,
+                    )
+                    .unwrap();
+                }
             }
         }
         solution
@@ -374,10 +430,14 @@ mod tests {
 
     #[test]
     pub fn testproblem_maxsatddd() {
+        let mut env = grb::Env::new("").unwrap();
+        env.set(grb::param::OutputFlag, 0).unwrap();
+
         let delay_cost_type = DelayCostType::FiniteSteps123;
 
         let problem = crate::problem::problem1_with_stations();
         let result = ddd::solvers::maxsatddd::solve(
+            &env,
             satcoder::solvers::minisat::Solver::new(),
             &problem,
             30.0,
@@ -391,6 +451,9 @@ mod tests {
 
     #[test]
     pub fn testproblem_mipdddpack() {
+        let mut env = grb::Env::new("").unwrap();
+        env.set(grb::param::OutputFlag, 0).unwrap();
+
         let delay_cost_type = DelayCostType::FiniteSteps123;
         let mut env = grb::Env::new("").unwrap();
         env.set(grb::param::OutputFlag, 0).unwrap();
@@ -403,10 +466,14 @@ mod tests {
 
     #[test]
     pub fn samescore_trivial() {
+        let mut env = grb::Env::new("").unwrap();
+        env.set(grb::param::OutputFlag, 0).unwrap();
+
         let problem = crate::problem::problem1_with_stations();
         let delay_cost_type = DelayCostType::FiniteSteps123;
 
         let result = ddd::solvers::maxsatddd::solve(
+            &env,
             satcoder::solvers::minisat::Solver::new(),
             &problem,
             30.0,
@@ -418,6 +485,7 @@ mod tests {
 
         for _ in 0..100 {
             let result = ddd::solvers::maxsatddd::solve(
+                &env,
                 satcoder::solvers::minisat::Solver::new(),
                 &problem,
                 30.0,
@@ -433,6 +501,9 @@ mod tests {
 
     #[test]
     pub fn samescore_all_instances() {
+        let mut env = grb::Env::new("").unwrap();
+        env.set(grb::param::OutputFlag, 0).unwrap();
+
         let delay_cost_type = DelayCostType::FiniteSteps123;
         for delaytype in [
             ddd::problem::DelayMeasurementType::AllStationArrivals,
@@ -449,6 +520,7 @@ mod tests {
                 );
 
                 let result = ddd::solvers::maxsatddd::solve(
+                    &env,
                     satcoder::solvers::minisat::Solver::new(),
                     &problem,
                     30.0,
@@ -461,6 +533,7 @@ mod tests {
                 for iteration in 0..100 {
                     println!("iteration {} {}", instance_number, iteration);
                     let result = ddd::solvers::maxsatddd::solve(
+                        &env,
                         satcoder::solvers::minisat::Solver::new(),
                         &problem,
                         30.0,

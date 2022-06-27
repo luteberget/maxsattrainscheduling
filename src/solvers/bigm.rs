@@ -4,7 +4,10 @@ use std::{
 };
 
 use super::SolverError;
-use crate::{problem::{iter_infinite_staircase, DelayCostThresholds, DelayCostType, Problem}, solvers::minimize};
+use crate::{
+    problem::{iter_infinite_staircase, DelayCostThresholds, DelayCostType, Problem},
+    solvers::minimize,
+};
 const M: f64 = 2.0 * 6.0 * 3600.0;
 
 type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<grb::Var, SolverError>;
@@ -193,7 +196,41 @@ fn solve(
         | DelayCostType::InfiniteSteps180
         | DelayCostType::InfiniteSteps360 => {
             // this is done lazily when a solution has been found
-            lazy_stepfunction = Some(Default::default());
+            //lazy_stepfunction = Some(Default::default());
+            // The lazy_stepfunction uses big-M and can in princple have any shape, but since we know that
+            // the step funtion has a fixed spacing and step increase, we can just use a single integer variable with cost.
+
+            let interval = match delay_cost_type {
+                DelayCostType::InfiniteSteps60 => 60,
+                DelayCostType::InfiniteSteps180 => 180,
+                DelayCostType::InfiniteSteps360 => 360,
+                _ => panic!(),
+            };
+
+            for (train_idx, train) in problem.trains.iter().enumerate() {
+                for visit_idx in 0..train.visits.len() {
+                    if let Some(aimed) = train.visits[visit_idx].aimed {
+                        let time_var = t_vars[train_idx][visit_idx];
+                        let objective_var_name = format!(
+                            "tn{}_v{}_tk{}_dlysteps",
+                            train_names[train_idx],
+                            visit_idx,
+                            resource_names[train.visits[visit_idx].resource_id],
+                        );
+                        let objective_var =
+                            add_intvar!(model, name:&objective_var_name,bounds:0.., obj: 1.0)
+                                .map_err(SolverError::GurobiError)?;
+
+                        #[allow(clippy::useless_conversion)]
+                        model
+                            .add_constr(
+                                &format!("bound_{}", objective_var_name),
+                                c!(interval * objective_var >= time_var - aimed),
+                            )
+                            .map_err(SolverError::GurobiError)?;
+                    }
+                }
+            }
         }
         DelayCostType::Continuous => {
             for (train_idx, train) in problem.trains.iter().enumerate() {
@@ -292,7 +329,7 @@ fn solve(
             })
             .collect::<Vec<_>>();
 
-            const USE_MINIMIZE :bool = true;
+        const USE_MINIMIZE: bool = true;
 
         let solution = if USE_MINIMIZE {
             minimize::minimize_solution(env, problem, priorities)?
@@ -326,7 +363,7 @@ fn solve(
 
             let mut cs: HashMap<(usize, usize), Vec<(usize, usize)>> = HashMap::new();
             for visit_pair @ ((t1, v1), (t2, v2)) in visit_conflicts.iter().copied() {
-                if !check_conflict(visit_pair, |t,v| solution[t][v])? {
+                if !check_conflict(visit_pair, |t, v| solution[t][v])? {
                     cs.entry((t1, t2)).or_default().push((v1, v2));
                 }
             }
@@ -352,8 +389,7 @@ fn solve(
 
                         let steps = lazy_stepfunction.entry((train_idx, visit_idx)).or_default();
                         // let mut added_this = false;
-                        for (threshold, cost) in
-                            iter_infinite_staircase(interval).skip(steps.len())
+                        for (threshold, cost) in iter_infinite_staircase(interval).skip(steps.len())
                         {
                             if cost > train.visit_delay_cost(delay_cost_type, visit_idx, curr_t) {
                                 // println!("  next cost {} exceeds {}", cost, train.visit_delay_cost(delay_cost_type, visit_idx, curr_t));
@@ -523,13 +559,12 @@ pub fn visit_conflicts(problem: &Problem) -> Vec<((usize, usize), (usize, usize)
 
 fn check_conflict(
     ((t1, v1), (t2, v2)): ((usize, usize), (usize, usize)),
-    t_vars: impl Fn(usize,usize) -> i32,
+    t_vars: impl Fn(usize, usize) -> i32,
 ) -> Result<bool, SolverError> {
-
-    let t_t1v1 = t_vars(t1,v1);
-    let t_t1v1next = t_vars(t1,v1+1);
-    let t_t2v2 = t_vars(t2,v2);
-    let t_t2v2next = t_vars(t2,v2+1);
+    let t_t1v1 = t_vars(t1, v1);
+    let t_t1v1next = t_vars(t1, v1 + 1);
+    let t_t2v2 = t_vars(t2, v2);
+    let t_t2v2next = t_vars(t2, v2 + 1);
 
     let separation = (t_t2v2 - t_t1v1next).max(t_t1v1 - t_t2v2next);
 

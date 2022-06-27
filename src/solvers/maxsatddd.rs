@@ -16,7 +16,7 @@ use satcoder::{
 };
 use typed_index_collections::TiVec;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 struct VisitId(u32);
 
 impl From<VisitId> for usize {
@@ -65,20 +65,23 @@ pub struct SolveStats {
 }
 
 pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
+    env: &grb::Env,
     solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
-    solve_debug(solver, problem, timeout, delay_cost_type, |_| {})
+    solve_debug(env, solver, problem, timeout, delay_cost_type, |_| {})
 }
 
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
 
-use crate::{debug::DebugInfo, problem::DelayCostType};
+use crate::{debug::DebugInfo, problem::DelayCostType, solvers::minimize};
 
 use super::{costtree::CostTree, SolverError};
 pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
+    env: &grb::Env,
+
     mut solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
@@ -102,7 +105,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut resource_visits: Vec<Vec<VisitId>> = Vec::new();
     let mut occupations: TiVec<VisitId, Occ<_>> = TiVec::new();
     let mut touched_intervals = Vec::new();
-    let mut conflicts: HashMap<_, Vec<_>> = HashMap::new();
+    let mut conflicts: HashMap<usize, Vec<usize>> = HashMap::new();
     let mut new_time_points = Vec::new();
 
     #[allow(unused)]
@@ -126,7 +129,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 cost: vec![true.into()],
                 cost_tree: CostTree::new(),
                 delays: vec![(true.into(), visit.earliest), (false.into(), i32::MAX)],
-                incumbent: 0,
+                incumbent_idx: 0,
             });
 
             while resource_visits.len() <= visit.resource_id {
@@ -149,9 +152,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut debug_actions = Vec::new();
     let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
 
-    let mut conflicts_added: HashSet<((usize, usize, i32), (usize, usize, i32))> =
-        Default::default();
-    let mut conflict_vars: HashMap<((usize, usize), (usize, usize)), Bool<L>> = Default::default();
+    let mut conflicts_added: HashSet<((VisitId, i32), (VisitId, i32))> = Default::default();
+    let mut conflict_vars: HashMap<(VisitId, VisitId), Bool<L>> = Default::default();
+    let mut priorities: Vec<(VisitId, VisitId)> = Vec::new();
 
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
@@ -203,7 +206,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         }));
 
                         // Insert the new time point.
-                        let t1_in_var = v1.delays[v1.incumbent].0;
+                        let t1_in_var = v1.delays[v1.incumbent_idx].0;
                         let new_t = v1.incumbent_time() + visit.travel_time;
                         let (t1_earliest_out_var, t1_is_new) =
                             occupations[next_visit].time_point(&mut solver, new_t);
@@ -315,15 +318,15 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                                 continue;
                             }
 
-                            let conflict_id_a = (train_idx, visit_idx, t1_out);
-                            let conflict_id_b = (other_train_idx, other_visit_idx, t2_out);
+                            // let conflict_id_a = (visit_id, t1_out);
+                            // let conflict_id_b = (other_visit, t2_out);
 
-                            if conflicts_added.contains(&(conflict_id_b, conflict_id_a)) {
-                                continue;
-                            }
+                            // if conflicts_added.contains(&(conflict_id_b, conflict_id_a)) {
+                            //     continue;
+                            // }
 
                             // println!("Inserting {:?}", (conflict_id_a, conflict_id_b));
-                            assert!(conflicts_added.insert((conflict_id_a, conflict_id_b)));
+                            // assert!(conflicts_added.insert((conflict_id_a, conflict_id_b)));
 
                             // let t2_out = t2_earliest_out;
                             // let t1_out = t1_earliest_out;
@@ -377,27 +380,28 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             let v1 = &occupations[visit_id];
                             let v2 = &occupations[other_visit];
 
-                            let _t1_in_lit = v1.delays[v1.incumbent].0;
+                            let _t1_in_lit = v1.delays[v1.incumbent_idx].0;
                             let t1_out_lit = next_visit
-                                .map(|v| occupations[v].delays[occupations[v].incumbent].0)
+                                .map(|v| occupations[v].delays[occupations[v].incumbent_idx].0)
                                 .unwrap_or_else(|| true.into());
-                            let _t2_in_lit = v2.delays[v2.incumbent].0;
+                            let _t2_in_lit = v2.delays[v2.incumbent_idx].0;
                             let t2_out_lit = other_next_visit
-                                .map(|v| occupations[v].delays[occupations[v].incumbent].0)
+                                .map(|v| occupations[v].delays[occupations[v].incumbent_idx].0)
                                 .unwrap_or_else(|| true.into());
 
                             const USE_CHOICE_VAR: bool = true;
 
                             if USE_CHOICE_VAR {
-                                let (pa,pb) = ((train_idx, visit_idx),(other_train_idx, other_visit_idx));
+                                let (pa, pb) = (visit_id, other_visit);
 
-                                let choose = conflict_vars.get(&(pa,pb)).copied().unwrap_or_else(|| {
-                                    let new_var = SatInstance::new_var(&mut solver);
-                                    conflict_vars.insert((pa,pb), new_var);
-                                    conflict_vars.insert((pb,pa), !new_var);
-                                    new_var
-                                });
-                                
+                                let choose =
+                                    conflict_vars.get(&(pa, pb)).copied().unwrap_or_else(|| {
+                                        let new_var = SatInstance::new_var(&mut solver);
+                                        conflict_vars.insert((pa, pb), new_var);
+                                        conflict_vars.insert((pb, pa), !new_var);
+                                        new_var
+                                    });
+
                                 SatInstance::add_clause(
                                     &mut solver,
                                     vec![!choose, !t1_out_lit, delay_t2],
@@ -444,7 +448,17 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             if !(found_resource_conflict || found_travel_time_conflict) {
                 // Incumbent times are feasible and optimal.
 
-                let trains = extract_solution(problem, &occupations);
+                const USE_LP_MINIMIZE: bool = false;
+
+                let trains = if !USE_LP_MINIMIZE {
+                    extract_solution(problem, &occupations)
+                } else {
+                    let p = priorities
+                        .into_iter()
+                        .map(|(a, b)| (visits[a], visits[b]))
+                        .collect();
+                    minimize::minimize_solution(env, problem, p)?
+                };
 
                 println!(
                     "Finished with cost {} iterations {} solver {:?}",
@@ -618,12 +632,12 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         // let old_time = this_occ.incumbent_time();
                         let mut touched = false;
 
-                        while model.value(&this_occ.delays[this_occ.incumbent + 1].0) {
-                            this_occ.incumbent += 1;
+                        while model.value(&this_occ.delays[this_occ.incumbent_idx + 1].0) {
+                            this_occ.incumbent_idx += 1;
                             touched = true;
                         }
-                        while !model.value(&this_occ.delays[this_occ.incumbent].0) {
-                            this_occ.incumbent -= 1;
+                        while !model.value(&this_occ.delays[this_occ.incumbent_idx].0) {
+                            this_occ.incumbent_idx -= 1;
                             touched = true;
                         }
                         let (_train_idx, visit_idx) = visits[visit];
@@ -669,11 +683,145 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         // }
                     }
 
+                    const USE_LOCAL_MINIMIZE: bool = true;
+                    if USE_LOCAL_MINIMIZE {
+                        let mut last_mod = 0;
+                        let mut i = 0;
+                        let occs_len = occupations.len();
+                        assert!(visits.len() == occupations.len());
+                        while last_mod < occs_len {
+                            let mut touched = false;
+                            // println!("i = {} (l={})",i, visits.len());
+
+                            let visit_id = VisitId(i % occs_len as u32);
+                            while occupations[visit_id].incumbent_idx > 0 {
+                                // We can always leave earlier, so the critical interval is
+                                // from this event to the next.
+
+                                let t1_in = occupations[visit_id].delays
+                                    [occupations[visit_id].incumbent_idx]
+                                    .1;
+                                let t1_in_new = occupations[visit_id].delays
+                                    [occupations[visit_id].incumbent_idx - 1]
+                                    .1;
+
+                                let (train_idx, visit_idx) = visits[visit_id];
+                                let visit = problem.trains[train_idx].visits[visit_idx];
+
+                                let next_visit: Option<VisitId> =
+                                    if visit_idx + 1 < problem.trains[train_idx].visits.len() {
+                                        Some((usize::from(visit_id) + 1).into())
+                                    } else {
+                                        None
+                                    };
+
+                                let prev_visit: Option<VisitId> = if visit_idx > 0 {
+                                    Some((usize::from(visit_id) - 1).into())
+                                } else {
+                                    None
+                                };
+
+                                let t1_prev_earliest_out = prev_visit
+                                    .map(|v| {
+                                        let (tidx, vidx) = visits[v];
+                                        let travel_time =
+                                            problem.trains[tidx].visits[vidx].travel_time;
+                                        occupations[v].incumbent_time() + travel_time
+                                    })
+                                    .unwrap_or(i32::MIN);
+
+                                let travel_ok = t1_prev_earliest_out <= t1_in_new;
+
+                                let t1_out = next_visit
+                                    .map(|nx| occupations[nx].incumbent_time())
+                                    .unwrap_or(t1_in + visit.travel_time);
+
+                                let can_reduce = travel_ok && conflicts
+                                    .get(&visit.resource_id)
+                                    .iter()
+                                    .flat_map(|rs| rs.iter())
+                                    .copied()
+                                    .all(|other_resource| {
+                                        resource_visits[other_resource]
+                                            .iter()
+                                            .copied()
+                                            .filter(|other_visit| {
+                                                usize::from(visit_id) != usize::from(*other_visit)
+                                            })
+                                            .filter(|other_visit| {
+                                                visits[*other_visit].0 != train_idx
+                                            })
+                                            .all(|other_visit| {
+                                                let v2 = &occupations[other_visit];
+                                                let t2_in = v2.incumbent_time();
+                                                let (other_train_idx, other_visit_idx) =
+                                                    visits[other_visit];
+                                                let other_next_visit: Option<VisitId> =
+                                                    if other_visit_idx + 1
+                                                        < problem.trains[other_train_idx]
+                                                            .visits
+                                                            .len()
+                                                    {
+                                                        Some((usize::from(other_visit) + 1).into())
+                                                    } else {
+                                                        None
+                                                    };
+
+                                                let t2_out = other_next_visit
+                                                    .map(|v| occupations[v].incumbent_time())
+                                                    .unwrap_or_else(|| {
+                                                        let other_visit = problem.trains
+                                                            [other_train_idx]
+                                                            .visits[other_visit_idx];
+                                                        t2_in + other_visit.travel_time
+                                                    });
+                                                t1_out <= t2_in || t2_out <= t1_in_new
+                                            })
+                                    });
+
+                                if can_reduce {
+                                    // println!("REDUCE {} {} {}", train_idx, visit_idx, occupations[visit_id].incumbent_time());
+                                    occupations[visit_id].incumbent_idx -= 1;
+                                    touched = true;
+                                    last_mod = 0;
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            i += 1;
+
+                            if touched {
+                                let visit_idx = visits[visit_id].1;
+                                if visit_idx > 0 {
+                                    let prev_visit = (Into::<usize>::into(visit_id) - 1).into();
+                                    if touched_intervals.last() != Some(&prev_visit) {
+                                        touched_intervals.push(prev_visit);
+                                    }
+                                }
+                                touched_intervals.push(visit_id);
+                            } else {
+                                last_mod += 1;
+                            }
+                        }
+                    }
+
                     // println!(
                     //     "Touched {}/{} occupations",
                     //     touched_intervals.len(),
                     //     occupations.len()
                     // );
+
+                    priorities = conflict_vars
+                        .iter()
+                        .filter_map(|(pair, l)| {
+                            let has_choice = model.value(l);
+                            let has_time = occupations[pair.0].incumbent_time()
+                                < occupations[pair.1].incumbent_time();
+                            (has_choice && has_time).then(|| *pair)
+                        })
+                        .collect::<Vec<_>>();
+                    // println!("Pri {:?}", priorities);
 
                     debug_out(DebugInfo {
                         iteration,
@@ -811,6 +959,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
         }
 
         iteration += 1;
+        // println!("iteration {}", iteration);
     }
 }
 
@@ -842,12 +991,12 @@ struct Occ<L: satcoder::Lit> {
     cost: Vec<Bool<L>>,
     cost_tree: CostTree<L>,
     delays: Vec<(Bool<L>, i32)>,
-    incumbent: usize,
+    incumbent_idx: usize,
 }
 
 impl<L: satcoder::Lit> Occ<L> {
     pub fn incumbent_time(&self) -> i32 {
-        self.delays[self.incumbent].1
+        self.delays[self.incumbent_idx].1
     }
 
     pub fn time_point(&mut self, solver: &mut impl SatInstance<L>, t: i32) -> (Bool<L>, bool) {
