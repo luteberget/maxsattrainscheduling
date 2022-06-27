@@ -1,6 +1,6 @@
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, HashMap, HashSet},
     time::Instant,
 };
 
@@ -113,7 +113,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
     for (a, b) in problem.conflicts.iter() {
         conflicts.entry(*a).or_default().push(*b);
-        conflicts.entry(*b).or_default().push(*a);
+        if *a != *b {
+            conflicts.entry(*b).or_default().push(*a);
+        }
     }
 
     for (train_idx, train) in problem.trains.iter().enumerate() {
@@ -146,6 +148,10 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut soft_constraints = HashMap::new();
     let mut debug_actions = Vec::new();
     let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
+
+    let mut conflicts_added: HashSet<((usize, usize, i32), (usize, usize, i32))> =
+        Default::default();
+    let mut conflict_vars: HashMap<((usize, usize), (usize, usize)), Bool<L>> = Default::default();
 
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
@@ -238,6 +244,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 }
             }
 
+            // println!("Solving conflicts in iteration {}", iteration);
+
             // SOLVE ALL SIMPLE PRESEDENCES BEFORE CONFLICTS
             // if !found_conflict {
             for visit_id in touched_intervals.iter().copied() {
@@ -255,9 +263,11 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 let visit = problem.trains[train_idx].visits[visit_idx];
 
                 // RESOURCE CONFLICT
+                // println!("touchesd {:?}", usize::from(visit_id));
 
                 if let Some(conflicting_resources) = conflicts.get(&visit.resource_id) {
                     for other_resource in conflicting_resources.iter().copied() {
+                        // println!(" other resource {:?}", other_resource);
                         let t1_out = next_visit
                             .map(|nx| occupations[nx].incumbent_time())
                             .unwrap_or(t1_in + visit.travel_time);
@@ -304,6 +314,16 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             if t1_out <= t2_in || t2_out <= t1_in {
                                 continue;
                             }
+
+                            let conflict_id_a = (train_idx, visit_idx, t1_out);
+                            let conflict_id_b = (other_train_idx, other_visit_idx, t2_out);
+
+                            if conflicts_added.contains(&(conflict_id_b, conflict_id_a)) {
+                                continue;
+                            }
+
+                            // println!("Inserting {:?}", (conflict_id_a, conflict_id_b));
+                            assert!(conflicts_added.insert((conflict_id_a, conflict_id_b)));
 
                             // let t2_out = t2_earliest_out;
                             // let t1_out = t1_earliest_out;
@@ -369,7 +389,15 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             const USE_CHOICE_VAR: bool = true;
 
                             if USE_CHOICE_VAR {
-                                let choose = SatInstance::new_var(&mut solver);
+                                let (pa,pb) = ((train_idx, visit_idx),(other_train_idx, other_visit_idx));
+
+                                let choose = conflict_vars.get(&(pa,pb)).copied().unwrap_or_else(|| {
+                                    let new_var = SatInstance::new_var(&mut solver);
+                                    conflict_vars.insert((pa,pb), new_var);
+                                    conflict_vars.insert((pb,pa), !new_var);
+                                    new_var
+                                });
+                                
                                 SatInstance::add_clause(
                                     &mut solver,
                                     vec![!choose, !t1_out_lit, delay_t2],
@@ -560,21 +588,27 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
         }
 
         let mut n_assumps = 20;
-        let mut assumptions = soft_constraints.iter().map(|(k,(_,w,_))| (*k, *w)).collect::<Vec<_>>();
-        assumptions.sort_by_key(|(_,w)| -(*w as isize));
+        let mut assumptions = soft_constraints
+            .iter()
+            .map(|(k, (_, w, _))| (*k, *w))
+            .collect::<Vec<_>>();
+        assumptions.sort_by_key(|(_, w)| -(*w as isize));
 
         let core = loop {
             let result = {
                 // println!("solving");
                 let _p = hprof::enter("sat check");
-                SatSolverWithCore::solve_with_assumptions(&mut solver, assumptions.iter().map(|(k,_)| *k).take(n_assumps))
+                SatSolverWithCore::solve_with_assumptions(
+                    &mut solver,
+                    assumptions.iter().map(|(k, _)| *k).take(n_assumps),
+                )
             };
 
             // println!("solving done");
             match result {
                 satcoder::SatResultWithCore::Sat(_) if n_assumps < soft_constraints.len() => {
                     n_assumps += 20;
-                },
+                }
                 satcoder::SatResultWithCore::Sat(model) => {
                     is_sat = true;
                     stats.n_sat += 1;
