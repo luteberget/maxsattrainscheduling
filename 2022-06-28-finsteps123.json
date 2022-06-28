@@ -1,0 +1,2810 @@
+[
+  {
+    "avg_tracks": 20.931034088134766,
+    "conflicting_visit_pairs": 5915,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 0,
+    "name": "origA1",
+    "solves": [
+      {
+        "avg_time_points": 2.507642799678198,
+        "cost": 11,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 127,
+        "max_time_points": 8,
+        "num_conflicts": 577,
+        "num_time_points": 3117,
+        "num_traveltime": 577,
+        "objective_iters": 11,
+        "resource_iters": 1,
+        "sol_time": 13.0829,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 20,
+        "travel_iters": 94
+      },
+      {
+        "added_conflict_pairs": 9,
+        "cost": 11,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 11.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 9,
+        "sol_time": 150.899,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1214
+      }
+    ],
+    "trains": 29
+  },
+  {
+    "avg_tracks": 19.0,
+    "conflicting_visit_pairs": 3735,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 1,
+    "name": "origA2",
+    "solves": [
+      {
+        "avg_time_points": 2.6143589743589746,
+        "cost": 25,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 111,
+        "max_time_points": 10,
+        "num_conflicts": 517,
+        "num_time_points": 2549,
+        "num_traveltime": 517,
+        "objective_iters": 25,
+        "resource_iters": 1,
+        "sol_time": 10.1172,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 28,
+        "travel_iters": 56
+      },
+      {
+        "added_conflict_pairs": 19,
+        "cost": 25,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 25.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 19,
+        "sol_time": 139.0495,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 950
+      }
+    ],
+    "trains": 25
+  },
+  {
+    "avg_tracks": 22.375,
+    "conflicting_visit_pairs": 2061,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 2,
+    "name": "origA3",
+    "solves": [
+      {
+        "avg_time_points": 2.6448087431693987,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 88,
+        "max_time_points": 8,
+        "num_conflicts": 429,
+        "num_time_points": 1936,
+        "num_traveltime": 429,
+        "objective_iters": 10,
+        "resource_iters": 1,
+        "sol_time": 7.3267,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 14,
+        "travel_iters": 62
+      },
+      {
+        "added_conflict_pairs": 9,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 10.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 9,
+        "sol_time": 82.1732,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 716
+      }
+    ],
+    "trains": 16
+  },
+  {
+    "avg_tracks": 19.214284896850586,
+    "conflicting_visit_pairs": 1175,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 3,
+    "name": "origA4",
+    "solves": [
+      {
+        "avg_time_points": 3.0434782608695654,
+        "cost": 17,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 142,
+        "max_time_points": 7,
+        "num_conflicts": 532,
+        "num_time_points": 1680,
+        "num_traveltime": 532,
+        "objective_iters": 17,
+        "resource_iters": 1,
+        "sol_time": 8.4835,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 16,
+        "travel_iters": 107
+      },
+      {
+        "added_conflict_pairs": 10,
+        "cost": 17,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 17.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 10,
+        "sol_time": 80.7297,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 538
+      }
+    ],
+    "trains": 14
+  },
+  {
+    "avg_tracks": 19.25,
+    "conflicting_visit_pairs": 876,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 4,
+    "name": "origA5",
+    "solves": [
+      {
+        "avg_time_points": 2.6181434599156117,
+        "cost": 15,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 85,
+        "max_time_points": 7,
+        "num_conflicts": 266,
+        "num_time_points": 1241,
+        "num_traveltime": 266,
+        "objective_iters": 15,
+        "resource_iters": 1,
+        "sol_time": 5.7091,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 9,
+        "travel_iters": 59
+      },
+      {
+        "added_conflict_pairs": 7,
+        "cost": 15,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 15.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 7,
+        "sol_time": 42.5158,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 462
+      }
+    ],
+    "trains": 12
+  },
+  {
+    "avg_tracks": 18.625,
+    "conflicting_visit_pairs": 307,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 5,
+    "name": "origA6",
+    "solves": [
+      {
+        "avg_time_points": 2.689542483660131,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 98,
+        "max_time_points": 5,
+        "num_conflicts": 201,
+        "num_time_points": 823,
+        "num_traveltime": 201,
+        "objective_iters": 10,
+        "resource_iters": 1,
+        "sol_time": 3.3312,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 2,
+        "travel_iters": 84
+      },
+      {
+        "added_conflict_pairs": 4,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 10.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 4,
+        "sol_time": 27.6737,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 298
+      }
+    ],
+    "trains": 8
+  },
+  {
+    "avg_tracks": 12.625,
+    "conflicting_visit_pairs": 126,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 6,
+    "name": "origA7",
+    "solves": [
+      {
+        "avg_time_points": 2.9523809523809526,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 54,
+        "max_time_points": 8,
+        "num_conflicts": 177,
+        "num_time_points": 620,
+        "num_traveltime": 177,
+        "objective_iters": 10,
+        "resource_iters": 1,
+        "sol_time": 1.9408,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 5,
+        "travel_iters": 37
+      },
+      {
+        "added_conflict_pairs": 7,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 10.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 7,
+        "sol_time": 22.3666,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 202
+      }
+    ],
+    "trains": 8
+  },
+  {
+    "avg_tracks": 19.214284896850586,
+    "conflicting_visit_pairs": 4877,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 7,
+    "name": "origA8",
+    "solves": [
+      {
+        "avg_time_points": 4.7481884057971016,
+        "cost": 31,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 165,
+        "max_time_points": 20,
+        "num_conflicts": 2581,
+        "num_time_points": 5242,
+        "num_traveltime": 2581,
+        "objective_iters": 31,
+        "resource_iters": 1,
+        "sol_time": 57.3717,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 85,
+        "travel_iters": 47
+      },
+      {
+        "added_conflict_pairs": 49,
+        "cost": 31,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 31.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 49,
+        "sol_time": 199.808,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1076
+      }
+    ],
+    "trains": 28
+  },
+  {
+    "avg_tracks": 20.049999237060547,
+    "conflicting_visit_pairs": 2616,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 8,
+    "name": "origA9",
+    "solves": [
+      {
+        "avg_time_points": 3.535279805352798,
+        "cost": 18,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 143,
+        "max_time_points": 18,
+        "num_conflicts": 1072,
+        "num_time_points": 2906,
+        "num_traveltime": 1072,
+        "objective_iters": 18,
+        "resource_iters": 2,
+        "sol_time": 18.3166,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 62,
+        "travel_iters": 60
+      },
+      {
+        "added_conflict_pairs": 22,
+        "cost": 18,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 18.0,
+        "iteration": 6,
+        "refinements": 5,
+        "resource_constraints": 22,
+        "sol_time": 104.4543,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 802
+      }
+    ],
+    "trains": 20
+  },
+  {
+    "avg_tracks": 18.176469802856445,
+    "conflicting_visit_pairs": 1632,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 9,
+    "name": "origA10",
+    "solves": [
+      {
+        "avg_time_points": 3.1763779527559057,
+        "cost": 17,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 99,
+        "max_time_points": 14,
+        "num_conflicts": 643,
+        "num_time_points": 2017,
+        "num_traveltime": 643,
+        "objective_iters": 17,
+        "resource_iters": 1,
+        "sol_time": 8.6519,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 32,
+        "travel_iters": 48
+      },
+      {
+        "added_conflict_pairs": 19,
+        "cost": 17,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 17.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 19,
+        "sol_time": 69.882,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 618
+      }
+    ],
+    "trains": 17
+  },
+  {
+    "avg_tracks": 19.83333396911621,
+    "conflicting_visit_pairs": 6162,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 10,
+    "name": "origA11",
+    "solves": [
+      {
+        "avg_time_points": 3.630327868852459,
+        "cost": 23,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 133,
+        "max_time_points": 11,
+        "num_conflicts": 1736,
+        "num_time_points": 4429,
+        "num_traveltime": 1736,
+        "objective_iters": 23,
+        "resource_iters": 1,
+        "sol_time": 42.1217,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 71,
+        "travel_iters": 37
+      },
+      {
+        "added_conflict_pairs": 35,
+        "cost": 23,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 23.0,
+        "iteration": 6,
+        "refinements": 5,
+        "resource_constraints": 35,
+        "sol_time": 278.848,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1190
+      }
+    ],
+    "trains": 30
+  },
+  {
+    "avg_tracks": 21.714284896850586,
+    "conflicting_visit_pairs": 6393,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 11,
+    "name": "origA12",
+    "solves": [
+      {
+        "avg_time_points": 3.252411575562701,
+        "cost": 24,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 155,
+        "max_time_points": 10,
+        "num_conflicts": 1387,
+        "num_time_points": 4046,
+        "num_traveltime": 1387,
+        "objective_iters": 24,
+        "resource_iters": 1,
+        "sol_time": 43.0398,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 49,
+        "travel_iters": 80
+      },
+      {
+        "added_conflict_pairs": 38,
+        "cost": 24,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 24.0,
+        "iteration": 8,
+        "refinements": 7,
+        "resource_constraints": 38,
+        "sol_time": 369.1571,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1216
+      }
+    ],
+    "trains": 28
+  },
+  {
+    "avg_tracks": 17.33333396911621,
+    "conflicting_visit_pairs": 2022,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 12,
+    "name": "origB1",
+    "solves": [
+      {
+        "avg_time_points": 2.0482866043613708,
+        "cost": 4,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 20,
+        "max_time_points": 3,
+        "num_conflicts": 27,
+        "num_time_points": 1315,
+        "num_traveltime": 27,
+        "objective_iters": 4,
+        "resource_iters": 1,
+        "sol_time": 1.338,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 0,
+        "travel_iters": 14
+      },
+      {
+        "added_conflict_pairs": 2,
+        "cost": 4,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 4.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 2,
+        "sol_time": 28.5638,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 624
+      }
+    ],
+    "trains": 18
+  },
+  {
+    "avg_tracks": 14.800000190734863,
+    "conflicting_visit_pairs": 87,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 13,
+    "name": "origB2",
+    "solves": [
+      {
+        "avg_time_points": 2.5163398692810457,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 56,
+        "max_time_points": 5,
+        "num_conflicts": 71,
+        "num_time_points": 385,
+        "num_traveltime": 71,
+        "objective_iters": 5,
+        "resource_iters": 1,
+        "sol_time": 0.9264,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 3,
+        "travel_iters": 46
+      },
+      {
+        "added_conflict_pairs": 1,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 5.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 1,
+        "sol_time": 8.4085,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 148
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 16.799999237060547,
+    "conflicting_visit_pairs": 136,
+    "conflicts": 20,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 14,
+    "name": "origB3",
+    "solves": [
+      {
+        "avg_time_points": 2.994219653179191,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 49,
+        "max_time_points": 7,
+        "num_conflicts": 158,
+        "num_time_points": 518,
+        "num_traveltime": 158,
+        "objective_iters": 5,
+        "resource_iters": 1,
+        "sol_time": 1.1933,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 4,
+        "travel_iters": 38
+      },
+      {
+        "added_conflict_pairs": 4,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 5.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 4,
+        "sol_time": 19.5107,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 168
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.949999809265137,
+    "conflicting_visit_pairs": 2246,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 15,
+    "name": "origB4",
+    "solves": [
+      {
+        "avg_time_points": 3.048632218844985,
+        "cost": 16,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 105,
+        "max_time_points": 20,
+        "num_conflicts": 542,
+        "num_time_points": 2006,
+        "num_traveltime": 542,
+        "objective_iters": 16,
+        "resource_iters": 1,
+        "sol_time": 8.1686,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 36,
+        "travel_iters": 51
+      },
+      {
+        "added_conflict_pairs": 8,
+        "cost": 16,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 16.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 8,
+        "sol_time": 69.6156,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 638
+      }
+    ],
+    "trains": 20
+  },
+  {
+    "avg_tracks": 17.799999237060547,
+    "conflicting_visit_pairs": 136,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 16,
+    "name": "origB5",
+    "solves": [
+      {
+        "avg_time_points": 2.5901639344262297,
+        "cost": 2,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 73,
+        "max_time_points": 5,
+        "num_conflicts": 100,
+        "num_time_points": 474,
+        "num_traveltime": 100,
+        "objective_iters": 2,
+        "resource_iters": 1,
+        "sol_time": 1.1582,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 3,
+        "travel_iters": 66
+      },
+      {
+        "added_conflict_pairs": 2,
+        "cost": 2,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 2.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 2,
+        "sol_time": 16.7998,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 178
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.199999809265137,
+    "conflicting_visit_pairs": 93,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 17,
+    "name": "origB6",
+    "solves": [
+      {
+        "avg_time_points": 2.0955414012738856,
+        "cost": 2,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 17,
+        "max_time_points": 3,
+        "num_conflicts": 13,
+        "num_time_points": 329,
+        "num_traveltime": 13,
+        "objective_iters": 2,
+        "resource_iters": 1,
+        "sol_time": 0.2813,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 0,
+        "travel_iters": 13
+      },
+      {
+        "added_conflict_pairs": 1,
+        "cost": 2,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 2.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 1,
+        "sol_time": 7.5246,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 152
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.25,
+    "conflicting_visit_pairs": 2865,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 18,
+    "name": "origB7",
+    "solves": [
+      {
+        "avg_time_points": 3.6560846560846563,
+        "cost": 25,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 114,
+        "max_time_points": 27,
+        "num_conflicts": 899,
+        "num_time_points": 2764,
+        "num_traveltime": 899,
+        "objective_iters": 25,
+        "resource_iters": 1,
+        "sol_time": 14.7465,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 54,
+        "travel_iters": 33
+      },
+      {
+        "added_conflict_pairs": 22,
+        "cost": 25,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 25.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 22,
+        "sol_time": 97.4822,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 732
+      }
+    ],
+    "trains": 24
+  },
+  {
+    "avg_tracks": 13.399999618530273,
+    "conflicting_visit_pairs": 72,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 19,
+    "name": "origB8",
+    "solves": [
+      {
+        "avg_time_points": 2.2949640287769784,
+        "cost": 6,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 47,
+        "max_time_points": 3,
+        "num_conflicts": 39,
+        "num_time_points": 319,
+        "num_traveltime": 39,
+        "objective_iters": 6,
+        "resource_iters": 1,
+        "sol_time": 0.5589,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 0,
+        "travel_iters": 39
+      },
+      {
+        "added_conflict_pairs": 1,
+        "cost": 6,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 6.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 1,
+        "sol_time": 7.0488,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 134
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 13.571428298950195,
+    "conflicting_visit_pairs": 150,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 20,
+    "name": "origB9",
+    "solves": [
+      {
+        "avg_time_points": 3.918781725888325,
+        "cost": 7,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 101,
+        "max_time_points": 10,
+        "num_conflicts": 345,
+        "num_time_points": 772,
+        "num_traveltime": 345,
+        "objective_iters": 7,
+        "resource_iters": 1,
+        "sol_time": 4.4169,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 13,
+        "travel_iters": 79
+      },
+      {
+        "added_conflict_pairs": 8,
+        "cost": 7,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 7.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 8,
+        "sol_time": 24.4455,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 190
+      }
+    ],
+    "trains": 7
+  },
+  {
+    "avg_tracks": 11.375,
+    "conflicting_visit_pairs": 130,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 21,
+    "name": "origB10",
+    "solves": [
+      {
+        "avg_time_points": 4.252631578947368,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 72,
+        "max_time_points": 11,
+        "num_conflicts": 390,
+        "num_time_points": 808,
+        "num_traveltime": 390,
+        "objective_iters": 10,
+        "resource_iters": 1,
+        "sol_time": 3.4245,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 13,
+        "travel_iters": 47
+      },
+      {
+        "added_conflict_pairs": 10,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 10.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 10,
+        "sol_time": 37.0511,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 182
+      }
+    ],
+    "trains": 8
+  },
+  {
+    "avg_tracks": 15.399999618530273,
+    "conflicting_visit_pairs": 3202,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 22,
+    "name": "origB11",
+    "solves": [
+      {
+        "avg_time_points": 3.581132075471698,
+        "cost": 23,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 123,
+        "max_time_points": 31,
+        "num_conflicts": 824,
+        "num_time_points": 2847,
+        "num_traveltime": 824,
+        "objective_iters": 23,
+        "resource_iters": 1,
+        "sol_time": 23.1436,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 42,
+        "travel_iters": 56
+      },
+      {
+        "added_conflict_pairs": 33,
+        "cost": 23,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 23.0,
+        "iteration": 7,
+        "refinements": 6,
+        "resource_constraints": 33,
+        "sol_time": 122.8803,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 770
+      }
+    ],
+    "trains": 25
+  },
+  {
+    "avg_tracks": 16.214284896850586,
+    "conflicting_visit_pairs": 970,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 23,
+    "name": "origB12",
+    "solves": [
+      {
+        "avg_time_points": 2.5448717948717947,
+        "cost": 6,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 57,
+        "max_time_points": 8,
+        "num_conflicts": 212,
+        "num_time_points": 1191,
+        "num_traveltime": 212,
+        "objective_iters": 6,
+        "resource_iters": 1,
+        "sol_time": 2.9251,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 15,
+        "travel_iters": 34
+      },
+      {
+        "added_conflict_pairs": 3,
+        "cost": 6,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 6.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 3,
+        "sol_time": 22.7628,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 454
+      }
+    ],
+    "trains": 14
+  },
+  {
+    "avg_tracks": 20.931034088134766,
+    "conflicting_visit_pairs": 5915,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 24,
+    "name": "trackA1",
+    "solves": [
+      {
+        "avg_time_points": 4.917940466613033,
+        "cost": 23,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 144,
+        "max_time_points": 34,
+        "num_conflicts": 3134,
+        "num_time_points": 6113,
+        "num_traveltime": 3134,
+        "objective_iters": 23,
+        "resource_iters": 1,
+        "sol_time": 98.4884,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 93,
+        "travel_iters": 26
+      },
+      {
+        "added_conflict_pairs": 96,
+        "cost": 23,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 23.0,
+        "iteration": 10,
+        "refinements": 9,
+        "resource_constraints": 96,
+        "sol_time": 559.8169,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1214
+      }
+    ],
+    "trains": 29
+  },
+  {
+    "avg_tracks": 19.0,
+    "conflicting_visit_pairs": 3735,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 25,
+    "name": "trackA2",
+    "solves": [
+      {
+        "avg_time_points": 5.088205128205129,
+        "cost": 33,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 225,
+        "max_time_points": 25,
+        "num_conflicts": 2610,
+        "num_time_points": 4961,
+        "num_traveltime": 2610,
+        "objective_iters": 33,
+        "resource_iters": 2,
+        "sol_time": 99.8498,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 89,
+        "travel_iters": 100
+      },
+      {
+        "added_conflict_pairs": 71,
+        "cost": 33,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 33.0,
+        "iteration": 6,
+        "refinements": 5,
+        "resource_constraints": 71,
+        "sol_time": 309.0556,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 950
+      }
+    ],
+    "trains": 25
+  },
+  {
+    "avg_tracks": 22.375,
+    "conflicting_visit_pairs": 2061,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 26,
+    "name": "trackA3",
+    "solves": [
+      {
+        "avg_time_points": 5.273224043715847,
+        "cost": 15,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 258,
+        "max_time_points": 18,
+        "num_conflicts": 2168,
+        "num_time_points": 3860,
+        "num_traveltime": 2168,
+        "objective_iters": 15,
+        "resource_iters": 2,
+        "sol_time": 69.4001,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 65,
+        "travel_iters": 175
+      },
+      {
+        "added_conflict_pairs": 45,
+        "cost": 15,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 15.0,
+        "iteration": 8,
+        "refinements": 7,
+        "resource_constraints": 45,
+        "sol_time": 273.7291,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 716
+      }
+    ],
+    "trains": 16
+  },
+  {
+    "avg_tracks": 19.214284896850586,
+    "conflicting_visit_pairs": 1175,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 27,
+    "name": "trackA4",
+    "solves": [
+      {
+        "avg_time_points": 3.625,
+        "cost": 15,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 118,
+        "max_time_points": 12,
+        "num_conflicts": 802,
+        "num_time_points": 2001,
+        "num_traveltime": 802,
+        "objective_iters": 15,
+        "resource_iters": 1,
+        "sol_time": 20.9154,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 30,
+        "travel_iters": 71
+      },
+      {
+        "added_conflict_pairs": 18,
+        "cost": 15,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 15.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 18,
+        "sol_time": 88.0529,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 538
+      }
+    ],
+    "trains": 14
+  },
+  {
+    "avg_tracks": 19.25,
+    "conflicting_visit_pairs": 876,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 28,
+    "name": "trackA5",
+    "solves": [
+      {
+        "avg_time_points": 3.411392405063291,
+        "cost": 12,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 154,
+        "max_time_points": 12,
+        "num_conflicts": 607,
+        "num_time_points": 1617,
+        "num_traveltime": 607,
+        "objective_iters": 12,
+        "resource_iters": 1,
+        "sol_time": 10.4139,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 19,
+        "travel_iters": 121
+      },
+      {
+        "added_conflict_pairs": 18,
+        "cost": 12,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 12.0,
+        "iteration": 6,
+        "refinements": 5,
+        "resource_constraints": 18,
+        "sol_time": 90.8174,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 462
+      }
+    ],
+    "trains": 12
+  },
+  {
+    "avg_tracks": 18.625,
+    "conflicting_visit_pairs": 307,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 29,
+    "name": "trackA6",
+    "solves": [
+      {
+        "avg_time_points": 2.977124183006536,
+        "cost": 8,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 84,
+        "max_time_points": 8,
+        "num_conflicts": 272,
+        "num_time_points": 911,
+        "num_traveltime": 272,
+        "objective_iters": 8,
+        "resource_iters": 1,
+        "sol_time": 3.1401,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 9,
+        "travel_iters": 65
+      },
+      {
+        "added_conflict_pairs": 7,
+        "cost": 8,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 8.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 7,
+        "sol_time": 27.5064,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 298
+      }
+    ],
+    "trains": 8
+  },
+  {
+    "avg_tracks": 12.625,
+    "conflicting_visit_pairs": 126,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 30,
+    "name": "trackA7",
+    "solves": [
+      {
+        "avg_time_points": 3.0904761904761906,
+        "cost": 8,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 61,
+        "max_time_points": 7,
+        "num_conflicts": 208,
+        "num_time_points": 649,
+        "num_traveltime": 208,
+        "objective_iters": 8,
+        "resource_iters": 1,
+        "sol_time": 1.9351,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 5,
+        "travel_iters": 46
+      },
+      {
+        "added_conflict_pairs": 9,
+        "cost": 8,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 8.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 9,
+        "sol_time": 27.2453,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 202
+      }
+    ],
+    "trains": 8
+  },
+  {
+    "avg_tracks": 19.88888931274414,
+    "conflicting_visit_pairs": 4862,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 31,
+    "name": "trackA8",
+    "solves": [
+      {
+        "avg_time_points": 9.762942779291553,
+        "cost": 34,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 209,
+        "max_time_points": 49,
+        "num_conflicts": 6647,
+        "num_time_points": 10749,
+        "num_traveltime": 6647,
+        "objective_iters": 34,
+        "resource_iters": 1,
+        "sol_time": 246.996,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 125,
+        "travel_iters": 48
+      },
+      {
+        "added_conflict_pairs": 155,
+        "cost": 34,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 34.0,
+        "iteration": 10,
+        "refinements": 9,
+        "resource_constraints": 155,
+        "sol_time": 874.5689,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1074
+      }
+    ],
+    "trains": 27
+  },
+  {
+    "avg_tracks": 20.049999237060547,
+    "conflicting_visit_pairs": 2616,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 32,
+    "name": "trackA9",
+    "solves": [
+      {
+        "avg_time_points": 4.034063260340632,
+        "cost": 25,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 101,
+        "max_time_points": 20,
+        "num_conflicts": 1423,
+        "num_time_points": 3316,
+        "num_traveltime": 1423,
+        "objective_iters": 25,
+        "resource_iters": 1,
+        "sol_time": 19.7166,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 49,
+        "travel_iters": 25
+      },
+      {
+        "added_conflict_pairs": 45,
+        "cost": 25,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 25.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 45,
+        "sol_time": 128.4487,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 802
+      }
+    ],
+    "trains": 20
+  },
+  {
+    "avg_tracks": 18.176469802856445,
+    "conflicting_visit_pairs": 1632,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 33,
+    "name": "trackA10",
+    "solves": [
+      {
+        "avg_time_points": 3.601574803149606,
+        "cost": 17,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 96,
+        "max_time_points": 13,
+        "num_conflicts": 872,
+        "num_time_points": 2287,
+        "num_traveltime": 872,
+        "objective_iters": 17,
+        "resource_iters": 1,
+        "sol_time": 11.9107,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 37,
+        "travel_iters": 40
+      },
+      {
+        "added_conflict_pairs": 23,
+        "cost": 17,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 17.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 23,
+        "sol_time": 86.9683,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 618
+      }
+    ],
+    "trains": 17
+  },
+  {
+    "avg_tracks": 20.482759475708008,
+    "conflicting_visit_pairs": 6144,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 34,
+    "name": "trackA11",
+    "solves": [
+      {
+        "avg_time_points": 11.064913722267871,
+        "cost": 33,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 230,
+        "max_time_points": 92,
+        "num_conflicts": 8707,
+        "num_time_points": 13466,
+        "num_traveltime": 8707,
+        "objective_iters": 33,
+        "resource_iters": 1,
+        "sol_time": 453.069,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 153,
+        "travel_iters": 42
+      },
+      {
+        "added_conflict_pairs": 202,
+        "cost": 33,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 33.0,
+        "iteration": 11,
+        "refinements": 10,
+        "resource_constraints": 202,
+        "sol_time": 2541.4987,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1188
+      }
+    ],
+    "trains": 29
+  },
+  {
+    "avg_tracks": 21.714284896850586,
+    "conflicting_visit_pairs": 6393,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 35,
+    "name": "trackA12",
+    "solves": [
+      {
+        "avg_time_points": 11.111736334405144,
+        "cost": 36,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 209,
+        "max_time_points": 90,
+        "num_conflicts": 8739,
+        "num_time_points": 13823,
+        "num_traveltime": 8739,
+        "objective_iters": 36,
+        "resource_iters": 1,
+        "sol_time": 361.516,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 146,
+        "travel_iters": 25
+      },
+      {
+        "added_conflict_pairs": 210,
+        "cost": 36,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 36.0,
+        "iteration": 13,
+        "refinements": 12,
+        "resource_constraints": 210,
+        "sol_time": 2405.0402,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1216
+      }
+    ],
+    "trains": 28
+  },
+  {
+    "avg_tracks": 17.33333396911621,
+    "conflicting_visit_pairs": 2022,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 36,
+    "name": "trackB1",
+    "solves": [
+      {
+        "avg_time_points": 3.3193146417445485,
+        "cost": 13,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 106,
+        "max_time_points": 8,
+        "num_conflicts": 762,
+        "num_time_points": 2131,
+        "num_traveltime": 762,
+        "objective_iters": 13,
+        "resource_iters": 1,
+        "sol_time": 12.5811,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 23,
+        "travel_iters": 68
+      },
+      {
+        "added_conflict_pairs": 19,
+        "cost": 13,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 13.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 19,
+        "sol_time": 81.1047,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 624
+      }
+    ],
+    "trains": 18
+  },
+  {
+    "avg_tracks": 14.800000190734863,
+    "conflicting_visit_pairs": 87,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 37,
+    "name": "trackB2",
+    "solves": [
+      {
+        "avg_time_points": 2.7973856209150325,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 58,
+        "max_time_points": 5,
+        "num_conflicts": 104,
+        "num_time_points": 428,
+        "num_traveltime": 104,
+        "objective_iters": 5,
+        "resource_iters": 2,
+        "sol_time": 1.1638,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 3,
+        "travel_iters": 47
+      },
+      {
+        "added_conflict_pairs": 6,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 5.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 6,
+        "sol_time": 14.8978,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 148
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 16.799999237060547,
+    "conflicting_visit_pairs": 136,
+    "conflicts": 20,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 38,
+    "name": "trackB3",
+    "solves": [
+      {
+        "avg_time_points": 3.6242774566473988,
+        "cost": 4,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 55,
+        "max_time_points": 9,
+        "num_conflicts": 241,
+        "num_time_points": 627,
+        "num_traveltime": 241,
+        "objective_iters": 4,
+        "resource_iters": 1,
+        "sol_time": 1.9654,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 13,
+        "travel_iters": 36
+      },
+      {
+        "added_conflict_pairs": 5,
+        "cost": 4,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 4.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 5,
+        "sol_time": 12.5319,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 168
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.949999809265137,
+    "conflicting_visit_pairs": 2246,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 39,
+    "name": "trackB4",
+    "solves": [
+      {
+        "avg_time_points": 4.656534954407295,
+        "cost": 19,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 111,
+        "max_time_points": 29,
+        "num_conflicts": 1469,
+        "num_time_points": 3064,
+        "num_traveltime": 1469,
+        "objective_iters": 19,
+        "resource_iters": 1,
+        "sol_time": 21.7099,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 61,
+        "travel_iters": 29
+      },
+      {
+        "added_conflict_pairs": 28,
+        "cost": 19,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 19.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 28,
+        "sol_time": 82.2501,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 638
+      }
+    ],
+    "trains": 20
+  },
+  {
+    "avg_tracks": 17.799999237060547,
+    "conflicting_visit_pairs": 136,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 40,
+    "name": "trackB5",
+    "solves": [
+      {
+        "avg_time_points": 4.191256830601093,
+        "cost": 7,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 71,
+        "max_time_points": 9,
+        "num_conflicts": 351,
+        "num_time_points": 767,
+        "num_traveltime": 351,
+        "objective_iters": 7,
+        "resource_iters": 1,
+        "sol_time": 2.9199,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 16,
+        "travel_iters": 46
+      },
+      {
+        "added_conflict_pairs": 8,
+        "cost": 7,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 7.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 8,
+        "sol_time": 40.743,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 178
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.199999809265137,
+    "conflicting_visit_pairs": 93,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 41,
+    "name": "trackB6",
+    "solves": [
+      {
+        "avg_time_points": 3.0,
+        "cost": 2,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 50,
+        "max_time_points": 6,
+        "num_conflicts": 145,
+        "num_time_points": 471,
+        "num_traveltime": 145,
+        "objective_iters": 2,
+        "resource_iters": 1,
+        "sol_time": 1.1058,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 3,
+        "travel_iters": 43
+      },
+      {
+        "added_conflict_pairs": 3,
+        "cost": 2,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 2.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 3,
+        "sol_time": 10.5139,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 152
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.25,
+    "conflicting_visit_pairs": 2865,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 42,
+    "name": "trackB7",
+    "solves": [
+      {
+        "avg_time_points": 3.8544973544973544,
+        "cost": 27,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 90,
+        "max_time_points": 18,
+        "num_conflicts": 1176,
+        "num_time_points": 2914,
+        "num_traveltime": 1176,
+        "objective_iters": 27,
+        "resource_iters": 1,
+        "sol_time": 19.9718,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 41,
+        "travel_iters": 20
+      },
+      {
+        "added_conflict_pairs": 42,
+        "cost": 27,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 27.0,
+        "iteration": 7,
+        "refinements": 6,
+        "resource_constraints": 42,
+        "sol_time": 197.5236,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 732
+      }
+    ],
+    "trains": 24
+  },
+  {
+    "avg_tracks": 13.399999618530273,
+    "conflicting_visit_pairs": 72,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 43,
+    "name": "trackB8",
+    "solves": [
+      {
+        "avg_time_points": 3.9280575539568345,
+        "cost": 8,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 88,
+        "max_time_points": 10,
+        "num_conflicts": 241,
+        "num_time_points": 546,
+        "num_traveltime": 241,
+        "objective_iters": 8,
+        "resource_iters": 1,
+        "sol_time": 2.5917,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 10,
+        "travel_iters": 68
+      },
+      {
+        "added_conflict_pairs": 5,
+        "cost": 8,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 8.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 5,
+        "sol_time": 14.2626,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 134
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 13.571428298950195,
+    "conflicting_visit_pairs": 150,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 44,
+    "name": "trackB9",
+    "solves": [
+      {
+        "avg_time_points": 4.477157360406092,
+        "cost": 9,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 57,
+        "max_time_points": 14,
+        "num_conflicts": 376,
+        "num_time_points": 882,
+        "num_traveltime": 376,
+        "objective_iters": 9,
+        "resource_iters": 1,
+        "sol_time": 3.282,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 27,
+        "travel_iters": 19
+      },
+      {
+        "added_conflict_pairs": 10,
+        "cost": 9,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 9.0,
+        "iteration": 6,
+        "refinements": 5,
+        "resource_constraints": 10,
+        "sol_time": 49.6888,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 190
+      }
+    ],
+    "trains": 7
+  },
+  {
+    "avg_tracks": 12.857142448425293,
+    "conflicting_visit_pairs": 126,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 45,
+    "name": "trackB10",
+    "solves": [
+      {
+        "avg_time_points": 2.572192513368984,
+        "cost": 8,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 49,
+        "max_time_points": 5,
+        "num_conflicts": 97,
+        "num_time_points": 481,
+        "num_traveltime": 97,
+        "objective_iters": 8,
+        "resource_iters": 1,
+        "sol_time": 1.8594,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 2,
+        "travel_iters": 37
+      },
+      {
+        "added_conflict_pairs": 3,
+        "cost": 8,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 8.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 3,
+        "sol_time": 10.8265,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 180
+      }
+    ],
+    "trains": 7
+  },
+  {
+    "avg_tracks": 15.399999618530273,
+    "conflicting_visit_pairs": 3202,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 46,
+    "name": "trackB11",
+    "solves": [
+      {
+        "avg_time_points": 4.022641509433963,
+        "cost": 31,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 185,
+        "max_time_points": 14,
+        "num_conflicts": 1353,
+        "num_time_points": 3198,
+        "num_traveltime": 1353,
+        "objective_iters": 31,
+        "resource_iters": 1,
+        "sol_time": 41.1158,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 52,
+        "travel_iters": 100
+      },
+      {
+        "added_conflict_pairs": 39,
+        "cost": 31,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 31.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 39,
+        "sol_time": 145.3233,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 770
+      }
+    ],
+    "trains": 25
+  },
+  {
+    "avg_tracks": 16.214284896850586,
+    "conflicting_visit_pairs": 970,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 47,
+    "name": "trackB12",
+    "solves": [
+      {
+        "avg_time_points": 3.963675213675214,
+        "cost": 16,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 107,
+        "max_time_points": 16,
+        "num_conflicts": 742,
+        "num_time_points": 1855,
+        "num_traveltime": 742,
+        "objective_iters": 16,
+        "resource_iters": 3,
+        "sol_time": 11.1387,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 39,
+        "travel_iters": 48
+      },
+      {
+        "added_conflict_pairs": 27,
+        "cost": 16,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 16.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 27,
+        "sol_time": 117.5782,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 454
+      }
+    ],
+    "trains": 14
+  },
+  {
+    "avg_tracks": 20.931034088134766,
+    "conflicting_visit_pairs": 5915,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 48,
+    "name": "stationA1",
+    "solves": [
+      {
+        "avg_time_points": 6.290426387771521,
+        "cost": 37,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 198,
+        "max_time_points": 23,
+        "num_conflicts": 4565,
+        "num_time_points": 7819,
+        "num_traveltime": 4565,
+        "objective_iters": 37,
+        "resource_iters": 1,
+        "sol_time": 177.5201,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 106,
+        "travel_iters": 53
+      },
+      {
+        "added_conflict_pairs": 132,
+        "cost": 37,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 37.0,
+        "iteration": 13,
+        "refinements": 12,
+        "resource_constraints": 132,
+        "sol_time": 1160.5282,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1214
+      }
+    ],
+    "trains": 29
+  },
+  {
+    "avg_tracks": 19.0,
+    "conflicting_visit_pairs": 3735,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 49,
+    "name": "stationA2",
+    "solves": [
+      {
+        "avg_time_points": 6.596923076923077,
+        "cost": 40,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 184,
+        "max_time_points": 23,
+        "num_conflicts": 3814,
+        "num_time_points": 6432,
+        "num_traveltime": 3814,
+        "objective_iters": 40,
+        "resource_iters": 1,
+        "sol_time": 82.5562,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 106,
+        "travel_iters": 36
+      },
+      {
+        "added_conflict_pairs": 97,
+        "cost": 40,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 40.0,
+        "iteration": 8,
+        "refinements": 7,
+        "resource_constraints": 97,
+        "sol_time": 371.681,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 950
+      }
+    ],
+    "trains": 25
+  },
+  {
+    "avg_tracks": 22.375,
+    "conflicting_visit_pairs": 2061,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 50,
+    "name": "stationA3",
+    "solves": [
+      {
+        "avg_time_points": 4.505464480874317,
+        "cost": 19,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 115,
+        "max_time_points": 17,
+        "num_conflicts": 1632,
+        "num_time_points": 3298,
+        "num_traveltime": 1632,
+        "objective_iters": 19,
+        "resource_iters": 1,
+        "sol_time": 23.0134,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 57,
+        "travel_iters": 37
+      },
+      {
+        "added_conflict_pairs": 44,
+        "cost": 19,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 19.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 44,
+        "sol_time": 152.7428,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 716
+      }
+    ],
+    "trains": 16
+  },
+  {
+    "avg_tracks": 19.214284896850586,
+    "conflicting_visit_pairs": 1175,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 51,
+    "name": "stationA4",
+    "solves": [
+      {
+        "avg_time_points": 4.0144927536231885,
+        "cost": 17,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 138,
+        "max_time_points": 15,
+        "num_conflicts": 1002,
+        "num_time_points": 2216,
+        "num_traveltime": 1002,
+        "objective_iters": 17,
+        "resource_iters": 1,
+        "sol_time": 16.3972,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 34,
+        "travel_iters": 85
+      },
+      {
+        "added_conflict_pairs": 23,
+        "cost": 17,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 17.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 23,
+        "sol_time": 71.129,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 538
+      }
+    ],
+    "trains": 14
+  },
+  {
+    "avg_tracks": 19.25,
+    "conflicting_visit_pairs": 876,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 52,
+    "name": "stationA5",
+    "solves": [
+      {
+        "avg_time_points": 3.8734177215189876,
+        "cost": 16,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 100,
+        "max_time_points": 14,
+        "num_conflicts": 795,
+        "num_time_points": 1836,
+        "num_traveltime": 795,
+        "objective_iters": 16,
+        "resource_iters": 1,
+        "sol_time": 8.7238,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 26,
+        "travel_iters": 56
+      },
+      {
+        "added_conflict_pairs": 16,
+        "cost": 16,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 16.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 16,
+        "sol_time": 76.0079,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 462
+      }
+    ],
+    "trains": 12
+  },
+  {
+    "avg_tracks": 18.625,
+    "conflicting_visit_pairs": 307,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 53,
+    "name": "stationA6",
+    "solves": [
+      {
+        "avg_time_points": 2.7483660130718954,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 51,
+        "max_time_points": 8,
+        "num_conflicts": 189,
+        "num_time_points": 841,
+        "num_traveltime": 189,
+        "objective_iters": 10,
+        "resource_iters": 1,
+        "sol_time": 1.694,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 15,
+        "travel_iters": 24
+      },
+      {
+        "added_conflict_pairs": 4,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 10.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 4,
+        "sol_time": 17.5712,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 298
+      }
+    ],
+    "trains": 8
+  },
+  {
+    "avg_tracks": 12.625,
+    "conflicting_visit_pairs": 126,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 54,
+    "name": "stationA7",
+    "solves": [
+      {
+        "avg_time_points": 3.7476190476190476,
+        "cost": 12,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 94,
+        "max_time_points": 8,
+        "num_conflicts": 339,
+        "num_time_points": 787,
+        "num_traveltime": 339,
+        "objective_iters": 12,
+        "resource_iters": 1,
+        "sol_time": 4.6161,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 10,
+        "travel_iters": 70
+      },
+      {
+        "added_conflict_pairs": 8,
+        "cost": 12,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 12.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 8,
+        "sol_time": 21.9277,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 202
+      }
+    ],
+    "trains": 8
+  },
+  {
+    "avg_tracks": 19.88888931274414,
+    "conflicting_visit_pairs": 4862,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 55,
+    "name": "stationA8",
+    "solves": [
+      {
+        "avg_time_points": 10.358764759309718,
+        "cost": 43,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 225,
+        "max_time_points": 54,
+        "num_conflicts": 7207,
+        "num_time_points": 11405,
+        "num_traveltime": 7207,
+        "objective_iters": 43,
+        "resource_iters": 2,
+        "sol_time": 240.6164,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 160,
+        "travel_iters": 19
+      },
+      {
+        "added_conflict_pairs": 190,
+        "cost": 43,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 43.0,
+        "iteration": 17,
+        "refinements": 16,
+        "resource_constraints": 190,
+        "sol_time": 1810.8242,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1074
+      }
+    ],
+    "trains": 27
+  },
+  {
+    "avg_tracks": 20.049999237060547,
+    "conflicting_visit_pairs": 2616,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 56,
+    "name": "stationA9",
+    "solves": [
+      {
+        "avg_time_points": 4.45985401459854,
+        "cost": 27,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 124,
+        "max_time_points": 16,
+        "num_conflicts": 1755,
+        "num_time_points": 3666,
+        "num_traveltime": 1755,
+        "objective_iters": 27,
+        "resource_iters": 1,
+        "sol_time": 25.5612,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 54,
+        "travel_iters": 41
+      },
+      {
+        "added_conflict_pairs": 54,
+        "cost": 27,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 27.0,
+        "iteration": 7,
+        "refinements": 6,
+        "resource_constraints": 54,
+        "sol_time": 209.5181,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 802
+      }
+    ],
+    "trains": 20
+  },
+  {
+    "avg_tracks": 18.176469802856445,
+    "conflicting_visit_pairs": 1632,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 57,
+    "name": "stationA10",
+    "solves": [
+      {
+        "avg_time_points": 3.837795275590551,
+        "cost": 21,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 110,
+        "max_time_points": 20,
+        "num_conflicts": 976,
+        "num_time_points": 2437,
+        "num_traveltime": 976,
+        "objective_iters": 21,
+        "resource_iters": 1,
+        "sol_time": 13.4246,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 54,
+        "travel_iters": 33
+      },
+      {
+        "added_conflict_pairs": 27,
+        "cost": 21,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 21.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 27,
+        "sol_time": 94.3984,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 618
+      }
+    ],
+    "trains": 17
+  },
+  {
+    "avg_tracks": 20.482759475708008,
+    "conflicting_visit_pairs": 6144,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 58,
+    "name": "stationA11",
+    "solves": [
+      {
+        "avg_time_points": 10.354149548069023,
+        "cost": 41,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 207,
+        "max_time_points": 74,
+        "num_conflicts": 8038,
+        "num_time_points": 12601,
+        "num_traveltime": 8038,
+        "objective_iters": 41,
+        "resource_iters": 1,
+        "sol_time": 334.6657,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 129,
+        "travel_iters": 35
+      },
+      {
+        "added_conflict_pairs": 143,
+        "cost": 41,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 41.0,
+        "iteration": 9,
+        "refinements": 8,
+        "resource_constraints": 143,
+        "sol_time": 917.0624,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1188
+      }
+    ],
+    "trains": 29
+  },
+  {
+    "avg_tracks": 21.714284896850586,
+    "conflicting_visit_pairs": 6393,
+    "conflicts": 33,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 59,
+    "name": "stationA12",
+    "solves": [
+      {
+        "avg_time_points": 13.479099678456592,
+        "cost": 44,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 224,
+        "max_time_points": 101,
+        "num_conflicts": 10665,
+        "num_time_points": 16768,
+        "num_traveltime": 10665,
+        "objective_iters": 44,
+        "resource_iters": 1,
+        "sol_time": 380.213,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 166,
+        "travel_iters": 12
+      },
+      {
+        "added_conflict_pairs": 223,
+        "cost": 44,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 44.0,
+        "iteration": 17,
+        "refinements": 16,
+        "resource_constraints": 223,
+        "sol_time": 2079.5672,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 1216
+      }
+    ],
+    "trains": 28
+  },
+  {
+    "avg_tracks": 17.33333396911621,
+    "conflicting_visit_pairs": 2022,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 60,
+    "name": "stationB1",
+    "solves": [
+      {
+        "avg_time_points": 3.79595015576324,
+        "cost": 19,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 87,
+        "max_time_points": 9,
+        "num_conflicts": 1005,
+        "num_time_points": 2437,
+        "num_traveltime": 1005,
+        "objective_iters": 19,
+        "resource_iters": 1,
+        "sol_time": 11.8265,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 31,
+        "travel_iters": 35
+      },
+      {
+        "added_conflict_pairs": 30,
+        "cost": 19,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 19.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 30,
+        "sol_time": 93.8584,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 624
+      }
+    ],
+    "trains": 18
+  },
+  {
+    "avg_tracks": 14.800000190734863,
+    "conflicting_visit_pairs": 87,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 61,
+    "name": "stationB2",
+    "solves": [
+      {
+        "avg_time_points": 2.849673202614379,
+        "cost": 7,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 58,
+        "max_time_points": 6,
+        "num_conflicts": 112,
+        "num_time_points": 436,
+        "num_traveltime": 112,
+        "objective_iters": 7,
+        "resource_iters": 1,
+        "sol_time": 1.3151,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 3,
+        "travel_iters": 46
+      },
+      {
+        "added_conflict_pairs": 9,
+        "cost": 7,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 7.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 9,
+        "sol_time": 29.1809,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 148
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 16.799999237060547,
+    "conflicting_visit_pairs": 136,
+    "conflicts": 20,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 62,
+    "name": "stationB3",
+    "solves": [
+      {
+        "avg_time_points": 4.317919075144508,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 70,
+        "max_time_points": 12,
+        "num_conflicts": 351,
+        "num_time_points": 747,
+        "num_traveltime": 351,
+        "objective_iters": 5,
+        "resource_iters": 1,
+        "sol_time": 2.5856,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 16,
+        "travel_iters": 47
+      },
+      {
+        "added_conflict_pairs": 5,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 5.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 5,
+        "sol_time": 15.0436,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 168
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.949999809265137,
+    "conflicting_visit_pairs": 2246,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 63,
+    "name": "stationB4",
+    "solves": [
+      {
+        "avg_time_points": 4.4696048632218845,
+        "cost": 31,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 102,
+        "max_time_points": 15,
+        "num_conflicts": 1394,
+        "num_time_points": 2941,
+        "num_traveltime": 1394,
+        "objective_iters": 31,
+        "resource_iters": 1,
+        "sol_time": 17.3754,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 41,
+        "travel_iters": 28
+      },
+      {
+        "added_conflict_pairs": 33,
+        "cost": 31,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 31.0,
+        "iteration": 4,
+        "refinements": 3,
+        "resource_constraints": 33,
+        "sol_time": 117.245,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 638
+      }
+    ],
+    "trains": 20
+  },
+  {
+    "avg_tracks": 17.799999237060547,
+    "conflicting_visit_pairs": 136,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 64,
+    "name": "stationB5",
+    "solves": [
+      {
+        "avg_time_points": 4.830601092896175,
+        "cost": 6,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 69,
+        "max_time_points": 16,
+        "num_conflicts": 450,
+        "num_time_points": 884,
+        "num_traveltime": 450,
+        "objective_iters": 6,
+        "resource_iters": 1,
+        "sol_time": 5.7578,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 13,
+        "travel_iters": 48
+      },
+      {
+        "added_conflict_pairs": 9,
+        "cost": 6,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 6.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 9,
+        "sol_time": 52.3461,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 178
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.199999809265137,
+    "conflicting_visit_pairs": 93,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 65,
+    "name": "stationB6",
+    "solves": [
+      {
+        "avg_time_points": 2.929936305732484,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 50,
+        "max_time_points": 5,
+        "num_conflicts": 135,
+        "num_time_points": 460,
+        "num_traveltime": 135,
+        "objective_iters": 5,
+        "resource_iters": 1,
+        "sol_time": 1.7737,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 3,
+        "travel_iters": 40
+      },
+      {
+        "added_conflict_pairs": 3,
+        "cost": 5,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 5.0,
+        "iteration": 2,
+        "refinements": 1,
+        "resource_constraints": 3,
+        "sol_time": 12.8509,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 152
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 15.25,
+    "conflicting_visit_pairs": 2865,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 66,
+    "name": "stationB7",
+    "solves": [
+      {
+        "avg_time_points": 4.994708994708994,
+        "cost": 40,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 156,
+        "max_time_points": 16,
+        "num_conflicts": 1972,
+        "num_time_points": 3776,
+        "num_traveltime": 1972,
+        "objective_iters": 40,
+        "resource_iters": 1,
+        "sol_time": 54.9261,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 57,
+        "travel_iters": 57
+      },
+      {
+        "added_conflict_pairs": 49,
+        "cost": 40,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 40.0,
+        "iteration": 6,
+        "refinements": 5,
+        "resource_constraints": 49,
+        "sol_time": 233.3624,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 732
+      }
+    ],
+    "trains": 24
+  },
+  {
+    "avg_tracks": 13.399999618530273,
+    "conflicting_visit_pairs": 72,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 67,
+    "name": "stationB8",
+    "solves": [
+      {
+        "avg_time_points": 3.338129496402878,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 66,
+        "max_time_points": 6,
+        "num_conflicts": 169,
+        "num_time_points": 464,
+        "num_traveltime": 169,
+        "objective_iters": 10,
+        "resource_iters": 1,
+        "sol_time": 1.9779,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 5,
+        "travel_iters": 49
+      },
+      {
+        "added_conflict_pairs": 5,
+        "cost": 10,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 10.0,
+        "iteration": 3,
+        "refinements": 2,
+        "resource_constraints": 5,
+        "sol_time": 19.6223,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 134
+      }
+    ],
+    "trains": 5
+  },
+  {
+    "avg_tracks": 13.571428298950195,
+    "conflicting_visit_pairs": 150,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 68,
+    "name": "stationB9",
+    "solves": [
+      {
+        "avg_time_points": 3.517766497461929,
+        "cost": 11,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 65,
+        "max_time_points": 8,
+        "num_conflicts": 245,
+        "num_time_points": 693,
+        "num_traveltime": 245,
+        "objective_iters": 11,
+        "resource_iters": 1,
+        "sol_time": 2.232,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 15,
+        "travel_iters": 37
+      },
+      {
+        "added_conflict_pairs": 19,
+        "cost": 11,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 11.0,
+        "iteration": 8,
+        "refinements": 7,
+        "resource_constraints": 19,
+        "sol_time": 76.6458,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 190
+      }
+    ],
+    "trains": 7
+  },
+  {
+    "avg_tracks": 12.857142448425293,
+    "conflicting_visit_pairs": 126,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 69,
+    "name": "stationB10",
+    "solves": [
+      {
+        "avg_time_points": 2.700534759358289,
+        "cost": 11,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 53,
+        "max_time_points": 6,
+        "num_conflicts": 115,
+        "num_time_points": 505,
+        "num_traveltime": 115,
+        "objective_iters": 11,
+        "resource_iters": 1,
+        "sol_time": 0.9829,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 5,
+        "travel_iters": 35
+      },
+      {
+        "added_conflict_pairs": 6,
+        "cost": 11,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 11.0,
+        "iteration": 5,
+        "refinements": 4,
+        "resource_constraints": 6,
+        "sol_time": 32.9832,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 180
+      }
+    ],
+    "trains": 7
+  },
+  {
+    "avg_tracks": 15.399999618530273,
+    "conflicting_visit_pairs": 3202,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 70,
+    "name": "stationB11",
+    "solves": [
+      {
+        "avg_time_points": 4.743396226415094,
+        "cost": 44,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 134,
+        "max_time_points": 16,
+        "num_conflicts": 1835,
+        "num_time_points": 3771,
+        "num_traveltime": 1835,
+        "objective_iters": 44,
+        "resource_iters": 1,
+        "sol_time": 45.1118,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 54,
+        "travel_iters": 34
+      },
+      {
+        "added_conflict_pairs": 63,
+        "cost": 44,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 44.0,
+        "iteration": 6,
+        "refinements": 5,
+        "resource_constraints": 63,
+        "sol_time": 217.2172,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 770
+      }
+    ],
+    "trains": 25
+  },
+  {
+    "avg_tracks": 16.214284896850586,
+    "conflicting_visit_pairs": 970,
+    "conflicts": 25,
+    "delay_cost_type": "FiniteSteps123",
+    "index": 71,
+    "name": "stationB12",
+    "solves": [
+      {
+        "avg_time_points": 4.7414529914529915,
+        "cost": 19,
+        "delay_cost_type": "FiniteSteps123",
+        "iterations": 119,
+        "max_time_points": 22,
+        "num_conflicts": 1038,
+        "num_time_points": 2219,
+        "num_traveltime": 1038,
+        "objective_iters": 19,
+        "resource_iters": 1,
+        "sol_time": 15.3229,
+        "solver_name": "MaxSatDdd",
+        "travel_and_resource_iters": 49,
+        "travel_iters": 49
+      },
+      {
+        "added_conflict_pairs": 26,
+        "cost": 19,
+        "delay_cost_type": "FiniteSteps123",
+        "internal_cost": 19.0,
+        "iteration": 6,
+        "refinements": 5,
+        "resource_constraints": 26,
+        "sol_time": 120.8199,
+        "solver_name": "BigMLazy",
+        "travel_constraints": 454
+      }
+    ],
+    "trains": 14
+  }
+]
