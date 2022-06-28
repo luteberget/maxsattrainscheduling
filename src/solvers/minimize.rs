@@ -1,5 +1,5 @@
 use crate::{
-    problem::{DelayCostType, Problem},
+    problem::Problem,
     solvers::SolverError,
 };
 
@@ -28,12 +28,12 @@ pub fn minimize_solution(
         .trains
         .iter()
         .enumerate()
-        .map(|(train_idx, train)| {
+        .map(|(_train_idx, train)| {
             train
                 .visits
                 .iter()
                 .enumerate()
-                .map(|(visit_idx, visit)| {
+                .map(|(_visit_idx, visit)| {
                     add_ctsvar!(model,
                 // name : &format!("tn{}_v{}_tk{}", train_names[train_idx], visit_idx, resource_names[visit.resource_id]), 
                 bounds: visit.earliest..,
@@ -46,9 +46,8 @@ pub fn minimize_solution(
         .collect::<Result<Vec<_>, _>>()?;
 
     // Travel time constraints
-    for train_idx in 0..problem.trains.len() {
-        for visit_idx in 0..problem.trains[train_idx].visits.len() - 1 {
-            let visits = &problem.trains[train_idx].visits;
+    for (train,ts) in problem.trains.iter().zip(t_vars.iter()) {
+        for visit_idx in 0..train.visits.len() - 1 {
             #[allow(clippy::useless_conversion)]
             model
                 .add_constr("",
@@ -59,8 +58,8 @@ pub fn minimize_solution(
                     //     resource_names[problem.trains[train_idx].visits[visit_idx].resource_id]
                     // ),
                     c!(
-                        (t_vars[train_idx][visit_idx + 1]) - (t_vars[train_idx][visit_idx])
-                            >= visits[visit_idx].travel_time
+                        (ts[visit_idx + 1]) - (ts[visit_idx])
+                            >= train.visits[visit_idx].travel_time
                     ),
                 )
                 .map_err(SolverError::GurobiError)?;

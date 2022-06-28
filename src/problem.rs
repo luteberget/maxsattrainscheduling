@@ -197,15 +197,15 @@ impl Train {
 }
 
 pub fn infinite_staircase(delay: i32, interval: usize) -> usize {
-    if delay <= 0 {
-        0
-    } else {
-        (delay as usize / interval) + 1
-    }
+    // if delay <= 0 {
+    //     0
+    // } else {
+        (delay as f64 / interval as f64).ceil() as usize
+    // }
 }
 
 pub fn iter_infinite_staircase(interval :usize) -> impl Iterator<Item = (i32, usize)> {
-    std::iter::once((1,1)).chain((1..).map(move |x| (interval as i32 * x, x as usize +1) ))
+    (0..).map(move |x| (interval as i32 * x + 1, x as usize + 1))
 }
 
 pub struct DelayCostThresholds {

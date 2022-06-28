@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
 use satcoder::Bool;
 
@@ -24,8 +24,8 @@ impl<L: satcoder::Lit + std::fmt::Debug> CostTree<L> {
         solver: &mut impl satcoder::SatInstance<L>,
         input: Bool<L>,
         cost: usize,
-        name: String,
-        notify_vars: &mut impl FnMut(String, usize, Bool<L>),
+        // name: String,
+        notify_vars: &mut impl FnMut(usize, Bool<L>),
     ) {
         assert!(cost > 0);
 
@@ -48,8 +48,8 @@ impl<L: satcoder::Lit + std::fmt::Debug> CostTree<L> {
             // let linear_mode = false;
 
             if linear_mode && parent_node_idx.map(|i| self.nodes[i].cost).unwrap_or(0) + 1 != cost {
-                self.add_cost(solver, false.into(), cost - 1, name.clone(), notify_vars);
-                return self.add_cost(solver, input, cost, name, notify_vars);
+                self.add_cost(solver, false.into(), cost - 1,  notify_vars);
+                return self.add_cost(solver, input, cost,  notify_vars);
             } else {
                 let new_var = solver.new_var();
 
@@ -70,7 +70,7 @@ impl<L: satcoder::Lit + std::fmt::Debug> CostTree<L> {
                 // println!("  - added cost duff {}", cost_diff);
 
                 notify_vars(
-                    format!("{}_c{}_d{}", name, cost, cost_diff),
+                    // format!("{}_c{}_d{}", name, cost, cost_diff),
                     cost_diff,
                     new_var,
                 );
@@ -136,5 +136,11 @@ impl<L: satcoder::Lit + std::fmt::Debug> CostTree<L> {
         // } else {
 
         // }
+    }
+}
+
+impl<L: satcoder::Lit + std::fmt::Debug> Default for CostTree<L> {
+    fn default() -> Self {
+        Self::new()
     }
 }

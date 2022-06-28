@@ -20,6 +20,7 @@ pub fn solve_bigm(
     timeout: f64,
     train_names: &[String],
     resource_names: &[String],
+    mut output_stats :impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
@@ -30,6 +31,7 @@ pub fn solve_bigm(
         train_names,
         resource_names,
         add_bigm_conflict_constraint,
+        output_stats,
     )
 }
 
@@ -42,6 +44,7 @@ pub fn solve_hull(
 
     train_names: &[String],
     resource_names: &[String],
+    mut output_stats :impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
@@ -52,6 +55,7 @@ pub fn solve_hull(
         train_names,
         resource_names,
         add_hull_conflict_constraint,
+        output_stats,
     )
 }
 
@@ -65,6 +69,7 @@ fn solve(
     train_names: &[String],
     resource_names: &[String],
     add_conflict_constraint: ConflictHandler,
+    mut output_stats :impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
@@ -260,7 +265,7 @@ fn solve(
         }
     }
 
-    let mut refinement_iterations = 0;
+    let mut refinement_iterations = 0usize;
     loop {
         {
             log::debug!(
@@ -466,6 +471,14 @@ fn solve(
                 refinement_iterations
             );
 
+            output_stats("refinements".to_string(), refinement_iterations.into());
+            output_stats("added_conflict_pairs".to_string(), added_conflicts.len().into());
+            output_stats("iteration".to_string(), iteration.into());
+            output_stats("travel_constraints".to_string(), n_travel_constraints.into());
+            output_stats("resource_constraints".to_string(), n_resource_constraints.into());
+            output_stats("internal_cost".to_string(), cost.into());
+
+
             // let mip_objective =  model.get_attr(grb::attr::ObjVal).unwrap();
             // println!("MIP obj {}", mip_objective);
 
@@ -650,7 +663,7 @@ fn add_hull_conflict_constraint(
         visit_pair: ((t1, v1), (t2, v2)),
         t_vars,
         resource_names: _,
-        train_names,
+        train_names: _,
     } = conflict;
 
     // println!("adding conflict {:?}", ((t1, v1), (t2, v2)));

@@ -39,6 +39,9 @@ struct Opt {
 
     #[structopt(long)]
     other_objective: Option<String>,
+
+    #[structopt(long)]
+    json_output: Option<String>,
 }
 
 pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
@@ -156,6 +159,8 @@ enum SolverType {
     MipHull,
 }
 
+const TIMEOUT: f64 = 120.0;
+
 fn main() {
     pretty_env_logger::env_logger::Builder::from_env(
         pretty_env_logger::env_logger::Env::default().default_filter_or("trace"),
@@ -213,58 +218,80 @@ fn main() {
     env.set(grb::param::OutputFlag, 0).unwrap();
     println!("...ok.");
 
-    let solve_it = |name: String, p: NamedProblem| -> Result<Vec<Vec<i32>>, SolverError> {
+    let mut problems: Vec<serde_json::Value> = Default::default();
+
+    let mut solve_it = |name: String, p: NamedProblem| -> Result<Vec<Vec<i32>>, SolverError> {
         if solvers.is_empty() {
             panic!("no solver specified");
         }
+
         let problemstats = print_problem_stats(&p.problem);
+
+        let mut solves: Vec<serde_json::Value> = Default::default();
 
         let mut solution = Result::Err(SolverError::NoSolution);
         for solver in solvers.iter() {
             hprof::start_frame();
             println!("Starting solver {:?}", solver);
+            let mut solve_data = serde_json::Map::new();
+
             solution = match solver {
                 SolverType::BigMEager => bigm::solve_bigm(
                     &env,
                     &p.problem,
                     delay_cost_type,
                     false,
-                    30.0,
+                    TIMEOUT,
                     &p.train_names,
                     &p.resource_names,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
                 ),
                 SolverType::MipHull => bigm::solve_hull(
                     &env,
                     &p.problem,
                     delay_cost_type,
                     true,
-                    30.0,
+                    TIMEOUT,
                     &p.train_names,
                     &p.resource_names,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
                 ),
                 SolverType::BigMLazy => bigm::solve_bigm(
                     &env,
                     &p.problem,
                     delay_cost_type,
                     true,
-                    30.0,
+                    TIMEOUT,
                     &p.train_names,
                     &p.resource_names,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
                 ),
                 SolverType::MaxSatDdd => maxsatddd::solve(
-                    &env,
+                    // &env,
                     satcoder::solvers::minisat::Solver::new(),
                     &p.problem,
-                    30.0,
+                    TIMEOUT,
                     delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
                 )
                 .map(|(v, _)| v),
                 SolverType::MaxSatDddCadical => maxsatddd::solve(
-                    &env,
+                    // &env,
                     satcoder::solvers::cadical::Solver::new(),
                     &p.problem,
-                    30.0,
+                    TIMEOUT,
                     delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
                 )
                 .map(|(v, _)| v),
                 SolverType::MaxSatIdl => {
@@ -284,8 +311,19 @@ fn main() {
             };
             hprof::end_frame();
             let solver_name = format!("{:?}", solver);
+            solve_data.insert("solver_name".to_string(), solver_name.clone().into());
+            solve_data.insert(
+                "delay_cost_type".to_string(),
+                format!("{:?}", delay_cost_type).into(),
+            );
+            if let Some(other_delay_cost_type) = other_delay_cost_type {
+                solve_data.insert(
+                    "other_delay_cost_type".to_string(),
+                    format!("{:?}", other_delay_cost_type).into(),
+                );
+            }
 
-            if let Ok(solution) = solution.as_ref() {
+            let solve_stats = if let Ok(solution) = solution.as_ref() {
                 let cost = p
                     .problem
                     .verify_solution(solution, delay_cost_type)
@@ -293,6 +331,11 @@ fn main() {
 
                 let other_cost =
                     other_delay_cost_type.map(|c| p.problem.verify_solution(solution, c).unwrap());
+
+                solve_data.insert("cost".to_string(), cost.into());
+                if let Some(other_cost) = other_cost {
+                    solve_data.insert("other_cost".to_string(), other_cost.into());
+                }
 
                 hprof::profiler().print_timing();
                 let _root = hprof::profiler().root();
@@ -307,6 +350,8 @@ fn main() {
                     sol_time,
                 )
                 .unwrap();
+
+                solve_data.insert("sol_time".to_string(), sol_time.into());
 
                 if let Some(other_cost) = other_cost {
                     writeln!(
@@ -343,8 +388,22 @@ fn main() {
                     )
                     .unwrap();
                 }
-            }
+            };
+
+            solves.push(solve_data.into());
         }
+
+        let  index = problems.len();
+        problems.push(serde_json::json! {{
+            "index": index,
+            "name": name,
+            "trains": problemstats.trains,
+            "conflicts": problemstats.conflicts,
+            "avg_tracks": problemstats.avg_tracks,
+            "conflicting_visit_pairs": problemstats.conflicting_visit_pairs,
+            "delay_cost_type": format!("{:?}", delay_cost_type),
+            "solves" : serde_json::Value::Array(solves),
+        }});
         solution
     };
 
@@ -369,6 +428,11 @@ fn main() {
         })
     }
     println!("{}", perf_out.into_inner());
+
+    if let Some(f) = opt.json_output {
+        std::fs::write(&f, serde_json::to_string_pretty(&problems).unwrap()).unwrap();
+        println!("Wrote to file {:?}", f);
+    }
 }
 
 struct ProblemStats {
@@ -439,11 +503,12 @@ mod tests {
 
         let problem = crate::problem::problem1_with_stations();
         let result = ddd::solvers::maxsatddd::solve(
-            &env,
+            // &env,
             satcoder::solvers::minisat::Solver::new(),
             &problem,
             30.0,
             DelayCostType::FiniteSteps123,
+            |_, _| {},
         )
         .unwrap()
         .0;
@@ -475,11 +540,12 @@ mod tests {
         let delay_cost_type = DelayCostType::FiniteSteps123;
 
         let result = ddd::solvers::maxsatddd::solve(
-            &env,
+            // &env,
             satcoder::solvers::minisat::Solver::new(),
             &problem,
             30.0,
             delay_cost_type,
+            |_, _| {},
         )
         .unwrap()
         .0;
@@ -487,11 +553,12 @@ mod tests {
 
         for _ in 0..100 {
             let result = ddd::solvers::maxsatddd::solve(
-                &env,
+                // &env,
                 satcoder::solvers::minisat::Solver::new(),
                 &problem,
                 30.0,
                 DelayCostType::FiniteSteps123,
+                |_, _| {},
             )
             .unwrap()
             .0;
@@ -522,11 +589,12 @@ mod tests {
                 );
 
                 let result = ddd::solvers::maxsatddd::solve(
-                    &env,
+                    // &env,
                     satcoder::solvers::minisat::Solver::new(),
                     &problem,
                     30.0,
                     delay_cost_type,
+                    |_, _| {},
                 )
                 .unwrap()
                 .0;
@@ -535,11 +603,12 @@ mod tests {
                 for iteration in 0..100 {
                     println!("iteration {} {}", instance_number, iteration);
                     let result = ddd::solvers::maxsatddd::solve(
-                        &env,
+                        // &env,
                         satcoder::solvers::minisat::Solver::new(),
                         &problem,
                         30.0,
                         DelayCostType::FiniteSteps123,
+                        |_, _| {},
                     )
                     .unwrap()
                     .0;

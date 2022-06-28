@@ -1,6 +1,6 @@
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, HashMap},
     time::Instant,
 };
 
@@ -65,28 +65,36 @@ pub struct SolveStats {
 }
 
 pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
-    env: &grb::Env,
+    // env: &grb::Env,
     solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
+    mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
-    solve_debug(env, solver, problem, timeout, delay_cost_type, |_| {})
+    solve_debug(
+        solver,
+        problem,
+        timeout,
+        delay_cost_type,
+        |_| {},
+        output_stats,
+    )
 }
 
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
 
-use crate::{debug::DebugInfo, problem::DelayCostType, solvers::minimize};
+use crate::{debug::DebugInfo, problem::DelayCostType};
 
 use super::{costtree::CostTree, SolverError};
 pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
-    env: &grb::Env,
-
+    // env: &grb::Env,
     mut solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
     debug_out: impl Fn(DebugInfo),
+    mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     // TODO
     //  - more eager constraint generation
@@ -150,11 +158,11 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut total_cost = 0;
     let mut soft_constraints = HashMap::new();
     let mut debug_actions = Vec::new();
-    let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
+    // let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
 
-    let mut conflicts_added: HashSet<((VisitId, i32), (VisitId, i32))> = Default::default();
+    // let mut conflicts_added: HashSet<((VisitId, i32), (VisitId, i32))> = Default::default();
     let mut conflict_vars: HashMap<(VisitId, VisitId), Bool<L>> = Default::default();
-    let mut priorities: Vec<(VisitId, VisitId)> = Vec::new();
+    // let mut priorities: Vec<(VisitId, VisitId)> = Vec::new();
 
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
@@ -453,11 +461,12 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 let trains = if !USE_LP_MINIMIZE {
                     extract_solution(problem, &occupations)
                 } else {
-                    let p = priorities
-                        .into_iter()
-                        .map(|(a, b)| (visits[a], visits[b]))
-                        .collect();
-                    minimize::minimize_solution(env, problem, p)?
+                    // let p = priorities
+                    //     .into_iter()
+                    //     .map(|(a, b)| (visits[a], visits[b]))
+                    //     .collect();
+                    // minimize::minimize_solution(env, problem, p)?
+                    panic!()
                 };
 
                 println!(
@@ -497,6 +506,54 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                     /* num conflicts */ stats.n_conflict,
                 );
 
+                output_stats("iterations".to_string(), iteration.into());
+                output_stats(
+                    "objective_iters".to_string(),
+                    (*iteration_types.get(&IterationType::Objective).unwrap_or(&0)).into(),
+                );
+                output_stats(
+                    "travel_iters".to_string(),
+                    (*iteration_types
+                        .get(&IterationType::TravelTimeConflict)
+                        .unwrap_or(&0))
+                    .into(),
+                );
+                output_stats(
+                    "resource_iters".to_string(),
+                    (*iteration_types
+                        .get(&IterationType::ResourceConflict)
+                        .unwrap_or(&0))
+                    .into(),
+                );
+                output_stats(
+                    "travel_and_resource_iters".to_string(),
+                    (*iteration_types
+                        .get(&IterationType::TravelAndResourceConflict)
+                        .unwrap_or(&0))
+                    .into(),
+                );
+                output_stats("num_traveltime".to_string(), stats.n_travel.into());
+                output_stats("num_conflicts".to_string(), stats.n_travel.into());
+                output_stats(
+                    "num_time_points".to_string(),
+                    occupations
+                        .iter()
+                        .map(|o| o.delays.len())
+                        .sum::<usize>()
+                        .into(),
+                );
+                output_stats(
+                    "max_time_points".to_string(),
+                    occupations.iter().map(|o| o.delays.len()).max().unwrap()
+                        .into(),
+                );
+                output_stats(
+                    "avg_time_points".to_string(),
+                    ((occupations.iter().map(|o| o.delays.len()).sum::<usize>() as f64)
+                        / (occupations.len() as f64))
+                        .into(),
+                );
+
                 return Ok((trains, stats));
             }
         }
@@ -518,10 +575,10 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 //     train_idx, visit_idx, new_t, new_timepoint_cost
                 // );
 
-                let var_name = format!(
-                    "t{}v{}t{}cost{}",
-                    train_idx, visit_idx, new_t, new_timepoint_cost
-                );
+                // let var_name = format!(
+                //     "t{}v{}t{}cost{}",
+                //     train_idx, visit_idx, new_t, new_timepoint_cost
+                // );
 
                 const USE_COST_TREE: bool = true;
                 if !USE_COST_TREE {
@@ -564,8 +621,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         &mut solver,
                         new_timepoint_var,
                         new_timepoint_cost,
-                        var_name,
-                        &mut |name, weight, cost_var| {
+                        // var_name,
+                        &mut |weight, cost_var| {
                             // cost_var_names.insert(!cost_var, name);
                             soft_constraints.insert(!cost_var, (Soft::Delay, weight, weight));
                         },
@@ -736,48 +793,53 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                                     .map(|nx| occupations[nx].incumbent_time())
                                     .unwrap_or(t1_in + visit.travel_time);
 
-                                let can_reduce = travel_ok && conflicts
-                                    .get(&visit.resource_id)
-                                    .iter()
-                                    .flat_map(|rs| rs.iter())
-                                    .copied()
-                                    .all(|other_resource| {
-                                        resource_visits[other_resource]
-                                            .iter()
-                                            .copied()
-                                            .filter(|other_visit| {
-                                                usize::from(visit_id) != usize::from(*other_visit)
-                                            })
-                                            .filter(|other_visit| {
-                                                visits[*other_visit].0 != train_idx
-                                            })
-                                            .all(|other_visit| {
-                                                let v2 = &occupations[other_visit];
-                                                let t2_in = v2.incumbent_time();
-                                                let (other_train_idx, other_visit_idx) =
-                                                    visits[other_visit];
-                                                let other_next_visit: Option<VisitId> =
-                                                    if other_visit_idx + 1
-                                                        < problem.trains[other_train_idx]
-                                                            .visits
-                                                            .len()
-                                                    {
-                                                        Some((usize::from(other_visit) + 1).into())
-                                                    } else {
-                                                        None
-                                                    };
+                                let can_reduce = travel_ok
+                                    && conflicts
+                                        .get(&visit.resource_id)
+                                        .iter()
+                                        .flat_map(|rs| rs.iter())
+                                        .copied()
+                                        .all(|other_resource| {
+                                            resource_visits[other_resource]
+                                                .iter()
+                                                .copied()
+                                                .filter(|other_visit| {
+                                                    usize::from(visit_id)
+                                                        != usize::from(*other_visit)
+                                                })
+                                                .filter(|other_visit| {
+                                                    visits[*other_visit].0 != train_idx
+                                                })
+                                                .all(|other_visit| {
+                                                    let v2 = &occupations[other_visit];
+                                                    let t2_in = v2.incumbent_time();
+                                                    let (other_train_idx, other_visit_idx) =
+                                                        visits[other_visit];
+                                                    let other_next_visit: Option<VisitId> =
+                                                        if other_visit_idx + 1
+                                                            < problem.trains[other_train_idx]
+                                                                .visits
+                                                                .len()
+                                                        {
+                                                            Some(
+                                                                (usize::from(other_visit) + 1)
+                                                                    .into(),
+                                                            )
+                                                        } else {
+                                                            None
+                                                        };
 
-                                                let t2_out = other_next_visit
-                                                    .map(|v| occupations[v].incumbent_time())
-                                                    .unwrap_or_else(|| {
-                                                        let other_visit = problem.trains
-                                                            [other_train_idx]
-                                                            .visits[other_visit_idx];
-                                                        t2_in + other_visit.travel_time
-                                                    });
-                                                t1_out <= t2_in || t2_out <= t1_in_new
-                                            })
-                                    });
+                                                    let t2_out = other_next_visit
+                                                        .map(|v| occupations[v].incumbent_time())
+                                                        .unwrap_or_else(|| {
+                                                            let other_visit = problem.trains
+                                                                [other_train_idx]
+                                                                .visits[other_visit_idx];
+                                                            t2_in + other_visit.travel_time
+                                                        });
+                                                    t1_out <= t2_in || t2_out <= t1_in_new
+                                                })
+                                        });
 
                                 if can_reduce {
                                     // println!("REDUCE {} {} {}", train_idx, visit_idx, occupations[visit_id].incumbent_time());
@@ -812,15 +874,15 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                     //     occupations.len()
                     // );
 
-                    priorities = conflict_vars
-                        .iter()
-                        .filter_map(|(pair, l)| {
-                            let has_choice = model.value(l);
-                            let has_time = occupations[pair.0].incumbent_time()
-                                < occupations[pair.1].incumbent_time();
-                            (has_choice && has_time).then(|| *pair)
-                        })
-                        .collect::<Vec<_>>();
+                    // priorities = conflict_vars
+                    //     .iter()
+                    //     .filter_map(|(pair, l)| {
+                    //         let has_choice = model.value(l);
+                    //         let has_time = occupations[pair.0].incumbent_time()
+                    //             < occupations[pair.1].incumbent_time();
+                    //         (has_choice && has_time).then(|| *pair)
+                    //     })
+                    //     .collect::<Vec<_>>();
                     // println!("Pri {:?}", priorities);
 
                     debug_out(DebugInfo {
@@ -852,8 +914,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
             // println!("Core size {}", core.len());
             // // *core_sizes.entry(core.len()).or_default() += 1;
-            trim_core(&mut core, &mut solver);
-            minimize_core(&mut core, &mut solver);
+            // trim_core(&mut core, &mut solver);
+            // minimize_core(&mut core, &mut solver);
             // println!("Post core size {}", core.len());
 
             // *processed_core_sizes.entry(core.len()).or_default() += 1;
@@ -863,7 +925,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             debug_actions.push(SolverAction::Core(core.len()));
 
             let min_weight = core.iter().map(|c| soft_constraints[c].1).min().unwrap();
-            let max_weight = core.iter().map(|c| soft_constraints[c].1).max().unwrap();
+            // let max_weight = core.iter().map(|c| soft_constraints[c].1).max().unwrap();
             assert!(min_weight >= 1);
 
             // println!("Core sz{} weight range {} -- {} assumps {}/{}",  core.len(), min_weight, max_weight, n_assumps, soft_constraints.len());
@@ -871,10 +933,10 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             for c in core.iter() {
                 let (soft, cost, original_cost) = soft_constraints.remove(c).unwrap();
 
-                let soft_str = match &soft {
-                    Soft::Delay => "delay".to_string(),
-                    Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
-                };
+                // let soft_str = match &soft {
+                //     Soft::Delay => "delay".to_string(),
+                //     Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
+                // };
 
                 // println!("  * {:?} {:?} {} {}", c, cost_var_names.get(c), soft_str, cost);
 
