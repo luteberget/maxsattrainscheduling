@@ -66,25 +66,24 @@ pub fn xml_instances(mut x: impl FnMut(String, NamedProblem)) {
 }
 
 pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
-    let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-    #[allow(unused)]
-    let c_instances = [21, 22, 23, 24];
+    // let a_instances = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    // let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+    // #[allow(unused)]
+    // let c_instances = [21, 22, 23, 24];
 
     for (dir, shortname) in [
-        ("txtinstances", "txt1"),
-        ("txtinstances2", "txt2"),
-        ("txtinstances3", "txt3"),
+        ("instances_original", "orig"),
+        ("instances_addtracktime", "track"),
+        ("instances_addstationtime", "station"),
     ] {
-        let instances = a_instances
-            .into_iter()
-            .chain(b_instances)
-            .chain(c_instances);
+        let instances = ["A", "B"]
+            .iter()
+            .flat_map(move |n| (1..=12).map(move |i| (n, i)));
 
         // let instances = instances.skip(16).take(1);
 
-        for instance_id in instances {
-            let filename = format!("{}/Instance{}.txt", dir, instance_id);
+        for (infrastructure, number) in instances {
+            let filename = format!("{}/Instance{}{}.txt", dir, infrastructure, number);
             println!("Reading {}", filename);
             #[allow(unused)]
             let (problem, _) = parser::read_txt_file(
@@ -94,7 +93,10 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
                 None,
                 |_| {},
             );
-            x(format!("{} {}", shortname, instance_id), problem);
+            x(
+                format!("{}{}{}", shortname, infrastructure, number),
+                problem,
+            );
         }
     }
 }
