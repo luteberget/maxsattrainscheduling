@@ -65,6 +65,23 @@ impl Problem {
         sum_cost
     }
 
+    pub fn cost(&self, solution: &[Vec<i32>], delay_cost_type: DelayCostType) -> i32 {
+        let mut sum_cost = 0;
+
+        // Check the running times and sum up the delays
+        for (train_idx, train) in self.trains.iter().enumerate() {
+            for visit_idx in 0..train.visits.len() {
+                let t1_in = solution[train_idx][visit_idx];
+                let cost = train.visit_delay_cost(delay_cost_type, visit_idx, t1_in) as i32;
+                if cost > 0 {
+                    // println!("Added cost for t{} v{} = {}", train_idx, visit_idx, cost);
+                    sum_cost += cost;
+                }
+            }
+        }
+        sum_cost
+    }
+
     pub fn verify_solution(
         &self,
         solution: &[Vec<i32>],
@@ -200,18 +217,17 @@ pub fn infinite_staircase(delay: i32, interval: usize) -> usize {
     // if delay <= 0 {
     //     0
     // } else {
-        (delay as f64 / interval as f64).ceil() as usize
+    (delay as f64 / interval as f64).ceil() as usize
     // }
 }
 
-pub fn iter_infinite_staircase(interval :usize) -> impl Iterator<Item = (i32, usize)> {
+pub fn iter_infinite_staircase(interval: usize) -> impl Iterator<Item = (i32, usize)> {
     (0..).map(move |x| (interval as i32 * x + 1, x as usize + 1))
 }
 
 pub struct DelayCostThresholds {
     pub thresholds: Vec<(i32, usize)>,
 }
-
 
 impl DelayCostThresholds {
     pub fn f123() -> DelayCostThresholds {

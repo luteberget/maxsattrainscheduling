@@ -3,7 +3,11 @@ use std::{cell::RefCell, collections::HashSet, fmt::Write};
 use ddd::{
     parser,
     problem::{self, DelayCostThresholds, DelayCostType, NamedProblem, Visit},
-    solvers::{bigm, maxsatddd, SolverError},
+    solvers::{
+        bigm,
+        greedy::{self, default_heuristic},
+        maxsatddd, SolverError,
+    },
 };
 
 use std::path::PathBuf;
@@ -157,6 +161,7 @@ enum SolverType {
     MaxSatIdl,
     MipDdd,
     MipHull,
+    Greedy,
 }
 
 const TIMEOUT: f64 = 120.0;
@@ -180,6 +185,7 @@ fn main() {
             "maxsat_idl" => SolverType::MaxSatIdl,
             "mip_ddd" => SolverType::MipDdd,
             "mip_hull" => SolverType::MipHull,
+            "greedy" => SolverType::Greedy,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -236,6 +242,9 @@ fn main() {
             let mut solve_data = serde_json::Map::new();
 
             solution = match solver {
+                SolverType::Greedy => {
+                    greedy::solve2(&p.problem, &env, delay_cost_type, default_heuristic)
+                }
                 SolverType::BigMEager => bigm::solve_bigm(
                     &env,
                     &p.problem,
@@ -302,11 +311,7 @@ fn main() {
                     }
                 }
                 SolverType::MipDdd => {
-                    if let DelayCostType::FiniteSteps123 = delay_cost_type {
-                        ddd::solvers::mipdddpack::solve(&env, &p.problem, delay_cost_type)
-                    } else {
-                        panic!("Unsupported delay cost type for MipDDD solver.")
-                    }
+                    ddd::solvers::mipdddpack::solve(&env, &p.problem, delay_cost_type)
                 }
             };
             hprof::end_frame();
@@ -393,7 +398,7 @@ fn main() {
             solves.push(solve_data.into());
         }
 
-        let  index = problems.len();
+        let index = problems.len();
         problems.push(serde_json::json! {{
             "index": index,
             "name": name,
@@ -480,6 +485,10 @@ fn print_problem_stats(problem: &problem::Problem) -> ProblemStats {
     let conflicts = problem.conflicts.len();
     println!(
         "trains {} tracks {} avgtracks {:.2} trackpairs {} delays {} avgdelay{}",
+        trains, conflicts, avg_tracks, conflicting_visit_pairs, delays, avgdelay,
+    );
+    println!(
+        "{} & {} & {:.2} & {} & {} & {} \\\\",
         trains, conflicts, avg_tracks, conflicting_visit_pairs, delays, avgdelay,
     );
     ProblemStats {

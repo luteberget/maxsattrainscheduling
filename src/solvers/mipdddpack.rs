@@ -13,7 +13,7 @@ use super::SolverError;
 const M: f64 = 100_000.0;
 
 pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -> Result<Vec<Vec<i32>>, SolverError> {
-    assert!(matches!(delay_cost_type, DelayCostType::FiniteSteps123));
+    // assert!(matches!(delay_cost_type, DelayCostType::FiniteSteps123));
     let _p_init = hprof::enter("mip solve init");
     let mut intervals = problem
         .trains
@@ -65,9 +65,6 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
         let mut model = Model::with_env("model1", env).map_err(SolverError::GurobiError)?;
         let interval_vars = intervals.iter().enumerate().map(|(train_idx,t)| {
             t.iter().enumerate().map(|(visit_idx,v)| {
-
-
-
                 let intervals = v.iter().map(|(time,time_out)| {
                     let mut cost = problem.trains[train_idx].visit_delay_cost(delay_cost_type, visit_idx, *time) as f64;
 
@@ -241,7 +238,13 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
             let _p = hprof::enter("mip_ddd check conflicts");
             for visit_pair @ ((t1, v1), (t2, v2)) in visit_conflicts.iter().copied() {
                 if !check_conflict(visit_pair, &solution)? {
-                    warn!("conflict refinement t{}v{}x{} vee t{}v{}x{}", t1, v1, solution[t2][v2+1], t2, v2, solution[t1][v1+1]);
+                    warn!("conflict refinement t{}v{}x{}--{} vee t{}v{}x{}--{}", 
+                    t1, v1, solution[t1][v1], solution[t1][v1+1],
+                    t2, v2, solution[t2][v2], solution[t2][v2+1]);
+                    warn!("   t1-v1   intervals {:?}", intervals[t1][v1]);
+                    warn!("   t1-v1+1 intervals {:?}", intervals[t1][v1+1]);
+                    warn!("   t2-v2   intervals {:?}", intervals[t2][v2]);
+                    warn!("   t2-v2+1 intervals {:?}", intervals[t2][v2+1]);
                     new_intervals.push_back((t2, v2, solution[t1][v1 + 1]));
                     new_intervals.push_back((t1, v1, solution[t2][v2 + 1]));
                 }
