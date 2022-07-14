@@ -1,3 +1,5 @@
+# Convert train dispatching JSON results format into Latex table.
+
 import json
 
 def tr_name(x):
