@@ -7,4 +7,9 @@ A paper describing the algorithm is currently under review.
 
 ## Problem instances
 
+A set of 24 problem instances used for performance evaluation can be found in
+the `instances_original` directory. These 24 instances are also modified to
+become harder to solve. One modification adds more travel time in the tracks
+(`original_addtracktime`), and another modification adds also more dwelling
+time in stations (`original_addstationtime`).
 
