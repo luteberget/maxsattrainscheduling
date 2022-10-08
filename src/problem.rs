@@ -8,6 +8,8 @@ pub enum DelayMeasurementType {
 
 #[derive(Debug, Clone, Copy)]
 pub enum DelayCostType {
+    FiniteSteps1_3Min,
+    FiniteSteps1_5Min,
     FiniteSteps123,
     FiniteSteps12345,
     FiniteSteps139,
@@ -199,6 +201,8 @@ impl Train {
         if let Some(aimed) = self.visits[path_idx].aimed {
             let d = (t - aimed).max(0);
             match delay_cost_type {
+                DelayCostType::FiniteSteps1_3Min => DelayCostThresholds::f1_3min().eval(d),
+                DelayCostType::FiniteSteps1_5Min => DelayCostThresholds::f1_5min().eval(d),
                 DelayCostType::FiniteSteps123 => DelayCostThresholds::f123().eval(d),
                 DelayCostType::FiniteSteps12345 => DelayCostThresholds::f12345().eval(d),
                 DelayCostType::FiniteSteps139 => DelayCostThresholds::f139().eval(d),
@@ -230,6 +234,16 @@ pub struct DelayCostThresholds {
 }
 
 impl DelayCostThresholds {
+    pub fn f1_3min() -> DelayCostThresholds {
+        DelayCostThresholds {
+            thresholds: vec![(5 * 60, 1)],
+        }
+    }
+    pub fn f1_5min() -> DelayCostThresholds {
+        DelayCostThresholds {
+            thresholds: vec![(3 * 60, 1)],
+        }
+    }
     pub fn f123() -> DelayCostThresholds {
         DelayCostThresholds {
             thresholds: vec![(360, 3), (180, 2), (0, 1)],

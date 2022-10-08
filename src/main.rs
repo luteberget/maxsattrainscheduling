@@ -194,6 +194,8 @@ fn main() {
     let delay_cost_type = opt
         .objective
         .map(|obj| match obj.as_str() {
+            "finsteps1_5min" => DelayCostType::FiniteSteps1_5Min,
+            "finsteps1_3min" => DelayCostType::FiniteSteps1_3Min,
             "finsteps123" => DelayCostType::FiniteSteps123,
             "finsteps12345" => DelayCostType::FiniteSteps12345,
             "finsteps139" => DelayCostType::FiniteSteps139,

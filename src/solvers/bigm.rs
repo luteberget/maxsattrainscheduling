@@ -144,10 +144,14 @@ fn solve(
 
     // Objective
     match delay_cost_type {
-        DelayCostType::FiniteSteps123
+        DelayCostType::FiniteSteps1_3Min
+        | DelayCostType::FiniteSteps1_5Min
+        | DelayCostType::FiniteSteps123
         | DelayCostType::FiniteSteps12345
         | DelayCostType::FiniteSteps139 => {
             let delay_cost = match delay_cost_type {
+                DelayCostType::FiniteSteps1_3Min => DelayCostThresholds::f1_3min(),
+                DelayCostType::FiniteSteps1_5Min => DelayCostThresholds::f1_5min(),
                 DelayCostType::FiniteSteps123 => DelayCostThresholds::f123(),
                 DelayCostType::FiniteSteps12345 => DelayCostThresholds::f12345(),
                 DelayCostType::FiniteSteps139 => DelayCostThresholds::f139(),
