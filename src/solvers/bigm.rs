@@ -84,6 +84,12 @@ fn solve(
     //     .set_param(param::IntFeasTol, 1e-8)
     //     .map_err(SolverError::GurobiError)?;
 
+        // model
+        // .set_param(param::LazyConstraints, 1)
+        // .map_err(SolverError::GurobiError)?;
+
+    // model.set_param(grb::param::OutputFlag, 1);
+
     // timing variables
     let t_vars = problem
         .trains
@@ -270,6 +276,7 @@ fn solve(
     }
 
     let mut refinement_iterations = 0usize;
+    // println!("INSTANCE");
     loop {
         {
             log::debug!(
@@ -278,9 +285,12 @@ fn solve(
                 added_conflicts.len(),
                 lazy_stepfunction.as_ref().map(|l| l.values().map(|x| x.len()).sum::<usize>()),
             );
-            model
-                .write(&format!("model{}.lp", refinement_iterations + 1))
-                .unwrap();
+            // model
+            //     .write(&format!("model{}.lp", refinement_iterations + 1))
+            //     .unwrap();
+            // model
+            //     .write(&format!("model{}.mps", refinement_iterations + 1))
+            //     .unwrap();
             let _p = hprof::enter("optimize");
             model
                 .set_param(
@@ -289,6 +299,9 @@ fn solve(
                 )
                 .map_err(SolverError::GurobiError)?;
             model.optimize().map_err(SolverError::GurobiError)?;
+
+            // let n_nodes = model.get_attr(grb::attr::NodeCount).map_err(SolverError::GurobiError)?;
+            // println!("NODECOUNT {}", n_nodes);
             iteration += 1;
         }
 
@@ -574,7 +587,7 @@ pub fn visit_conflicts(problem: &Problem) -> Vec<((usize, usize), (usize, usize)
     conflicts
 }
 
-fn check_conflict(
+pub fn check_conflict(
     ((t1, v1), (t2, v2)): ((usize, usize), (usize, usize)),
     t_vars: impl Fn(usize, usize) -> i32,
 ) -> Result<bool, SolverError> {

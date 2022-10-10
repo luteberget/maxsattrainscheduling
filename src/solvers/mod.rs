@@ -6,6 +6,7 @@ pub mod idl;
 pub mod mipdddpack;
 pub mod costtree;
 mod minimize;
+pub mod cutting;
 
 
 #[derive(Debug)]

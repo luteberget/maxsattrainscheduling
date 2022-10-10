@@ -83,7 +83,7 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
         ("instances_addtracktime", "track"),
         ("instances_addstationtime", "station"),
     ] {
-        let instances = ["A", "B"]
+        let instances = ["A" ,"B"]
             .iter()
             .flat_map(move |n| (1..=12).map(move |i| (n, i)));
 
@@ -162,6 +162,7 @@ enum SolverType {
     MipDdd,
     MipHull,
     Greedy,
+    Cutting,
 }
 
 const TIMEOUT: f64 = 120.0;
@@ -186,6 +187,7 @@ fn main() {
             "mip_ddd" => SolverType::MipDdd,
             "mip_hull" => SolverType::MipHull,
             "greedy" => SolverType::Greedy,
+            "cutting" => SolverType::Cutting,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -244,6 +246,16 @@ fn main() {
             let mut solve_data = serde_json::Map::new();
 
             solution = match solver {
+                SolverType::Cutting => ddd::solvers::cutting::solve_cutting(
+                    &p.problem,
+                    delay_cost_type,
+                    TIMEOUT,
+                    &p.train_names,
+                    &p.resource_names,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                ),
                 SolverType::Greedy => {
                     greedy::solve2(&p.problem, &env, delay_cost_type, default_heuristic)
                 }
