@@ -1,10 +1,13 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::{HashMap, BTreeMap}, rc::Rc};
 
 use crate::problem::*;
 
+pub type Constraint = (TrainRef, TrackRef, TimeInterval);
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct TimeInterval {
-    time_start: TimeValue,
-    time_end: TimeValue,
+    pub time_start: TimeValue,
+    pub time_end: TimeValue,
 }
 
 pub const INTERVAL_MAX: TimeInterval = TimeInterval {
@@ -25,11 +28,23 @@ impl TimeInterval {
     }
 }
 
-pub type Constraints = HashMap<TrackRef, Vec<TimeInterval>>;
+pub type Constraints = BTreeMap<TrackRef, Vec<TimeInterval>>;
 
 pub type TrainSchedule = Vec<(TrackRef, TimeValue)>;
 
-pub fn singletrain_optimal_path_under_constraints(
+
+pub struct SingleTrainSolver {
+
+}
+
+
+impl SingleTrainSolver {
+    pub fn new() -> Self {
+        todo!()
+    }
+}
+
+pub fn onetrain(
     train: &Train,
     tracks: &[Track],
     constraints: &Constraints,
@@ -108,6 +123,8 @@ pub fn singletrain_optimal_path_under_constraints(
                     break;
                 }
             }
+
+            assert!(vec.len() == train.visits.len() + 1);
 
             return vec;
         }

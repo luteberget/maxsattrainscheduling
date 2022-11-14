@@ -1,7 +1,4 @@
-mod simulator;
-mod singletrain;
-mod problem;
-
+use heuristic::*;
 
 fn main() {
     println!("Hello, world!");
