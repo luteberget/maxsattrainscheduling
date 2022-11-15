@@ -13,6 +13,7 @@ pub type TimeValue = u32;
 pub type VisitRef = u32;
 
 pub const SENTINEL_TRACK: TrackRef = -1;
+pub const TRAIN_FINISHED: TrackRef = -2;
 pub const SENTINEL_TRAIN: TrainRef = -1;
 
 #[derive(Deserialize, Debug)]

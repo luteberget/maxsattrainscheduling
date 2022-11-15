@@ -41,7 +41,10 @@
             "nexts": [],
             "travel_time": 10
         }],
-        "trains": []
+        "trains": [{
+            "appears_at": 10,
+            "visits": []
+        }]
     },
     "draw_tracks": [{
         "p_a": [0,0],

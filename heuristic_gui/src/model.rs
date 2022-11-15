@@ -20,6 +20,6 @@ pub struct DrawTrack {
 pub struct Model {
     pub problem :Rc<Problem>,
     pub draw_tracks :Rc<Vec<DrawTrack>>,
-    pub solver :heuristic::globalsearch::ConflictSolver,
+    pub solver :heuristic::solver::ConflictSolver,
     pub selected_train :usize,
 }

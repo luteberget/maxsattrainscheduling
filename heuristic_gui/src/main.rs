@@ -6,6 +6,9 @@ mod app;
 mod model;
 
 fn main() {
+
+    pretty_env_logger::init();
+
     let input: model::Input =
         serde_json::from_str(&std::fs::read_to_string("example1.json").unwrap()).unwrap();
 
@@ -22,7 +25,7 @@ fn main() {
 
     let app = app::App {
         model: model::Model {
-            solver: heuristic::globalsearch::ConflictSolver::new(problem.clone()),
+            solver: heuristic::solver::ConflictSolver::new(problem.clone()),
             problem,
             draw_tracks,
             selected_train: 0,
