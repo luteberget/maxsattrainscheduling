@@ -44,6 +44,10 @@
         "trains": [{
             "appears_at": 10,
             "visits": []
+        },
+        {
+            "appears_at": 15,
+            "visits": []
         }]
     },
     "draw_tracks": [{

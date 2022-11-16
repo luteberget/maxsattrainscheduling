@@ -74,11 +74,17 @@ impl App {
         if ui.button("Step").clicked() {
             self.model.solver.step();
         }
+        ui.heading("Current resource occupations");
+        for resource in self.model.solver.conflicts.conflicting_resource_set.iter() {
+            for occ in self.model.solver.conflicts.resources[*resource as usize].occupations.iter() {
+                ui.label(&format!("res {} {:?}", resource, occ));
+            }
+        }
         ui.heading("Current node");
-        ui.label("node");
+        ui.label(&format!("{:?}", self.model.solver.current_node));
         ui.heading("Open nodes");
-        for _node in self.model.solver.queued_nodes.iter() {
-            ui.label("node");
+        for n in self.model.solver.queued_nodes.iter() {
+            ui.label(&format!("{:?}", n));
         }
     }
 
@@ -109,8 +115,9 @@ impl App {
                         .color(if conflicts {
                             Color32::RED
                         } else {
-                            Color32::GRAY
-                        }),
+                            Color32::BLACK
+                        })
+                        .fill_alpha(0.5),
                     );
                 }
             }
@@ -127,10 +134,14 @@ impl App {
                     if let Some(prev_draw) =
                         (prev.track >= 0).then(|| &self.model.draw_tracks[prev.track as usize])
                     {
-                        plot_ui.line(Line::new(PlotPoints::from_iter([
-                            [prev.time as f64, prev_draw.p_a[0] as f64],
-                            [curr.time as f64, prev_draw.p_b[0] as f64],
-                        ])));
+                        plot_ui.line(
+                            Line::new(PlotPoints::from_iter([
+                                [prev.time as f64, prev_draw.p_a[0] as f64],
+                                [curr.time as f64, prev_draw.p_b[0] as f64],
+                            ]))
+                            .color(Color32::BLACK)
+                            .width(2.0),
+                        );
                     }
 
                     curr = prev;

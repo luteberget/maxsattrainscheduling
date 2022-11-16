@@ -38,23 +38,25 @@ impl TimeInterval {
     }
 }
 
+#[derive(Debug)]
 pub struct ResourceConflicts {
     pub conflicting_resource_set: Vec<u32>,
     pub resources: Vec<ResourceOccupations>,
 }
 
+#[derive(Debug)]
 pub struct ResourceOccupations {
     pub conflicting_resource_set_idx: i32,
     pub occupations: TinyVec<[ResourceOccupation; 32]>,
 }
 
 impl ResourceOccupations {
-    pub fn has_conflict(&self) -> bool {
+    pub fn get_conflict(&self) -> Option<(&ResourceOccupation, &ResourceOccupation)> {
         // TODO this is not correct (but fast)
         self.occupations
             .iter()
             .zip(self.occupations.iter().skip(1))
-            .any(|(a, b)| a.interval.overlap(&b.interval))
+            .find(|(a, b)| a.interval.overlap(&b.interval))
     }
 }
 
@@ -85,10 +87,10 @@ impl ResourceConflicts {
             }
             Err(idx) => {
                 resource.occupations.insert(idx, occ);
-                if resource.conflicting_resource_set_idx < 0 && resource.has_conflict() {
+                if resource.conflicting_resource_set_idx < 0 && resource.get_conflict().is_some() {
                     resource.conflicting_resource_set_idx =
                         self.conflicting_resource_set.len() as i32;
-                    self.conflicting_resource_set.push(idx as u32);
+                    self.conflicting_resource_set.push(resource_idx as u32);
                 }
             }
         }
@@ -98,14 +100,48 @@ impl ResourceConflicts {
         let resource = &mut self.resources[resource_idx];
         let idx = resource.occupations.binary_search(&occ).unwrap();
         resource.occupations.remove(idx);
-        if resource.conflicting_resource_set_idx >= 0 && !resource.has_conflict() {
+
+        if resource.conflicting_resource_set_idx >= 0 && resource.get_conflict().is_none() {
             self.conflicting_resource_set
                 .swap_remove(resource.conflicting_resource_set_idx as usize);
-            resource.conflicting_resource_set_idx = -1;
-            if idx < self.conflicting_resource_set.len() {
-                self.resources[self.conflicting_resource_set[idx] as usize]
-                    .conflicting_resource_set_idx = idx as i32;
+            if (resource.conflicting_resource_set_idx as usize)
+                < self.conflicting_resource_set.len()
+            {
+                let other_resource =
+                    self.conflicting_resource_set[resource.conflicting_resource_set_idx as usize];
+                self.resources[other_resource as usize].conflicting_resource_set_idx =
+                    resource.conflicting_resource_set_idx as i32;
             }
+            self.resources[resource_idx].conflicting_resource_set_idx = -1;
+        }
+    }
+
+    pub fn add_or_remove(
+        &mut self,
+        add: bool,
+        train: TrainRef,
+        track: TrackRef,
+        interval: TimeInterval,
+    ) {
+        let occ = ResourceOccupation { train, interval };
+        if add {
+            trace!(
+                "ADD train{} track{} [{} -> {}] ",
+                train,
+                track,
+                occ.interval.time_start,
+                occ.interval.time_end
+            );
+            self.add(track as usize, occ);
+        } else {
+            trace!(
+                "DEL train{} track{} [{} -> {}] ",
+                train,
+                track,
+                occ.interval.time_start,
+                occ.interval.time_end
+            );
+            self.remove(track as usize, occ);
         }
     }
 }
@@ -114,81 +150,91 @@ impl ResourceConflicts {
 pub enum ConflictSolverStatus {
     Exhausted,
     SelectNode,
+    Conflict,
     SolveTrains,
 }
 
-pub struct ConflictSolverNode {}
+#[derive(Debug)]
+pub struct ConflictConstraint {
+    pub train: TrainRef,
+    pub track: TrackRef,
+    pub interval: TimeInterval,
+}
+
+pub struct ConflictSolverNode {
+    pub constraint: ConflictConstraint,
+    pub depth: u32,
+    pub parent: Option<Rc<ConflictSolverNode>>,
+}
+
+impl std::fmt::Debug for ConflictSolverNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ConflictSolverNode")
+            .field("constraint", &self.constraint)
+            .field("depth", &self.depth)
+            .field("has_parent", &self.parent.is_some())
+            .finish()
+    }
+}
 
 pub struct ConflictSolver {
     pub problem: Rc<Problem>,
     pub trains: Vec<TrainSolver>,
     pub conflicts: ResourceConflicts,
-
     pub queued_nodes: Vec<Rc<ConflictSolverNode>>,
-
-    pub current_node: Rc<ConflictSolverNode>,
+    pub current_node: Option<Rc<ConflictSolverNode>>, // The root node is "None".
     pub dirty_trains: Vec<u32>,
-}
-
-#[derive(Default)]
-pub struct Conflict {}
-
-pub struct TrackConflicts {
-    pub conflicts: TinyVec<[Conflict; 4]>,
+    pub dirty_train_idxs: Vec<i32>,
 }
 
 impl ConflictSolver {
     pub fn status(&self) -> ConflictSolverStatus {
-        match (self.dirty_trains.is_empty(), self.queued_nodes.is_empty()) {
-            (false, _) => ConflictSolverStatus::SolveTrains,
-            (_, false) => ConflictSolverStatus::SelectNode,
-            (true, true) => ConflictSolverStatus::Exhausted,
+        match (
+            self.dirty_trains.is_empty(),
+            self.conflicts.conflicting_resource_set.is_empty(),
+            self.queued_nodes.is_empty(),
+        ) {
+            (false, _, _) => ConflictSolverStatus::SolveTrains,
+            (_, false, _) => ConflictSolverStatus::Conflict,
+            (_, _, false) => ConflictSolverStatus::SelectNode,
+            (true, true, true) => ConflictSolverStatus::Exhausted,
         }
     }
 
     pub fn step(&mut self) {
+        // TODO possibly resolve conflicts before finishing solving all trains.
+
         if let Some(dirty_train) = self.dirty_trains.last() {
-            match self.trains[*dirty_train as usize].status() {
+            let dirty_train_idx = *dirty_train as usize;
+            match self.trains[dirty_train_idx].status() {
                 TrainSolverStatus::Failed => {
-                    debug!("Train {} failed.", dirty_train);
-                    self.pick_node();
+                    debug!("Train {} failed.", dirty_train_idx);
+                    self.switch_node();
                 }
                 TrainSolverStatus::Optimal => {
-                    debug!("Train {} optimal.", dirty_train);
-                    self.dirty_trains.pop();
+                    debug!("Train {} optimal.", dirty_train_idx);
+                    Self::remove_dirty_train(
+                        &mut self.dirty_trains,
+                        &mut self.dirty_train_idxs,
+                        dirty_train_idx,
+                    );
                 }
                 TrainSolverStatus::Working => {
-                    self.trains[*dirty_train as usize].step(|add, track, interval| {
-                        let occ = ResourceOccupation {
-                            train: *dirty_train as i32,
+                    self.trains[dirty_train_idx].step(|add, track, interval| {
+                        self.conflicts.add_or_remove(
+                            add,
+                            dirty_train_idx as TrainRef,
+                            track,
                             interval,
-                        };
-                        if add {
-                            trace!(
-                                "ADD train{} track{} [{} -> {}] ",
-                                dirty_train,
-                                track,
-                                occ.interval.time_start,
-                                occ.interval.time_end
-                            );
-                            self.conflicts.add(track as usize, occ);
-                        } else {
-                            trace!(
-                                "DEL train{} track{} [{} -> {}] ",
-                                dirty_train,
-                                track,
-                                occ.interval.time_start,
-                                occ.interval.time_end
-                            );
-                            self.conflicts.remove(track as usize, occ);
-                        }
+                        )
                     });
                 }
             }
         } else if !self.conflicts.conflicting_resource_set.is_empty() {
             self.branch();
         } else if !self.queued_nodes.is_empty() {
-            self.pick_node();
+            debug!("Switching node");
+            self.switch_node();
         } else {
             debug!("Search exhausted.")
         }
@@ -196,11 +242,161 @@ impl ConflictSolver {
 
     /// Select a conflict and create constraints for it.
     fn branch(&mut self) {
-        todo!()
+        assert!(!self.conflicts.conflicting_resource_set.is_empty());
+        let conflict_resource = self.conflicts.conflicting_resource_set[0];
+        // println!("CONFLICTS {:#?}", self.conflicts);
+        let (occ_a, occ_b) = self.conflicts.resources[conflict_resource as usize]
+            .get_conflict()
+            .unwrap();
+
+        // If both trains are running at their minimum travel time, then
+        // we can create valid conflicting intervals.
+
+        // TODO: remove assumptions that the trains are as early as possible to every event.
+
+        let block_a = TimeInterval {
+            time_start: occ_a.interval.time_start,
+            time_end: occ_b.interval.time_end,
+        };
+
+        let block_b = TimeInterval {
+            time_start: occ_b.interval.time_start,
+            time_end: occ_a.interval.time_end,
+        };
+
+        assert!(block_a.overlap(&block_b));
+
+        let constraint_a = ConflictConstraint {
+            train: occ_a.train,
+            track: conflict_resource as TrackRef,
+            interval: block_a,
+        };
+
+        let constraint_b = ConflictConstraint {
+            train: occ_b.train,
+            track: conflict_resource as TrackRef,
+            interval: block_b,
+        };
+
+        debug!(
+            "Branch:\n - a: {:?}\n - b: {:?}",
+            constraint_a, constraint_b
+        );
+
+        let node_a = ConflictSolverNode {
+            constraint: constraint_a,
+            depth: self.current_node.as_ref().map_or(0, |n| n.depth) + 1,
+            parent: self.current_node.clone(),
+        };
+
+        let node_b = ConflictSolverNode {
+            constraint: constraint_b,
+            depth: self.current_node.as_ref().map_or(0, |n| n.depth) + 1,
+            parent: self.current_node.clone(),
+        };
+
+        self.queued_nodes.push(Rc::new(node_a));
+        self.queued_nodes.push(Rc::new(node_b));
+
+        // TODO special-case DFS without putting the node on the queue.
+
+        self.switch_node();
     }
 
-    fn pick_node(&mut self) {
-        todo!()
+    fn select_node(&mut self) -> Option<Rc<ConflictSolverNode>> {
+        self.queued_nodes.pop()
+    }
+
+    fn switch_node(&mut self) {
+        let new_node = self.select_node().unwrap();
+        debug!("conflict search switching to node {:?}", new_node);
+        let mut backward = self.current_node.as_ref();
+        let mut forward = Some(&new_node);
+
+        loop {
+            // trace!(
+            //     "Comparing backward depth1 {} to forawrd depth2 {}",
+            //     depth1,
+            //     depth2
+            // );
+
+            let same_node = match (backward, forward) {
+                (Some(rc1), Some(rc2)) => Rc::ptr_eq(rc1, rc2),
+                (None, None) => true,
+                _ => false,
+            };
+            if same_node {
+                break;
+            } else {
+                let depth1 = backward.as_ref().map_or(0, |n| n.depth);
+                let depth2 = forward.as_ref().map_or(0, |n| n.depth);
+                if depth1 < depth2 {
+                    let node = forward.unwrap();
+
+                    // Add constraint
+                    let train = node.constraint.train;
+                    self.trains[train as usize].add_constraint(
+                        node.constraint.track,
+                        node.constraint.interval,
+                        |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
+                    );
+                    Self::add_dirty_train(
+                        &mut self.dirty_trains,
+                        &mut self.dirty_train_idxs,
+                        train as usize,
+                    );
+
+                    forward = node.parent.as_ref();
+                } else {
+                    let node = backward.unwrap();
+
+                    // Remove constraint
+                    let train = node.constraint.train;
+
+                    self.trains[train as usize].remove_constraint(
+                        node.constraint.track,
+                        node.constraint.interval,
+                        |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
+                    );
+                    Self::add_dirty_train(
+                        &mut self.dirty_trains,
+                        &mut self.dirty_train_idxs,
+                        train as usize,
+                    );
+
+                    backward = node.parent.as_ref();
+                }
+            }
+        }
+
+        self.current_node = Some(new_node);
+    }
+
+    fn remove_dirty_train(
+        dirty_trains: &mut Vec<u32>,
+        dirty_train_idxs: &mut [i32],
+        train_idx: usize,
+    ) {
+        assert!(dirty_train_idxs[train_idx] >= 0);
+
+        let dirty_idx = dirty_train_idxs[train_idx] as usize;
+        dirty_trains.swap_remove(dirty_idx);
+        if dirty_idx < dirty_trains.len() {
+            let other_train = dirty_trains[dirty_idx] as usize;
+            dirty_train_idxs[other_train] = dirty_idx as i32;
+        }
+        dirty_train_idxs[train_idx] = -1;
+    }
+
+    fn add_dirty_train(
+        dirty_trains: &mut Vec<u32>,
+        dirty_train_idxs: &mut [i32],
+        train_idx: usize,
+    ) {
+        if dirty_train_idxs[train_idx] == -1 {
+            dirty_train_idxs[train_idx] = dirty_trains.len() as i32;
+            dirty_trains.push(train_idx as u32);
+        }
     }
 
     pub fn new(problem: Rc<Problem>) -> Self {
@@ -217,15 +413,15 @@ impl ConflictSolver {
             })
             .collect();
         let conflicts = ResourceConflicts::empty(problem.tracks.len());
-        let start_node = ConflictSolverNode {};
         let dirty_trains = (0..(trains.len() as u32)).collect();
-
+        let dirty_train_idxs = (0..(trains.len() as i32)).collect();
         Self {
             problem,
             trains,
             conflicts,
-            current_node: Rc::new(start_node),
+            current_node: None,
             dirty_trains,
+            dirty_train_idxs,
             queued_nodes: vec![],
         }
     }
@@ -256,7 +452,7 @@ impl std::fmt::Debug for TrainSolverNode {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone)]
 pub struct Block {
     track: TrackRef,
     interval: TimeInterval,
@@ -267,6 +463,7 @@ pub struct TrainSolver {
     pub train_idx: usize,
     pub blocks: BTreeSet<Block>,
 
+    root_node: Rc<TrainSolverNode>,
     pub queued_nodes: Vec<Rc<TrainSolverNode>>,
     pub current_node: Rc<TrainSolverNode>,
     pub solution: Option<Result<Rc<TrainSolverNode>, ()>>,
@@ -274,21 +471,23 @@ pub struct TrainSolver {
 
 impl TrainSolver {
     pub fn new(problem: Rc<Problem>, train_idx: usize, blocks: BTreeSet<Block>) -> Self {
-        let current_node = Rc::new(TrainSolverNode {
-            time: problem.trains[train_idx].appears_at,
-            track: SENTINEL_TRACK,
-            parent: None,
-            depth: 0,
-        });
-
+        let root_node = Self::start_node(&problem, train_idx);
         Self {
+            current_node: root_node.clone(),
+            root_node,
             problem,
             train_idx,
             queued_nodes: vec![],
-            current_node,
             solution: None,
             blocks,
         }
+    }
+
+    pub fn reset(&mut self, use_resource: impl FnMut(bool, TrackRef, TimeInterval)) {
+        // TODO extract struct TrainSearchState
+        self.queued_nodes.clear();
+        self.solution = None;
+        self.switch_node(self.root_node.clone(), use_resource);
     }
 
     pub fn status(&self) -> TrainSolverStatus {
@@ -308,7 +507,10 @@ impl TrainSolver {
             debug!("  solution detected");
 
             self.solution = Some(Ok(self.current_node.clone()));
-        } else if self.current_node.track == SENTINEL_TRACK {
+            return;
+        }
+
+        if self.current_node.track == SENTINEL_TRACK {
             // First route segment.
 
             // This is special casing the first track segment,
@@ -351,7 +553,25 @@ impl TrainSolver {
 
             assert!(self.current_node.track >= 0);
             let current_track = &self.problem.tracks[self.current_node.track as usize];
+            trace!(
+                "Currentr track {} has next tracks {:?}",
+                self.current_node.track,
+                current_track.nexts
+            );
             for next_track in current_track.nexts.iter() {
+                trace!(
+                    "  - next track {} has valid transfer times {:?}",
+                    next_track,
+                    valid_transfer_times(
+                        &self.problem,
+                        &self.blocks,
+                        self.current_node.track,
+                        self.current_node.time,
+                        *next_track,
+                    )
+                    .collect::<Vec<_>>()
+                );
+
                 for time in valid_transfer_times(
                     &self.problem,
                     &self.blocks,
@@ -368,9 +588,33 @@ impl TrainSolver {
                     }));
                 }
             }
+
+            if current_track.nexts.is_empty() {
+                // TODO special casing the last track segments.
+                // This should be replaced by explicitly linking to TRAIN_FINISHED
+                trace!("  adding train finished node");
+                assert!(self.current_node.track >= 0);
+                let travel_time = self.problem.tracks[self.current_node.track as usize].travel_time;
+
+                // We should already have made sure that the minium travel time is available in the resource(s).
+                assert!(block_available(
+                    &self.blocks,
+                    Block {
+                        interval: TimeInterval::duration(self.current_node.time, travel_time),
+                        track: self.current_node.track
+                    }
+                ));
+
+                self.queued_nodes.push(Rc::new(TrainSolverNode {
+                    track: TRAIN_FINISHED,
+                    time: self.current_node.time + travel_time,
+                    depth: self.current_node.depth + 1,
+                    parent: Some(self.current_node.clone()),
+                }))
+            }
         }
 
-        self.switch_node(use_resource);
+        self.next_node(use_resource);
     }
 
     pub fn select_node(&mut self) -> Option<Rc<TrainSolverNode>> {
@@ -378,7 +622,52 @@ impl TrainSolver {
         self.queued_nodes.pop()
     }
 
-    pub fn switch_node(&mut self, mut use_resource: impl FnMut(bool, TrackRef, TimeInterval)) {
+    pub fn add_constraint(
+        &mut self,
+        track: TrackRef,
+        interval: TimeInterval,
+        use_resource: impl FnMut(bool, TrackRef, TimeInterval),
+    ) {
+        debug!(
+            "train {} add constraint {:?}",
+            self.train_idx,
+            (track, interval)
+        );
+        self.blocks.insert(Block { interval, track });
+        // TODO incremental algorithm
+        self.reset(use_resource);
+    }
+
+    pub fn remove_constraint(
+        &mut self,
+        track: TrackRef,
+        interval: TimeInterval,
+        use_resource: impl FnMut(bool, TrackRef, TimeInterval),
+    ) {
+        debug!(
+            "train {} remove constraint {:?}",
+            self.train_idx,
+            (track, interval)
+        );
+        assert!(self.blocks.remove(&Block { interval, track }));
+        // TODO incremental algorithm
+        self.reset(use_resource);
+    }
+
+    pub fn next_node(&mut self, use_resource: impl FnMut(bool, TrackRef, TimeInterval)) {
+        if let Some(new_node) = self.select_node() {
+            self.switch_node(new_node, use_resource);
+        } else {
+            warn!("Train has no more nodes.");
+            self.solution = Some(Err(()));
+        }
+    }
+
+    fn switch_node(
+        &mut self,
+        new_node: Rc<TrainSolverNode>,
+        mut use_resource: impl FnMut(bool, i32, TimeInterval),
+    ) {
         fn occupation(node: &TrainSolverNode) -> Option<(TrackRef, TimeInterval)> {
             let prev_node = node.parent.as_ref()?;
             if prev_node.track < 0 {
@@ -393,35 +682,49 @@ impl TrainSolver {
                 },
             ))
         }
+        debug!("switching to node {:?}", new_node);
+        let mut backward = &self.current_node;
+        let mut forward = &new_node;
+        loop {
+            debug!(
+                " backw depth {} forw depth {}",
+                backward.depth, forward.depth
+            );
 
-        if let Some(new_node) = self.select_node() {
-            debug!("switching to node {:?}", new_node);
-            let mut backward = &self.current_node;
-            let mut forward = &new_node;
-
-            loop {
-                match backward.depth.cmp(&forward.depth) {
-                    std::cmp::Ordering::Less => {
-                        if let Some((track, interval)) = occupation(forward) {
-                            use_resource(true, track, interval);
-                        }
-                        forward = forward.parent.as_ref().unwrap();
-                    }
-                    std::cmp::Ordering::Greater => {
-                        if let Some((track, interval)) = occupation(forward) {
-                            use_resource(false, track, interval);
-                        }
-                        backward = backward.parent.as_ref().unwrap();
-                    }
-                    std::cmp::Ordering::Equal => break,
+            if Rc::ptr_eq(backward, forward) {
+                break;
+            } else if backward.depth < forward.depth {
+                if let Some((track, interval)) = occupation(forward) {
+                    debug!(
+                        "train {} adds resource use {:?}",
+                        self.train_idx,
+                        (track, interval)
+                    );
+                    use_resource(true, track, interval);
                 }
+                forward = forward.parent.as_ref().unwrap();
+            } else {
+                if let Some((track, interval)) = occupation(backward) {
+                    debug!(
+                        "train {} removes resource use {:?}",
+                        self.train_idx,
+                        (track, interval)
+                    );
+                    use_resource(false, track, interval);
+                }
+                backward = backward.parent.as_ref().unwrap();
             }
-
-            self.current_node = new_node;
-        } else {
-            warn!("Train has no more nodes.");
-            self.solution = Some(Err(()));
         }
+        self.current_node = new_node;
+    }
+
+    fn start_node(problem: &Rc<Problem>, train_idx: usize) -> Rc<TrainSolverNode> {
+        Rc::new(TrainSolverNode {
+            time: problem.trains[train_idx].appears_at,
+            track: SENTINEL_TRACK,
+            parent: None,
+            depth: 0,
+        })
     }
 }
 
@@ -464,14 +767,16 @@ fn valid_transfer_times<'a>(
     r2: TrackRef,
 ) -> impl Iterator<Item = TimeValue> + 'a {
     // TODO, experiment: we could store the latest_exit on the node when it is first generated.
-
+    trace!("valid transfer times r1={} t1={} r2={}", r1, t1, r2);
     let latest_exit = latest_exit(blocks, r1, t1).unwrap_or(TimeValue::MAX);
+    trace!("  latest_exit {}", latest_exit);
 
     let travel_time = (r1 >= 0)
         .then(|| problem.tracks[r1 as usize].travel_time)
         .unwrap_or(0);
 
     let earliest_entry = t1 + travel_time;
+    trace!("  earliest_entry {}", earliest_entry);
 
     assert!(latest_exit >= earliest_entry);
 
@@ -482,12 +787,23 @@ fn valid_transfer_times<'a>(
         .unwrap_or(0);
 
     let range = Block {
-        track: r1,
+        track: r2,
         interval: TimeInterval::duration(earliest_entry, 0),
     }..Block {
-        track: r1 + 1,
+        track: r2 + 1,
         interval: INTERVAL_MIN,
     };
+
+    {
+        trace!("range {:?}", range);
+        let candidate_start_times = std::iter::once(earliest_entry)
+            .chain(blocks.range(range.clone()).map(|b| b.interval.time_end));
+
+        trace!(
+            "candidate start times {:?}",
+            candidate_start_times.collect::<Vec<_>>()
+        );
+    }
 
     let candidate_start_times =
         std::iter::once(earliest_entry).chain(blocks.range(range).map(|b| b.interval.time_end));
