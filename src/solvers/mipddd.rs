@@ -2,7 +2,8 @@
 use grb::add_binvar;
 
 use super::SolverError;
-use crate::{problem::Problem, solvers::bigm::visit_conflicts};
+use ddd_problem::problem::Problem;
+use crate::{solvers::bigm::visit_conflicts};
 
 struct TimingVariable {
     intervals: Vec<(i32, grb::Var)>,

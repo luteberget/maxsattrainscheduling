@@ -1,8 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
+use ddd_problem::problem::{Problem, DelayCostThresholds};
 use satcoder::constraints::Totalizer;
 
-use crate::problem::{DelayCostThresholds, Problem};
 
 use super::SolverError;
 

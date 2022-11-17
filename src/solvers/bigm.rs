@@ -4,10 +4,8 @@ use std::{
 };
 
 use super::SolverError;
-use crate::{
-    problem::{iter_infinite_staircase, DelayCostThresholds, DelayCostType, Problem},
-    solvers::minimize,
-};
+use crate::solvers::minimize;
+use ddd_problem::problem::{iter_infinite_staircase, DelayCostThresholds, DelayCostType, Problem};
 const M: f64 = 2.0 * 6.0 * 3600.0;
 
 type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<grb::Var, SolverError>;
@@ -20,7 +18,7 @@ pub fn solve_bigm(
     timeout: f64,
     train_names: &[String],
     resource_names: &[String],
-    mut output_stats :impl FnMut(String, serde_json::Value),
+    mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
@@ -44,7 +42,7 @@ pub fn solve_hull(
 
     train_names: &[String],
     resource_names: &[String],
-    mut output_stats :impl FnMut(String, serde_json::Value),
+    mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
@@ -69,7 +67,7 @@ fn solve(
     train_names: &[String],
     resource_names: &[String],
     add_conflict_constraint: ConflictHandler,
-    mut output_stats :impl FnMut(String, serde_json::Value),
+    mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
@@ -84,9 +82,9 @@ fn solve(
     //     .set_param(param::IntFeasTol, 1e-8)
     //     .map_err(SolverError::GurobiError)?;
 
-        // model
-        // .set_param(param::LazyConstraints, 1)
-        // .map_err(SolverError::GurobiError)?;
+    // model
+    // .set_param(param::LazyConstraints, 1)
+    // .map_err(SolverError::GurobiError)?;
 
     // model.set_param(grb::param::OutputFlag, 1);
 
@@ -489,12 +487,20 @@ fn solve(
             );
 
             output_stats("refinements".to_string(), refinement_iterations.into());
-            output_stats("added_conflict_pairs".to_string(), added_conflicts.len().into());
+            output_stats(
+                "added_conflict_pairs".to_string(),
+                added_conflicts.len().into(),
+            );
             output_stats("iteration".to_string(), iteration.into());
-            output_stats("travel_constraints".to_string(), n_travel_constraints.into());
-            output_stats("resource_constraints".to_string(), n_resource_constraints.into());
+            output_stats(
+                "travel_constraints".to_string(),
+                n_travel_constraints.into(),
+            );
+            output_stats(
+                "resource_constraints".to_string(),
+                n_resource_constraints.into(),
+            );
             output_stats("internal_cost".to_string(), cost.into());
-
 
             // let mip_objective =  model.get_attr(grb::attr::ObjVal).unwrap();
             // println!("MIP obj {}", mip_objective);

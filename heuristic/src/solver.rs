@@ -1,7 +1,8 @@
 use crate::{
     interval::TimeInterval,
+    occupation::ResourceConflicts,
     problem::*,
-    train::{TrainSolver, TrainSolverStatus}, occupation::ResourceConflicts,
+    train::{TrainSolver, TrainSolverStatus},
 };
 use log::debug;
 use std::rc::Rc;
@@ -17,7 +18,7 @@ pub enum ConflictSolverStatus {
 #[derive(Debug)]
 pub struct ConflictConstraint {
     pub train: TrainRef,
-    pub track: TrackRef,
+    pub track: ResourceRef,
     pub interval: TimeInterval,
 }
 
@@ -38,13 +39,13 @@ impl std::fmt::Debug for ConflictSolverNode {
 }
 
 pub struct ConflictSolver {
-    pub problem: Rc<Problem>,
     pub trains: Vec<TrainSolver>,
     pub conflicts: ResourceConflicts,
     pub queued_nodes: Vec<Rc<ConflictSolverNode>>,
     pub current_node: Option<Rc<ConflictSolverNode>>, // The root node is "None".
     pub dirty_trains: Vec<u32>,
-    pub dirty_train_idxs: Vec<i32>,
+    pub total_nodes: usize,
+    // pub dirty_train_idxs: Vec<i32>,
 }
 
 impl ConflictSolver {
@@ -54,17 +55,20 @@ impl ConflictSolver {
             self.conflicts.conflicting_resource_set.is_empty(),
             self.queued_nodes.is_empty(),
         ) {
-            (false, _, _) => ConflictSolverStatus::SolveTrains,
             (_, false, _) => ConflictSolverStatus::Conflict,
+            (false, _, _) => ConflictSolverStatus::SolveTrains,
             (_, _, false) => ConflictSolverStatus::SelectNode,
             (true, true, true) => ConflictSolverStatus::Exhausted,
         }
     }
 
     pub fn step(&mut self) {
-        // TODO possibly resolve conflicts before finishing solving all trains.
+        // TODO We are solving conflicts when they appear, before trains are
+        // finished solving. Is there a realistic pathological case for this?
 
-        if let Some(dirty_train) = self.dirty_trains.last() {
+        if !self.conflicts.conflicting_resource_set.is_empty() {
+            self.branch();
+        } else if let Some(dirty_train) = self.dirty_trains.last() {
             let dirty_train_idx = *dirty_train as usize;
             match self.trains[dirty_train_idx].status() {
                 TrainSolverStatus::Failed => {
@@ -73,11 +77,7 @@ impl ConflictSolver {
                 }
                 TrainSolverStatus::Optimal => {
                     debug!("Train {} optimal.", dirty_train_idx);
-                    Self::remove_dirty_train(
-                        &mut self.dirty_trains,
-                        &mut self.dirty_train_idxs,
-                        dirty_train_idx,
-                    );
+                    self.dirty_trains.pop();
                 }
                 TrainSolverStatus::Working => {
                     self.trains[dirty_train_idx].step(|add, track, interval| {
@@ -88,15 +88,27 @@ impl ConflictSolver {
                             interval,
                         )
                     });
+
+                    Self::bubble_train_queue(&mut self.dirty_trains, &self.trains);
                 }
             }
-        } else if !self.conflicts.conflicting_resource_set.is_empty() {
-            self.branch();
         } else if !self.queued_nodes.is_empty() {
             debug!("Switching node");
             self.switch_node();
         } else {
             debug!("Search exhausted.")
+        }
+    }
+
+    fn bubble_train_queue(dirty_trains: &mut [u32], trains: &[TrainSolver]) {
+        // Bubble the last train in the dirty train queue to the correct ordering.
+        let mut idx = dirty_trains.len();
+        while idx >= 2
+            && trains[dirty_trains[idx - 2] as usize].current_time()
+                < trains[dirty_trains[idx - 1] as usize].current_time()
+        {
+            dirty_trains.swap(idx - 2, idx - 1);
+            idx -= 1;
         }
     }
 
@@ -128,13 +140,13 @@ impl ConflictSolver {
 
         let constraint_a = ConflictConstraint {
             train: occ_a.train,
-            track: conflict_resource as TrackRef,
+            track: conflict_resource,
             interval: block_a,
         };
 
         let constraint_b = ConflictConstraint {
             train: occ_b.train,
-            track: conflict_resource as TrackRef,
+            track: conflict_resource,
             interval: block_b,
         };
 
@@ -157,6 +169,8 @@ impl ConflictSolver {
 
         self.queued_nodes.push(Rc::new(node_a));
         self.queued_nodes.push(Rc::new(node_b));
+
+        self.total_nodes += 2;
 
         // TODO special-case DFS without putting the node on the queue.
 
@@ -200,12 +214,8 @@ impl ConflictSolver {
                         node.constraint.interval,
                         |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
-                    Self::add_dirty_train(
-                        &mut self.dirty_trains,
-                        &mut self.dirty_train_idxs,
-                        train as usize,
-                    );
 
+                    Self::add_dirty_train(train, &mut self.dirty_trains, &self.trains);
                     forward = node.parent.as_ref();
                 } else {
                     let node = backward.unwrap();
@@ -218,12 +228,8 @@ impl ConflictSolver {
                         node.constraint.interval,
                         |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
-                    Self::add_dirty_train(
-                        &mut self.dirty_trains,
-                        &mut self.dirty_train_idxs,
-                        train as usize,
-                    );
 
+                    Self::add_dirty_train(train, &mut self.dirty_trains, &self.trains);
                     backward = node.parent.as_ref();
                 }
             }
@@ -232,56 +238,34 @@ impl ConflictSolver {
         self.current_node = Some(new_node);
     }
 
-    fn remove_dirty_train(
-        dirty_trains: &mut Vec<u32>,
-        dirty_train_idxs: &mut [i32],
-        train_idx: usize,
-    ) {
-        assert!(dirty_train_idxs[train_idx] >= 0);
-
-        let dirty_idx = dirty_train_idxs[train_idx] as usize;
-        dirty_trains.swap_remove(dirty_idx);
-        if dirty_idx < dirty_trains.len() {
-            let other_train = dirty_trains[dirty_idx] as usize;
-            dirty_train_idxs[other_train] = dirty_idx as i32;
-        }
-        dirty_train_idxs[train_idx] = -1;
-    }
-
-    fn add_dirty_train(
-        dirty_trains: &mut Vec<u32>,
-        dirty_train_idxs: &mut [i32],
-        train_idx: usize,
-    ) {
-        if dirty_train_idxs[train_idx] == -1 {
-            dirty_train_idxs[train_idx] = dirty_trains.len() as i32;
-            dirty_trains.push(train_idx as u32);
-        }
-    }
-
-    pub fn new(problem: Rc<Problem>) -> Self {
-        let trains: Vec<TrainSolver> = problem
-            .trains
+    fn add_dirty_train(train: TrainRef, dirty_trains: &mut Vec<u32>, trains: &[TrainSolver]) {
+        if let Some((idx, _)) = dirty_trains
             .iter()
             .enumerate()
-            .map(|(train_idx, _t)| {
-                TrainSolver::new(
-                    problem.clone(),
-                    train_idx,
-                )
-            })
-            .collect();
-        let conflicts = crate::occupation::ResourceConflicts::empty(problem.tracks.len());
-        let dirty_trains = (0..(trains.len() as u32)).collect();
-        let dirty_train_idxs = (0..(trains.len() as i32)).collect();
+            .rev() /* Search from the back, because a conflicting train is probably recently used. */
+            .find(|(_, t)| **t == train as u32)
+        {
+            Self::bubble_train_queue(&mut dirty_trains[0..=idx], trains);
+        } else {
+            dirty_trains.push(train as u32);
+            Self::bubble_train_queue(dirty_trains, trains);
+        }
+    }
+
+    pub fn new(problem: Problem) -> Self {
+        let trains: Vec<TrainSolver> = problem.trains.into_iter().map(TrainSolver::new).collect();
+        let conflicts = crate::occupation::ResourceConflicts::empty(problem.n_resources);
+
+        let mut dirty_trains: Vec<u32> = (0..(trains.len() as u32)).collect();
+        dirty_trains.sort_by_key(|t| -(trains[*t as usize].current_time() as i32));
+
         Self {
-            problem,
             trains,
             conflicts,
             current_node: None,
             dirty_trains,
-            dirty_train_idxs,
             queued_nodes: vec![],
+            total_nodes: 0,
         }
     }
 }

@@ -1,7 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
+use ddd_problem::problem::{Problem, DelayCostType};
+
 use super::SolverError;
-use crate::problem::{DelayCostType, Problem};
 
 mod highs {
     use std::ffi::c_void;

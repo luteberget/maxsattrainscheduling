@@ -1,8 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
+use ddd_problem::problem::{Problem, DelayCostType};
 use grb::add_ctsvar;
 
-use crate::problem::{DelayCostType, Problem};
 
 use super::{bigm::visit_conflicts, minimize, SolverError};
 

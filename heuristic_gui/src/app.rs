@@ -49,6 +49,8 @@ impl App {
             ui.label(&format!("Train status {:?}", train_solver.status()));
             ui.label(&format!("Blocks {:?}", train_solver.blocks));
             ui.label(&format!("Current node {:?}", train_solver.current_node));
+            ui.label(&format!("Current time {}", train_solver.current_time()));
+            ui.label(&format!("Total number of nodes {}", train_solver.total_nodes));
             ui.label(&format!("Nodes {:?}", train_solver.queued_nodes));
             ui.label(&format!("Solution {:?}", train_solver.solution));
         } else {
@@ -59,6 +61,7 @@ impl App {
     fn conflict_solver_ui(&mut self, ui: &mut egui::Ui) {
         ui.heading("Conflict solver");
         ui.label(&format!("Status: {:?}", self.model.solver.status()));
+        ui.label(&format!("Total number of nodes {}", self.model.solver.total_nodes));
         ui.label(&format!(
             "Queued nodes: {}",
             self.model.solver.queued_nodes.len()

@@ -6,8 +6,7 @@ use std::collections::{HashMap, VecDeque};
 
 use grb::prelude::*;
 use log::{warn, info};
-
-use crate::problem::{Problem, DelayCostType};
+use ddd_problem::problem::{Problem, DelayCostType};
 
 use super::SolverError;
 const M: f64 = 100_000.0;

@@ -4,12 +4,12 @@ use std::{
     time::Instant,
 };
 
+use ddd_problem::problem::{Problem, DelayCostType};
+
 #[allow(unused)]
 use crate::{
     debug::{ResourceInterval, SolverAction},
-    minimize_core,
-    problem::Problem,
-    trim_core,
+    minimize_core, trim_core,
 };
 use satcoder::{
     constraints::Totalizer, prelude::SymbolicModel, Bool, SatInstance, SatSolverWithCore,
@@ -84,7 +84,7 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
 
-use crate::{debug::DebugInfo, problem::DelayCostType};
+use crate::debug::DebugInfo;
 
 use super::{costtree::CostTree, SolverError};
 pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
@@ -544,7 +544,11 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 );
                 output_stats(
                     "max_time_points".to_string(),
-                    occupations.iter().map(|o| o.delays.len()).max().unwrap()
+                    occupations
+                        .iter()
+                        .map(|o| o.delays.len())
+                        .max()
+                        .unwrap()
                         .into(),
                 );
                 output_stats(

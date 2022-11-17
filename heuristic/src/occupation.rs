@@ -1,7 +1,7 @@
 use log::{warn, trace};
 use tinyvec::TinyVec;
 
-use crate::{problem::{TrainRef, TrackRef}, interval::TimeInterval};
+use crate::{problem::{TrainRef, ResourceRef}, interval::TimeInterval};
 
 
 
@@ -87,7 +87,7 @@ impl ResourceConflicts {
         &mut self,
         add: bool,
         train: TrainRef,
-        track: TrackRef,
+        resource: ResourceRef,
         interval: TimeInterval,
     ) {
         let occ = ResourceOccupation { train, interval };
@@ -95,20 +95,20 @@ impl ResourceConflicts {
             trace!(
                 "ADD train{} track{} [{} -> {}] ",
                 train,
-                track,
+                resource,
                 occ.interval.time_start,
                 occ.interval.time_end
             );
-            self.add(track as usize, occ);
+            self.add(resource as usize, occ);
         } else {
             trace!(
                 "DEL train{} track{} [{} -> {}] ",
                 train,
-                track,
+                resource,
                 occ.interval.time_start,
                 occ.interval.time_end
             );
-            self.remove(track as usize, occ);
+            self.remove(resource as usize, occ);
         }
     }
 }
