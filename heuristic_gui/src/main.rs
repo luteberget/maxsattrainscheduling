@@ -1,33 +1,24 @@
-use std::rc::Rc;
-
 use eframe::egui::Visuals;
 
 mod app;
 mod model;
+pub mod examples;
 
 fn main() {
 
     pretty_env_logger::init();
 
     let input: model::Input =
-        serde_json::from_str(&std::fs::read_to_string("example1.json").unwrap()).unwrap();
+        serde_json::from_str(&std::fs::read_to_string("example_oneres.json").unwrap()).unwrap();
 
-    if input.symmetric {
-        todo!();
-    }
-    
-    if input.problem.tracks.len() != input.draw_tracks.len() {
-        panic!("draw tracks length");
-    }
+    // let input = examples::example_1();
 
-    let problem = Rc::new(input.problem);
-    let draw_tracks = Rc::new(input.draw_tracks);
+    // let problem = Rc::new(input.problem);
+    // let draw_tracks = Rc::new(input.draw_tracks);
 
     let app = app::App {
         model: model::Model {
-            solver: heuristic::solver::ConflictSolver::new(problem.clone()),
-            problem,
-            draw_tracks,
+            solver: heuristic::solver::ConflictSolver::new(examples::example_1()),
             selected_train: 0,
         },
     };

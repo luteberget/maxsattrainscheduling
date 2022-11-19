@@ -1,11 +1,10 @@
-use std::{collections::BTreeSet, rc::Rc};
-
-use log::{debug, trace, warn};
-
 use crate::{
-    interval::{TimeInterval, INTERVAL_MIN},
+    interval::TimeInterval,
     problem::{Block, BlockRef, ResourceRef, TimeValue, Train},
 };
+use log::{debug, info, trace, warn};
+use std::rc::Rc;
+use tinyvec::TinyVec;
 
 #[derive(Debug)]
 pub enum TrainSolverStatus {
@@ -32,15 +31,15 @@ impl std::fmt::Debug for TrainSolverNode {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone)]
-pub struct ResourceBlocked {
-    resource: ResourceRef,
-    interval: TimeInterval,
+#[derive(Default, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct IsOccupied {
+    enter_after: TimeValue,
+    exit_before: TimeValue,
 }
 
 pub struct TrainSolver {
     pub train: Train,
-    pub blocks: BTreeSet<ResourceBlocked>,
+    pub occupied: Vec<TinyVec<[IsOccupied; 4]>>,
 
     root_node: Rc<TrainSolverNode>,
     pub queued_nodes: Vec<Rc<TrainSolverNode>>,
@@ -59,13 +58,15 @@ impl TrainSolver {
             depth: 0,
         });
 
+        let occupied = train.blocks.iter().map(|_| Default::default()).collect();
+
         Self {
             current_node: root_node.clone(),
             root_node,
             train,
             queued_nodes: vec![],
             solution: None,
-            blocks: Default::default(),
+            occupied,
             total_nodes: 1,
         }
     }
@@ -92,33 +93,28 @@ impl TrainSolver {
     pub fn step(&mut self, use_resource: impl FnMut(bool, ResourceRef, TimeInterval)) {
         assert!(matches!(self.status(), TrainSolverStatus::Working));
 
-        for next_block in self.train.blocks[self.current_node.block as usize]
-            .nexts
-            .iter()
-        {
-            trace!(
-                "  - next track {} has valid transfer times {:?}",
-                next_block,
-                valid_transfer_times(
-                    &self.train,
-                    &self.blocks,
+        let nexts = &self.train.blocks[self.current_node.block as usize].nexts;
+        if nexts.is_empty() {
+            info!("Train solved.");
+            self.solution = Some(Ok(self.current_node.clone()));
+        } else {
+            for next_block in nexts.iter() {
+                let succ = successor_nodes(
+                    &self.occupied,
+                    &self.train.blocks,
                     self.current_node.block,
                     self.current_node.time,
                     *next_block,
-                )
-                .collect::<Vec<_>>()
-            );
+                );
 
-            for time in valid_transfer_times(
-                &self.train,
-                &self.blocks,
-                self.current_node.block,
-                self.current_node.time,
-                *next_block,
-            ) {
-                if self.train.blocks[*next_block as usize].nexts.is_empty() {
-                    panic!("solution");
-                } else {
+                let succ = succ.collect::<Vec<_>>();
+                trace!(
+                    "  - next track {} has valid transfer times {:?}",
+                    next_block,
+                    succ
+                );
+
+                for time in succ {
                     trace!("  adding node {} {}", next_block, time);
                     self.total_nodes += 1;
 
@@ -130,155 +126,8 @@ impl TrainSolver {
                     }));
                 }
             }
+            self.next_node(use_resource);
         }
-
-        // if self.train.blocks[self.current_node.block as usize]
-        //     .nexts
-        //     .is_empty()
-        // {
-        //     // TODO special casing the last track segments.
-        //     // This should be replaced by explicitly linking to TRAIN_FINISHED
-        //     trace!("  adding train finished node");
-        //     assert!(self.current_node.block >= 0);
-        //     let travel_time =
-        //         self.train.blocks[self.current_node.block as usize].minimum_travel_time;
-
-        //     // We should already have made sure that the minium travel time is available in the resource(s).
-        //     assert!(block_available(
-        //         &self.blocks,
-        //         ResourceBlocked {
-        //             interval: TimeInterval::duration(self.current_node.time, travel_time),
-        //             resource: self.current_node.block
-        //         }
-        //     ));
-
-        //     self.total_nodes += 1;
-        //     self.queued_nodes.push(Rc::new(TrainSolverNode {
-        //         block: TRAIN_FINISHED,
-        //         time: self.current_node.time + travel_time,
-        //         depth: self.current_node.depth + 1,
-        //         parent: Some(self.current_node.clone()),
-        //     }))
-        // }
-
-        // debug!("Train step");
-        // if self.current_node.track == TRAIN_FINISHED {
-        //     // Detect solution.
-        //     debug!("  solution detected");
-
-        //     self.solution = Some(Ok(self.current_node.clone()));
-        //     return;
-        // }
-
-        // if self.current_node.track == SENTINEL_TRACK {
-        //     // First route segment.
-
-        //     // This is special casing the first track segment,
-        //     // and requiring it to start exactly at the `arrives_at` time.
-        //     // TODO generalize this to be treated in the same way
-        //     // TODO add general latest_departure?
-
-        //     debug!("  First route segment");
-
-        //     for (track, _tr) in self
-        //         .problem
-        //         .tracks
-        //         .iter()
-        //         .enumerate()
-        //         .filter(|(_, tr)| tr.prevs.is_empty())
-        //     {
-        //         trace!(" candidate first route {}", track);
-        //         let interval = TimeInterval::duration(
-        //             self.current_node.time,
-        //             self.problem.tracks[track].travel_time,
-        //         );
-        //         if block_available(
-        //             &self.blocks,
-        //             ResourceBlocked {
-        //                 resource: track as TrackRef,
-        //                 interval,
-        //             },
-        //         ) {
-        //             trace!("  adding node {} {}", track, self.current_node.time);
-        //             self.total_nodes += 1;
-
-        //             self.queued_nodes.push(Rc::new(TrainSolverNode {
-        //                 track: track as TrackRef,
-        //                 time: self.current_node.time,
-        //                 depth: self.current_node.depth + 1,
-        //                 parent: Some(self.current_node.clone()),
-        //             }));
-        //         }
-        //     }
-        // } else {
-        //     // We haven't reached a solution yet, so we expand the node.
-
-        //     assert!(self.current_node.track >= 0);
-        //     let current_track = &self.problem.tracks[self.current_node.track as usize];
-        //     trace!(
-        //         "Currentr track {} has next tracks {:?}",
-        //         self.current_node.track,
-        //         current_track.nexts
-        //     );
-        //     for next_track in current_track.nexts.iter() {
-        //         trace!(
-        //             "  - next track {} has valid transfer times {:?}",
-        //             next_track,
-        //             valid_transfer_times(
-        //                 &self.problem,
-        //                 &self.blocks,
-        //                 self.current_node.track,
-        //                 self.current_node.time,
-        //                 *next_track,
-        //             )
-        //             .collect::<Vec<_>>()
-        //         );
-
-        //         for time in valid_transfer_times(
-        //             &self.problem,
-        //             &self.blocks,
-        //             self.current_node.track,
-        //             self.current_node.time,
-        //             *next_track,
-        //         ) {
-        //             trace!("  adding node {} {}", next_track, time);
-        //             self.total_nodes += 1;
-        //             self.queued_nodes.push(Rc::new(TrainSolverNode {
-        //                 time,
-        //                 track: *next_track,
-        //                 parent: Some(self.current_node.clone()),
-        //                 depth: self.current_node.depth + 1,
-        //             }));
-        //         }
-        //     }
-
-        //     if current_track.nexts.is_empty() {
-        //         // TODO special casing the last track segments.
-        //         // This should be replaced by explicitly linking to TRAIN_FINISHED
-        //         trace!("  adding train finished node");
-        //         assert!(self.current_node.track >= 0);
-        //         let travel_time = self.problem.tracks[self.current_node.track as usize].travel_time;
-
-        //         // We should already have made sure that the minium travel time is available in the resource(s).
-        //         assert!(block_available(
-        //             &self.blocks,
-        //             ResourceBlocked {
-        //                 interval: TimeInterval::duration(self.current_node.time, travel_time),
-        //                 resource: self.current_node.track
-        //             }
-        //         ));
-
-        //         self.total_nodes += 1;
-        //         self.queued_nodes.push(Rc::new(TrainSolverNode {
-        //             track: TRAIN_FINISHED,
-        //             time: self.current_node.time + travel_time,
-        //             depth: self.current_node.depth + 1,
-        //             parent: Some(self.current_node.clone()),
-        //         }))
-        //     }
-        // }
-
-        self.next_node(use_resource);
     }
 
     pub fn select_node(&mut self) -> Option<Rc<TrainSolverNode>> {
@@ -286,26 +135,61 @@ impl TrainSolver {
         self.queued_nodes.pop()
     }
 
-    pub fn add_constraint(
+    pub fn resource_to_blocks(
+        train: &Train,
+        resource: ResourceRef,
+    ) -> impl Iterator<Item = BlockRef> + '_ {
+        // TODO Prepare lookup table for performance?
+        train.blocks.iter().enumerate().filter_map(move |(idx, b)| {
+            (b.resource_usage.iter().any(|r| r.resource == resource)).then_some(idx as BlockRef)
+        })
+    }
+
+    pub fn set_occupied(
         &mut self,
         resource: ResourceRef,
-        interval: TimeInterval,
+        enter_after: TimeValue,
+        exit_before: TimeValue,
         use_resource: impl FnMut(bool, ResourceRef, TimeInterval),
     ) {
-        debug!("train add constraint {:?}", (resource, interval));
-        self.blocks.insert(ResourceBlocked { interval, resource });
+        for block in Self::resource_to_blocks(&self.train, resource) {
+            debug!(
+                "train add constraint for resource {} block {:?}",
+                resource,
+                (block, enter_after, exit_before)
+            );
+
+            let new_occ = IsOccupied {
+                enter_after,
+                exit_before,
+            };
+
+            let occ_list = &mut self.occupied[block as usize];
+            let index = occ_list.binary_search(&new_occ).unwrap_err();
+            self.occupied[block as usize].insert(index, new_occ);
+        }
         // TODO incremental algorithm
         self.reset(use_resource);
     }
 
-    pub fn remove_constraint(
+    pub fn remove_occupied(
         &mut self,
         resource: ResourceRef,
-        interval: TimeInterval,
+        enter_after: TimeValue,
+        exit_before: TimeValue,
         use_resource: impl FnMut(bool, ResourceRef, TimeInterval),
     ) {
-        debug!("train remove constraint {:?}", (resource, interval));
-        assert!(self.blocks.remove(&ResourceBlocked { interval, resource }));
+        for block in Self::resource_to_blocks(&self.train, resource) {
+            debug!(
+                "train remove constraint for resource {} block {:?}",
+                resource,
+                (block, enter_after, exit_before)
+            );
+            let len_before = self.occupied[block as usize].len();
+            self.occupied[block as usize]
+                .retain(|o| o.enter_after != enter_after && o.exit_before != exit_before);
+            assert!(self.occupied[block as usize].len() + 1 == len_before);
+        }
         // TODO incremental algorithm
         self.reset(use_resource);
     }
@@ -315,7 +199,9 @@ impl TrainSolver {
             self.switch_node(new_node, use_resource);
         } else {
             warn!("Train has no more nodes.");
-            self.solution = Some(Err(()));
+            if self.solution.is_none() {
+                self.solution = Some(Err(()));
+            }
         }
     }
 
@@ -324,6 +210,22 @@ impl TrainSolver {
         new_node: Rc<TrainSolverNode>,
         mut use_resource: impl FnMut(bool, ResourceRef, TimeInterval),
     ) {
+        fn occupations(
+            block: &Block,
+            t_in: TimeValue,
+            t_out: TimeValue,
+        ) -> impl Iterator<Item = (ResourceRef, TimeInterval)> + '_ {
+            block.resource_usage.iter().map(move |r| {
+                (
+                    r.resource,
+                    TimeInterval {
+                        time_start: t_in,
+                        time_end: t_out.min(t_in + r.release_after),
+                    },
+                )
+            })
+        }
+
         debug!("switching to node {:?}", new_node);
         let mut backward = &self.current_node;
         let mut forward = &new_node;
@@ -354,7 +256,7 @@ impl TrainSolver {
                     backward.time,
                 ) {
                     debug!("train removes resource use {:?}", (resource, interval));
-                    use_resource(true, resource, interval);
+                    use_resource(false, resource, interval);
                 }
                 backward = backward_prev;
             }
@@ -363,106 +265,33 @@ impl TrainSolver {
     }
 }
 
-fn block_available(blocks: &BTreeSet<ResourceBlocked>, block: ResourceBlocked) -> bool {
-    let range = ResourceBlocked {
-        resource: block.resource,
-        interval: INTERVAL_MIN,
-    }..ResourceBlocked {
-        resource: block.resource + 1,
-        interval: INTERVAL_MIN,
-    };
-
-    !blocks.range(range).any(|other| {
-        assert!(other.resource == block.resource);
-        other.interval.overlap(&block.interval)
-    })
-}
-
-fn latest_exit(blocks: &BTreeSet<ResourceBlocked>, r: ResourceRef, t: TimeValue) -> Option<TimeValue> {
-    let range = ResourceBlocked {
-        resource: r,
-        interval: TimeInterval::duration(t, 0),
-    }..ResourceBlocked {
-        resource: r + 1,
-        interval: INTERVAL_MIN,
-    };
-
-    blocks.range(range).next().map(|first_interval| {
-        assert!(first_interval.resource == r);
-        first_interval.interval.time_start
-    })
-}
-
-fn valid_transfer_times<'a>(
-    train: &'_ Train,
-    blocks: &'a BTreeSet<ResourceBlocked>,
-    b1: BlockRef,
-    t1: TimeValue,
-    r2: BlockRef,
+fn successor_nodes<'a>(
+    occupied: &'a [TinyVec<[IsOccupied; 4]>],
+    blocks: &'a [Block],
+    prev_block_idx: BlockRef,
+    prev_block_entry: TimeValue,
+    next_block_idx: BlockRef,
 ) -> impl Iterator<Item = TimeValue> + 'a {
-    // TODO, experiment: we could store the latest_exit on the node when it is first generated.
-    trace!("valid transfer times r1={} t1={} r2={}", b1, t1, r2);
-    let latest_exit = latest_exit(blocks, b1, t1).unwrap_or(TimeValue::MAX);
-    trace!("  latest_exit {}", latest_exit);
+    let prev_block = &blocks[prev_block_idx as usize];
+    let next_block = &blocks[next_block_idx as usize];
 
-    let travel_time = train.blocks[b1 as usize].minimum_travel_time;
+    let earliest_exit_prev =
+        (prev_block_entry + prev_block.minimum_travel_time).max(next_block.earliest_start);
 
-    let earliest_entry = t1 + travel_time;
-    trace!("  earliest_entry {}", earliest_entry);
+    let latest_exit_prev = occupied[prev_block_idx as usize]
+        .iter()
+        .filter_map(|c| (prev_block_entry < c.enter_after).then_some(c.exit_before))
+        .min()
+        .unwrap_or(TimeValue::MAX);
 
-    assert!(latest_exit >= earliest_entry);
-
-    // Search through blockings on the r2.
-
-    let next_travel_time = train.blocks[r2 as usize].minimum_travel_time;
-
-    let range = ResourceBlocked {
-        resource: r2,
-        interval: TimeInterval::duration(earliest_entry, 0),
-    }..ResourceBlocked {
-        resource: r2 + 1,
-        interval: INTERVAL_MIN,
-    };
-
-    {
-        trace!("range {:?}", range);
-        let candidate_start_times = std::iter::once(earliest_entry)
-            .chain(blocks.range(range.clone()).map(|b| b.interval.time_end));
-
-        trace!(
-            "candidate start times {:?}",
-            candidate_start_times.collect::<Vec<_>>()
+    // Candidates, in order of increasing cost.
+    let candidate_times = std::iter::once(next_block.aimed_start)
+        .chain(std::iter::once(earliest_exit_prev))
+        .chain(
+            occupied[next_block_idx as usize]
+                .iter()
+                .map(|r| r.enter_after),
         );
-    }
 
-    let candidate_start_times =
-        std::iter::once(earliest_entry).chain(blocks.range(range).map(|b| b.interval.time_end));
-
-    candidate_start_times.filter(move |t2| {
-        assert!(*t2 >= earliest_entry);
-        *t2 <= latest_exit
-            && block_available(
-                blocks,
-                ResourceBlocked {
-                    resource: r2,
-                    interval: TimeInterval::duration(*t2, next_travel_time),
-                },
-            )
-    })
-}
-
-fn occupations(
-    block: &Block,
-    t_in: TimeValue,
-    t_out: TimeValue,
-) -> impl Iterator<Item = (ResourceRef, TimeInterval)> + '_ {
-    block.resource_usage.iter().map(move |r| {
-        (
-            r.resource,
-            TimeInterval {
-                time_start: t_in,
-                time_end: t_out.min(r.release_after),
-            },
-        )
-    })
+    candidate_times.filter(move |c| *c >= earliest_exit_prev && *c < latest_exit_prev)
 }

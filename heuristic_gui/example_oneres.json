@@ -1,0 +1,35 @@
+{
+    "problem": {
+        "n_resources": 1,
+        "trains": [
+            {
+                "blocks": [
+                    {
+                        "minimum_travel_time": 0,
+                        "earliest_start": 10,
+                        "aimed_start": 0,
+                        "resource_usage": [],
+                        "nexts": [1]
+                    },
+                    {
+                        "minimum_travel_time": 10,
+                        "earliest_start": 10,
+                        "aimed_start": 0,
+                        "resource_usage": [{
+                            "resource": 0,
+                            "release_after": 9999
+                        }],
+                        "nexts": [2]
+                    },
+                    {
+                        "minimum_travel_time": 0,
+                        "earliest_start": 0,
+                        "aimed_start": 0,
+                        "resource_usage": [],
+                        "nexts": []
+                    }
+                ]
+            }
+        ]
+    }
+}

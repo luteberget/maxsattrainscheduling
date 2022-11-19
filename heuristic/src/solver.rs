@@ -1,5 +1,4 @@
 use crate::{
-    interval::TimeInterval,
     occupation::ResourceConflicts,
     problem::*,
     train::{TrainSolver, TrainSolverStatus},
@@ -18,8 +17,9 @@ pub enum ConflictSolverStatus {
 #[derive(Debug)]
 pub struct ConflictConstraint {
     pub train: TrainRef,
-    pub track: ResourceRef,
-    pub interval: TimeInterval,
+    pub resource: ResourceRef,
+    pub enter_after: TimeValue,
+    pub leave_before: TimeValue,
 }
 
 pub struct ConflictSolverNode {
@@ -124,30 +124,32 @@ impl ConflictSolver {
         // If both trains are running at their minimum travel time, then
         // we can create valid conflicting intervals.
 
-        // TODO: remove assumptions that the trains are as early as possible to every event.
+        // // TODO: remove assumptions that the trains are as early as possible to every event.
 
-        let block_a = TimeInterval {
-            time_start: occ_a.interval.time_start,
-            time_end: occ_b.interval.time_end,
-        };
+        // let block_a = TimeInterval {
+        //     time_start: occ_a.interval.time_start,
+        //     time_end: occ_b.interval.time_end,
+        // };
 
-        let block_b = TimeInterval {
-            time_start: occ_b.interval.time_start,
-            time_end: occ_a.interval.time_end,
-        };
+        // let block_b = TimeInterval {
+        //     time_start: occ_b.interval.time_start,
+        //     time_end: occ_a.interval.time_end,
+        // };
 
-        assert!(block_a.overlap(&block_b));
+        // assert!(block_a.overlap(&block_b));
 
         let constraint_a = ConflictConstraint {
             train: occ_a.train,
-            track: conflict_resource,
-            interval: block_a,
+            resource: conflict_resource,
+            enter_after: occ_b.interval.time_end,
+            leave_before: occ_a.interval.time_start,
         };
 
         let constraint_b = ConflictConstraint {
             train: occ_b.train,
-            track: conflict_resource,
-            interval: block_b,
+            resource: conflict_resource,
+            enter_after: occ_a.interval.time_end,
+            leave_before: occ_b.interval.time_start,
         };
 
         debug!(
@@ -209,9 +211,10 @@ impl ConflictSolver {
 
                     // Add constraint
                     let train = node.constraint.train;
-                    self.trains[train as usize].add_constraint(
-                        node.constraint.track,
-                        node.constraint.interval,
+                    self.trains[train as usize].set_occupied(
+                        node.constraint.resource,
+                        node.constraint.enter_after,
+                        node.constraint.leave_before,
                         |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
 
@@ -223,9 +226,10 @@ impl ConflictSolver {
                     // Remove constraint
                     let train = node.constraint.train;
 
-                    self.trains[train as usize].remove_constraint(
-                        node.constraint.track,
-                        node.constraint.interval,
+                    self.trains[train as usize].remove_occupied(
+                        node.constraint.resource,
+                        node.constraint.enter_after,
+                        node.constraint.leave_before,
                         |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
 
@@ -253,6 +257,8 @@ impl ConflictSolver {
     }
 
     pub fn new(problem: Problem) -> Self {
+        problem.verify();
+        
         let trains: Vec<TrainSolver> = problem.trains.into_iter().map(TrainSolver::new).collect();
         let conflicts = crate::occupation::ResourceConflicts::empty(problem.n_resources);
 
