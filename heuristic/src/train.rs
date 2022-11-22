@@ -127,12 +127,15 @@ impl TrainSolver {
                     }));
                 }
             }
+            
+            // TODO special-case DFS without putting the node on the queue.
             self.next_node(use_resource);
         }
     }
 
     pub fn select_node(&mut self) -> Option<Rc<TrainSolverNode>> {
         trace!("  select node");
+        self.queued_nodes.sort_by_key(|x| -(x.time as i32));
         self.queued_nodes.pop()
     }
 
