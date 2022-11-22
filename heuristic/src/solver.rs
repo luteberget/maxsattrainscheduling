@@ -236,7 +236,14 @@ impl ConflictSolver {
             .rev() /* Search from the back, because a conflicting train is probably recently used. */
             .find(|(_, t)| **t == train as u32)
         {
-            Self::bubble_train_queue(&mut dirty_trains[0..=idx], trains);
+            // Bubble to the right, in this case, because the train has become earlier.
+            while idx + 1 < dirty_trains.len()
+                && trains[dirty_trains[idx] as usize].current_time()
+                    < trains[dirty_trains[idx+1] as usize].current_time()
+            {
+                dirty_trains.swap(idx, idx +1);
+                idx += 1;
+            }
         } else {
             dirty_trains.push(train as u32);
             Self::train_queue_bubble_leftward(dirty_trains, trains);
