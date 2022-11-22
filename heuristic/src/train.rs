@@ -297,5 +297,7 @@ fn successor_nodes<'a>(
                 .map(|r| r.enter_after),
         );
 
-    candidate_times.filter(move |c| *c >= earliest_exit_prev && *c < latest_exit_prev)
+    candidate_times
+        .filter(move |c| *c >= earliest_exit_prev && *c < latest_exit_prev)
+        .dedup()
 }
