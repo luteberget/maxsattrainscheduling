@@ -89,7 +89,7 @@ impl ConflictSolver {
                         )
                     });
 
-                    Self::bubble_train_queue(&mut self.dirty_trains, &self.trains);
+                    Self::train_queue_bubble_leftward(&mut self.dirty_trains, &self.trains);
                 }
             }
         } else if !self.queued_nodes.is_empty() {
@@ -100,7 +100,7 @@ impl ConflictSolver {
         }
     }
 
-    fn bubble_train_queue(dirty_trains: &mut [u32], trains: &[TrainSolver]) {
+    fn train_queue_bubble_leftward(dirty_trains: &mut [u32], trains: &[TrainSolver]) {
         // Bubble the last train in the dirty train queue to the correct ordering.
         let mut idx = dirty_trains.len();
         while idx >= 2
@@ -121,35 +121,18 @@ impl ConflictSolver {
             .get_conflict()
             .unwrap();
 
-        // If both trains are running at their minimum travel time, then
-        // we can create valid conflicting intervals.
-
-        // // TODO: remove assumptions that the trains are as early as possible to every event.
-
-        // let block_a = TimeInterval {
-        //     time_start: occ_a.interval.time_start,
-        //     time_end: occ_b.interval.time_end,
-        // };
-
-        // let block_b = TimeInterval {
-        //     time_start: occ_b.interval.time_start,
-        //     time_end: occ_a.interval.time_end,
-        // };
-
-        // assert!(block_a.overlap(&block_b));
-
         let constraint_a = ConflictConstraint {
             train: occ_a.train,
             resource: conflict_resource,
             enter_after: occ_b.interval.time_end,
-            leave_before: occ_a.interval.time_start,
+            leave_before: occ_a.interval.time_end,
         };
 
         let constraint_b = ConflictConstraint {
             train: occ_b.train,
             resource: conflict_resource,
             enter_after: occ_a.interval.time_end,
-            leave_before: occ_b.interval.time_start,
+            leave_before: occ_b.interval.time_end,
         };
 
         debug!(
@@ -218,7 +201,7 @@ impl ConflictSolver {
                         |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
 
-                    Self::add_dirty_train(train, &mut self.dirty_trains, &self.trains);
+                    Self::train_queue_rewinded_train(train, &mut self.dirty_trains, &self.trains);
                     forward = node.parent.as_ref();
                 } else {
                     let node = backward.unwrap();
@@ -233,7 +216,7 @@ impl ConflictSolver {
                         |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
 
-                    Self::add_dirty_train(train, &mut self.dirty_trains, &self.trains);
+                    Self::train_queue_rewinded_train(train, &mut self.dirty_trains, &self.trains);
                     backward = node.parent.as_ref();
                 }
             }
@@ -242,8 +225,12 @@ impl ConflictSolver {
         self.current_node = Some(new_node);
     }
 
-    fn add_dirty_train(train: TrainRef, dirty_trains: &mut Vec<u32>, trains: &[TrainSolver]) {
-        if let Some((idx, _)) = dirty_trains
+    fn train_queue_rewinded_train(
+        train: TrainRef,
+        dirty_trains: &mut Vec<u32>,
+        trains: &[TrainSolver],
+    ) {
+        if let Some((mut idx, _)) = dirty_trains
             .iter()
             .enumerate()
             .rev() /* Search from the back, because a conflicting train is probably recently used. */
@@ -252,13 +239,13 @@ impl ConflictSolver {
             Self::bubble_train_queue(&mut dirty_trains[0..=idx], trains);
         } else {
             dirty_trains.push(train as u32);
-            Self::bubble_train_queue(dirty_trains, trains);
+            Self::train_queue_bubble_leftward(dirty_trains, trains);
         }
     }
 
     pub fn new(problem: Problem) -> Self {
         problem.verify();
-        
+
         let trains: Vec<TrainSolver> = problem.trains.into_iter().map(TrainSolver::new).collect();
         let conflicts = crate::occupation::ResourceConflicts::empty(problem.n_resources);
 

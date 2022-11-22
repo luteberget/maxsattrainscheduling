@@ -2,6 +2,7 @@ use crate::{
     interval::TimeInterval,
     problem::{Block, BlockRef, ResourceRef, TimeValue, Train},
 };
+use itertools::Itertools;
 use log::{debug, info, trace, warn};
 use std::rc::Rc;
 use tinyvec::TinyVec;
