@@ -122,7 +122,8 @@ impl App {
                         } else {
                             Color32::BLACK
                         })
-                        .fill_alpha(0.5),
+                        .fill_alpha(0.5)
+                        .name(format!("res {} train {}", resource_idx, occ.train )),
                     );
                 }
             }

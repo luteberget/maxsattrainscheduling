@@ -29,8 +29,8 @@ impl ResourceOccupations {
 
 #[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ResourceOccupation {
-    pub train: TrainRef,
     pub interval: TimeInterval,
+    pub train: TrainRef,
 }
 
 impl ResourceConflicts {
@@ -54,6 +54,7 @@ impl ResourceConflicts {
             }
             Err(idx) => {
                 resource.occupations.insert(idx, occ);
+                trace!("Inserted res{} {:?} ", resource_idx, resource.occupations);
                 if resource.conflicting_resource_set_idx < 0 && resource.get_conflict().is_some() {
                     resource.conflicting_resource_set_idx =
                         self.conflicting_resource_set.len() as i32;

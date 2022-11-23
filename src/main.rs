@@ -327,7 +327,7 @@ fn main() {
         });
     }
     if opt.txt_instances {
-        txt_instances(|name, p| {
+        txt_instances("", |name, p| {
             solve_it(name, p);
         });
     }

@@ -43,6 +43,7 @@ pub fn txt_instances(path_prefix :&str, mut x: impl FnMut(String, NamedProblem))
         // let instances = instances.skip(16).take(1);
 
         for (infrastructure, number) in instances {
+            let _p = hprof::enter("read");
             let filename = format!("{}{}/Instance{}{}.txt", path_prefix, dir, infrastructure, number);
             println!("Reading {}", filename);
             #[allow(unused)]
@@ -53,6 +54,7 @@ pub fn txt_instances(path_prefix :&str, mut x: impl FnMut(String, NamedProblem))
                 None,
                 |_| {},
             );
+            drop(_p);
             x(
                 format!("{}{}{}", shortname, infrastructure, number),
                 problem,

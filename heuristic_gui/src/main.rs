@@ -1,15 +1,15 @@
 use eframe::egui::Visuals;
+use heuristic::problem;
 
 mod app;
-mod model;
 pub mod examples;
+mod model;
 
 fn main() {
-
     pretty_env_logger::init();
 
-    let input: model::Input =
-        serde_json::from_str(&std::fs::read_to_string("example_oneres.json").unwrap()).unwrap();
+    let input: problem::Problem =
+        serde_json::from_str(&std::fs::read_to_string("origA1_rh.json").unwrap()).unwrap();
 
     // let input = examples::example_1();
 
@@ -18,7 +18,7 @@ fn main() {
 
     let app = app::App {
         model: model::Model {
-            solver: heuristic::solver::ConflictSolver::new(examples::example_1()),
+            solver: heuristic::solver::ConflictSolver::new(input),
             selected_train: 0,
         },
     };

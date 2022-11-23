@@ -72,6 +72,17 @@ impl TrainSolver {
         }
     }
 
+    pub fn current_solution(&self) -> Vec<TimeValue> {
+        let mut node = &self.current_node;
+        let mut values = Vec::new();
+        while let Some(parent) = node.parent.as_ref() {
+            values.push(node.time);
+            node = parent;
+        }
+        values.reverse();
+        values
+    }
+
     pub fn current_time(&self) -> TimeValue {
         self.current_node.time
     }
@@ -92,6 +103,7 @@ impl TrainSolver {
     }
 
     pub fn step(&mut self, use_resource: impl FnMut(bool, ResourceRef, TimeInterval)) {
+        let _p = hprof::enter("train step");
         assert!(matches!(self.status(), TrainSolverStatus::Working));
 
         let nexts = &self.train.blocks[self.current_node.block as usize].nexts;

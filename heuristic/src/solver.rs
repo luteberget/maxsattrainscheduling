@@ -62,7 +62,19 @@ impl ConflictSolver {
         }
     }
 
+    pub fn solve_any(mut self) -> Vec<Vec<i32>> {
+        while !self.dirty_trains.is_empty() || !self.conflicts.conflicting_resource_set.is_empty() {
+            self.step();
+        }
+        self.current_solution()
+    }
+
+    pub fn current_solution(&self) -> Vec<Vec<TimeValue>> {
+        self.trains.iter().map(|t| t.current_solution()).collect()
+    }
+
     pub fn step(&mut self) {
+        let _p = hprof::enter("conflict step");
         // TODO We are solving conflicts when they appear, before trains are
         // finished solving. Is there a realistic pathological case for this?
 
@@ -257,7 +269,7 @@ impl ConflictSolver {
         let conflicts = crate::occupation::ResourceConflicts::empty(problem.n_resources);
 
         let mut dirty_trains: Vec<u32> = (0..(trains.len() as u32)).collect();
-        dirty_trains.sort_by_key(|t| -(trains[*t as usize].current_time() as i32));
+        dirty_trains.sort_by_key(|t| -(trains[*t as usize].current_time() as i64));
 
         Self {
             trains,
