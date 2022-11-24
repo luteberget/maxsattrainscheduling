@@ -20,6 +20,8 @@ struct Opt {
 }
 
 pub fn main() {
+    pretty_env_logger::init();
+
     let opt = Opt::from_args();
     println!("{:#?}", opt);
 

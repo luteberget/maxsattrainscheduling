@@ -78,37 +78,48 @@ impl ConflictSolver {
         // TODO We are solving conflicts when they appear, before trains are
         // finished solving. Is there a realistic pathological case for this?
 
-        if !self.conflicts.conflicting_resource_set.is_empty() {
-            self.branch();
-        } else if let Some(dirty_train) = self.dirty_trains.last() {
-            let dirty_train_idx = *dirty_train as usize;
-            match self.trains[dirty_train_idx].status() {
-                TrainSolverStatus::Failed => {
-                    debug!("Train {} failed.", dirty_train_idx);
-                    self.switch_node();
-                }
-                TrainSolverStatus::Optimal => {
-                    debug!("Train {} optimal.", dirty_train_idx);
-                    self.dirty_trains.pop();
-                }
-                TrainSolverStatus::Working => {
-                    self.trains[dirty_train_idx].step(|add, track, interval| {
-                        self.conflicts.add_or_remove(
-                            add,
-                            dirty_train_idx as TrainRef,
-                            track,
-                            interval,
-                        )
-                    });
+        loop {
+            if !self.conflicts.conflicting_resource_set.is_empty() {
+                self.branch();
+                break;
+            } else if let Some(dirty_train) = self.dirty_trains.last() {
+                let dirty_train_idx = *dirty_train as usize;
+                match self.trains[dirty_train_idx].status() {
+                    TrainSolverStatus::Failed => {
+                        debug!("Train {} failed.", dirty_train_idx);
+                        self.switch_node();
+                        break;
+                    }
+                    TrainSolverStatus::Optimal => {
+                        debug!("Train {} optimal.", dirty_train_idx);
+                        self.dirty_trains.pop();
+                        break;
+                    }
+                    TrainSolverStatus::Working => {
+                        self.trains[dirty_train_idx].step(&mut |add, track, interval| {
+                            self.conflicts.add_or_remove(
+                                add,
+                                dirty_train_idx as TrainRef,
+                                track,
+                                interval,
+                            )
+                        });
 
-                    Self::train_queue_bubble_leftward(&mut self.dirty_trains, &self.trains);
+                        Self::train_queue_bubble_leftward(&mut self.dirty_trains, &self.trains);
+                    }
                 }
+            } else if !self.queued_nodes.is_empty() {
+                debug!("Switching node");
+                self.switch_node();
+                break;
+            } else {
+                debug!("Search exhausted.");
+                break;
             }
-        } else if !self.queued_nodes.is_empty() {
-            debug!("Switching node");
-            self.switch_node();
-        } else {
-            debug!("Search exhausted.")
+
+            if !self.conflicts.conflicting_resource_set.is_empty() {
+                break;
+            }
         }
     }
 
@@ -164,8 +175,8 @@ impl ConflictSolver {
             parent: self.current_node.clone(),
         };
 
-        self.queued_nodes.push(Rc::new(node_a));
         self.queued_nodes.push(Rc::new(node_b));
+        self.queued_nodes.push(Rc::new(node_a));
 
         self.total_nodes += 2;
 
@@ -210,7 +221,7 @@ impl ConflictSolver {
                         node.constraint.resource,
                         node.constraint.enter_after,
                         node.constraint.leave_before,
-                        |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
+                        &mut |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
 
                     Self::train_queue_rewinded_train(train, &mut self.dirty_trains, &self.trains);
@@ -225,7 +236,7 @@ impl ConflictSolver {
                         node.constraint.resource,
                         node.constraint.enter_after,
                         node.constraint.leave_before,
-                        |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
+                        &mut |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
 
                     Self::train_queue_rewinded_train(train, &mut self.dirty_trains, &self.trains);

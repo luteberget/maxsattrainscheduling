@@ -87,7 +87,7 @@ impl TrainSolver {
         self.current_node.time
     }
 
-    pub fn reset(&mut self, use_resource: impl FnMut(bool, ResourceRef, TimeInterval)) {
+    pub fn reset(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
         // TODO extract struct TrainSearchState
         self.queued_nodes.clear();
         self.solution = None;
@@ -102,47 +102,49 @@ impl TrainSolver {
         }
     }
 
-    pub fn step(&mut self, use_resource: impl FnMut(bool, ResourceRef, TimeInterval)) {
+    pub fn step(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
         let _p = hprof::enter("train step");
         assert!(matches!(self.status(), TrainSolverStatus::Working));
 
-        let nexts = &self.train.blocks[self.current_node.block as usize].nexts;
-        if nexts.is_empty() {
-            info!("Train solved.");
-            self.solution = Some(Ok(self.current_node.clone()));
-        } else {
-            for next_block in nexts.iter() {
-                let succ = successor_nodes(
-                    &self.occupied,
-                    &self.train.blocks,
-                    self.current_node.block,
-                    self.current_node.time,
-                    *next_block,
-                );
+        // while self.solution.is_none() {
+            let nexts = &self.train.blocks[self.current_node.block as usize].nexts;
+            if nexts.is_empty() {
+                info!("Train solved.");
+                self.solution = Some(Ok(self.current_node.clone()));
+            } else {
+                for next_block in nexts.iter() {
+                    let succ = successor_nodes(
+                        &self.occupied,
+                        &self.train.blocks,
+                        self.current_node.block,
+                        self.current_node.time,
+                        *next_block,
+                    );
 
-                let succ = succ.collect::<Vec<_>>();
-                trace!(
-                    "  - next track {} has valid transfer times {:?}",
-                    next_block,
-                    succ
-                );
+                    let succ = succ.collect::<Vec<_>>();
+                    trace!(
+                        "  - next track {} has valid transfer times {:?}",
+                        next_block,
+                        succ
+                    );
 
-                for time in succ {
-                    trace!("  adding node {} {}", next_block, time);
-                    self.total_nodes += 1;
+                    for time in succ {
+                        trace!("  adding node {} {}", next_block, time);
+                        self.total_nodes += 1;
 
-                    self.queued_nodes.push(Rc::new(TrainSolverNode {
-                        time,
-                        block: *next_block,
-                        parent: Some(self.current_node.clone()),
-                        depth: self.current_node.depth + 1,
-                    }));
+                        self.queued_nodes.push(Rc::new(TrainSolverNode {
+                            time,
+                            block: *next_block,
+                            parent: Some(self.current_node.clone()),
+                            depth: self.current_node.depth + 1,
+                        }));
+                    }
                 }
+
+                // TODO special-case DFS without putting the node on the queue.
+                self.next_node(use_resource);
             }
-            
-            // TODO special-case DFS without putting the node on the queue.
-            self.next_node(use_resource);
-        }
+        // }
     }
 
     pub fn select_node(&mut self) -> Option<Rc<TrainSolverNode>> {
@@ -166,7 +168,7 @@ impl TrainSolver {
         resource: ResourceRef,
         enter_after: TimeValue,
         exit_before: TimeValue,
-        use_resource: impl FnMut(bool, ResourceRef, TimeInterval),
+        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
     ) {
         for block in Self::resource_to_blocks(&self.train, resource) {
             debug!(
@@ -193,7 +195,7 @@ impl TrainSolver {
         resource: ResourceRef,
         enter_after: TimeValue,
         exit_before: TimeValue,
-        use_resource: impl FnMut(bool, ResourceRef, TimeInterval),
+        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
     ) {
         for block in Self::resource_to_blocks(&self.train, resource) {
             debug!(
@@ -210,7 +212,7 @@ impl TrainSolver {
         self.reset(use_resource);
     }
 
-    pub fn next_node(&mut self, use_resource: impl FnMut(bool, ResourceRef, TimeInterval)) {
+    pub fn next_node(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
         if let Some(new_node) = self.select_node() {
             self.switch_node(new_node, use_resource);
         } else {
@@ -224,7 +226,7 @@ impl TrainSolver {
     fn switch_node(
         &mut self,
         new_node: Rc<TrainSolverNode>,
-        mut use_resource: impl FnMut(bool, ResourceRef, TimeInterval),
+        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
     ) {
         fn occupations(
             block: &Block,

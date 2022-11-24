@@ -14,3 +14,4 @@ ddd_problem = { path = "../ddd_problem" }
 itertools = "0.10"
 hprof="0.1"
 structopt = "0.3"
+pretty_env_logger = "0.4"

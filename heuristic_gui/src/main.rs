@@ -9,7 +9,7 @@ fn main() {
     pretty_env_logger::init();
 
     let input: problem::Problem =
-        serde_json::from_str(&std::fs::read_to_string("origA1_rh.json").unwrap()).unwrap();
+        serde_json::from_str(&std::fs::read_to_string("origA8_rh.json").unwrap()).unwrap();
 
     // let input = examples::example_1();
 
