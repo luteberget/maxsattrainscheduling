@@ -3,7 +3,7 @@ use crate::{
     problem::*,
     train::{TrainSolver, TrainSolverStatus},
 };
-use log::debug;
+use log::{debug, warn};
 use std::rc::Rc;
 
 #[derive(Debug)]
@@ -17,6 +17,7 @@ pub enum ConflictSolverStatus {
 #[derive(Debug)]
 pub struct ConflictConstraint {
     pub train: TrainRef,
+    pub other_train: TrainRef,
     pub resource: ResourceRef,
     pub enter_after: TimeValue,
     pub leave_before: TimeValue,
@@ -42,6 +43,7 @@ pub struct ConflictSolver {
     pub trains: Vec<TrainSolver>,
     pub conflicts: ResourceConflicts,
     pub queued_nodes: Vec<Rc<ConflictSolverNode>>,
+    pub prev_conflict: Vec<TinyVec<[(ResourceRef, u32); 16]>>,
     pub current_node: Option<Rc<ConflictSolverNode>>, // The root node is "None".
     pub dirty_trains: Vec<u32>,
     pub total_nodes: usize,
@@ -144,8 +146,11 @@ impl ConflictSolver {
             .get_conflict()
             .unwrap();
 
+        assert!(occ_a.train != occ_b.train);
+
         let constraint_a = ConflictConstraint {
             train: occ_a.train,
+            other_train: occ_b.train,
             resource: conflict_resource,
             enter_after: occ_b.interval.time_end,
             leave_before: occ_a.interval.time_end,
@@ -153,6 +158,7 @@ impl ConflictSolver {
 
         let constraint_b = ConflictConstraint {
             train: occ_b.train,
+            other_train: occ_a.train,
             resource: conflict_resource,
             enter_after: occ_a.interval.time_end,
             leave_before: occ_b.interval.time_end,
@@ -163,20 +169,31 @@ impl ConflictSolver {
             constraint_a, constraint_b
         );
 
-        let node_a = ConflictSolverNode {
-            constraint: constraint_a,
-            depth: self.current_node.as_ref().map_or(0, |n| n.depth) + 1,
-            parent: self.current_node.clone(),
-        };
 
-        let node_b = ConflictSolverNode {
-            constraint: constraint_b,
-            depth: self.current_node.as_ref().map_or(0, |n| n.depth) + 1,
-            parent: self.current_node.clone(),
-        };
+        if self.is_reasonable_constraint(&constraint_a, self.current_node.as_ref()) {
+            let node_a = ConflictSolverNode {
+                constraint: constraint_a,
+                depth: self.current_node.as_ref().map_or(0, |n| n.depth) + 1,
+                parent: self.current_node.clone(),
+            };
+            self.queued_nodes.push(Rc::new(node_a));
+        } else {
+            warn!("Skipping loop-like constraint {:?}", constraint_a);
+        }
 
-        self.queued_nodes.push(Rc::new(node_b));
-        self.queued_nodes.push(Rc::new(node_a));
+        if self.is_reasonable_constraint(&constraint_b, self.current_node.as_ref()) {
+            let node_b = ConflictSolverNode {
+                constraint: constraint_b,
+                depth: self.current_node.as_ref().map_or(0, |n| n.depth) + 1,
+                parent: self.current_node.clone(),
+            };
+            self.queued_nodes.push(Rc::new(node_b));
+        } else {
+            warn!("Skipping loop-like constraint {:?}", constraint_b);
+        }
+
+
+        // TODO Here, we will want to know whether these two trains ever conflicted before.
 
         self.total_nodes += 2;
 
@@ -221,8 +238,23 @@ impl ConflictSolver {
                         node.constraint.resource,
                         node.constraint.enter_after,
                         node.constraint.leave_before,
-                        &mut |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
+                        &mut |a, res, i| self.conflicts.add_or_remove(a, train, res, i),
                     );
+
+                    {
+                        let mut found = false;
+                        for idx in (0..(self.prev_conflict[train as usize]).len()).rev() {
+                            let elem = &mut self.prev_conflict[train as usize][idx];
+                            if elem.0 == node.constraint.resource {
+                                assert!(elem.1 > 0);
+                                found = true;
+                                elem.1 += 1;
+                            }
+                        }
+                        if !found {
+                            self.prev_conflict[train as usize].push((node.constraint.resource, 1));
+                        }
+                    }
 
                     Self::train_queue_rewinded_train(train, &mut self.dirty_trains, &self.trains);
                     forward = node.parent.as_ref();
@@ -238,6 +270,22 @@ impl ConflictSolver {
                         node.constraint.leave_before,
                         &mut |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
+
+                    {
+                        let mut found = false;
+                        for idx in (0..(self.prev_conflict[train as usize]).len()).rev() {
+                            let elem = &mut self.prev_conflict[train as usize][idx];
+                            if elem.0 == node.constraint.resource {
+                                assert!(elem.1 > 0);
+                                found = true;
+                                elem.1 -= 1;
+                                if elem.1 == 0 {
+                                    self.prev_conflict[train as usize].remove(idx);
+                                }
+                            }
+                        }
+                        assert!(found);
+                    }
 
                     Self::train_queue_rewinded_train(train, &mut self.dirty_trains, &self.trains);
                     backward = node.parent.as_ref();
@@ -282,6 +330,8 @@ impl ConflictSolver {
         let mut dirty_trains: Vec<u32> = (0..(trains.len() as u32)).collect();
         dirty_trains.sort_by_key(|t| -(trains[*t as usize].current_time() as i64));
 
+        let prev_conflict = trains.iter().map(|_| Default::default()).collect();
+
         Self {
             trains,
             conflicts,
@@ -289,6 +339,55 @@ impl ConflictSolver {
             dirty_trains,
             queued_nodes: vec![],
             total_nodes: 0,
+            prev_conflict,
         }
+    }
+
+    pub(crate) fn is_reasonable_constraint(
+        &self,
+        constr: &ConflictConstraint,
+        current_node: Option<&Rc<ConflictSolverNode>>,
+    ) -> bool {
+        // If this train has less than 3 conflict on the same resource, it is reasonable.
+        let res = constr.resource;
+        let n_conflicts = *self.prev_conflict[constr.train as usize]
+            .iter()
+            .find_map(|(r, n)| (*r == res).then(|| n))
+            .unwrap_or(&0);
+
+        if n_conflicts < 3 {
+            return true;
+        }
+
+        // This train has multiple conflicts on the same resource.
+        // We do a (heuristic) cycle check.
+
+        let current_node = current_node.unwrap();
+        let mut curr_node = current_node;
+        let mut curr_train = constr.train;
+        let mut count = 0;
+
+        const MAX_CYCLE_CHECK_LENGTH: usize = 10;
+        const MAX_CYCLE_LENGTH: usize = 2;
+
+        for _ in 0..MAX_CYCLE_CHECK_LENGTH {
+            if curr_node.constraint.other_train == curr_train {
+                curr_train = curr_node.constraint.other_train;
+                if curr_train == constr.train {
+                    count += 1;
+                    if count >= MAX_CYCLE_LENGTH {
+                        return false;
+                    }
+                }
+            }
+
+            if let Some(x) = curr_node.parent.as_ref() {
+                curr_node = x;
+            } else {
+                break;
+            }
+        }
+
+        true
     }
 }
