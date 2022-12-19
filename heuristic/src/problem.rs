@@ -11,12 +11,16 @@ pub struct Problem {
 
 impl Problem {
     pub fn verify(&self) {
-        // All block next references
+
         for t in &self.trains {
-            for b in &t.blocks {
+            for (block_idx,b) in t.blocks.iter().enumerate() {
                 for n in &b.nexts {
                     if (*n as usize) >= t.blocks.len() {
                         panic!("Invalid block reference.");
+                    }
+
+                    if (*n as usize) <= block_idx {
+                        panic!("Blocks must be topologically ordered.");
                     }
                 }
             }
@@ -49,6 +53,7 @@ pub struct Train {
 pub struct Block {
     pub minimum_travel_time: TimeValue,
     pub aimed_start: TimeValue,
+    pub delayed_after: Option<TimeValue>,
     pub earliest_start: TimeValue,
     pub resource_usage: TinyVec<[ResourceUsage; 4]>,
     pub nexts: TinyVec<[u32; 4]>,
@@ -82,6 +87,7 @@ pub fn convert_ddd_problem(problem: &ddd_problem::problem::NamedProblem) -> Prob
             earliest_start: 0,
             resource_usage: std::iter::empty().collect(),
             nexts: std::iter::once(1).collect(),
+            delayed_after : None,
         }];
         for visit in train.visits.iter() {
             // pub struct Visit {
@@ -109,6 +115,7 @@ pub fn convert_ddd_problem(problem: &ddd_problem::problem::NamedProblem) -> Prob
                 minimum_travel_time: visit.travel_time as TimeValue,
                 nexts: std::iter::once(next_idx as BlockRef).collect(),
                 resource_usage,
+                delayed_after : visit.aimed,
             });
         }
 
@@ -118,6 +125,7 @@ pub fn convert_ddd_problem(problem: &ddd_problem::problem::NamedProblem) -> Prob
             minimum_travel_time: 0,
             nexts: std::iter::empty().collect(),
             resource_usage: std::iter::empty().collect(),
+            delayed_after : None,
         });
 
         trains.push(Train { blocks })

@@ -1,4 +1,6 @@
-use heuristic::{problem::convert_ddd_problem, solver::ConflictSolver};
+use heuristic::{
+    problem::convert_ddd_problem, queue_train::QueueTrainSolver, solver::ConflictSolver,
+};
 use std::{
     path::PathBuf,
     time::{Duration, Instant},
@@ -26,11 +28,13 @@ pub fn main() {
     println!("{:#?}", opt);
 
     enum SolverMode {
+        First,
         Exact,
     }
 
     let mode = match opt.mode.as_str() {
         "exact" => SolverMode::Exact,
+        "first" => SolverMode::First,
         _ => panic!("unknown solver mode"),
     };
 
@@ -59,20 +63,37 @@ pub fn main() {
 
         let htr_problem = convert_ddd_problem(&ddd_problem);
 
-
         let start_time = Instant::now();
-        let solution = match mode {
+        let (cost, solution) = match mode {
             SolverMode::Exact => {
                 let _p = hprof::enter("solve exact");
-                let solver = ConflictSolver::new(htr_problem);
-                solver.solve_any()
+                let mut solver = ConflictSolver::<QueueTrainSolver>::new(htr_problem);
+                let mut best = (i32::MAX, None);
+                let mut n_solutions = 0;
+                while let Some((cost,sol)) = solver.solve_next() {
+                    if cost < best.0 {
+                        best = (cost, Some(sol));
+                        println!("{}", cost);
+                    }
+                    n_solutions += 1;
+                }
+
+                println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.n_nodes_created, solver.n_nodes_explored);
+
+                (best.0, best.1.unwrap())
+            }
+            SolverMode::First => {
+                let _p = hprof::enter("solve first");
+                let mut solver = ConflictSolver::<QueueTrainSolver>::new(htr_problem);
+                solver.solve_next().unwrap()
             }
         };
-        
+
         let solve_time = start_time.elapsed();
         println!(
-            "output size: {}",
-            solution.iter().map(|s| s.len()).sum::<usize>()
+            "output size: {}, COST: {}",
+            solution.iter().map(|s| s.len()).sum::<usize>(),
+            cost,
         );
         let cost = ddd_problem
             .problem
@@ -94,7 +115,7 @@ pub fn main() {
                 "{}  {}  {:.0}",
                 result.instance,
                 result.cost,
-                result.solve_time.as_secs_f64()*1000.0,
+                result.solve_time.as_secs_f64() * 1000.0,
             );
         }
     }

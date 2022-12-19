@@ -33,4 +33,36 @@ impl TimeInterval {
     pub fn overlap(&self, other: &Self) -> bool {
         !(self.time_end <= other.time_start || other.time_end <= self.time_start)
     }
+
+    pub fn intersect(&self, other: &Self) -> Self {
+        let time_start = self.time_start.max(other.time_start);
+        let time_end = self.time_end.min(other.time_end);
+
+        if time_start <= time_end {
+            Self {
+                time_start,
+                time_end,
+            }
+        } else {
+            let midpoint = (time_start + time_end) / 2;
+            Self {
+                time_start: midpoint,
+                time_end: midpoint,
+            }
+        }
+    }
+
+    pub fn envelope(&self, other: &Self) -> Self {
+        let time_start = self.time_start.min(other.time_start);
+        let time_end = self.time_end.max(other.time_end);
+
+        Self {
+            time_start,
+            time_end,
+        }
+    }
+
+    pub fn length(&self) -> TimeValue {
+        self.time_end - self.time_start
+    }
 }

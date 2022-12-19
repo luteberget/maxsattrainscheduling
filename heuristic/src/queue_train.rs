@@ -1,18 +1,12 @@
 use crate::{
     interval::TimeInterval,
     problem::{Block, BlockRef, ResourceRef, TimeValue, Train},
+    solver::{TrainSolver, TrainSolverStatus},
 };
 use itertools::Itertools;
-use log::{debug, info, trace, warn};
+use log::{debug, info, trace, warn, error};
 use std::rc::Rc;
 use tinyvec::TinyVec;
-
-#[derive(Debug)]
-pub enum TrainSolverStatus {
-    Failed,
-    Optimal,
-    Working,
-}
 
 pub struct TrainSolverNode {
     pub block: BlockRef,
@@ -38,7 +32,7 @@ pub struct IsOccupied {
     exit_before: TimeValue,
 }
 
-pub struct TrainSolver {
+pub struct QueueTrainSolver {
     pub train: Train,
     pub occupied: Vec<TinyVec<[IsOccupied; 4]>>,
 
@@ -50,101 +44,12 @@ pub struct TrainSolver {
     pub total_nodes: usize,
 }
 
-impl TrainSolver {
-    pub fn new(train: Train) -> Self {
-        let root_node = Rc::new(TrainSolverNode {
-            time: TimeValue::MIN,
-            block: 0,
-            parent: None,
-            depth: 0,
-        });
-
-        let occupied = train.blocks.iter().map(|_| Default::default()).collect();
-
-        Self {
-            current_node: root_node.clone(),
-            root_node,
-            train,
-            queued_nodes: vec![],
-            solution: None,
-            occupied,
-            total_nodes: 1,
-        }
-    }
-
-    pub fn current_solution(&self) -> Vec<TimeValue> {
-        let mut node = &self.current_node;
-        let mut values = Vec::new();
-        while let Some(parent) = node.parent.as_ref() {
-            values.push(node.time);
-            node = parent;
-        }
-        values.reverse();
-        values
-    }
-
-    pub fn current_time(&self) -> TimeValue {
-        self.current_node.time
-    }
-
+impl QueueTrainSolver {
     pub fn reset(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
         // TODO extract struct TrainSearchState
         self.queued_nodes.clear();
         self.solution = None;
         self.switch_node(self.root_node.clone(), use_resource);
-    }
-
-    pub fn status(&self) -> TrainSolverStatus {
-        match self.solution {
-            Some(Ok(_)) => TrainSolverStatus::Optimal,
-            Some(Err(())) => TrainSolverStatus::Failed,
-            None => TrainSolverStatus::Working,
-        }
-    }
-
-    pub fn step(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
-        let _p = hprof::enter("train step");
-        assert!(matches!(self.status(), TrainSolverStatus::Working));
-
-        // while self.solution.is_none() {
-            let nexts = &self.train.blocks[self.current_node.block as usize].nexts;
-            if nexts.is_empty() {
-                info!("Train solved.");
-                self.solution = Some(Ok(self.current_node.clone()));
-            } else {
-                for next_block in nexts.iter() {
-                    let succ = successor_nodes(
-                        &self.occupied,
-                        &self.train.blocks,
-                        self.current_node.block,
-                        self.current_node.time,
-                        *next_block,
-                    );
-
-                    let succ = succ.collect::<Vec<_>>();
-                    trace!(
-                        "  - next track {} has valid transfer times {:?}",
-                        next_block,
-                        succ
-                    );
-
-                    for time in succ {
-                        trace!("  adding node {} {}", next_block, time);
-                        self.total_nodes += 1;
-
-                        self.queued_nodes.push(Rc::new(TrainSolverNode {
-                            time,
-                            block: *next_block,
-                            parent: Some(self.current_node.clone()),
-                            depth: self.current_node.depth + 1,
-                        }));
-                    }
-                }
-
-                // TODO special-case DFS without putting the node on the queue.
-                self.next_node(use_resource);
-            }
-        // }
     }
 
     pub fn select_node(&mut self) -> Option<Rc<TrainSolverNode>> {
@@ -161,55 +66,6 @@ impl TrainSolver {
         train.blocks.iter().enumerate().filter_map(move |(idx, b)| {
             (b.resource_usage.iter().any(|r| r.resource == resource)).then_some(idx as BlockRef)
         })
-    }
-
-    pub fn set_occupied(
-        &mut self,
-        resource: ResourceRef,
-        enter_after: TimeValue,
-        exit_before: TimeValue,
-        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
-    ) {
-        for block in Self::resource_to_blocks(&self.train, resource) {
-            debug!(
-                "train add constraint for resource {} block {:?}",
-                resource,
-                (block, enter_after, exit_before)
-            );
-
-            let new_occ = IsOccupied {
-                enter_after,
-                exit_before,
-            };
-
-            let occ_list = &mut self.occupied[block as usize];
-            let index = occ_list.binary_search(&new_occ).unwrap_err();
-            self.occupied[block as usize].insert(index, new_occ);
-        }
-        // TODO incremental algorithm
-        self.reset(use_resource);
-    }
-
-    pub fn remove_occupied(
-        &mut self,
-        resource: ResourceRef,
-        enter_after: TimeValue,
-        exit_before: TimeValue,
-        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
-    ) {
-        for block in Self::resource_to_blocks(&self.train, resource) {
-            debug!(
-                "train remove constraint for resource {} block {:?}",
-                resource,
-                (block, enter_after, exit_before)
-            );
-            let len_before = self.occupied[block as usize].len();
-            self.occupied[block as usize]
-                .retain(|o| o.enter_after != enter_after && o.exit_before != exit_before);
-            assert!(self.occupied[block as usize].len() + 1 == len_before);
-        }
-        // TODO incremental algorithm
-        self.reset(use_resource);
     }
 
     pub fn next_node(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
@@ -280,6 +136,155 @@ impl TrainSolver {
             }
         }
         self.current_node = new_node;
+    }
+}
+
+impl TrainSolver for QueueTrainSolver {
+    fn new(train: Train) -> Self {
+        let root_node = Rc::new(TrainSolverNode {
+            time: TimeValue::MIN,
+            block: 0,
+            parent: None,
+            depth: 0,
+        });
+
+        let occupied = train.blocks.iter().map(|_| Default::default()).collect();
+
+        Self {
+            current_node: root_node.clone(),
+            root_node,
+            train,
+            queued_nodes: vec![],
+            solution: None,
+            occupied,
+            total_nodes: 1,
+        }
+    }
+
+    fn current_solution(&self) -> (i32, Vec<TimeValue>) {
+        let mut node = &self.current_node;
+        let mut cost = 0;
+        let mut values = Vec::new();
+        loop {
+            values.push(node.time);
+            if let Some(delayed_after) = self.train.blocks[node.block as usize].delayed_after {
+                cost += (node.time - delayed_after).max(0);
+            }
+            if let Some(parent) = node.parent.as_ref() {
+                node = parent;
+            } else {
+                values.pop();
+                break;
+            }
+        }
+
+        values.reverse();
+        (cost, values)
+    }
+
+    fn current_time(&self) -> TimeValue {
+        self.current_node.time
+    }
+
+    fn status(&self) -> TrainSolverStatus {
+        match self.solution {
+            Some(Ok(_)) => TrainSolverStatus::Optimal,
+            Some(Err(())) => TrainSolverStatus::Failed,
+            None => TrainSolverStatus::Working,
+        }
+    }
+
+    fn step(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
+        let _p = hprof::enter("train step");
+        assert!(matches!(self.status(), TrainSolverStatus::Working));
+
+        // while self.solution.is_none() {
+            let nexts = &self.train.blocks[self.current_node.block as usize].nexts;
+            if nexts.is_empty() {
+                info!("Train solved.");
+                self.solution = Some(Ok(self.current_node.clone()));
+            } else {
+                for next_block in nexts.iter() {
+                    let succ = successor_nodes(
+                        &self.occupied,
+                        &self.train.blocks,
+                        self.current_node.block,
+                        self.current_node.time,
+                        *next_block,
+                    );
+
+                    let succ = succ.collect::<Vec<_>>();
+                    trace!(
+                        "  - next track {} has valid transfer times {:?}",
+                        next_block,
+                        succ
+                    );
+
+                    for time in succ {
+                        trace!("  adding node {} {}", next_block, time);
+                        self.total_nodes += 1;
+
+                        self.queued_nodes.push(Rc::new(TrainSolverNode {
+                            time,
+                            block: *next_block,
+                            parent: Some(self.current_node.clone()),
+                            depth: self.current_node.depth + 1,
+                        }));
+                    }
+                }
+
+                // TODO special-case DFS without putting the node on the queue.
+                self.next_node(use_resource);
+            // }
+        }
+    }
+
+    fn set_occupied(
+        &mut self,
+        add: bool,
+        resource: ResourceRef,
+        enter_after: TimeValue,
+        exit_before: TimeValue,
+        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
+    ) {
+        if add {
+            for block in Self::resource_to_blocks(&self.train, resource) {
+                debug!(
+                    "train add constraint for resource {} block {:?}",
+                    resource,
+                    (block, enter_after, exit_before)
+                );
+
+                let new_occ = IsOccupied {
+                    enter_after,
+                    exit_before,
+                };
+
+                let occ_list = &mut self.occupied[block as usize];
+                let index = match occ_list.binary_search(&new_occ) {
+                    Ok(i) => {
+                        error!("occupation was already in list! {:?} in {:?}", new_occ, occ_list);
+                        panic!();
+                    }
+                    Err(i) => i,
+                };
+                self.occupied[block as usize].insert(index, new_occ);
+            }
+        } else {
+            for block in Self::resource_to_blocks(&self.train, resource) {
+                debug!(
+                    "train remove constraint for resource {} block {:?}",
+                    resource,
+                    (block, enter_after, exit_before)
+                );
+                let len_before = self.occupied[block as usize].len();
+                self.occupied[block as usize]
+                    .retain(|o| o.enter_after != enter_after && o.exit_before != exit_before);
+                assert!(self.occupied[block as usize].len() + 1 == len_before);
+            }
+        }
+        // TODO incremental algorithm
+        self.reset(use_resource);
     }
 }
 
