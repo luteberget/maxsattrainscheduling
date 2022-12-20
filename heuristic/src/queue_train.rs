@@ -4,7 +4,7 @@ use crate::{
     solver::{TrainSolver, TrainSolverStatus},
 };
 use itertools::Itertools;
-use log::{debug, info, trace, warn, error};
+use log::{debug, error, info, trace, warn};
 use std::rc::Rc;
 use tinyvec::TinyVec;
 
@@ -33,6 +33,7 @@ pub struct IsOccupied {
 }
 
 pub struct QueueTrainSolver {
+    pub id: usize,
     pub train: Train,
     pub occupied: Vec<TinyVec<[IsOccupied; 4]>>,
 
@@ -140,7 +141,7 @@ impl QueueTrainSolver {
 }
 
 impl TrainSolver for QueueTrainSolver {
-    fn new(train: Train) -> Self {
+    fn new(id: usize, train: Train) -> Self {
         let root_node = Rc::new(TrainSolverNode {
             time: TimeValue::MIN,
             block: 0,
@@ -151,6 +152,7 @@ impl TrainSolver for QueueTrainSolver {
         let occupied = train.blocks.iter().map(|_| Default::default()).collect();
 
         Self {
+            id,
             current_node: root_node.clone(),
             root_node,
             train,
@@ -199,42 +201,42 @@ impl TrainSolver for QueueTrainSolver {
         assert!(matches!(self.status(), TrainSolverStatus::Working));
 
         // while self.solution.is_none() {
-            let nexts = &self.train.blocks[self.current_node.block as usize].nexts;
-            if nexts.is_empty() {
-                info!("Train solved.");
-                self.solution = Some(Ok(self.current_node.clone()));
-            } else {
-                for next_block in nexts.iter() {
-                    let succ = successor_nodes(
-                        &self.occupied,
-                        &self.train.blocks,
-                        self.current_node.block,
-                        self.current_node.time,
-                        *next_block,
-                    );
+        let nexts = &self.train.blocks[self.current_node.block as usize].nexts;
+        if nexts.is_empty() {
+            info!("Train solved.");
+            self.solution = Some(Ok(self.current_node.clone()));
+        } else {
+            for next_block in nexts.iter() {
+                let succ = successor_nodes(
+                    &self.occupied,
+                    &self.train.blocks,
+                    self.current_node.block,
+                    self.current_node.time,
+                    *next_block,
+                );
 
-                    let succ = succ.collect::<Vec<_>>();
-                    trace!(
-                        "  - next track {} has valid transfer times {:?}",
-                        next_block,
-                        succ
-                    );
+                let succ = succ.collect::<Vec<_>>();
+                trace!(
+                    "  - next track {} has valid transfer times {:?}",
+                    next_block,
+                    succ
+                );
 
-                    for time in succ {
-                        trace!("  adding node {} {}", next_block, time);
-                        self.total_nodes += 1;
+                for time in succ {
+                    trace!("  adding node {} {}", next_block, time);
+                    self.total_nodes += 1;
 
-                        self.queued_nodes.push(Rc::new(TrainSolverNode {
-                            time,
-                            block: *next_block,
-                            parent: Some(self.current_node.clone()),
-                            depth: self.current_node.depth + 1,
-                        }));
-                    }
+                    self.queued_nodes.push(Rc::new(TrainSolverNode {
+                        time,
+                        block: *next_block,
+                        parent: Some(self.current_node.clone()),
+                        depth: self.current_node.depth + 1,
+                    }));
                 }
+            }
 
-                // TODO special-case DFS without putting the node on the queue.
-                self.next_node(use_resource);
+            // TODO special-case DFS without putting the node on the queue.
+            self.next_node(use_resource);
             // }
         }
     }
@@ -249,12 +251,13 @@ impl TrainSolver for QueueTrainSolver {
     ) {
         if add {
             for block in Self::resource_to_blocks(&self.train, resource) {
-                debug!(
-                    "train add constraint for resource {} block {:?}",
-                    resource,
-                    (block, enter_after, exit_before)
-                );
-
+                if self.id == 26 {
+                    warn!(
+                        "train add constraint for resource {} block {:?}",
+                        resource,
+                        (block, enter_after, exit_before)
+                    );
+                }
                 let new_occ = IsOccupied {
                     enter_after,
                     exit_before,
@@ -262,25 +265,32 @@ impl TrainSolver for QueueTrainSolver {
 
                 let occ_list = &mut self.occupied[block as usize];
                 let index = match occ_list.binary_search(&new_occ) {
-                    Ok(i) => {
-                        error!("occupation was already in list! {:?} in {:?}", new_occ, occ_list);
-                        panic!();
-                    }
+                    Ok(i) => i,
                     Err(i) => i,
                 };
                 self.occupied[block as usize].insert(index, new_occ);
             }
         } else {
             for block in Self::resource_to_blocks(&self.train, resource) {
-                debug!(
-                    "train remove constraint for resource {} block {:?}",
-                    resource,
-                    (block, enter_after, exit_before)
-                );
-                let len_before = self.occupied[block as usize].len();
-                self.occupied[block as usize]
-                    .retain(|o| o.enter_after != enter_after && o.exit_before != exit_before);
-                assert!(self.occupied[block as usize].len() + 1 == len_before);
+                if self.id == 26 {
+                    warn!(
+                        "train remove constraint for resource {} block {:?}",
+                        resource,
+                        (block, enter_after, exit_before)
+                    );
+                }
+
+                let new_occ = IsOccupied {
+                    enter_after,
+                    exit_before,
+                };
+
+                match self.occupied[block as usize].binary_search(&new_occ) {
+                    Ok(idx) => {
+                        self.occupied[block as usize].remove(idx);
+                    }
+                    Err(_) => panic!(),
+                }
             }
         }
         // TODO incremental algorithm

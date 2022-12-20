@@ -4,7 +4,7 @@ use crate::{
     problem::*,
 };
 use log::{debug, warn};
-use std::{rc::Rc, collections::BinaryHeap};
+use std::{collections::BinaryHeap, rc::Rc};
 
 #[derive(Debug)]
 pub enum ConflictSolverStatus {
@@ -27,10 +27,10 @@ pub struct ConflictConstraint {
     pub other_train: TrainRef,
     pub resource: ResourceRef,
     pub enter_after: TimeValue,
-    pub leave_before: TimeValue,
+    pub exit_before: TimeValue,
 }
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub struct NodeEval {
     a_best: bool,
     controversy: f64,
@@ -55,16 +55,13 @@ impl PartialOrd for ConflictSolverNode {
     }
 }
 
-impl Eq for ConflictSolverNode {
-
-}
+impl Eq for ConflictSolverNode {}
 
 impl Ord for ConflictSolverNode {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.partial_cmp(other).unwrap()
     }
 }
-
 
 impl std::fmt::Debug for ConflictSolverNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -89,7 +86,7 @@ pub trait TrainSolver {
         exit_before: TimeValue,
         use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
     );
-    fn new(train: crate::problem::Train) -> Self;
+    fn new(id: usize, train: crate::problem::Train) -> Self;
 }
 
 pub struct ConflictSolver<Train> {
@@ -154,7 +151,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
 
         loop {
             if self.lb >= self.ub {
-                println!("Node fathomed. {} >= {}", self.lb, self.ub);
+                // println!("Node fathomed. {} >= {}", self.lb, self.ub);
                 self.switch_to_any_node();
                 break;
             } else if !self.conflicts.conflicting_resource_set.is_empty() {
@@ -320,8 +317,8 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         let significance = interval_outer.length() as f64;
 
         // Measure decision controversy
-        let choice = h1_score < 0.5;
-        let controversy = [
+        let choice = sum_product / sum_weight < 0.5;
+        let importance = [
             (h1_score, h1_weight),
             (h2_score, h2_weight),
             (h3_score, h3_weight),
@@ -332,7 +329,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
 
         NodeEval {
             a_best: choice,
-            controversy,
+            controversy: importance,
         }
     }
 
@@ -352,7 +349,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
             other_train: occ_b.train,
             resource: conflict_resource,
             enter_after: occ_b.interval.time_end,
-            leave_before: occ_a.interval.time_end,
+            exit_before: occ_a.interval.time_end,
         };
 
         let constraint_b = ConflictConstraint {
@@ -360,7 +357,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
             other_train: occ_a.train,
             resource: conflict_resource,
             enter_after: occ_a.interval.time_end,
-            leave_before: occ_b.interval.time_end,
+            exit_before: occ_b.interval.time_end,
         };
 
         debug!(
@@ -369,7 +366,9 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         );
 
         let node_eval = self.node_evaluation(&occ_a, &occ_b);
-        assert!(node_eval.a_best);
+
+        // assert!(node_eval.a_best);
+
         let mut chosen_node = None;
 
         if self.is_reasonable_constraint(&constraint_a, self.current_node.as_ref()) {
@@ -461,7 +460,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
                         true,
                         node.constraint.resource,
                         node.constraint.enter_after,
-                        node.constraint.leave_before,
+                        node.constraint.exit_before,
                         &mut |a, res, i| self.conflicts.add_or_remove(a, train, res, i),
                     );
 
@@ -491,11 +490,12 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
                     // Remove constraint
                     let train = node.constraint.train;
 
+                    debug!("train {} remove", train);
                     self.trains[train as usize].set_occupied(
                         false,
                         node.constraint.resource,
                         node.constraint.enter_after,
-                        node.constraint.leave_before,
+                        node.constraint.exit_before,
                         &mut |a, t, i| self.conflicts.add_or_remove(a, train, t, i),
                     );
 
@@ -551,7 +551,12 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
     pub fn new(problem: Problem) -> Self {
         problem.verify();
 
-        let trains: Vec<Train> = problem.trains.into_iter().map(Train::new).collect();
+        let trains: Vec<Train> = problem
+            .trains
+            .into_iter()
+            .enumerate()
+            .map(|(i, t)| Train::new(i, t))
+            .collect();
         let conflicts = crate::occupation::ResourceConflicts::empty(problem.n_resources);
 
         let mut dirty_trains: Vec<u32> = (0..(trains.len() as u32)).collect();
@@ -610,6 +615,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
                 if curr_train == constr.train {
                     count += 1;
                     if count >= MAX_CYCLE_LENGTH {
+                        // println!("CYCLE {:?}", current_node);
                         return false;
                     }
                 }
