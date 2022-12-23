@@ -41,12 +41,12 @@ impl DagTrainSolver {
             }
         }
 
-
         let times = train.blocks.iter().map(|_| Default::default()).collect();
         let occupied = resource_to_blocks
             .iter()
             .map(|_| Default::default())
             .collect();
+
         Self {
             id,
             train,
@@ -131,7 +131,7 @@ impl DagTrainSolver {
         resource: ResourceRef,
         enter_after: TimeValue,
         exit_before: TimeValue,
-        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
+        use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval),
     ) {
         todo!()
     }
