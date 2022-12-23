@@ -74,12 +74,13 @@ pub fn main() {
                     if cost < best.0 {
                         best = (cost, Some(sol));
                         println!("{}", cost);
+                        println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.n_nodes_created, solver.n_nodes_explored);
                     }
                     n_solutions += 1;
                 }
 
-                println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.n_nodes_created, solver.n_nodes_explored);
 
+                println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.n_nodes_created, solver.n_nodes_explored);
                 (best.0, best.1.unwrap())
             }
             SolverMode::First => {
@@ -88,7 +89,6 @@ pub fn main() {
                 solver.solve_next().unwrap()
             }
         };
-
         let solve_time = start_time.elapsed();
         println!(
             "output size: {}, COST: {}",

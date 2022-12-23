@@ -5,8 +5,9 @@ use eframe::{
     },
     epaint::Color32,
 };
+use heuristic::solver::TrainSolver;
 
-use crate::model::Model;
+use crate::model::{AutoColor, Model};
 
 pub struct App {
     pub model: Model,
@@ -18,12 +19,16 @@ impl App {
             egui::SidePanel::left("left_panel")
                 .width_range(300.0..=300.0)
                 .show_inside(ui, |ui| {
-                    self.conflict_solver_ui(ui);
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        self.conflict_solver_ui(ui);
+                    })
                 });
             egui::SidePanel::left("left_panel2")
                 .width_range(300.0..=300.0)
                 .show_inside(ui, |ui| {
-                    self.train_solver_ui(ui);
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        self.train_solver_ui(ui);
+                    })
                 });
 
             // ui.heading("infrastructure");
@@ -64,6 +69,7 @@ impl App {
     fn conflict_solver_ui(&mut self, ui: &mut egui::Ui) {
         ui.heading("Conflict solver");
         ui.label(&format!("Status: {:?}", self.model.solver.status()));
+        ui.label(&format!("Cost: {:?}", self.model.current_cost));
         ui.label(&format!(
             "Total number of nodes {}",
             self.model.solver.total_nodes
@@ -80,9 +86,13 @@ impl App {
             "Total conflicts: {}",
             self.model.solver.conflicts.conflicting_resource_set.len()
         ));
+
         if ui.button("Step").clicked() {
-            self.model.solver.step();
+            if let Some((cost, _sol)) = self.model.solver.solve_next() {
+                self.model.current_cost = Some(cost);
+            }
         }
+
         ui.heading("Current resource occupations");
         for resource in self.model.solver.conflicts.conflicting_resource_set.iter() {
             for occ in self.model.solver.conflicts.resources[*resource as usize]
@@ -101,32 +111,131 @@ impl App {
     }
 
     fn plot_traingraph(&mut self, ui: &mut egui::Ui) {
+        let mut autocolor = AutoColor::new();
         let plot = egui::plot::Plot::new("grph");
         plot.show(ui, |plot_ui| {
-            for (resource_idx, occs) in self.model.solver.conflicts.resources.iter().enumerate() {
-                for pt in [resource_idx, resource_idx + 1] {
+            for (_, y) in self.model.locations.iter() {
+                for pt in [*y, *y + 1] {
                     plot_ui.hline(HLine::new(pt as f32).color(Color32::BLACK).width(1.0));
                 }
+            }
 
-                let conflicts = occs.conflicting_resource_set_idx >= 0;
-                for occ in occs.occupations.iter() {
-                    plot_ui.polygon(
-                        Polygon::new(PlotPoints::from_iter([
-                            [occ.interval.time_start as f64, resource_idx as f64],
-                            [occ.interval.time_end as f64, resource_idx as f64],
-                            [occ.interval.time_end as f64, (resource_idx + 1) as f64],
-                            [occ.interval.time_start as f64, (resource_idx + 1) as f64],
-                        ]))
-                        .color(if conflicts {
-                            Color32::RED
-                        } else {
-                            Color32::BLACK
-                        })
-                        .fill_alpha(0.5)
-                        .name(format!("res {} train {}", resource_idx, occ.train )),
-                    );
+            for train_solver in self.model.solver.trains.iter() {
+                let color = autocolor.next();
+                let direction = {
+                    let mut dir = 1;
+                    let mut prev_y = None;
+                    let mut curr = &train_solver.current_node;
+                    'x: while let Some(prev) = curr.parent.as_ref() {
+                        for res in train_solver.train.blocks[prev.block as usize]
+                            .resource_usage
+                            .iter()
+                        {
+                            let trackname = res.track_name.as_ref();
+                            if let Some(&y) = trackname.and_then(|n| self.model.locations.get(n)) {
+                                if let Some(prev_y) = prev_y {
+                                    if prev_y < y {
+                                        // We are looking at the nodes backwards, so
+                                        // prev_y < y is a negative-direction train.
+                                        dir = -1;
+                                    } else {
+                                        dir = 1;
+                                    }
+                                    break 'x;
+                                } else {
+                                    prev_y = Some(y);
+                                }
+                            }
+                        }
+                        curr = prev;
+                    }
+                    dir
+                };
+
+                let mut curr = &train_solver.current_node;
+                let mut prev_pos: Option<[f64; 2]> = None;
+                while let Some(prev) = curr.parent.as_ref() {
+                    for res in train_solver.train.blocks[prev.block as usize]
+                        .resource_usage
+                        .iter()
+                    {
+                        let trackname = res.track_name.as_ref();
+                        if let Some(y) = trackname.and_then(|n| self.model.locations.get(n)) {
+                            let ys = if direction > 0 {
+                                (*y as f64, (*y + 1) as f64)
+                            } else {
+                                ((*y + 1) as f64, *y as f64)
+                            };
+
+                            if let Some(prev_pos) = prev_pos {
+                                if prev_pos[1] == ys.1 {
+                                    plot_ui.line(
+                                        Line::new(PlotPoints::from_iter([
+                                            prev_pos,
+                                            [
+                                                0.5 * (prev_pos[0] + curr.time as f64),
+                                                0.5 * (prev_pos[1] + ys.1),
+                                            ],
+                                            [curr.time as f64, ys.1],
+                                        ]))
+                                        .color(color)
+                                        .width(3.0)
+                                        .name(&format!("Train {} Station", train_solver.id)),
+                                    );
+                                }
+                            }
+
+                            plot_ui.line(
+                                Line::new(PlotPoints::from_iter([
+                                    [prev.time as f64, ys.0],
+                                    [
+                                        0.5 * ((prev.time as f64) + (curr.time as f64)),
+                                        0.5 * (ys.0 + ys.1),
+                                    ],
+                                    [curr.time as f64, ys.1],
+                                ]))
+                                .color(color)
+                                .width(2.0)
+                                .name(&format!(
+                                    "Train {} Track {:?} dir {}",
+                                    train_solver.id, trackname, direction
+                                )),
+                            );
+
+                            prev_pos = Some([prev.time as f64, ys.0]);
+                        } else if trackname.is_some() {
+                            println!("Warning: no track name {:?}", trackname);
+                        }
+                    }
+
+                    curr = prev;
                 }
             }
+
+            // for (resource_idx, occs) in self.model.solver.conflicts.resources.iter().enumerate() {
+            //     for pt in [resource_idx, resource_idx + 1] {
+            //         plot_ui.hline(HLine::new(pt as f32).color(Color32::BLACK).width(1.0));
+            //     }
+
+            //     let conflicts = occs.conflicting_resource_set_idx >= 0;
+            //     for occ in occs.occupations.iter() {
+            //         plot_ui.polygon(
+            //             Polygon::new(PlotPoints::from_iter([
+            //                 [occ.interval.time_start as f64, resource_idx as f64],
+            //                 [occ.interval.time_end as f64, resource_idx as f64],
+            //                 [occ.interval.time_end as f64, (resource_idx + 1) as f64],
+            //                 [occ.interval.time_start as f64, (resource_idx + 1) as f64],
+            //             ]))
+            //             .color(if conflicts {
+            //                 Color32::RED
+            //             } else {
+            //                 Color32::BLACK
+            //             })
+            //             .fill_alpha(0.5)
+            //             .name(format!("res {} train {}", resource_idx, occ.train)),
+            //         );
+            //     }
+            // }
 
             // for train_solver in
             //     self.model.solver.trains.iter()

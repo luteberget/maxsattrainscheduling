@@ -14,6 +14,7 @@ pub fn example_1() -> Problem {
                     earliest_start: 0,
                     resource_usage: Default::default(),
                     nexts: tiny_vec!(1, 2),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 10,
@@ -22,8 +23,10 @@ pub fn example_1() -> Problem {
                     resource_usage: tiny_vec!(ResourceUsage {
                         resource: 0,
                         release_after: 9999,
+                        track_name: None,
                     }),
                     nexts: tiny_vec!(3),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 10,
@@ -32,8 +35,10 @@ pub fn example_1() -> Problem {
                     resource_usage: tiny_vec!(ResourceUsage {
                         resource: 1,
                         release_after: 9999,
+                        track_name: None,
                     }),
                     nexts: tiny_vec!(3),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 100,
@@ -42,8 +47,10 @@ pub fn example_1() -> Problem {
                     resource_usage: tiny_vec!(ResourceUsage {
                         resource: 2,
                         release_after: 9999,
+                        track_name: None,
                     }),
                     nexts: tiny_vec!(4, 5),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 10,
@@ -52,8 +59,10 @@ pub fn example_1() -> Problem {
                     resource_usage: tiny_vec!(ResourceUsage {
                         resource: 3,
                         release_after: 9999,
+                        track_name: None,
                     }),
                     nexts: tiny_vec!(6),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 10,
@@ -62,8 +71,10 @@ pub fn example_1() -> Problem {
                     resource_usage: tiny_vec!(ResourceUsage {
                         resource: 4,
                         release_after: 9999,
+                        track_name: None,
                     }),
                     nexts: tiny_vec!(6),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 100,
@@ -72,8 +83,10 @@ pub fn example_1() -> Problem {
                     resource_usage: tiny_vec!(ResourceUsage {
                         resource: 5,
                         release_after: 9999,
+                        track_name: None,
                     }),
                     nexts: tiny_vec!(7, 8),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 10,
@@ -82,8 +95,10 @@ pub fn example_1() -> Problem {
                     resource_usage: tiny_vec!(ResourceUsage {
                         resource: 6,
                         release_after: 9999,
+                        track_name: None,
                     }),
                     nexts: tiny_vec!(9),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 10,
@@ -92,8 +107,10 @@ pub fn example_1() -> Problem {
                     resource_usage: tiny_vec!(ResourceUsage {
                         resource: 7,
                         release_after: 9999,
+                        track_name: None,
                     }),
                     nexts: tiny_vec!(9),
+                    delayed_after: None,
                 },
                 Block {
                     minimum_travel_time: 0,
@@ -101,6 +118,7 @@ pub fn example_1() -> Problem {
                     earliest_start: 0,
                     resource_usage: Default::default(),
                     nexts: tiny_vec!(),
+                    delayed_after: None,
                 },
             ],
         });

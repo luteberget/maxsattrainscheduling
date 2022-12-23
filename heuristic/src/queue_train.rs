@@ -42,11 +42,12 @@ pub struct QueueTrainSolver {
     pub current_node: Rc<TrainSolverNode>,
     pub solution: Option<Result<Rc<TrainSolverNode>, ()>>,
 
+    pub slacks: Vec<i32>,
     pub total_nodes: usize,
 }
 
 impl QueueTrainSolver {
-    pub fn reset(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
+    pub fn reset(&mut self, use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval)) {
         // TODO extract struct TrainSearchState
         self.queued_nodes.clear();
         self.solution = None;
@@ -69,7 +70,7 @@ impl QueueTrainSolver {
         })
     }
 
-    pub fn next_node(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
+    pub fn next_node(&mut self, use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval)) {
         if let Some(new_node) = self.select_node() {
             self.switch_node(new_node, use_resource);
         } else {
@@ -83,7 +84,7 @@ impl QueueTrainSolver {
     fn switch_node(
         &mut self,
         new_node: Rc<TrainSolverNode>,
-        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
+        use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval),
     ) {
         fn occupations(
             block: &Block,
@@ -120,7 +121,7 @@ impl QueueTrainSolver {
                     forward.time,
                 ) {
                     debug!("train adds resource use {:?}", (resource, interval));
-                    use_resource(true, resource, interval);
+                    use_resource(true, forward_prev.block, resource, interval);
                 }
                 forward = forward_prev;
             } else {
@@ -131,7 +132,7 @@ impl QueueTrainSolver {
                     backward.time,
                 ) {
                     debug!("train removes resource use {:?}", (resource, interval));
-                    use_resource(false, resource, interval);
+                    use_resource(false, backward_prev.block, resource, interval);
                 }
                 backward = backward_prev;
             }
@@ -149,7 +150,25 @@ impl TrainSolver for QueueTrainSolver {
             depth: 0,
         });
 
+        let mut slacks: Vec<i32> = train
+            .blocks
+            .iter()
+            .map(|b| b.delayed_after.unwrap_or(999999i32))
+            .collect();
+        for (block_idx, block) in train.blocks.iter().enumerate().rev() {
+            if slacks[block_idx] == 999999 {
+                slacks[block_idx] = -block.minimum_travel_time
+                    + block
+                        .nexts
+                        .iter()
+                        .map(|n| slacks[*n as usize])
+                        .min()
+                        .unwrap_or(999999i32);
+            }
+        }
+
         let occupied = train.blocks.iter().map(|_| Default::default()).collect();
+        println!("train {} slacks  {:?}", id, slacks);
 
         Self {
             id,
@@ -160,6 +179,7 @@ impl TrainSolver for QueueTrainSolver {
             solution: None,
             occupied,
             total_nodes: 1,
+            slacks,
         }
     }
 
@@ -196,7 +216,7 @@ impl TrainSolver for QueueTrainSolver {
         }
     }
 
-    fn step(&mut self, use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval)) {
+    fn step(&mut self, use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval)) {
         let _p = hprof::enter("train step");
         assert!(matches!(self.status(), TrainSolverStatus::Working));
 
@@ -247,7 +267,7 @@ impl TrainSolver for QueueTrainSolver {
         resource: ResourceRef,
         enter_after: TimeValue,
         exit_before: TimeValue,
-        use_resource: &mut impl FnMut(bool, ResourceRef, TimeInterval),
+        use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval),
     ) {
         if add {
             for block in Self::resource_to_blocks(&self.train, resource) {
