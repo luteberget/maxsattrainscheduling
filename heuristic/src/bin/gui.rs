@@ -1,13 +1,45 @@
-use eframe::{
-    egui::{
-        self,
-        plot::{HLine, Line, PlotPoint, PlotPoints, Polygon, Text},
-    },
-    epaint::Color32,
+use eframe::egui::Visuals;
+use eframe::egui::{
+    self,
+    plot::{HLine, Line, PlotPoint, PlotPoints, Polygon, Text},
 };
+use eframe::epaint::Color32;
+use heuristic::problem;
+use heuristic::problem::*;
 use heuristic::solver::TrainSolver;
+use serde::Deserialize;
+use std::collections::HashMap;
 
-use crate::model::{AutoColor, Model};
+#[derive(Deserialize, Debug)]
+pub struct Input {
+    pub problem: Problem,
+}
+
+pub struct Model {
+    pub solver: heuristic::solver::ConflictSolver<heuristic::queue_train::QueueTrainSolver>,
+    pub selected_train: usize,
+    pub current_cost: Option<i32>,
+    pub locations: HashMap<String, i32>,
+}
+
+pub struct AutoColor {
+    next_auto_color_idx: u32,
+}
+
+impl AutoColor {
+    pub fn new() -> Self {
+        Self {
+            next_auto_color_idx: 0,
+        }
+    }
+    pub fn next(&mut self) -> Color32 {
+        let i = self.next_auto_color_idx;
+        self.next_auto_color_idx += 1;
+        let golden_ratio = (5.0_f32.sqrt() - 1.0) / 2.0; // 0.61803398875
+        let h = i as f32 * golden_ratio;
+        eframe::epaint::color::Hsva::new(h, 0.85, 0.5, 1.0).into() // TODO(emilk): OkLab or some other perspective color space
+    }
+}
 
 pub struct App {
     pub model: Model,
@@ -290,4 +322,40 @@ impl eframe::App for App {
 
         ctx.request_repaint_after(std::time::Duration::from_secs_f32(1.0));
     }
+}
+
+fn main() {
+    pretty_env_logger::init();
+
+    let input: problem::Problem =
+        serde_json::from_str(&std::fs::read_to_string("../heuristic/trackB12_rh.json").unwrap())
+            .unwrap();
+
+    // let input = examples::example_1();
+
+    // let problem = Rc::new(input.problem);
+    // let draw_tracks = Rc::new(input.draw_tracks);
+
+    let mut locations = HashMap::new();
+    for i in 1..=25 {
+        locations.insert(format!("T{}", i), i);
+    }
+
+    let app = App {
+        model: Model {
+            solver: heuristic::solver::ConflictSolver::new(input),
+            selected_train: 0,
+            current_cost: None,
+            locations,
+        },
+    };
+
+    eframe::run_native(
+        "heuristic train re-scheduling and re-routing",
+        eframe::NativeOptions::default(),
+        Box::new(|ctx| {
+            ctx.egui_ctx.set_visuals(Visuals::light());
+            Box::new(app)
+        }),
+    );
 }
