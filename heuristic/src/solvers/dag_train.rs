@@ -1,7 +1,6 @@
 use crate::{
     interval::TimeInterval,
-    problem::{Block, BlockRef, ResourceRef, TimeValue, Train},
-    solver::{TrainSolver, TrainSolverStatus},
+    problem::{Block, BlockRef, ResourceRef, TimeValue, Train}, TrainSolverStatus,
 };
 use itertools::Itertools;
 use log::{debug, error, info, trace, warn};

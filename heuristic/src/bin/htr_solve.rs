@@ -1,5 +1,5 @@
 use heuristic::{
-    problem::convert_ddd_problem, queue_train::QueueTrainSolver, solver::ConflictSolver,
+    problem::convert_ddd_problem, solvers::queue_train::QueueTrainSolver, solvers::bnb_solver::ConflictSolver,
 };
 use std::{
     path::PathBuf,

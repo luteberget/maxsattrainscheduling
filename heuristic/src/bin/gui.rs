@@ -4,9 +4,8 @@ use eframe::egui::{
     plot::{HLine, Line, PlotPoint, PlotPoints, Polygon, Text},
 };
 use eframe::epaint::Color32;
-use heuristic::problem;
+use heuristic::{problem, TrainSolver};
 use heuristic::problem::*;
-use heuristic::solver::TrainSolver;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -16,7 +15,7 @@ pub struct Input {
 }
 
 pub struct Model {
-    pub solver: heuristic::solver::ConflictSolver<heuristic::queue_train::QueueTrainSolver>,
+    pub solver: heuristic::solvers::bnb_solver::ConflictSolver<heuristic::solvers::queue_train::QueueTrainSolver>,
     pub selected_train: usize,
     pub current_cost: Option<i32>,
     pub locations: HashMap<String, i32>,
@@ -328,7 +327,7 @@ fn main() {
     pretty_env_logger::init();
 
     let input: problem::Problem =
-        serde_json::from_str(&std::fs::read_to_string("../heuristic/trackB12_rh.json").unwrap())
+        serde_json::from_str(&std::fs::read_to_string("trackB12_rh.json").unwrap())
             .unwrap();
 
     // let input = examples::example_1();
@@ -343,7 +342,7 @@ fn main() {
 
     let app = App {
         model: Model {
-            solver: heuristic::solver::ConflictSolver::new(input),
+            solver: heuristic::solvers::bnb_solver::ConflictSolver::new(input),
             selected_train: 0,
             current_cost: None,
             locations,

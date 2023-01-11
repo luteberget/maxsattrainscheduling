@@ -1,7 +1,7 @@
 use crate::{
     interval::TimeInterval,
     occupation::{ResourceConflicts, ResourceOccupation},
-    problem::*,
+    problem::*, TrainSolver, TrainSolverStatus,
 };
 use log::{debug, warn};
 use std::{
@@ -17,12 +17,6 @@ pub enum ConflictSolverStatus {
     SolveTrains,
 }
 
-#[derive(Debug)]
-pub enum TrainSolverStatus {
-    Failed,
-    Optimal,
-    Working,
-}
 
 #[derive(Debug)]
 pub struct ConflictConstraint {
@@ -76,21 +70,6 @@ impl std::fmt::Debug for ConflictSolverNode {
     }
 }
 
-pub trait TrainSolver {
-    fn current_solution(&self) -> (i32, Vec<TimeValue>);
-    fn current_time(&self) -> TimeValue;
-    fn status(&self) -> TrainSolverStatus;
-    fn step(&mut self, use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval));
-    fn set_occupied(
-        &mut self,
-        add: bool,
-        resource: ResourceRef,
-        enter_after: TimeValue,
-        exit_before: TimeValue,
-        use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval),
-    );
-    fn new(id: usize, train: crate::problem::Train) -> Self;
-}
 
 pub struct ConflictSolver<Train> {
     pub input: Vec<crate::problem::Train>,
@@ -723,50 +702,6 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
 
         let prev_conflict = trains.iter().map(|_| Default::default()).collect();
         let train_lbs = trains.iter().map(|_| 0).collect();
-
-        // let priorities: Vec<(u32, u32, bool)> = vec![
-        //     (3, 6, 1 == 1),
-        //     (5, 6, 0 == 1),
-        //     (5, 12, 0 == 1),
-        //     (6, 12, 0 == 1),
-        //     (4, 13, 1 == 1),
-        //     (0, 7, 0 == 1),
-        //     (1, 2, 1 == 1),
-        //     (1, 4, 1 == 1),
-        //     (2, 12, 0 == 1),
-        //     (3, 12, 0 == 1),
-        //     (11, 12, 0 == 1),
-        //     (9, 10, 0 == 1),
-        //     (2, 13, 1 == 1),
-        //     (3, 4, 1 == 1),
-        //     (3, 12, 0 == 1),
-        //     (4, 13, 0 == 1),
-        //     (0, 7, 0 == 1),
-        //     (0, 12, 0 == 1),
-        //     (4, 12, 0 == 1),
-        //     (3, 4, 1 == 1),
-        //     (10, 12, 0 == 1),
-        //     (6, 12, 0 == 1),
-        //     (7, 12, 0 == 1),
-        //     (4, 12, 0 == 1),
-        //     (11, 12, 0 == 1),
-        //     (3, 12, 1 == 1),
-        //     (5, 7, 1 == 1),
-        //     (1, 6, 1 == 1),
-        //     (0, 7, 0 == 1),
-        //     (11, 12, 0 == 1),
-        //     (6, 12, 1 == 1),
-        //     (0, 7, 0 == 1),
-        //     (11, 12, 0 == 1),
-        //     (0, 5, 0 == 1),
-        //     (3, 4, 0 == 1),
-        // ];
-        // assert!(priorities.iter().all(|(x, y, _)| x < y));
-
-        // let symm_priorities = priorities.iter().map(|(x, y, b)| (*y, *x, !*b));
-
-        // let priorities: HashSet<(u32, u32, bool)> =
-        //     priorities.iter().copied().chain(symm_priorities).collect();
 
         Self {
             input,
