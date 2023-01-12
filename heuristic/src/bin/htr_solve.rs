@@ -1,5 +1,5 @@
 use heuristic::{
-    problem::convert_ddd_problem, solvers::queue_train::QueueTrainSolver, solvers::bnb_solver::ConflictSolver,
+    problem::convert_ddd_problem, solvers::train_queue::QueueTrainSolver, solvers::solver_brb::ConflictSolver,
 };
 use std::{
     path::PathBuf,
@@ -74,13 +74,13 @@ pub fn main() {
                     if cost < best.0 {
                         best = (cost, Some(sol));
                         println!("{}", cost);
-                        println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.n_nodes_created, solver.n_nodes_explored);
+                        println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.conflict_space.n_nodes_generated, solver.conflict_space.n_nodes_explored);
                     }
                     n_solutions += 1;
                 }
 
 
-                println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.n_nodes_created, solver.n_nodes_explored);
+                println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.conflict_space.n_nodes_generated, solver.conflict_space.n_nodes_explored);
                 (best.0, best.1.unwrap())
             }
             SolverMode::First => {

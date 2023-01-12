@@ -5,7 +5,8 @@ pub mod problem;
 pub mod solvers;
 pub mod interval;
 pub mod occupation;
-
+pub mod branching;
+pub mod trainset;
 
 
 #[derive(Debug)]

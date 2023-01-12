@@ -1,13 +1,16 @@
 use crate::{
     interval::TimeInterval,
     occupation::{ResourceConflicts, ResourceOccupation},
-    problem::*, TrainSolver, TrainSolverStatus,
+    problem::*,
+    TrainSolver, TrainSolverStatus, trainset::TrainSet,
 };
 use log::{debug, warn};
 use std::{
     collections::{BinaryHeap, HashSet},
     rc::Rc,
 };
+
+use crate::branching::{ConflictConstraint, ConflictSolverNode, Branching};
 
 #[derive(Debug)]
 pub enum ConflictSolverStatus {
@@ -17,76 +20,41 @@ pub enum ConflictSolverStatus {
     SolveTrains,
 }
 
-
-#[derive(Debug)]
-pub struct ConflictConstraint {
-    pub train: TrainRef,
-    pub other_train: TrainRef,
-    pub resource: ResourceRef,
-    pub enter_after: TimeValue,
-    pub exit_before: TimeValue,
-}
-
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct NodeEval {
     a_best: bool,
     node_score: f64,
 }
 
-pub struct ConflictSolverNode {
-    pub constraint: ConflictConstraint,
-    pub depth: u32,
-    pub parent: Option<Rc<ConflictSolverNode>>,
-    pub eval: NodeEval,
-}
-
-impl PartialEq for ConflictSolverNode {
+impl PartialEq for ConflictSolverNode<NodeEval> {
     fn eq(&self, other: &Self) -> bool {
         self.eval.node_score == other.eval.node_score
     }
 }
 
-impl PartialOrd for ConflictSolverNode {
+impl PartialOrd for ConflictSolverNode<NodeEval> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.eval.node_score.partial_cmp(&other.eval.node_score)
     }
 }
 
-impl Eq for ConflictSolverNode {}
+impl Eq for ConflictSolverNode<NodeEval> {}
 
-impl Ord for ConflictSolverNode {
+impl Ord for ConflictSolverNode<NodeEval> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.partial_cmp(other).unwrap()
     }
 }
 
-impl std::fmt::Debug for ConflictSolverNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("ConflictSolverNode")
-            .field("constraint", &self.constraint)
-            .field("depth", &self.depth)
-            .field("has_parent", &self.parent.is_some())
-            .finish()
-    }
-}
-
-
 pub struct ConflictSolver<Train> {
     pub input: Vec<crate::problem::Train>,
-    pub trains: Vec<Train>,
-    pub slacks: Vec<Vec<i32>>,
-    pub train_lbs: Vec<i32>,
-    pub train_const_lbs: Vec<i32>,
-    pub lb: i32,
+    pub trainset :TrainSet<Train>,
+    
+    pub conflict_space: Branching<NodeEval>,
+    pub queued_nodes: BinaryHeap<Rc<ConflictSolverNode<NodeEval>>>,
     pub conflicts: ResourceConflicts,
-    pub queued_nodes: BinaryHeap<Rc<ConflictSolverNode>>,
-    pub prev_conflict: Vec<TinyVec<[(ResourceRef, u32); 16]>>,
-    pub current_node: Option<Rc<ConflictSolverNode>>, // The root node is "None".
-    pub dirty_trains: Vec<u32>,
-    pub total_nodes: usize,
-    // pub dirty_train_idxs: Vec<i32>,
-    pub n_nodes_created: usize,
-    pub n_nodes_explored: usize,
+
+    
     pub ub: i32,
     pub priorities: HashSet<(TrainRef, TrainRef, u32)>,
 }
@@ -94,11 +62,11 @@ pub struct ConflictSolver<Train> {
 impl<Train: TrainSolver> ConflictSolver<Train> {
     pub fn status(&self) -> ConflictSolverStatus {
         match (
-            self.dirty_trains.is_empty(),
-            self.conflicts.conflicting_resource_set.is_empty(),
+            !self.trainset.is_dirty(),
+            !self.conflicts.has_conflict(),
             self.queued_nodes.is_empty(),
         ) {
-            (_, _, true) if self.lb >= self.ub => ConflictSolverStatus::Exhausted,
+            (_, _, true) if self.trainset.lb >= self.ub => ConflictSolverStatus::Exhausted,
             (_, false, _) => ConflictSolverStatus::Conflict,
             (false, _, _) => ConflictSolverStatus::SolveTrains,
             (_, _, false) => ConflictSolverStatus::SelectNode,
@@ -113,7 +81,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
                 _ => self.step(),
             }
 
-            if self.dirty_trains.is_empty() && self.conflicts.conflicting_resource_set.is_empty() {
+            if !self.trainset.is_dirty() && !self.conflicts.has_conflict() {
                 return Some(self.current_solution());
             }
         }
@@ -122,7 +90,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
     pub fn current_solution(&self) -> (i32, Vec<Vec<TimeValue>>) {
         let mut total_cost = 0;
         let mut out_vec = Vec::new();
-        for (cost, times) in self.trains.iter().map(|t| t.current_solution()) {
+        for (cost, times) in self.trainset.trains.iter().map(|t| t.current_solution()) {
             total_cost += cost;
             out_vec.push(times);
         }
@@ -136,41 +104,41 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         // finished solving. Is there a realistic pathological case for this?
 
         loop {
-            if self.lb >= self.ub {
+            if self.trainset.lb >= self.ub {
                 // println!("Node fathomed. {} >= {}", self.lb, self.ub);
                 self.switch_to_any_node();
                 break;
             } else if !self.conflicts.conflicting_resource_set.is_empty() {
                 self.branch();
                 break;
-            } else if let Some(dirty_train) = self.dirty_trains.last() {
+            } else if let Some(dirty_train) = self.trainset.dirty_trains.last() {
                 let dirty_train_idx = *dirty_train as usize;
-                match self.trains[dirty_train_idx].status() {
+                match self.trainset.trains[dirty_train_idx].status() {
                     TrainSolverStatus::Failed => {
-                        assert!(self.train_lbs[dirty_train_idx] == 0);
+                        assert!(self.trainset.train_lbs[dirty_train_idx] == 0);
                         debug!("Train {} failed.", dirty_train_idx);
                         self.switch_to_any_node();
                         break;
                     }
                     TrainSolverStatus::Optimal => {
-                        let prev_cost = self.train_lbs[dirty_train_idx];
-                        let train_cost = self.trains[dirty_train_idx].current_solution().0;
-                        assert!(train_cost >= self.train_const_lbs[dirty_train_idx]);
-                        let new_cost = train_cost - self.train_const_lbs[dirty_train_idx];
-                        self.train_lbs[dirty_train_idx] = new_cost;
-                        self.lb += new_cost - prev_cost;
+                        let prev_cost = self.trainset.train_lbs[dirty_train_idx];
+                        let train_cost = self.trainset.trains[dirty_train_idx].current_solution().0;
+                        assert!(train_cost >= self.trainset.train_const_lbs[dirty_train_idx]);
+                        let new_cost = train_cost - self.trainset.train_const_lbs[dirty_train_idx];
+                        self.trainset.train_lbs[dirty_train_idx] = new_cost;
+                        self.trainset.lb += new_cost - prev_cost;
 
                         debug!(
                             "Train {} optimal. train_LB={} problem_LB={}",
-                            dirty_train_idx, new_cost, self.lb
+                            dirty_train_idx, new_cost, self.trainset.lb
                         );
-                        self.dirty_trains.pop();
+                        self.trainset.dirty_trains.pop();
                         break;
                     }
                     TrainSolverStatus::Working => {
-                        assert!(self.train_lbs[dirty_train_idx] == 0);
+                        assert!(self.trainset.train_lbs[dirty_train_idx] == 0);
 
-                        self.trains[dirty_train_idx].step(&mut |add, block, resource, interval| {
+                        self.trainset.trains[dirty_train_idx].step(&mut |add, block, resource, interval| {
                             self.conflicts.add_or_remove(
                                 add,
                                 dirty_train_idx as TrainRef,
@@ -180,7 +148,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
                             )
                         });
 
-                        Self::train_queue_bubble_leftward(&mut self.dirty_trains, &self.trains);
+                        Self::train_queue_bubble_leftward(&mut self.trainset.dirty_trains, &self.trainset.trains);
                     }
                 }
             } else {
@@ -222,7 +190,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
 
     fn current_priorities(&self) -> HashSet<(TrainRef, TrainRef, ResourceRef)> {
         let mut set = HashSet::new();
-        let mut node = self.current_node.as_ref();
+        let mut node = self.conflict_space.current_node.as_ref();
         loop {
             if let Some(n) = node {
                 set.insert((
@@ -241,7 +209,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
     }
 
     fn node_evaluation(
-        &self,
+        slacks: &Vec<Vec<i32>>,
         occ_a: &ResourceOccupation,
         c_a: &ConflictConstraint,
         occ_b: &ResourceOccupation,
@@ -266,13 +234,13 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         let delay_b_to = occ_a.interval.time_end;
 
         let slack_a =
-            self.slacks[occ_a.train as usize][occ_a.block as usize] - occ_a.interval.time_start;
+            slacks[occ_a.train as usize][occ_a.block as usize] - occ_a.interval.time_start;
         let new_slack_a =
-            self.slacks[occ_a.train as usize][occ_a.block as usize] - occ_b.interval.time_end;
+            slacks[occ_a.train as usize][occ_a.block as usize] - occ_b.interval.time_end;
         let slack_b =
-            self.slacks[occ_b.train as usize][occ_b.block as usize] - occ_b.interval.time_start;
+            slacks[occ_b.train as usize][occ_b.block as usize] - occ_b.interval.time_start;
         let new_slack_b =
-            self.slacks[occ_b.train as usize][occ_b.block as usize] - occ_a.interval.time_end;
+            slacks[occ_b.train as usize][occ_b.block as usize] - occ_a.interval.time_end;
 
         match (
             slack_a >= 0,
@@ -283,15 +251,15 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
             (_, false, _, true) => {
                 return NodeEval {
                     a_best: false,
-                    node_score: 0.1*interval_outer.length() as f64,
+                    node_score: 0.1 * interval_outer.length() as f64,
                 }
             }
             (_, true, _, false) => {
                 return NodeEval {
                     a_best: true,
-                    node_score: 0.1*interval_outer.length() as f64,
+                    node_score: 0.1 * interval_outer.length() as f64,
                 }
-            },
+            }
             _ => {
                 return NodeEval {
                     a_best: new_slack_a >= new_slack_b,
@@ -400,112 +368,40 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
     /// Select a conflict and create constraints for it.
     fn branch(&mut self) {
         assert!(!self.conflicts.conflicting_resource_set.is_empty());
+
         let conflict_resource = self.conflicts.conflicting_resource_set[0];
         // println!("CONFLICTS {:#?}", self.conflicts);
-        let (occ_a, occ_b) = self.conflicts.resources[conflict_resource as usize]
+        let conflict_occs = self.conflicts.resources[conflict_resource as usize]
             .get_conflict()
             .unwrap();
 
-        assert!(occ_a.train != occ_b.train);
-
-        let constraint_a = ConflictConstraint {
-            train: occ_a.train,
-            other_train: occ_b.train,
-            resource: conflict_resource,
-            enter_after: occ_b.interval.time_end,
-            exit_before: occ_a.interval.time_end,
-        };
-
-        let constraint_b = ConflictConstraint {
-            train: occ_b.train,
-            other_train: occ_a.train,
-            resource: conflict_resource,
-            enter_after: occ_a.interval.time_end,
-            exit_before: occ_b.interval.time_end,
-        };
-
-        debug!(
-            "Branch:\n - a: {:?}\n - b: {:?}",
-            constraint_a, constraint_b
+        let (node_a, node_b) = self.conflict_space.branch(
+            (conflict_resource, conflict_occs.0, conflict_occs.1),
+            |c| {
+                let eval = Self::node_evaluation(&self.trainset.slacks, c.occ_a, c.c_a, c.occ_b, c.c_b);
+                (eval, eval)
+            },
         );
 
-        let node_eval = self.node_evaluation(&occ_a, &constraint_a, &occ_b, &constraint_b);
-
-        // assert!(node_eval.a_best);
-
-        let prioritized_a =
-            self.priorities
-                .contains(&(constraint_a.train, constraint_a.other_train, constraint_a.resource));
-
-        let prioritized_b =
-            self.priorities
-                .contains(&(constraint_b.train, constraint_b.other_train, constraint_b.resource));
-
-        if prioritized_a && prioritized_b {
-            println!("BOTH {:?} {:?}", constraint_a, constraint_b);
-        }
-
-        let prioritized = prioritized_a ^ prioritized_b;
-
         let mut chosen_node = None;
-
-        if self.is_reasonable_constraint(&constraint_a, self.current_node.as_ref()) {
-            let node_a = ConflictSolverNode {
-                constraint: constraint_a,
-                depth: self.current_node.as_ref().map_or(0, |n| n.depth) + 1,
-                parent: self.current_node.clone(),
-                eval: node_eval,
-            };
-
-            if prioritized {
-                if prioritized_a {
-                    chosen_node = Some(Rc::new(node_a));
-                } else {
-                    self.queued_nodes.push(Rc::new(node_a));
-                }
+        if let Some(node_a) = node_a {
+            if node_a.eval.a_best {
+                self.queued_nodes.push(node_a);
             } else {
-                if node_eval.a_best {
-                    // Since A is best, we choose to impose the constrain on the other train instead.
-                    self.queued_nodes.push(Rc::new(node_a));
-                } else {
-                    chosen_node = Some(Rc::new(node_a));
-                }
+                chosen_node = Some(node_a);
             }
-            self.n_nodes_created += 1;
-        } else {
-            warn!("Skipping loop-like constraint {:?}", constraint_a);
         }
 
-        if self.is_reasonable_constraint(&constraint_b, self.current_node.as_ref()) {
-            let node_b = ConflictSolverNode {
-                constraint: constraint_b,
-                depth: self.current_node.as_ref().map_or(0, |n| n.depth) + 1,
-                parent: self.current_node.clone(),
-                eval: node_eval,
-            };
-
-            if prioritized {
-                if prioritized_b {
-                    chosen_node = Some(Rc::new(node_b));
-                } else {
-                    self.queued_nodes.push(Rc::new(node_b));
-                }
+        if let Some(node_b) = node_b {
+            if node_b.eval.a_best {
+                self.queued_nodes.push(node_b);
             } else {
-                if !node_eval.a_best {
-                    self.queued_nodes.push(Rc::new(node_b));
-                } else {
-                    chosen_node = Some(Rc::new(node_b));
-                }
+                chosen_node = Some(node_b);
             }
-            self.n_nodes_created += 1;
-        } else {
-            warn!("Skipping loop-like constraint {:?}", constraint_b);
         }
 
-        self.total_nodes += 2;
-        // TODO special-case DFS without putting the node on the queue.
-        if let Some(n) = chosen_node {
-            self.set_node(n);
+        if let Some(chosen_node) = chosen_node {
+            self.set_node(chosen_node);
         } else {
             self.switch_to_any_node();
         }
@@ -524,105 +420,40 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         self.set_node(new_node);
     }
 
-    fn set_node(&mut self, new_node: Rc<ConflictSolverNode>) {
-        self.n_nodes_explored += 1;
-        debug!("conflict search switching to node {:?}", new_node);
-        let mut backward = self.current_node.as_ref();
-        let mut forward = Some(&new_node);
-
-        loop {
-            // trace!(
-            //     "Comparing backward depth1 {} to forawrd depth2 {}",
-            //     depth1,
-            //     depth2
-            // );
-
-            let same_node = match (backward, forward) {
-                (Some(rc1), Some(rc2)) => Rc::ptr_eq(rc1, rc2),
-                (None, None) => true,
-                _ => false,
-            };
-            if same_node {
-                break;
-            } else {
-                let depth1 = backward.as_ref().map_or(0, |n| n.depth);
-                let depth2 = forward.as_ref().map_or(0, |n| n.depth);
-                if depth1 < depth2 {
-                    let node = forward.unwrap();
-
-                    // Add constraint
-                    let train = node.constraint.train;
-                    self.trains[train as usize].set_occupied(
+    fn set_node(&mut self, node: Rc<ConflictSolverNode<NodeEval>>) {
+        self.conflict_space
+            .set_node(node, &mut |add, constraint| {
+                if add {
+                    let train = constraint.train;
+                    self.trainset.trains[train as usize].set_occupied(
                         true,
-                        node.constraint.resource,
-                        node.constraint.enter_after,
-                        node.constraint.exit_before,
-                        &mut |a, block, res, i| {
-                            self.conflicts.add_or_remove(a, train, block, res, i)
-                        },
+                        constraint.resource,
+                        constraint.enter_after,
+                        constraint.exit_before,
+                        &mut |a, block, res, i| self.conflicts.add_or_remove(a, train, block, res, i),
                     );
 
-                    self.lb -= self.train_lbs[train as usize];
-                    self.train_lbs[train as usize] = 0;
-
-                    {
-                        let mut found = false;
-                        for idx in (0..(self.prev_conflict[train as usize]).len()).rev() {
-                            let elem = &mut self.prev_conflict[train as usize][idx];
-                            if elem.0 == node.constraint.resource {
-                                assert!(elem.1 > 0);
-                                found = true;
-                                elem.1 += 1;
-                            }
-                        }
-                        if !found {
-                            self.prev_conflict[train as usize].push((node.constraint.resource, 1));
-                        }
-                    }
-
-                    Self::train_queue_rewinded_train(train, &mut self.dirty_trains, &self.trains);
-                    forward = node.parent.as_ref();
+                    self.trainset.lb -= self.trainset.train_lbs[train as usize];
+                    self.trainset.train_lbs[train as usize] = 0;
+                    Self::train_queue_rewinded_train(train, &mut self.trainset.dirty_trains, &self.trainset.trains);
                 } else {
-                    let node = backward.unwrap();
+                    let train = constraint.train;
 
                     // Remove constraint
-                    let train = node.constraint.train;
-
-                    debug!("train {} remove", train);
-                    self.trains[train as usize].set_occupied(
+                    self.trainset.trains[train as usize].set_occupied(
                         false,
-                        node.constraint.resource,
-                        node.constraint.enter_after,
-                        node.constraint.exit_before,
+                        constraint.resource,
+                        constraint.enter_after,
+                        constraint.exit_before,
                         &mut |a, b, r, i| self.conflicts.add_or_remove(a, train, b, r, i),
                     );
 
-                    self.lb -= self.train_lbs[train as usize];
-                    self.train_lbs[train as usize] = 0;
+                    self.trainset.lb -= self.trainset.train_lbs[train as usize];
+                    self.trainset.train_lbs[train as usize] = 0;
 
-                    {
-                        let mut found = false;
-                        for idx in (0..(self.prev_conflict[train as usize]).len()).rev() {
-                            let elem = &mut self.prev_conflict[train as usize][idx];
-                            if elem.0 == node.constraint.resource {
-                                assert!(elem.1 > 0);
-                                found = true;
-                                elem.1 -= 1;
-                                if elem.1 == 0 {
-                                    self.prev_conflict[train as usize].remove(idx);
-                                }
-                            }
-                        }
-                        assert!(found);
-                    }
-
-                    Self::train_queue_rewinded_train(train, &mut self.dirty_trains, &self.trains);
-                    backward = node.parent.as_ref();
+                    Self::train_queue_rewinded_train(train, &mut self.trainset.dirty_trains, &self.trainset.trains);
                 }
-            }
-        }
-
-        self.current_node = Some(new_node);
+            });
     }
 
     fn train_queue_rewinded_train(train: TrainRef, dirty_trains: &mut Vec<u32>, trains: &[Train]) {
@@ -695,81 +526,30 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
             .enumerate()
             .map(|(i, t)| Train::new(i, t))
             .collect();
-        let conflicts = crate::occupation::ResourceConflicts::empty(problem.n_resources);
 
         let mut dirty_trains: Vec<u32> = (0..(trains.len() as u32)).collect();
         dirty_trains.sort_by_key(|t| -(trains[*t as usize].current_time() as i64));
 
-        let prev_conflict = trains.iter().map(|_| Default::default()).collect();
         let train_lbs = trains.iter().map(|_| 0).collect();
 
-        Self {
-            input,
+        let trainset = TrainSet {
             trains,
             slacks,
             lb: train_const_lbs.iter().sum(),
             train_lbs,
             train_const_lbs,
-            conflicts,
-            current_node: None,
             dirty_trains,
-            queued_nodes: Default::default(),
-            total_nodes: 0,
-            prev_conflict,
+        };
 
-            n_nodes_created: 0,
-            n_nodes_explored: 0,
+        Self {
+            conflict_space: Branching::new(trainset.trains.len()),
+            input,
+        
+            trainset,
+            queued_nodes: Default::default(),
             ub: i32::MAX,
             priorities: Default::default(),
+            conflicts: crate::occupation::ResourceConflicts::empty(problem.n_resources),
         }
-    }
-
-    pub fn is_reasonable_constraint(
-        &self,
-        constr: &ConflictConstraint,
-        current_node: Option<&Rc<ConflictSolverNode>>,
-    ) -> bool {
-        // If this train has less than 3 conflict on the same resource, it is reasonable.
-        let res = constr.resource;
-        let n_conflicts = *self.prev_conflict[constr.train as usize]
-            .iter()
-            .find_map(|(r, n)| (*r == res).then(|| n))
-            .unwrap_or(&0);
-
-        if n_conflicts < 3 {
-            return true;
-        }
-
-        // This train has multiple conflicts on the same resource.
-        // We do a (heuristic) cycle check.
-
-        let current_node = current_node.unwrap();
-        let mut curr_node = current_node;
-        let mut curr_train = constr.train;
-        let mut count = 0;
-
-        const MAX_CYCLE_CHECK_LENGTH: usize = 10;
-        const MAX_CYCLE_LENGTH: usize = 2;
-
-        for _ in 0..MAX_CYCLE_CHECK_LENGTH {
-            if curr_node.constraint.other_train == curr_train {
-                curr_train = curr_node.constraint.other_train;
-                if curr_train == constr.train {
-                    count += 1;
-                    if count >= MAX_CYCLE_LENGTH {
-                        // println!("CYCLE {:?}", current_node);
-                        return false;
-                    }
-                }
-            }
-
-            if let Some(x) = curr_node.parent.as_ref() {
-                curr_node = x;
-            } else {
-                break;
-            }
-        }
-
-        true
     }
 }

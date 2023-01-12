@@ -11,6 +11,12 @@ pub struct ResourceConflicts {
     pub resources: Vec<ResourceOccupations>,
 }
 
+impl ResourceConflicts {
+    pub fn has_conflict(&self) -> bool {
+        !self.conflicting_resource_set.is_empty()
+    }
+}
+
 #[derive(Debug)]
 pub struct ResourceOccupations {
     pub conflicting_resource_set_idx: i32,

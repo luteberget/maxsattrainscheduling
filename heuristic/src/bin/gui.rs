@@ -15,7 +15,7 @@ pub struct Input {
 }
 
 pub struct Model {
-    pub solver: heuristic::solvers::bnb_solver::ConflictSolver<heuristic::solvers::queue_train::QueueTrainSolver>,
+    pub solver: heuristic::solvers::solver_brb::ConflictSolver<heuristic::solvers::train_queue::QueueTrainSolver>,
     pub selected_train: usize,
     pub current_cost: Option<i32>,
     pub locations: HashMap<String, i32>,
@@ -75,12 +75,12 @@ impl App {
         egui::ComboBox::from_label("Select one!")
             .selected_text(format!("Train {}", self.model.selected_train))
             .show_ui(ui, |ui| {
-                for i in 0..self.model.solver.trains.len() {
+                for i in 0..self.model.solver.trainset.trains.len() {
                     ui.selectable_value(&mut self.model.selected_train, i, format!("Train {}", i));
                 }
             });
 
-        if let Some(train_solver) = self.model.solver.trains.get(self.model.selected_train) {
+        if let Some(train_solver) = self.model.solver.trainset.trains.get(self.model.selected_train) {
             ui.label(&format!("Train index {:?}", self.model.selected_train));
             ui.label(&format!("Train status {:?}", train_solver.status()));
             ui.label(&format!("Occupations {:?}", train_solver.occupied));
@@ -103,7 +103,7 @@ impl App {
         ui.label(&format!("Cost: {:?}", self.model.current_cost));
         ui.label(&format!(
             "Total number of nodes {}",
-            self.model.solver.total_nodes
+            self.model.solver.conflict_space.n_nodes_generated
         ));
         ui.label(&format!(
             "Queued nodes: {}",
@@ -111,7 +111,7 @@ impl App {
         ));
         ui.label(&format!(
             "Unsolved trains: {:?}",
-            self.model.solver.dirty_trains
+            self.model.solver.trainset.dirty_trains
         ));
         ui.label(&format!(
             "Total conflicts: {}",
@@ -134,7 +134,7 @@ impl App {
             }
         }
         ui.heading("Current node");
-        ui.label(&format!("{:?}", self.model.solver.current_node));
+        ui.label(&format!("{:?}", self.model.solver.conflict_space.current_node));
         ui.heading("Open nodes");
         for n in self.model.solver.queued_nodes.iter() {
             ui.label(&format!("{:?}", n));
@@ -151,7 +151,7 @@ impl App {
                 }
             }
 
-            for train_solver in self.model.solver.trains.iter() {
+            for train_solver in self.model.solver.trainset.trains.iter() {
                 let color = autocolor.next();
                 let direction = {
                     let mut dir = 1;
@@ -342,7 +342,7 @@ fn main() {
 
     let app = App {
         model: Model {
-            solver: heuristic::solvers::bnb_solver::ConflictSolver::new(input),
+            solver: heuristic::solvers::solver_brb::ConflictSolver::new(input),
             selected_train: 0,
             current_cost: None,
             locations,

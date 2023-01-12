@@ -1,3 +1,4 @@
-pub mod dag_train;
-pub mod queue_train;
-pub mod bnb_solver;
+pub mod train_dag;
+pub mod train_queue;
+pub mod solver_brb;
+pub mod solver_dummy;
