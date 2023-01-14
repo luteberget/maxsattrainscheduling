@@ -4,8 +4,8 @@ use eframe::egui::{
     plot::{HLine, Line, PlotPoint, PlotPoints, Polygon, Text},
 };
 use eframe::epaint::Color32;
-use heuristic::{problem, TrainSolver};
 use heuristic::problem::*;
+use heuristic::{problem, TrainSolver};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -15,23 +15,28 @@ pub struct Input {
 }
 
 pub struct Model {
-    pub solver: heuristic::solvers::solver_brb::ConflictSolver<heuristic::solvers::train_queue::QueueTrainSolver>,
+    pub solver: heuristic::solvers::solver_brb::ConflictSolver<
+        heuristic::solvers::train_queue::QueueTrainSolver,
+    >,
     pub selected_train: usize,
     pub current_cost: Option<i32>,
     pub locations: HashMap<String, i32>,
+    pub ref_sol: Vec<Vec<i32>>,
+    pub show_ref_sol: bool,
 }
 
 pub struct AutoColor {
     next_auto_color_idx: u32,
 }
 
+#[allow(clippy::new_without_default)]
 impl AutoColor {
     pub fn new() -> Self {
         Self {
             next_auto_color_idx: 0,
         }
     }
-    pub fn next(&mut self) -> Color32 {
+    pub fn next_color(&mut self) -> Color32 {
         let i = self.next_auto_color_idx;
         self.next_auto_color_idx += 1;
         let golden_ratio = (5.0_f32.sqrt() - 1.0) / 2.0; // 0.61803398875
@@ -51,6 +56,7 @@ impl App {
                 .width_range(300.0..=300.0)
                 .show_inside(ui, |ui| {
                     egui::ScrollArea::vertical().show(ui, |ui| {
+                        ui.checkbox(&mut self.model.show_ref_sol, "show ref sol");
                         self.conflict_solver_ui(ui);
                     })
                 });
@@ -80,7 +86,13 @@ impl App {
                 }
             });
 
-        if let Some(train_solver) = self.model.solver.trainset.trains.get(self.model.selected_train) {
+        if let Some(train_solver) = self
+            .model
+            .solver
+            .trainset
+            .trains
+            .get(self.model.selected_train)
+        {
             ui.label(&format!("Train index {:?}", self.model.selected_train));
             ui.label(&format!("Train status {:?}", train_solver.status()));
             ui.label(&format!("Occupations {:?}", train_solver.occupied));
@@ -134,7 +146,10 @@ impl App {
             }
         }
         ui.heading("Current node");
-        ui.label(&format!("{:?}", self.model.solver.conflict_space.current_node));
+        ui.label(&format!(
+            "{:?}",
+            self.model.solver.conflict_space.current_node
+        ));
         ui.heading("Open nodes");
         for n in self.model.solver.queued_nodes.iter() {
             ui.label(&format!("{:?}", n));
@@ -151,41 +166,22 @@ impl App {
                 }
             }
 
-            for train_solver in self.model.solver.trainset.trains.iter() {
-                let color = autocolor.next();
-                let direction = {
-                    let mut dir = 1;
-                    let mut prev_y = None;
-                    let mut curr = &train_solver.current_node;
-                    'x: while let Some(prev) = curr.parent.as_ref() {
-                        for res in train_solver.train.blocks[prev.block as usize]
-                            .resource_usage
-                            .iter()
-                        {
-                            let trackname = res.track_name.as_ref();
-                            if let Some(&y) = trackname.and_then(|n| self.model.locations.get(n)) {
-                                if let Some(prev_y) = prev_y {
-                                    if prev_y < y {
-                                        // We are looking at the nodes backwards, so
-                                        // prev_y < y is a negative-direction train.
-                                        dir = -1;
-                                    } else {
-                                        dir = 1;
-                                    }
-                                    break 'x;
-                                } else {
-                                    prev_y = Some(y);
-                                }
-                            }
-                        }
-                        curr = prev;
-                    }
-                    dir
-                };
-
+            for (train_idx, train_solver) in self.model.solver.trainset.trains.iter().enumerate() {
+                let color = autocolor.next_color();
+                let direction = guess_train_direction(train_solver, &self.model.locations);
                 let mut curr = &train_solver.current_node;
                 let mut prev_pos: Option<[f64; 2]> = None;
                 while let Some(prev) = curr.parent.as_ref() {
+                    let curr_time = if self.model.show_ref_sol && curr.block > 0 {
+                        self.model.ref_sol[train_idx][curr.block as usize - 1]
+                    } else {
+                        curr.time
+                    };
+                    let prev_time = if self.model.show_ref_sol && prev.block > 0 {
+                        self.model.ref_sol[train_idx][prev.block as usize - 1]
+                    } else {
+                        prev.time
+                    };
                     for res in train_solver.train.blocks[prev.block as usize]
                         .resource_usage
                         .iter()
@@ -204,10 +200,10 @@ impl App {
                                         Line::new(PlotPoints::from_iter([
                                             prev_pos,
                                             [
-                                                0.5 * (prev_pos[0] + curr.time as f64),
+                                                0.5 * (prev_pos[0] + curr_time as f64),
                                                 0.5 * (prev_pos[1] + ys.1),
                                             ],
-                                            [curr.time as f64, ys.1],
+                                            [curr_time as f64, ys.1],
                                         ]))
                                         .color(color)
                                         .width(3.0)
@@ -218,12 +214,12 @@ impl App {
 
                             plot_ui.line(
                                 Line::new(PlotPoints::from_iter([
-                                    [prev.time as f64, ys.0],
+                                    [prev_time as f64, ys.0],
                                     [
-                                        0.5 * ((prev.time as f64) + (curr.time as f64)),
+                                        0.5 * ((prev_time as f64) + (curr_time as f64)),
                                         0.5 * (ys.0 + ys.1),
                                     ],
-                                    [curr.time as f64, ys.1],
+                                    [curr_time as f64, ys.1],
                                 ]))
                                 .color(color)
                                 .width(2.0)
@@ -233,7 +229,7 @@ impl App {
                                 )),
                             );
 
-                            prev_pos = Some([prev.time as f64, ys.0]);
+                            prev_pos = Some([prev_time as f64, ys.0]);
                         } else if trackname.is_some() {
                             println!("Warning: no track name {:?}", trackname);
                         }
@@ -314,6 +310,39 @@ impl App {
     }
 }
 
+fn guess_train_direction(
+    train_solver: &heuristic::solvers::train_queue::QueueTrainSolver,
+    locs: &HashMap<String, i32>,
+) -> i32 {
+    let mut dir = 1;
+    let mut prev_y = None;
+    let mut curr = &train_solver.current_node;
+    'x: while let Some(prev) = curr.parent.as_ref() {
+        for res in train_solver.train.blocks[prev.block as usize]
+            .resource_usage
+            .iter()
+        {
+            let trackname = res.track_name.as_ref();
+            if let Some(&y) = trackname.and_then(|n| locs.get(n)) {
+                if let Some(prev_y) = prev_y {
+                    if prev_y < y {
+                        // We are looking at the nodes backwards, so
+                        // prev_y < y is a negative-direction train.
+                        dir = -1;
+                    } else {
+                        dir = 1;
+                    }
+                    break 'x;
+                } else {
+                    prev_y = Some(y);
+                }
+            }
+        }
+        curr = prev;
+    }
+    dir
+}
+
 impl eframe::App for App {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         // self.get_messages();
@@ -327,8 +356,10 @@ fn main() {
     pretty_env_logger::init();
 
     let input: problem::Problem =
-        serde_json::from_str(&std::fs::read_to_string("trackB12_rh.json").unwrap())
-            .unwrap();
+        serde_json::from_str(&std::fs::read_to_string("trackB12_rh.json").unwrap()).unwrap();
+
+    let ref_sol: Vec<Vec<i32>> =
+        serde_json::from_str(&std::fs::read_to_string("trackB12_sol_15182.json").unwrap()).unwrap();
 
     // let input = examples::example_1();
 
@@ -346,6 +377,8 @@ fn main() {
             selected_train: 0,
             current_cost: None,
             locations,
+            ref_sol,
+            show_ref_sol: false,
         },
     };
 
