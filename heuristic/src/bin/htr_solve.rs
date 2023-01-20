@@ -19,6 +19,10 @@ struct Opt {
     /// Files to process
     #[structopt(name = "FILE", parse(from_os_str))]
     files: Vec<PathBuf>,
+
+    /// Time limit (milliseconds)
+    #[structopt(short,long,name = "TIME")]
+    time_limit :Option<u128>,
 }
 
 pub fn main() {
@@ -70,7 +74,7 @@ pub fn main() {
                 let mut solver = ConflictSolver::<QueueTrainSolver>::new(htr_problem);
                 let mut best = (i32::MAX, None);
                 let mut n_solutions = 0;
-                while let Some((cost,sol)) = solver.solve_next() {
+                while let Some((cost,sol)) = solver.solve_next_stopcb(|| start_time.elapsed().as_millis() >= opt.time_limit.unwrap_or(u128::MAX) ) {
                     if cost < best.0 {
                         best = (cost, Some(sol));
                         println!("{}", cost);

@@ -131,7 +131,7 @@ impl App {
         ));
 
         if ui.button("Step").clicked() {
-            if let Some((cost, _sol)) = self.model.solver.solve_next() {
+            if let Some((cost, _sol)) = self.model.solver.solve_partial_alltrains() {
                 self.model.current_cost = Some(cost);
             }
         }
@@ -236,6 +236,46 @@ impl App {
                     }
 
                     curr = prev;
+                }
+            }
+
+            if let Some((resource_idx, (occ_a, occ_b))) = self
+                .model
+                .solver
+                .conflicts
+                .conflicting_resource_set
+                .iter()
+                .map(|r| {
+                    (
+                        *r,
+                        self.model.solver.conflicts.resources[*r as usize]
+                            .get_conflict()
+                            .unwrap(),
+                    )
+                })
+                .min_by_key(|(_, c)| c.0.interval.time_start.min(c.1.interval.time_start))
+            {
+                for res in &self.model.solver.trainset.trains[occ_a.train as usize]
+                    .train
+                    .blocks[occ_a.block as usize]
+                    .resource_usage
+                {
+                    let trackname = res.track_name.as_ref();
+                    if let Some(y) = trackname.and_then(|n| self.model.locations.get(n)) {
+                        for occ in [occ_a, occ_b] {
+                            plot_ui.polygon(
+                                Polygon::new(PlotPoints::from_iter([
+                                    [occ.interval.time_start as f64, *y as f64],
+                                    [occ.interval.time_end as f64, *y as f64],
+                                    [occ.interval.time_end as f64, (*y + 1) as f64],
+                                    [occ.interval.time_start as f64, (*y + 1) as f64],
+                                ]))
+                                .color(Color32::RED)
+                                .fill_alpha(0.5)
+                                .name(format!("res {} train {}", resource_idx, occ.train)),
+                            );
+                        }
+                    }
                 }
             }
 

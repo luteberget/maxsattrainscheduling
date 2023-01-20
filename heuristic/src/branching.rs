@@ -85,18 +85,19 @@ impl<T> Branching<T> {
             train: occ_a.train,
             other_train: occ_b.train,
             resource: conflict_resource,
+            exit_before: occ_b.interval.time_start,
             enter_after: occ_b.interval.time_end,
-            exit_before: occ_a.interval.time_end,
         };
 
         let constraint_b = ConflictConstraint {
             train: occ_b.train,
             other_train: occ_a.train,
             resource: conflict_resource,
+            exit_before: occ_a.interval.time_start,
             enter_after: occ_a.interval.time_end,
-            exit_before: occ_b.interval.time_end,
         };
 
+        // println!("Evaluating branches.");
         let (eval_a, eval_b) = eval_f(ConflictDescription {
             c_a: &constraint_a,
             c_b: &constraint_b,

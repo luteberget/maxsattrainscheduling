@@ -7,6 +7,7 @@ pub mod interval;
 pub mod occupation;
 pub mod branching;
 pub mod trainset;
+pub mod node_eval;
 
 
 #[derive(Debug)]

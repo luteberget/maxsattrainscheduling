@@ -1,16 +1,18 @@
 use crate::{
     interval::TimeInterval,
+    node_eval::NodeEval,
     occupation::{ResourceConflicts, ResourceOccupation},
     problem::*,
-    TrainSolver, TrainSolverStatus, trainset::TrainSet,
+    trainset::TrainSet,
+    TrainSolver, TrainSolverStatus,
 };
-use log::{debug, warn};
+use log::{debug, warn, info};
 use std::{
     collections::{BinaryHeap, HashSet},
     rc::Rc,
 };
 
-use crate::branching::{ConflictConstraint, ConflictSolverNode, Branching};
+use crate::branching::{Branching, ConflictConstraint, ConflictSolverNode};
 
 #[derive(Debug)]
 pub enum ConflictSolverStatus {
@@ -18,12 +20,6 @@ pub enum ConflictSolverStatus {
     SelectNode,
     Conflict,
     SolveTrains,
-}
-
-#[derive(Copy, Clone, Default)]
-pub struct NodeEval {
-    a_best: bool,
-    node_score: f64,
 }
 
 impl PartialEq for ConflictSolverNode<NodeEval> {
@@ -48,13 +44,12 @@ impl Ord for ConflictSolverNode<NodeEval> {
 
 pub struct ConflictSolver<Train> {
     pub input: Vec<crate::problem::Train>,
-    pub trainset :TrainSet<Train>,
-    
+    pub trainset: TrainSet<Train>,
+
     pub conflict_space: Branching<NodeEval>,
     pub queued_nodes: BinaryHeap<Rc<ConflictSolverNode<NodeEval>>>,
     pub conflicts: ResourceConflicts,
 
-    
     pub ub: i32,
     pub priorities: HashSet<(TrainRef, TrainRef, u32)>,
 }
@@ -74,12 +69,64 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         }
     }
 
+    pub fn solve_partial(&mut self) -> Option<(i32, Vec<Vec<i32>>)> {
+        if matches!(self.status(), ConflictSolverStatus::Exhausted) {
+            return None;
+        }
+
+        self.step();
+
+        if !self.trainset.is_dirty() && !self.conflicts.has_conflict() {
+            return Some(self.current_solution());
+        }
+        return None;
+    }
+
+    pub fn solve_partial_alltrains(&mut self) -> Option<(i32, Vec<Vec<i32>>)> {
+        if self.trainset.is_dirty() {
+            self.solve_all_trains();
+            return None;
+        }
+        if !self.trainset.is_dirty() && !self.conflicts.has_conflict() {
+            return Some(self.current_solution());
+        }
+
+        if matches!(self.status(), ConflictSolverStatus::Exhausted) {
+            return None;
+        }
+
+        self.step();
+        if self.trainset.is_dirty() {
+            self.solve_all_trains();
+        }
+
+        if !self.trainset.is_dirty() && !self.conflicts.has_conflict() {
+            return Some(self.current_solution());
+        }
+        return None;
+    }
+
+    pub fn solve_next_stopcb(&mut self, mut stop :impl FnMut() -> bool) -> Option<(i32, Vec<Vec<i32>>)> {
+        loop {
+            if stop() || matches!(self.status(), ConflictSolverStatus::Exhausted) {
+                return None;
+            }
+
+            self.step();
+
+            if !self.trainset.is_dirty() && !self.conflicts.has_conflict() {
+                return Some(self.current_solution());
+            }
+        }
+    }
+
     pub fn solve_next(&mut self) -> Option<(i32, Vec<Vec<i32>>)> {
         loop {
-            match self.status() {
-                ConflictSolverStatus::Exhausted => return None,
-                _ => self.step(),
+            if matches!(self.status(), ConflictSolverStatus::Exhausted) {
+                return None;
             }
+
+            self.step();
 
             if !self.trainset.is_dirty() && !self.conflicts.has_conflict() {
                 return Some(self.current_solution());
@@ -111,45 +158,16 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
             } else if !self.conflicts.conflicting_resource_set.is_empty() {
                 self.branch();
                 break;
-            } else if let Some(dirty_train) = self.trainset.dirty_trains.last() {
-                let dirty_train_idx = *dirty_train as usize;
-                match self.trainset.trains[dirty_train_idx].status() {
-                    TrainSolverStatus::Failed => {
-                        assert!(self.trainset.train_lbs[dirty_train_idx] == 0);
-                        debug!("Train {} failed.", dirty_train_idx);
+            } else if let Some(&dirty_train) = self.trainset.dirty_trains.last() {
+                match self.solve_train(&dirty_train) {
+                    Some(false) => {
                         self.switch_to_any_node();
                         break;
                     }
-                    TrainSolverStatus::Optimal => {
-                        let prev_cost = self.trainset.train_lbs[dirty_train_idx];
-                        let train_cost = self.trainset.trains[dirty_train_idx].current_solution().0;
-                        assert!(train_cost >= self.trainset.train_const_lbs[dirty_train_idx]);
-                        let new_cost = train_cost - self.trainset.train_const_lbs[dirty_train_idx];
-                        self.trainset.train_lbs[dirty_train_idx] = new_cost;
-                        self.trainset.lb += new_cost - prev_cost;
-
-                        debug!(
-                            "Train {} optimal. train_LB={} problem_LB={}",
-                            dirty_train_idx, new_cost, self.trainset.lb
-                        );
-                        self.trainset.dirty_trains.pop();
+                    Some(true) => {
                         break;
                     }
-                    TrainSolverStatus::Working => {
-                        assert!(self.trainset.train_lbs[dirty_train_idx] == 0);
-
-                        self.trainset.trains[dirty_train_idx].step(&mut |add, block, resource, interval| {
-                            self.conflicts.add_or_remove(
-                                add,
-                                dirty_train_idx as TrainRef,
-                                block,
-                                resource,
-                                interval,
-                            )
-                        });
-
-                        Self::train_queue_bubble_leftward(&mut self.trainset.dirty_trains, &self.trainset.trains);
-                    }
+                    None => {}
                 }
             } else {
                 // New solution
@@ -172,6 +190,63 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
 
             if !self.conflicts.conflicting_resource_set.is_empty() {
                 break;
+            }
+        }
+    }
+
+    fn solve_all_trains(&mut self) {
+        while let Some(&dirty_train) = self.trainset.dirty_trains.last() {
+            let x = self.solve_train(&dirty_train);
+            if x == Some(false) {
+                println!("Train failed {}", dirty_train);
+                break;
+            }
+        }
+    }
+
+    fn solve_train(&mut self, dirty_train: &u32) -> Option<bool> {
+        let dirty_train_idx = *dirty_train as usize;
+        match self.trainset.trains[dirty_train_idx].status() {
+            TrainSolverStatus::Failed => {
+                assert!(self.trainset.train_lbs[dirty_train_idx] == 0);
+                debug!("Train {} failed.", dirty_train_idx);
+                Some(false)
+            }
+            TrainSolverStatus::Optimal => {
+                let prev_cost = self.trainset.train_lbs[dirty_train_idx];
+                let train_cost = self.trainset.trains[dirty_train_idx].current_solution().0;
+                assert!(train_cost >= self.trainset.train_const_lbs[dirty_train_idx]);
+                let new_cost = train_cost - self.trainset.train_const_lbs[dirty_train_idx];
+                self.trainset.train_lbs[dirty_train_idx] = new_cost;
+                self.trainset.lb += new_cost - prev_cost;
+
+                debug!(
+                    "Train {} optimal. train_LB={} problem_LB={}",
+                    dirty_train_idx, new_cost, self.trainset.lb
+                );
+                self.trainset.dirty_trains.pop();
+                Some(true)
+            }
+            TrainSolverStatus::Working => {
+                assert!(self.trainset.train_lbs[dirty_train_idx] == 0);
+
+                self.trainset.trains[dirty_train_idx].step(
+                    &mut |add, block, resource, interval| {
+                        self.conflicts.add_or_remove(
+                            add,
+                            dirty_train_idx as TrainRef,
+                            block,
+                            resource,
+                            interval,
+                        )
+                    },
+                );
+
+                Self::train_queue_bubble_leftward(
+                    &mut self.trainset.dirty_trains,
+                    &self.trainset.trains,
+                );
+                None
             }
         }
     }
@@ -208,177 +283,40 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         set
     }
 
-    fn node_evaluation(
-        slacks: &Vec<Vec<i32>>,
-        occ_a: &ResourceOccupation,
-        c_a: &ConflictConstraint,
-        occ_b: &ResourceOccupation,
-        c_b: &ConflictConstraint,
-    ) -> NodeEval {
-        // Things we might want to know to decide priority of node.
-
-        // How much do the trains overlap.
-        let interval_inner = occ_a.interval.intersect(&occ_b.interval);
-
-        // How much time from the first entry to the last exit.
-        let interval_outer = occ_a.interval.envelope(&occ_b.interval);
-
-        // How much time do the trains spend in this resource.
-        let total_time = occ_a.interval.length() + occ_b.interval.length();
-
-        // Is one interval contained in the other?
-        let contained = (occ_a.interval.time_start < occ_b.interval.time_start)
-            != (occ_a.interval.time_end < occ_b.interval.time_end);
-
-        let delay_a_to = occ_b.interval.time_end;
-        let delay_b_to = occ_a.interval.time_end;
-
-        let slack_a =
-            slacks[occ_a.train as usize][occ_a.block as usize] - occ_a.interval.time_start;
-        let new_slack_a =
-            slacks[occ_a.train as usize][occ_a.block as usize] - occ_b.interval.time_end;
-        let slack_b =
-            slacks[occ_b.train as usize][occ_b.block as usize] - occ_b.interval.time_start;
-        let new_slack_b =
-            slacks[occ_b.train as usize][occ_b.block as usize] - occ_a.interval.time_end;
-
-        match (
-            slack_a >= 0,
-            new_slack_a >= 0,
-            slack_b >= 0,
-            new_slack_b >= 0,
-        ) {
-            (_, false, _, true) => {
-                return NodeEval {
-                    a_best: false,
-                    node_score: 0.1 * interval_outer.length() as f64,
-                }
-            }
-            (_, true, _, false) => {
-                return NodeEval {
-                    a_best: true,
-                    node_score: 0.1 * interval_outer.length() as f64,
-                }
-            }
-            _ => {
-                return NodeEval {
-                    a_best: new_slack_a >= new_slack_b,
-                    node_score: interval_outer.length() as f64,
-                }
-            }
-        }
-
-        let mut sum_score = 0.0;
-        let mut sum_weight = 0.0;
-        let mut sum_product = 0.0;
-
-        // assert!(occ_a.interval.time_start <= occ_b.interval.time_start);
-
-        // Criterion 1:
-        // First come, first served
-        let (h1_score, h1_weight) = if occ_a.interval.time_start <= occ_b.interval.time_start {
-            (
-                0.0,
-                1.0 - (occ_a.interval.time_end - occ_b.interval.time_start) as f64
-                    / interval_outer.length() as f64,
-            )
-        } else {
-            (
-                1.0,
-                1.0 - (occ_b.interval.time_end - occ_a.interval.time_start) as f64
-                    / interval_outer.length() as f64,
-            )
-        };
-        sum_product += h1_score * h1_weight;
-        sum_score += h1_score;
-        sum_weight += h1_weight;
-
-        // Criterion 2:
-        // First leave, first served
-        let (h2_score, h2_weight) = if occ_a.interval.time_end < occ_b.interval.time_end {
-            (
-                0.0,
-                1.0 - (occ_a.interval.time_end - occ_b.interval.time_start) as f64
-                    / interval_outer.length() as f64,
-            )
-        } else {
-            (
-                1.0,
-                1.0 - (occ_b.interval.time_end - occ_a.interval.time_start) as f64
-                    / interval_outer.length() as f64,
-            )
-        };
-        sum_product += h2_score * h2_weight;
-        sum_score += h2_score;
-        sum_weight += h2_weight;
-
-        // Criterion 3:
-        // Fastest first
-        let (h3_score, h3_weight) = if occ_a.interval.length() < occ_b.interval.length() {
-            let a_faster =
-                (occ_a.interval.length() as f64 / occ_b.interval.length() as f64).powf(1.0 / 3.0);
-            let b_pushed = (occ_a.interval.time_end - occ_b.interval.time_start) as f64
-                / interval_outer.length() as f64;
-            (0.0, 1.0 - a_faster * b_pushed)
-        } else {
-            let b_faster =
-                (occ_b.interval.length() as f64 / occ_a.interval.length() as f64).powf(1.0 / 3.0);
-            let a_pushed = (occ_b.interval.time_end - occ_a.interval.time_start) as f64
-                / interval_outer.length() as f64;
-            (0.0, 1.0 - b_faster * a_pushed)
-        };
-        sum_product += h3_score * h3_weight;
-        sum_score += h3_score;
-        sum_weight += h3_weight;
-
-        // Criterion 4:
-        // Timetable priority
-        // TODO
-
-        // Criterion 5:
-        // Best remaining slack
-
-        // Criterion 6:
-        // Best remaining transferred slack
-
-        // Measure significance
-        // Not normalized.
-        let significance = interval_outer.length() as f64;
-
-        // Measure decision controversy
-        let choice = sum_product / sum_weight < 0.5;
-
-        // let choice = occ_a.interval.length() < occ_b.interval.length();
-
-        let importance = [
-            (h1_score, h1_weight),
-            (h2_score, h2_weight),
-            (h3_score, h3_weight),
-        ]
-        .into_iter()
-        .filter_map(|(s, w)| ((s > 0.5) != choice).then(|| w * (s - 0.5).abs()))
-        .sum::<f64>();
-
-        NodeEval {
-            a_best: choice,
-            node_score: importance,
-        }
-    }
-
     /// Select a conflict and create constraints for it.
     fn branch(&mut self) {
         assert!(!self.conflicts.conflicting_resource_set.is_empty());
 
-        let conflict_resource = self.conflicts.conflicting_resource_set[0];
-        // println!("CONFLICTS {:#?}", self.conflicts);
-        let conflict_occs = self.conflicts.resources[conflict_resource as usize]
-            .get_conflict()
+        let (conflict_resource, conflict_occs) = self
+            .conflicts
+            .conflicting_resource_set
+            .iter()
+            .map(|r| {
+                (
+                    *r,
+                    self.conflicts.resources[*r as usize]
+                        .get_conflict()
+                        .unwrap(),
+                )
+            })
+            .min_by_key(|(_, c)| c.0.interval.time_start.min(c.1.interval.time_start))
             .unwrap();
 
         let (node_a, node_b) = self.conflict_space.branch(
             (conflict_resource, conflict_occs.0, conflict_occs.1),
             |c| {
-                let eval = Self::node_evaluation(&self.trainset.slacks, c.occ_a, c.c_a, c.occ_b, c.c_b);
+                info!(
+                    "Evaluating:\n - a {:?} {:?}\n - b {:?} {:?}",
+                    c.occ_a, c.c_a, c.occ_b, c.c_b
+                );
+                let eval = crate::node_eval::node_evaluation(
+                    &self.trainset.original_trains,
+                    &self.trainset.slacks,
+                    c.occ_a,
+                    c.c_a,
+                    c.occ_b,
+                    c.c_b,
+                );
                 (eval, eval)
             },
         );
@@ -393,7 +331,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         }
 
         if let Some(node_b) = node_b {
-            if node_b.eval.a_best {
+            if !node_b.eval.a_best {
                 self.queued_nodes.push(node_b);
             } else {
                 chosen_node = Some(node_b);
@@ -408,11 +346,12 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
     }
 
     fn switch_to_any_node(&mut self) {
+        warn!("non-DFS node");
         let new_node = match self.queued_nodes.pop() {
             Some(n) => n,
             None => {
                 println!("No more nodes. Status: {:?}", self.status());
-                assert!(matches!(self.status(), ConflictSolverStatus::Exhausted));
+                // assert!(matches!(self.status(), ConflictSolverStatus::Exhausted));
                 return;
             }
         };
@@ -421,39 +360,46 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
     }
 
     fn set_node(&mut self, node: Rc<ConflictSolverNode<NodeEval>>) {
-        self.conflict_space
-            .set_node(node, &mut |add, constraint| {
-                if add {
-                    let train = constraint.train;
-                    self.trainset.trains[train as usize].set_occupied(
-                        true,
-                        constraint.resource,
-                        constraint.enter_after,
-                        constraint.exit_before,
-                        &mut |a, block, res, i| self.conflicts.add_or_remove(a, train, block, res, i),
-                    );
+        self.conflict_space.set_node(node, &mut |add, constraint| {
+            if add {
+                let train = constraint.train;
+                self.trainset.trains[train as usize].set_occupied(
+                    true,
+                    constraint.resource,
+                    constraint.enter_after,
+                    constraint.exit_before,
+                    &mut |a, block, res, i| self.conflicts.add_or_remove(a, train, block, res, i),
+                );
 
-                    self.trainset.lb -= self.trainset.train_lbs[train as usize];
-                    self.trainset.train_lbs[train as usize] = 0;
-                    Self::train_queue_rewinded_train(train, &mut self.trainset.dirty_trains, &self.trainset.trains);
-                } else {
-                    let train = constraint.train;
+                self.trainset.lb -= self.trainset.train_lbs[train as usize];
+                self.trainset.train_lbs[train as usize] = 0;
+                Self::train_queue_rewinded_train(
+                    train,
+                    &mut self.trainset.dirty_trains,
+                    &self.trainset.trains,
+                );
+            } else {
+                let train = constraint.train;
 
-                    // Remove constraint
-                    self.trainset.trains[train as usize].set_occupied(
-                        false,
-                        constraint.resource,
-                        constraint.enter_after,
-                        constraint.exit_before,
-                        &mut |a, b, r, i| self.conflicts.add_or_remove(a, train, b, r, i),
-                    );
+                // Remove constraint
+                self.trainset.trains[train as usize].set_occupied(
+                    false,
+                    constraint.resource,
+                    constraint.enter_after,
+                    constraint.exit_before,
+                    &mut |a, b, r, i| self.conflicts.add_or_remove(a, train, b, r, i),
+                );
 
-                    self.trainset.lb -= self.trainset.train_lbs[train as usize];
-                    self.trainset.train_lbs[train as usize] = 0;
+                self.trainset.lb -= self.trainset.train_lbs[train as usize];
+                self.trainset.train_lbs[train as usize] = 0;
 
-                    Self::train_queue_rewinded_train(train, &mut self.trainset.dirty_trains, &self.trainset.trains);
-                }
-            });
+                Self::train_queue_rewinded_train(
+                    train,
+                    &mut self.trainset.dirty_trains,
+                    &self.trainset.trains,
+                );
+            }
+        });
     }
 
     fn train_queue_rewinded_train(train: TrainRef, dirty_trains: &mut Vec<u32>, trains: &[Train]) {
@@ -480,6 +426,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
     pub fn new(problem: Problem) -> Self {
         problem.verify();
 
+        let original_trains = problem.trains.clone();
         let input = problem.trains.clone();
         let slacks = problem
             .trains
@@ -533,6 +480,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         let train_lbs = trains.iter().map(|_| 0).collect();
 
         let trainset = TrainSet {
+            original_trains,
             trains,
             slacks,
             lb: train_const_lbs.iter().sum(),
@@ -544,7 +492,7 @@ impl<Train: TrainSolver> ConflictSolver<Train> {
         Self {
             conflict_space: Branching::new(trainset.trains.len()),
             input,
-        
+
             trainset,
             queued_nodes: Default::default(),
             ub: i32::MAX,

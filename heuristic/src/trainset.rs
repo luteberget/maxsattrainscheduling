@@ -7,6 +7,7 @@ pub struct TrainSet<Train> {
     pub train_const_lbs: Vec<i32>,
     pub lb: i32,
     pub dirty_trains: Vec<u32>,
+    pub original_trains :Vec<crate::problem::Train>,
 }
 
 impl<Train:TrainSolver> TrainSet<Train> {
