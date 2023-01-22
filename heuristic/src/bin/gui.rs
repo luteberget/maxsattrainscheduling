@@ -396,10 +396,10 @@ fn main() {
     pretty_env_logger::init();
 
     let input: problem::Problem =
-        serde_json::from_str(&std::fs::read_to_string("trackB12_rh.json").unwrap()).unwrap();
+        serde_json::from_str(&std::fs::read_to_string("origA11_rh.json").unwrap()).unwrap();
 
     let ref_sol: Vec<Vec<i32>> =
-        serde_json::from_str(&std::fs::read_to_string("trackB12_sol_15182.json").unwrap()).unwrap();
+        serde_json::from_str(&std::fs::read_to_string("origA11_sol_3331.json").unwrap()).unwrap();
 
     // let input = examples::example_1();
 
@@ -407,9 +407,47 @@ fn main() {
     // let draw_tracks = Rc::new(input.draw_tracks);
 
     let mut locations = HashMap::new();
-    for i in 1..=25 {
+    for i in 1..=35 {
         locations.insert(format!("T{}", i), i);
     }
+
+    locations.insert("T1_S1_to_S2".to_string(), 1);
+    locations.insert("DT_T2_DT_S2_to_S3".to_string(), 2);
+    locations.insert("DT_T4_DT_S2_to_S3".to_string(), 2);
+    locations.insert("DT_T6_DT_S2_to_S3".to_string(),2);
+    locations.insert("DT_T6_DT_S4_to_S5X".to_string(),4);
+    locations.insert("DT_T4_DT_S3_to_S4X".to_string(),3);
+    locations.insert("DT_T2_DT_S2_to_S3X".to_string(),2);
+    locations.insert("DT_T4_DT_S3_to_S4".to_string(),3);
+    locations.insert("DT_T6_DT_S4_to_S5".to_string(),4);
+    locations.insert("T8_S5_to_S6".to_string(), 5);
+    locations.insert("T9_S6_to_S7".to_string(), 6);
+    locations.insert("T10_S7_to_S8".to_string(), 7);
+    locations.insert("T11_S8_to_S9".to_string(), 8);
+    locations.insert("T12_S9_to_S10".to_string(), 9);
+    locations.insert("T13_S10_to_S11".to_string(), 10);
+    locations.insert("T14_S11_to_S12".to_string(), 11);
+    locations.insert("T15_S12_to_S13".to_string(), 12);
+    locations.insert("T16_S13_to_S14".to_string(), 13);
+    locations.insert("T17_S14_to_S15".to_string(), 14);
+    locations.insert("T18_S15_to_S16".to_string(), 15);
+    locations.insert("T19_S16_to_S17".to_string(), 16);
+    locations.insert("T20_S17_to_S18".to_string(), 17);
+    locations.insert("T21_S18_to_S19".to_string(), 18);
+    locations.insert("T22_S19_to_S20".to_string(), 19);
+    locations.insert("T23_S20_to_S21".to_string(), 20);
+    locations.insert("T24_S21_to_S22".to_string(), 21);
+    locations.insert("T25_S22_to_S23".to_string(), 22);
+    locations.insert("T26_S23_to_S24".to_string(), 23);
+    locations.insert("T27_S24_to_S25".to_string(), 24);
+    locations.insert("T28_S25_to_S26".to_string(), 25);
+    locations.insert("T29_S26_to_S27".to_string(), 26);
+    locations.insert("T30_S27_to_S28".to_string(), 27);
+    locations.insert("T31_S28_to_S29".to_string(), 28);
+    locations.insert("T32_S29_to_S30".to_string(), 29);
+    locations.insert("T33_S30_to_S31".to_string(), 30);
+
+    
 
     let app = App {
         model: Model {

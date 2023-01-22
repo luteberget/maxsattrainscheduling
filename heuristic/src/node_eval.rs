@@ -14,6 +14,7 @@ pub enum LocalHeuristicType {
     FirstLeaving,
     FastestFirst,
     TimetableFirst,
+    CriticalDependencies,
 }
 
 pub fn node_evaluation(
@@ -24,14 +25,16 @@ pub fn node_evaluation(
     occ_b: &ResourceOccupation,
     c_b: &ConflictConstraint,
 ) -> NodeEval {
-    let mut priorities: Vec<(LocalHeuristicType, f64)> = Vec::new();
+    let mut priorities: Vec<(LocalHeuristicType, f64, f64)> = Vec::new();
     priorities.push((
         LocalHeuristicType::FirstEntering,
         first_entering(trains, slacks, occ_a, c_a, occ_b, c_b),
+        1.0,
     ));
     priorities.push((
         LocalHeuristicType::FirstLeaving,
         first_leaving(trains, slacks, occ_a, c_a, occ_b, c_b),
+        1.0,
     ));
 
     // Fastest first doesn't seem like a good heuristic.
@@ -43,15 +46,24 @@ pub fn node_evaluation(
     priorities.push((
         LocalHeuristicType::TimetableFirst,
         timetable_first(trains, slacks, occ_a, c_a, occ_b, c_b),
+        1.0,
     ));
 
-    // println!("NODE EVAL");
-    // for (pri_type, pri_value) in &priorities {
-    //     assert!(*pri_value >= 0.0 - 1.0e-5 && *pri_value <= 1.0 + 1.0e-5);
-    //     println!(" -  {:?}", (pri_type, pri_value));
-    // }
+    priorities.push((
+        LocalHeuristicType::CriticalDependencies,
+        critical_dependencies(trains, slacks, occ_a, c_a, occ_b, c_b),
+        3.0,
+    ));
 
-    let a_best = priorities.iter().map(|(_, v)| *v).sum::<f64>() / (priorities.len() as f64) < 0.5;
+    println!("NODE EVAL");
+    for (pri_type, pri_value, factor) in &priorities {
+        assert!(*pri_value >= 0.0 - 1.0e-5 && *pri_value <= 1.0 + 1.0e-5);
+        println!(" -  {:?} * {}", (pri_type, pri_value), factor);
+    }
+
+    let a_best = priorities.iter().map(|(_, v, f)| (*f) * (*v)).sum::<f64>()
+        / priorities.iter().map(|(_, _, f)| (*f)).sum::<f64>()
+        < 0.5;
     let significance = if a_best {
         // how much is B delayed
         c_b.enter_after - occ_b.interval.time_start
@@ -72,10 +84,10 @@ pub fn node_evaluation(
         }
     }
 
-    NodeEval {
+    dbg!(NodeEval {
         a_best,
         node_score: uncertainty * significance,
-    }
+    })
 }
 
 fn first_entering(
@@ -145,6 +157,35 @@ fn timetable_first(
     let slope: f64 = 240.0;
 
     1.0 / (1.0 + f64::exp(-x / slope))
+}
+
+fn critical_dependencies(
+    trains: &Vec<crate::problem::Train>,
+
+    slacks: &Vec<Vec<i32>>,
+    occ_a: &ResourceOccupation,
+    c_a: &ConflictConstraint,
+    occ_b: &ResourceOccupation,
+    c_b: &ConflictConstraint,
+) -> f64 {
+    if occ_a.train == 2 && occ_b.train == 6 {
+        return 1.0;
+    }
+
+    if occ_a.train == 15 && occ_b.train == 11 {
+        return 0.0;
+    }
+    if occ_a.train == 11 && occ_b.train == 15 {
+        return 1.0;
+    }
+    0.5
+
+    // let tt_a = trains[occ_a.train as usize].blocks[occ_a.block as usize].earliest_start;
+    // let tt_b = trains[occ_b.train as usize].blocks[occ_b.block as usize].earliest_start;
+    // let x = (tt_a - tt_b) as f64;
+    // let slope: f64 = 240.0;
+
+    // 1.0 / (1.0 + f64::exp(-x / slope))
 }
 
 pub fn old_node_evaluation(
