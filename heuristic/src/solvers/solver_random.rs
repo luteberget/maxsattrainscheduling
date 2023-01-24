@@ -1,10 +1,12 @@
 use std::rc::Rc;
 
 use crate::{
-    branching::{Branching, ConflictSolverNode}, node_eval::NodeEval, occupation::ResourceConflicts, problem::Problem,
-    trainset::TrainSet, ConflictSolver,
+    branching::{Branching, ConflictSolverNode},
+    occupation::ResourceConflicts,
+    problem::Problem,
+    trainset::TrainSet,
+    ConflictSolver,
 };
-use rand::prelude::*;
 
 use super::train_queue::QueueTrainSolver;
 
@@ -14,7 +16,7 @@ pub struct RandomHeuristic {
 
     pub conflict_space: Branching<()>,
     pub conflicts: ResourceConflicts,
-    queue :Vec<Rc<ConflictSolverNode<()>>>,
+    queue: Vec<Rc<ConflictSolverNode<()>>>,
 }
 
 impl RandomHeuristic {
@@ -32,30 +34,14 @@ impl RandomHeuristic {
     }
 
     pub fn solve_step(&mut self) -> Option<Option<(i32, Vec<Vec<i32>>)>> {
-        if self.conflicts.has_conflict() {
-            let (conflict_resource, (occ_a, occ_b)) = self
-                .conflicts
-                .conflicting_resource_set
-                .iter()
-                .map(|r| {
-                    (
-                        *r,
-                        self.conflicts.resources[*r as usize]
-                            .get_conflict()
-                            .unwrap(),
-                    )
-                })
-                .min_by_key(|(_, c)| c.0.interval.time_start.min(c.1.interval.time_start))
-                .unwrap();
-
-            let (node_a, node_b) = self
-                .conflict_space
-                .branch((conflict_resource, occ_a, occ_b), |_| ((), ()));
+        if let Some(conflict) = self.conflicts.first_conflict() {
+            let (node_a, node_b) = self.conflict_space.branch(conflict, |_| ((), ()));
 
             let node = match (node_a, node_b) {
                 (None, None) => {
                     println!("Random heuristic failed, backtracking to random discarded node.");
-                    self.queue.remove(rand::random::<usize>() % self.queue.len())
+                    self.queue
+                        .remove(rand::random::<usize>() % self.queue.len())
                 }
                 (None, Some(b)) => b,
                 (Some(a), None) => a,
@@ -70,7 +56,7 @@ impl RandomHeuristic {
                 }
             };
 
-            self.conflict_space.set_node(node, &mut |a, c| {
+            self.conflict_space.set_node(Some(node), &mut |a, c| {
                 self.trainset
                     .add_remove_constraint(a, c, &mut self.conflicts)
             });
@@ -105,11 +91,11 @@ impl ConflictSolver for RandomHeuristic {
         &self.conflicts
     }
 
-    fn small_step(&mut self) -> Option<(i32,Vec<Vec<i32>>)> {
+    fn small_step(&mut self) -> Option<(i32, Vec<Vec<i32>>)> {
         self.solve_step().flatten()
     }
 
-    fn big_step(&mut self) -> Option<(i32,Vec<Vec<i32>>)> {
+    fn big_step(&mut self) -> Option<(i32, Vec<Vec<i32>>)> {
         self.solve()
     }
 }

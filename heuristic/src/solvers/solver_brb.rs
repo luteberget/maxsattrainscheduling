@@ -1,10 +1,6 @@
 use crate::{
-    interval::TimeInterval,
-    node_eval::NodeEval,
-    occupation::{ResourceConflicts, ResourceOccupation},
-    problem::*,
-    trainset::TrainSet,
-    TrainSolver, TrainSolverStatus, ConflictSolver,
+    node_eval::NodeEval, occupation::ResourceConflicts, problem::*, trainset::TrainSet,
+    ConflictSolver, TrainSolver,
 };
 use log::{debug, info, warn};
 use std::{
@@ -12,7 +8,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::branching::{Branching, ConflictConstraint, ConflictSolverNode};
+use crate::branching::{Branching, ConflictSolverNode};
 
 use super::train_queue::QueueTrainSolver;
 
@@ -65,11 +61,11 @@ impl ConflictSolver for BnBConflictSolver<QueueTrainSolver> {
         &self.conflicts
     }
 
-    fn small_step(&mut self) -> Option<(i32,Vec<Vec<i32>>)> {
+    fn small_step(&mut self) -> Option<(i32, Vec<Vec<i32>>)> {
         self.solve_partial()
     }
 
-    fn big_step(&mut self) -> Option<(i32,Vec<Vec<i32>>)> {
+    fn big_step(&mut self) -> Option<(i32, Vec<Vec<i32>>)> {
         self.solve_partial_alltrains()
     }
 }
@@ -185,7 +181,7 @@ impl<Train: TrainSolver> BnBConflictSolver<Train> {
                 }
             } else {
                 // New solution
-                let (cost, sol) = self.trainset.current_solution();
+                let (cost, _sol) = self.trainset.current_solution();
                 if cost < self.ub {
                     self.ub = cost;
                     self.priorities = self.current_priorities();
@@ -232,39 +228,23 @@ impl<Train: TrainSolver> BnBConflictSolver<Train> {
     fn branch(&mut self) {
         assert!(!self.conflicts.conflicting_resource_set.is_empty());
 
-        let (conflict_resource, conflict_occs) = self
-            .conflicts
-            .conflicting_resource_set
-            .iter()
-            .map(|r| {
-                (
-                    *r,
-                    self.conflicts.resources[*r as usize]
-                        .get_conflict()
-                        .unwrap(),
-                )
-            })
-            .min_by_key(|(_, c)| c.0.interval.time_start.min(c.1.interval.time_start))
-            .unwrap();
+        let conflict = self.conflicts.first_conflict().unwrap();
 
-        let (node_a, node_b) = self.conflict_space.branch(
-            (conflict_resource, conflict_occs.0, conflict_occs.1),
-            |c| {
-                info!(
-                    "Evaluating:\n - a {:?} {:?}\n - b {:?} {:?}",
-                    c.occ_a, c.c_a, c.occ_b, c.c_b
-                );
-                let eval = crate::node_eval::node_evaluation(
-                    &self.trainset.original_trains,
-                    &self.trainset.slacks,
-                    c.occ_a,
-                    c.c_a,
-                    c.occ_b,
-                    c.c_b,
-                );
-                (eval, eval)
-            },
-        );
+        let (node_a, node_b) = self.conflict_space.branch(conflict, |c| {
+            info!(
+                "Evaluating:\n - a {:?} {:?}\n - b {:?} {:?}",
+                c.occ_a, c.c_a, c.occ_b, c.c_b
+            );
+            let eval = crate::node_eval::node_evaluation(
+                &self.trainset.original_trains,
+                &self.trainset.slacks,
+                c.occ_a,
+                c.c_a,
+                c.occ_b,
+                c.c_b,
+            );
+            (eval, eval)
+        });
 
         let mut chosen_node = None;
         if let Some(node_a) = node_a {
@@ -305,7 +285,7 @@ impl<Train: TrainSolver> BnBConflictSolver<Train> {
     }
 
     fn set_node(&mut self, node: Rc<ConflictSolverNode<NodeEval>>) {
-        self.conflict_space.set_node(node, &mut |add, constraint| {
+        self.conflict_space.set_node(Some(node), &mut |add, constraint| {
             self.trainset
                 .add_remove_constraint(add, constraint, &mut self.conflicts)
         });

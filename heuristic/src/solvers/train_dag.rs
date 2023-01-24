@@ -1,3 +1,6 @@
+#![allow(unused)] // REMOVE
+
+
 use crate::{
     interval::TimeInterval,
     problem::{Block, BlockRef, ResourceRef, TimeValue, Train}, TrainSolverStatus,

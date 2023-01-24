@@ -1,10 +1,11 @@
 use eframe::egui::Visuals;
 use eframe::egui::{
     self,
-    plot::{HLine, Line, PlotPoint, PlotPoints, Polygon, Text},
+    plot::{HLine, Line, PlotPoints, Polygon},
 };
 use eframe::epaint::Color32;
 use heuristic::solvers::solver_brb::BnBConflictSolver;
+use heuristic::solvers::solver_heurheur::HeurHeur;
 use heuristic::solvers::solver_random::RandomHeuristic;
 use heuristic::solvers::train_queue::QueueTrainSolver;
 use heuristic::{problem::*, ConflictSolver};
@@ -297,7 +298,7 @@ impl<Solver :ConflictSolver+StatusGui> App<Solver> {
         });
     }
 
-    fn plot_infrastructure(&mut self, ui: &mut egui::Ui) {
+    fn _plot_infrastructure(&mut self, _ui: &mut egui::Ui) {
         // let plot = egui::plot::Plot::new("infr").data_aspect(1.0).height(200.0);
         // plot.show(ui, |plot_ui| {
         //     for (_track, draw) in self
@@ -365,11 +366,11 @@ fn main() {
     pretty_env_logger::init();
 
     let input: problem::Problem =
-        serde_json::from_str(&std::fs::read_to_string("origB7_rh.json").unwrap()).unwrap();
+        serde_json::from_str(&std::fs::read_to_string("origA11_rh.json").unwrap()).unwrap();
 
-    // let ref_sol: Vec<Vec<i32>> =
-    //     serde_json::from_str(&std::fs::read_to_string("origA11_sol_3331.json").unwrap()).unwrap();
-    let ref_sol = vec![];
+    let ref_sol: Vec<Vec<i32>> =
+        serde_json::from_str(&std::fs::read_to_string("origA11_sol_3331.json").unwrap()).unwrap();
+    // let ref_sol = vec![];
 
     // let input = examples::example_1();
 
@@ -422,7 +423,7 @@ fn main() {
 
     let app = App {
         model: Model {
-            solver: RandomHeuristic::new(input),
+            solver: HeurHeur::new(input),
             selected_train: 0,
             current_cost: None,
             locations,
@@ -491,6 +492,12 @@ impl StatusGui for BnBConflictSolver<QueueTrainSolver> {
 }
 
 impl StatusGui for RandomHeuristic {
+    fn status_gui(&self, _ui: &mut egui::Ui) {
+        
+    }
+}
+
+impl StatusGui for HeurHeur {
     fn status_gui(&self, _ui: &mut egui::Ui) {
         
     }

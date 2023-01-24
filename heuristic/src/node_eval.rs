@@ -1,4 +1,4 @@
-use log::{debug, error, info};
+use log::error;
 
 use crate::{branching::ConflictConstraint, occupation::ResourceOccupation};
 
@@ -93,13 +93,13 @@ pub fn node_evaluation(
 }
 
 fn first_entering(
-    trains: &Vec<crate::problem::Train>,
+    _trains: &Vec<crate::problem::Train>,
 
-    slacks: &Vec<Vec<i32>>,
+    _slacks: &Vec<Vec<i32>>,
     occ_a: &ResourceOccupation,
-    c_a: &ConflictConstraint,
+    _c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
-    c_b: &ConflictConstraint,
+    _c_b: &ConflictConstraint,
 ) -> f64 {
     if occ_a.interval.time_start < occ_b.interval.time_start {
         0.5 - 0.5 * (occ_b.interval.time_start - occ_a.interval.time_start) as f64
@@ -111,13 +111,13 @@ fn first_entering(
 }
 
 fn first_leaving(
-    trains: &Vec<crate::problem::Train>,
+    _trains: &Vec<crate::problem::Train>,
 
-    slacks: &Vec<Vec<i32>>,
+_slacks: &Vec<Vec<i32>>,
     occ_a: &ResourceOccupation,
-    c_a: &ConflictConstraint,
+    _c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
-    c_b: &ConflictConstraint,
+    _c_b: &ConflictConstraint,
 ) -> f64 {
     if occ_a.interval.time_end < occ_b.interval.time_end {
         0.5 - 0.5 * (occ_b.interval.time_end - occ_a.interval.time_end) as f64
@@ -128,14 +128,14 @@ fn first_leaving(
     }
 }
 
-fn fastest_first(
-    trains: &Vec<crate::problem::Train>,
+fn _fastest_first(
+    _trains: &Vec<crate::problem::Train>,
 
-    slacks: &Vec<Vec<i32>>,
+    _slacks: &Vec<Vec<i32>>,
     occ_a: &ResourceOccupation,
-    c_a: &ConflictConstraint,
+    _c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
-    c_b: &ConflictConstraint,
+    _c_b: &ConflictConstraint,
 ) -> f64 {
     if occ_a.interval.length() < occ_b.interval.length() {
         0.5 - 0.5 * (1.0 - occ_a.interval.length() as f64 / occ_b.interval.length() as f64)
@@ -147,11 +147,11 @@ fn fastest_first(
 fn timetable_first(
     trains: &Vec<crate::problem::Train>,
 
-    slacks: &Vec<Vec<i32>>,
+    _slacks: &Vec<Vec<i32>>,
     occ_a: &ResourceOccupation,
-    c_a: &ConflictConstraint,
+    _c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
-    c_b: &ConflictConstraint,
+    _c_b: &ConflictConstraint,
 ) -> f64 {
     let tt_a = trains[occ_a.train as usize].blocks[occ_a.block as usize].earliest_start;
     let tt_b = trains[occ_b.train as usize].blocks[occ_b.block as usize].earliest_start;
@@ -162,13 +162,13 @@ fn timetable_first(
 }
 
 fn critical_dependencies(
-    trains: &Vec<crate::problem::Train>,
+    _trains: &Vec<crate::problem::Train>,
 
-    slacks: &Vec<Vec<i32>>,
+    _slacks: &Vec<Vec<i32>>,
     occ_a: &ResourceOccupation,
-    c_a: &ConflictConstraint,
+    _c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
-    c_b: &ConflictConstraint,
+    _c_b: &ConflictConstraint,
 ) -> f64 {
     if occ_a.train == 2 && occ_b.train == 6 {
         return 1.0;
@@ -179,6 +179,12 @@ fn critical_dependencies(
     }
     if occ_a.train == 11 && occ_b.train == 15 {
         return 1.0;
+    }
+    if occ_a.train == 19 && occ_b.train == 17 {
+        return 1.0;
+    }
+    if occ_a.train == 17 && occ_b.train == 19 {
+        return 0.0;
     }
     0.5
 
@@ -193,32 +199,32 @@ fn critical_dependencies(
 pub fn old_node_evaluation(
     slacks: &Vec<Vec<i32>>,
     occ_a: &ResourceOccupation,
-    c_a: &ConflictConstraint,
+    _c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
-    c_b: &ConflictConstraint,
+    _c_b: &ConflictConstraint,
 ) -> NodeEval {
     // Things we might want to know to decide priority of node.
 
     // How much do the trains overlap.
-    let interval_inner = occ_a.interval.intersect(&occ_b.interval);
+    let _interval_inner = occ_a.interval.intersect(&occ_b.interval);
 
     // How much time from the first entry to the last exit.
     let interval_outer = occ_a.interval.envelope(&occ_b.interval);
 
     // How much time do the trains spend in this resource.
-    let total_time = occ_a.interval.length() + occ_b.interval.length();
+    let _total_time = occ_a.interval.length() + occ_b.interval.length();
 
     // Is one interval contained in the other?
-    let contained = (occ_a.interval.time_start < occ_b.interval.time_start)
+    let _contained = (occ_a.interval.time_start < occ_b.interval.time_start)
         != (occ_a.interval.time_end < occ_b.interval.time_end);
 
-    let delay_a_to = occ_b.interval.time_end;
-    let delay_b_to = occ_a.interval.time_end;
+    let _delay_a_to = occ_b.interval.time_end;
+    let _delay_b_to = occ_a.interval.time_end;
 
-    let slack_a = slacks[occ_a.train as usize][occ_a.block as usize] - occ_a.interval.time_start;
-    let new_slack_a = slacks[occ_a.train as usize][occ_a.block as usize] - occ_b.interval.time_end;
-    let slack_b = slacks[occ_b.train as usize][occ_b.block as usize] - occ_b.interval.time_start;
-    let new_slack_b = slacks[occ_b.train as usize][occ_b.block as usize] - occ_a.interval.time_end;
+    let _slack_a = slacks[occ_a.train as usize][occ_a.block as usize] - occ_a.interval.time_start;
+    let _new_slack_a = slacks[occ_a.train as usize][occ_a.block as usize] - occ_b.interval.time_end;
+    let _slack_b = slacks[occ_b.train as usize][occ_b.block as usize] - occ_b.interval.time_start;
+    let _new_slack_b = slacks[occ_b.train as usize][occ_b.block as usize] - occ_a.interval.time_end;
 
     // match (
     //     slack_a >= 0,
@@ -246,7 +252,7 @@ pub fn old_node_evaluation(
     //     }
     // }
 
-    let mut sum_score = 0.0;
+    let mut _sum_score = 0.0;
     let mut sum_weight = 0.0;
     let mut sum_product = 0.0;
 
@@ -268,7 +274,7 @@ pub fn old_node_evaluation(
         )
     };
     sum_product += h1_score * h1_weight;
-    sum_score += h1_score;
+    _sum_score += h1_score;
     sum_weight += h1_weight;
 
     // Criterion 2:
@@ -287,7 +293,7 @@ pub fn old_node_evaluation(
         )
     };
     sum_product += h2_score * h2_weight;
-    sum_score += h2_score;
+    _sum_score += h2_score;
     sum_weight += h2_weight;
 
     // Criterion 3:
@@ -306,7 +312,7 @@ pub fn old_node_evaluation(
         (0.0, 1.0 - b_faster * a_pushed)
     };
     sum_product += h3_score * h3_weight;
-    sum_score += h3_score;
+    _sum_score += h3_score;
     sum_weight += h3_weight;
 
     // Criterion 4:
@@ -321,7 +327,7 @@ pub fn old_node_evaluation(
 
     // Measure significance
     // Not normalized.
-    let significance = interval_outer.length() as f64;
+    let _significance = interval_outer.length() as f64;
 
     // Measure decision controversy
     let choice = sum_product / sum_weight < 0.5;

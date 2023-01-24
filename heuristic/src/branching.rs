@@ -1,10 +1,10 @@
-use std::{collections::BinaryHeap, rc::Rc};
+use std::rc::Rc;
 
 use log::debug;
 use tinyvec::TinyVec;
 
 use crate::{
-    occupation::{ResourceConflicts, ResourceOccupation},
+    occupation::ResourceOccupation,
     problem::{ResourceRef, TimeValue, TrainRef},
 };
 
@@ -45,10 +45,15 @@ pub struct Branching<T> {
 pub struct ConflictDescription<'a> {
     pub c_a: &'a ConflictConstraint,
     pub c_b: &'a ConflictConstraint,
-    pub occ_a :&'a ResourceOccupation,
-    pub occ_b :&'a ResourceOccupation,
+    pub occ_a: &'a ResourceOccupation,
+    pub occ_b: &'a ResourceOccupation,
 }
 
+pub struct ConflictSpec<'a> {
+    pub resource: ResourceRef,
+    pub occ_a: &'a ResourceOccupation,
+    pub occ_b: &'a ResourceOccupation,
+}
 impl<T> Branching<T> {
     pub fn new(n_trains: usize) -> Self {
         Self {
@@ -66,15 +71,19 @@ impl<T> Branching<T> {
 
     pub fn branch(
         &mut self,
-        conflict :(ResourceRef, &ResourceOccupation, &ResourceOccupation),
-        mut eval_f :impl FnMut(ConflictDescription) -> (T,T),
+        conflict: ConflictSpec,
+        mut eval_f: impl FnMut(ConflictDescription) -> (T, T),
     ) -> (
         Option<Rc<ConflictSolverNode<T>>>,
         Option<Rc<ConflictSolverNode<T>>>,
     ) {
         // let conflict_resource = conflicts.conflicting_resource_set[0];
         // println!("CONFLICTS {:#?}", self.conflicts);
-        let (conflict_resource, occ_a, occ_b) = conflict;
+        let ConflictSpec {
+            resource,
+            occ_a,
+            occ_b,
+        } = conflict;
         // conflicts.resources[conflict_resource as usize]
         //     .get_conflict()
         //     .unwrap();
@@ -84,7 +93,7 @@ impl<T> Branching<T> {
         let constraint_a = ConflictConstraint {
             train: occ_a.train,
             other_train: occ_b.train,
-            resource: conflict_resource,
+            resource,
             exit_before: occ_b.interval.time_start,
             enter_after: occ_b.interval.time_end,
         };
@@ -92,7 +101,7 @@ impl<T> Branching<T> {
         let constraint_b = ConflictConstraint {
             train: occ_b.train,
             other_train: occ_a.train,
-            resource: conflict_resource,
+            resource,
             exit_before: occ_a.interval.time_start,
             enter_after: occ_a.interval.time_end,
         };
@@ -101,8 +110,8 @@ impl<T> Branching<T> {
         let (eval_a, eval_b) = eval_f(ConflictDescription {
             c_a: &constraint_a,
             c_b: &constraint_b,
-            occ_a :&occ_a,
-            occ_b :&occ_b,
+            occ_a: &occ_a,
+            occ_b: &occ_b,
         });
 
         let mut node_a = None;
@@ -131,14 +140,17 @@ impl<T> Branching<T> {
         (node_a, node_b)
     }
 
-    pub fn set_node(&mut self, new_node: Rc<ConflictSolverNode<T>>, f :&mut impl FnMut(bool, &ConflictConstraint)) {
+    pub fn set_node(
+        &mut self,
+        new_node: Option<Rc<ConflictSolverNode<T>>>,
+        f: &mut impl FnMut(bool, &ConflictConstraint),
+    ) {
         self.n_nodes_explored += 1;
         debug!("conflict search switching to node {:?}", new_node);
         let mut backward = self.current_node.as_ref();
-        let mut forward = Some(&new_node);
+        let mut forward = new_node.as_ref();
 
         loop {
-
             let same_node = match (backward, forward) {
                 (Some(rc1), Some(rc2)) => Rc::ptr_eq(rc1, rc2),
                 (None, None) => true,
@@ -152,10 +164,9 @@ impl<T> Branching<T> {
                 if depth1 < depth2 {
                     let node = forward.unwrap();
 
-                    
                     // Add constraint
                     f(true, &node.constraint);
-                    
+
                     // Record previous conflict for loop detection.
                     {
                         let train = node.constraint.train;
@@ -169,7 +180,8 @@ impl<T> Branching<T> {
                             }
                         }
                         if !found {
-                            self.train_prev_conflict[train as usize].push((node.constraint.resource, 1));
+                            self.train_prev_conflict[train as usize]
+                                .push((node.constraint.resource, 1));
                         }
                     }
 
@@ -177,10 +189,9 @@ impl<T> Branching<T> {
                 } else {
                     let node = backward.unwrap();
 
-                    
                     // Remove constraint
                     f(false, &node.constraint);
-                    
+
                     {
                         let train = node.constraint.train;
                         let mut found = false;
@@ -203,7 +214,7 @@ impl<T> Branching<T> {
             }
         }
 
-        self.current_node = Some(new_node);
+        self.current_node = new_node;
     }
 
     pub fn is_reasonable_constraint(

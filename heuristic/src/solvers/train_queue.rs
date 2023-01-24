@@ -3,7 +3,7 @@ use crate::{
     problem::{Block, BlockRef, ResourceRef, TimeValue, Train}, TrainSolver, TrainSolverStatus,
 };
 use itertools::Itertools;
-use log::{debug, error, info, trace, warn};
+use log::{debug, info, trace, warn};
 use std::rc::Rc;
 use tinyvec::TinyVec;
 

@@ -1,9 +1,11 @@
-use log::{warn, trace};
+use log::{trace, warn};
 use tinyvec::TinyVec;
 
-use crate::{problem::{TrainRef, ResourceRef, BlockRef}, interval::TimeInterval};
-
-
+use crate::{
+    branching::ConflictSpec,
+    interval::TimeInterval,
+    problem::{BlockRef, ResourceRef, TrainRef},
+};
 
 #[derive(Debug)]
 pub struct ResourceConflicts {
@@ -14,6 +16,20 @@ pub struct ResourceConflicts {
 impl ResourceConflicts {
     pub fn has_conflict(&self) -> bool {
         !self.conflicting_resource_set.is_empty()
+    }
+
+    pub fn first_conflict(&self) -> Option<ConflictSpec<'_>> {
+        self.conflicting_resource_set
+            .iter()
+            .map(|r| {
+                let (occ_a, occ_b) = self.resources[*r as usize].get_conflict().unwrap();
+                ConflictSpec {
+                    resource: *r,
+                    occ_a,
+                    occ_b,
+                }
+            })
+            .min_by_key(|c| c.occ_a.interval.time_start.min(c.occ_b.interval.time_start))
     }
 }
 
@@ -37,7 +53,7 @@ impl ResourceOccupations {
 pub struct ResourceOccupation {
     pub interval: TimeInterval,
     pub train: TrainRef,
-    pub block :BlockRef,
+    pub block: BlockRef,
 }
 
 impl ResourceConflicts {
@@ -95,11 +111,15 @@ impl ResourceConflicts {
         &mut self,
         add: bool,
         train: TrainRef,
-        block :BlockRef,
+        block: BlockRef,
         resource: ResourceRef,
         interval: TimeInterval,
     ) {
-        let occ = ResourceOccupation { train, interval, block };
+        let occ = ResourceOccupation {
+            train,
+            interval,
+            block,
+        };
         if add {
             trace!(
                 "ADD train{} track{} [{} -> {}] ",
