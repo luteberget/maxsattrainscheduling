@@ -1,5 +1,8 @@
 use interval::TimeInterval;
+use occupation::ResourceConflicts;
 use problem::{TimeValue, BlockRef, ResourceRef};
+use solvers::train_queue::QueueTrainSolver;
+use trainset::TrainSet;
 
 pub mod problem;
 pub mod solvers;
@@ -20,6 +23,7 @@ pub enum TrainSolverStatus {
 pub trait TrainSolver {
     fn current_solution(&self) -> (i32, Vec<TimeValue>);
     fn current_time(&self) -> TimeValue;
+    fn order_time(&self) -> TimeValue;
     fn status(&self) -> TrainSolverStatus;
     fn step(&mut self, use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval));
     fn set_occupied(
@@ -31,4 +35,12 @@ pub trait TrainSolver {
         use_resource: &mut impl FnMut(bool, BlockRef, ResourceRef, TimeInterval),
     );
     fn new(id: usize, train: crate::problem::Train) -> Self;
+}
+
+
+pub trait ConflictSolver {
+    fn trainset(&self) -> &TrainSet<QueueTrainSolver>;
+    fn conflicts(&self) -> &ResourceConflicts;
+    fn small_step(&mut self) -> Option<(i32,Vec<Vec<i32>>)>;
+    fn big_step(&mut self) -> Option<(i32,Vec<Vec<i32>>)>;
 }

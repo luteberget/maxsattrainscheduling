@@ -1,5 +1,5 @@
 use heuristic::{
-    problem::convert_ddd_problem, solvers::train_queue::QueueTrainSolver, solvers::solver_brb::ConflictSolver,
+    problem::convert_ddd_problem, solvers::train_queue::QueueTrainSolver, solvers::solver_brb::BnBConflictSolver,
 };
 use std::{
     path::PathBuf,
@@ -34,11 +34,15 @@ pub fn main() {
     enum SolverMode {
         First,
         Exact,
+        HeurHeur,
+        Random,
     }
 
     let mode = match opt.mode.as_str() {
         "exact" => SolverMode::Exact,
         "first" => SolverMode::First,
+        "heurheur" => SolverMode::HeurHeur,
+        "random" => SolverMode::Random,
         _ => panic!("unknown solver mode"),
     };
 
@@ -71,7 +75,7 @@ pub fn main() {
         let (cost, solution) = match mode {
             SolverMode::Exact => {
                 let _p = hprof::enter("solve exact");
-                let mut solver = ConflictSolver::<QueueTrainSolver>::new(htr_problem);
+                let mut solver = BnBConflictSolver::<QueueTrainSolver>::new(htr_problem);
                 let mut best = (i32::MAX, None);
                 let mut n_solutions = 0;
                 while let Some((cost,sol)) = solver.solve_next_stopcb(|| start_time.elapsed().as_millis() >= opt.time_limit.unwrap_or(u128::MAX) ) {
@@ -89,8 +93,18 @@ pub fn main() {
             }
             SolverMode::First => {
                 let _p = hprof::enter("solve first");
-                let mut solver = ConflictSolver::<QueueTrainSolver>::new(htr_problem);
+                let mut solver = BnBConflictSolver::<QueueTrainSolver>::new(htr_problem);
                 solver.solve_next().unwrap()
+            }
+            SolverMode::HeurHeur => {
+                let _p = hprof::enter("solve heurheur");
+                let mut solver = heuristic::solvers::solver_heurheur::HeurHeur::new(htr_problem);
+                solver.solve().unwrap()
+            }
+            SolverMode::Random => {
+                let _p = hprof::enter("solve random");
+                let mut solver = heuristic::solvers::solver_random::RandomHeuristic::new(htr_problem);
+                solver.solve().unwrap()
             }
         };
         let solve_time = start_time.elapsed();

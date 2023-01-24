@@ -4,7 +4,10 @@ use eframe::egui::{
     plot::{HLine, Line, PlotPoint, PlotPoints, Polygon, Text},
 };
 use eframe::epaint::Color32;
-use heuristic::problem::*;
+use heuristic::solvers::solver_brb::BnBConflictSolver;
+use heuristic::solvers::solver_random::RandomHeuristic;
+use heuristic::solvers::train_queue::QueueTrainSolver;
+use heuristic::{problem::*, ConflictSolver};
 use heuristic::{problem, TrainSolver};
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -14,10 +17,8 @@ pub struct Input {
     pub problem: Problem,
 }
 
-pub struct Model {
-    pub solver: heuristic::solvers::solver_brb::ConflictSolver<
-        heuristic::solvers::train_queue::QueueTrainSolver,
-    >,
+pub struct Model<Solver> {
+    pub solver: Solver,
     pub selected_train: usize,
     pub current_cost: Option<i32>,
     pub locations: HashMap<String, i32>,
@@ -45,19 +46,32 @@ impl AutoColor {
     }
 }
 
-pub struct App {
-    pub model: Model,
+pub struct App<Solver> {
+    pub model: Model<Solver>,
 }
 
-impl App {
+impl<Solver :ConflictSolver+StatusGui> App<Solver> {
     pub fn draw_gui(&mut self, ctx: &eframe::egui::Context) {
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::SidePanel::left("left_panel")
                 .width_range(300.0..=300.0)
                 .show_inside(ui, |ui| {
                     egui::ScrollArea::vertical().show(ui, |ui| {
+                        ui.label(&format!("Cost: {:?}", self.model.current_cost));
                         ui.checkbox(&mut self.model.show_ref_sol, "show ref sol");
-                        self.conflict_solver_ui(ui);
+
+                        if ui.button("Small step").clicked() {
+                            if let Some((cost, _sol)) = self.model.solver.small_step() {
+                                self.model.current_cost = Some(cost);
+                            }
+                        }
+                        if ui.button("Big step").clicked() {
+                            if let Some((cost, _sol)) = self.model.solver.big_step() {
+                                self.model.current_cost = Some(cost);
+                            }
+                        }
+                
+                        self.model.solver.status_gui(ui);
                     })
                 });
             egui::SidePanel::left("left_panel2")
@@ -81,7 +95,7 @@ impl App {
         egui::ComboBox::from_label("Select one!")
             .selected_text(format!("Train {}", self.model.selected_train))
             .show_ui(ui, |ui| {
-                for i in 0..self.model.solver.trainset.trains.len() {
+                for i in 0..self.model.solver.trainset().trains.len() {
                     ui.selectable_value(&mut self.model.selected_train, i, format!("Train {}", i));
                 }
             });
@@ -89,7 +103,7 @@ impl App {
         if let Some(train_solver) = self
             .model
             .solver
-            .trainset
+            .trainset()
             .trains
             .get(self.model.selected_train)
         {
@@ -109,52 +123,7 @@ impl App {
         }
     }
 
-    fn conflict_solver_ui(&mut self, ui: &mut egui::Ui) {
-        ui.heading("Conflict solver");
-        ui.label(&format!("Status: {:?}", self.model.solver.status()));
-        ui.label(&format!("Cost: {:?}", self.model.current_cost));
-        ui.label(&format!(
-            "Total number of nodes {}",
-            self.model.solver.conflict_space.n_nodes_generated
-        ));
-        ui.label(&format!(
-            "Queued nodes: {}",
-            self.model.solver.queued_nodes.len()
-        ));
-        ui.label(&format!(
-            "Unsolved trains: {:?}",
-            self.model.solver.trainset.dirty_trains
-        ));
-        ui.label(&format!(
-            "Total conflicts: {}",
-            self.model.solver.conflicts.conflicting_resource_set.len()
-        ));
 
-        if ui.button("Step").clicked() {
-            if let Some((cost, _sol)) = self.model.solver.solve_partial_alltrains() {
-                self.model.current_cost = Some(cost);
-            }
-        }
-
-        ui.heading("Current resource occupations");
-        for resource in self.model.solver.conflicts.conflicting_resource_set.iter() {
-            for occ in self.model.solver.conflicts.resources[*resource as usize]
-                .occupations
-                .iter()
-            {
-                ui.label(&format!("res {} {:?}", resource, occ));
-            }
-        }
-        ui.heading("Current node");
-        ui.label(&format!(
-            "{:?}",
-            self.model.solver.conflict_space.current_node
-        ));
-        ui.heading("Open nodes");
-        for n in self.model.solver.queued_nodes.iter() {
-            ui.label(&format!("{:?}", n));
-        }
-    }
 
     fn plot_traingraph(&mut self, ui: &mut egui::Ui) {
         let mut autocolor = AutoColor::new();
@@ -166,7 +135,7 @@ impl App {
                 }
             }
 
-            for (train_idx, train_solver) in self.model.solver.trainset.trains.iter().enumerate() {
+            for (train_idx, train_solver) in self.model.solver.trainset().trains.iter().enumerate() {
                 let color = autocolor.next_color();
                 let direction = guess_train_direction(train_solver, &self.model.locations);
                 let mut curr = &train_solver.current_node;
@@ -242,20 +211,20 @@ impl App {
             if let Some((resource_idx, (occ_a, occ_b))) = self
                 .model
                 .solver
-                .conflicts
+                .conflicts()
                 .conflicting_resource_set
                 .iter()
                 .map(|r| {
                     (
                         *r,
-                        self.model.solver.conflicts.resources[*r as usize]
+                        self.model.solver.conflicts().resources[*r as usize]
                             .get_conflict()
                             .unwrap(),
                     )
                 })
                 .min_by_key(|(_, c)| c.0.interval.time_start.min(c.1.interval.time_start))
             {
-                for res in &self.model.solver.trainset.trains[occ_a.train as usize]
+                for res in &self.model.solver.trainset().trains[occ_a.train as usize]
                     .train
                     .blocks[occ_a.block as usize]
                     .resource_usage
@@ -383,7 +352,7 @@ fn guess_train_direction(
     dir
 }
 
-impl eframe::App for App {
+impl<Solver:ConflictSolver +StatusGui> eframe::App for App<Solver> {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         // self.get_messages();
         self.draw_gui(ctx);
@@ -396,10 +365,11 @@ fn main() {
     pretty_env_logger::init();
 
     let input: problem::Problem =
-        serde_json::from_str(&std::fs::read_to_string("origA11_rh.json").unwrap()).unwrap();
+        serde_json::from_str(&std::fs::read_to_string("origB7_rh.json").unwrap()).unwrap();
 
-    let ref_sol: Vec<Vec<i32>> =
-        serde_json::from_str(&std::fs::read_to_string("origA11_sol_3331.json").unwrap()).unwrap();
+    // let ref_sol: Vec<Vec<i32>> =
+    //     serde_json::from_str(&std::fs::read_to_string("origA11_sol_3331.json").unwrap()).unwrap();
+    let ref_sol = vec![];
 
     // let input = examples::example_1();
 
@@ -409,6 +379,7 @@ fn main() {
     let mut locations = HashMap::new();
     for i in 1..=35 {
         locations.insert(format!("T{}", i), i);
+        locations.insert(format!("T{}_S{}_to_S{}", i, i,i+1),i);
     }
 
     locations.insert("T1_S1_to_S2".to_string(), 1);
@@ -451,7 +422,7 @@ fn main() {
 
     let app = App {
         model: Model {
-            solver: heuristic::solvers::solver_brb::ConflictSolver::new(input),
+            solver: RandomHeuristic::new(input),
             selected_train: 0,
             current_cost: None,
             locations,
@@ -468,4 +439,59 @@ fn main() {
             Box::new(app)
         }),
     );
+}
+
+
+pub trait StatusGui {
+    fn status_gui(&self, ui: &mut egui::Ui);
+}
+
+impl StatusGui for BnBConflictSolver<QueueTrainSolver> {
+    fn status_gui(&self, ui: &mut egui::Ui) {
+            ui.heading("Conflict solver");
+            ui.label(&format!("Status: {:?}", self.status()));
+            
+            ui.label(&format!(
+                "Total number of nodes {}",
+                self.conflict_space.n_nodes_generated
+            ));
+            ui.label(&format!(
+                "Queued nodes: {}",
+                self.queued_nodes.len()
+            ));
+            ui.label(&format!(
+                "Unsolved trains: {:?}",
+                self.trainset.dirty_trains
+            ));
+            ui.label(&format!(
+                "Total conflicts: {}",
+                self.conflicts.conflicting_resource_set.len()
+            ));
+    
+
+            ui.heading("Current resource occupations");
+            for resource in self.conflicts.conflicting_resource_set.iter() {
+                for occ in self.conflicts.resources[*resource as usize]
+                    .occupations
+                    .iter()
+                {
+                    ui.label(&format!("res {} {:?}", resource, occ));
+                }
+            }
+            ui.heading("Current node");
+            ui.label(&format!(
+                "{:?}",
+                self.conflict_space.current_node
+            ));
+            ui.heading("Open nodes");
+            for n in self.queued_nodes.iter() {
+                ui.label(&format!("{:?}", n));
+            }
+    }
+}
+
+impl StatusGui for RandomHeuristic {
+    fn status_gui(&self, _ui: &mut egui::Ui) {
+        
+    }
 }

@@ -315,6 +315,13 @@ impl TrainSolver for QueueTrainSolver {
         // TODO incremental algorithm
         self.reset(use_resource);
     }
+
+    fn order_time(&self) -> TimeValue {
+        if self.current_time() == TimeValue::MIN {
+            return self.train.blocks[1].earliest_start;
+        }
+        self.current_time()
+    }
 }
 
 fn successor_nodes<'a>(

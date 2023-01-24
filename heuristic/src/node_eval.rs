@@ -55,11 +55,11 @@ pub fn node_evaluation(
         3.0,
     ));
 
-    println!("NODE EVAL");
-    for (pri_type, pri_value, factor) in &priorities {
-        assert!(*pri_value >= 0.0 - 1.0e-5 && *pri_value <= 1.0 + 1.0e-5);
-        println!(" -  {:?} * {}", (pri_type, pri_value), factor);
-    }
+    // println!("NODE EVAL");
+    // for (pri_type, pri_value, factor) in &priorities {
+    //     assert!(*pri_value >= 0.0 - 1.0e-5 && *pri_value <= 1.0 + 1.0e-5);
+    //     println!(" -  {:?} * {}", (pri_type, pri_value), factor);
+    // }
 
     let a_best = priorities.iter().map(|(_, v, f)| (*f) * (*v)).sum::<f64>()
         / priorities.iter().map(|(_, _, f)| (*f)).sum::<f64>()
@@ -84,10 +84,12 @@ pub fn node_evaluation(
         }
     }
 
-    dbg!(NodeEval {
+    // dbg!(
+        NodeEval {
         a_best,
         node_score: uncertainty * significance,
-    })
+    }
+// )
 }
 
 fn first_entering(
