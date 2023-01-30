@@ -35,6 +35,7 @@ pub fn main() {
         First,
         Exact,
         HeurHeur,
+        HeurHeur2,
         Random,
     }
 
@@ -42,6 +43,7 @@ pub fn main() {
         "exact" => SolverMode::Exact,
         "first" => SolverMode::First,
         "heurheur" => SolverMode::HeurHeur,
+        "heurheur2" => SolverMode::HeurHeur2,
         "random" => SolverMode::Random,
         _ => panic!("unknown solver mode"),
     };
@@ -99,6 +101,11 @@ pub fn main() {
             SolverMode::HeurHeur => {
                 let _p = hprof::enter("solve heurheur");
                 let mut solver = heuristic::solvers::solver_heurheur::HeurHeur::new(htr_problem);
+                solver.solve().unwrap()
+            }
+            SolverMode::HeurHeur2 => {
+                let _p = hprof::enter("solve heurheur2");
+                let mut solver = heuristic::solvers::solver_heurheur2::HeurHeur2::new(htr_problem);
                 solver.solve().unwrap()
             }
             SolverMode::Random => {

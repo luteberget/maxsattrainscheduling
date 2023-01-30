@@ -1,6 +1,12 @@
+use std::collections::BTreeMap;
+
 use log::error;
 
-use crate::{branching::ConflictConstraint, occupation::ResourceOccupation};
+use crate::{
+    branching::ConflictConstraint,
+    occupation::ResourceOccupation,
+    problem::{BlockRef, TrainRef},
+};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct NodeEval {
@@ -24,6 +30,8 @@ pub fn node_evaluation(
     c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
     c_b: &ConflictConstraint,
+    weights: Option<&BTreeMap<(TrainRef, BlockRef), f32>>,
+    print :bool,
 ) -> NodeEval {
     let mut priorities: Vec<(LocalHeuristicType, f64, f64)> = Vec::new();
     priorities.push((
@@ -51,15 +59,17 @@ pub fn node_evaluation(
 
     priorities.push((
         LocalHeuristicType::CriticalDependencies,
-        critical_dependencies(trains, slacks, occ_a, c_a, occ_b, c_b),
+        critical_dependencies(trains, slacks, occ_a, c_a, occ_b, c_b, weights),
         3.0,
     ));
 
-    // println!("NODE EVAL");
-    // for (pri_type, pri_value, factor) in &priorities {
-    //     assert!(*pri_value >= 0.0 - 1.0e-5 && *pri_value <= 1.0 + 1.0e-5);
-    //     println!(" -  {:?} * {}", (pri_type, pri_value), factor);
-    // }
+    if print {
+    println!("NODE EVAL");
+    for (pri_type, pri_value, factor) in &priorities {
+        assert!(*pri_value >= 0.0 - 1.0e-5 && *pri_value <= 1.0 + 1.0e-5);
+        println!(" -  {:?} * {}", (pri_type, pri_value), factor);
+    }
+}
 
     let a_best = priorities.iter().map(|(_, v, f)| (*f) * (*v)).sum::<f64>()
         / priorities.iter().map(|(_, _, f)| (*f)).sum::<f64>()
@@ -85,11 +95,11 @@ pub fn node_evaluation(
     }
 
     // dbg!(
-        NodeEval {
+    NodeEval {
         a_best,
         node_score: uncertainty * significance,
     }
-// )
+    // )
 }
 
 fn first_entering(
@@ -113,7 +123,7 @@ fn first_entering(
 fn first_leaving(
     _trains: &Vec<crate::problem::Train>,
 
-_slacks: &Vec<Vec<i32>>,
+    _slacks: &Vec<Vec<i32>>,
     occ_a: &ResourceOccupation,
     _c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
@@ -162,38 +172,70 @@ fn timetable_first(
 }
 
 fn critical_dependencies(
-    _trains: &Vec<crate::problem::Train>,
+    trains: &Vec<crate::problem::Train>,
 
     _slacks: &Vec<Vec<i32>>,
     occ_a: &ResourceOccupation,
     _c_a: &ConflictConstraint,
     occ_b: &ResourceOccupation,
     _c_b: &ConflictConstraint,
+    weights: Option<&BTreeMap<(TrainRef, BlockRef), f32>>,
 ) -> f64 {
-    if occ_a.train == 2 && occ_b.train == 6 {
-        return 1.0;
+    let mut same_dir = false;
+    'res: for b1 in trains[occ_a.train as usize]
+        .blocks
+        .iter()
+        .skip(occ_a.block as usize+1)
+        .take(3)
+    {
+        for r1 in b1.resource_usage.iter() {
+            for b2 in trains[occ_b.train as usize]
+                .blocks
+                .iter()
+                .skip(occ_b.block as usize+1)
+                .take(3)
+            {
+                for r2 in b2.resource_usage.iter() {
+                    if r1.resource == r2.resource {
+                        same_dir = true;
+                        break 'res;
+                    }
+                }
+            }
+        }
     }
 
-    if occ_a.train == 15 && occ_b.train == 11 {
-        return 0.0;
+    if same_dir {
+        return 0.5;
     }
-    if occ_a.train == 11 && occ_b.train == 15 {
-        return 1.0;
-    }
-    if occ_a.train == 19 && occ_b.train == 17 {
-        return 1.0;
-    }
-    if occ_a.train == 17 && occ_b.train == 19 {
-        return 0.0;
-    }
-    0.5
 
-    // let tt_a = trains[occ_a.train as usize].blocks[occ_a.block as usize].earliest_start;
-    // let tt_b = trains[occ_b.train as usize].blocks[occ_b.block as usize].earliest_start;
-    // let x = (tt_a - tt_b) as f64;
-    // let slope: f64 = 240.0;
+    let w_a = weights
+        .and_then(|r| {
+            r.range((occ_a.train, occ_a.block + 1)..(occ_a.train, BlockRef::MAX))
+                .nth(0)
+                .map(|(_, w)| *w)
+        })
+        .unwrap_or(0.);
+    let w_b = weights
+        .and_then(|r| {
+            r.range((occ_b.train, occ_b.block + 1)..(occ_b.train, BlockRef::MAX))
+                .nth(0)
+                .map(|(_, w)| *w)
+        })
+        .unwrap_or(0.);
+
+    //     let x = (w_a - w_b) as f64;
+    // let slope: f64 = 1.0;
 
     // 1.0 / (1.0 + f64::exp(-x / slope))
+
+    if w_a == 0. && w_b > 0. {
+        1.
+    } else if w_b == 0. && w_a > 0. {
+        0.
+    } else {
+        0.5
+    }
 }
 
 pub fn old_node_evaluation(

@@ -4,3 +4,4 @@ pub mod solver_brb;
 pub mod solver_dummy;
 pub mod solver_heurheur;
 pub mod solver_random;
+pub mod solver_heurheur2;

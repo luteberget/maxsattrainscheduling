@@ -5,13 +5,15 @@ use tinyvec::TinyVec;
 
 use crate::{
     occupation::ResourceOccupation,
-    problem::{ResourceRef, TimeValue, TrainRef},
+    problem::{BlockRef, ResourceRef, TimeValue, TrainRef},
 };
 
 #[derive(Debug)]
 pub struct ConflictConstraint {
     pub train: TrainRef,
+    pub block: BlockRef,
     pub other_train: TrainRef,
+    pub other_block: BlockRef,
     pub resource: ResourceRef,
     pub enter_after: TimeValue,
     pub exit_before: TimeValue,
@@ -92,7 +94,9 @@ impl<T> Branching<T> {
 
         let constraint_a = ConflictConstraint {
             train: occ_a.train,
+            block: occ_a.block,
             other_train: occ_b.train,
+            other_block: occ_b.block,
             resource,
             exit_before: occ_b.interval.time_start,
             enter_after: occ_b.interval.time_end,
@@ -100,7 +104,9 @@ impl<T> Branching<T> {
 
         let constraint_b = ConflictConstraint {
             train: occ_b.train,
+            block: occ_b.block,
             other_train: occ_a.train,
+            other_block: occ_a.block,
             resource,
             exit_before: occ_a.interval.time_start,
             enter_after: occ_a.interval.time_end,

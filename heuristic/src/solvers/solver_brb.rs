@@ -242,6 +242,8 @@ impl<Train: TrainSolver> BnBConflictSolver<Train> {
                 c.c_a,
                 c.occ_b,
                 c.c_b,
+                None,
+                false,
             );
             (eval, eval)
         });

@@ -6,10 +6,11 @@ use eframe::egui::{
 use eframe::epaint::Color32;
 use heuristic::solvers::solver_brb::BnBConflictSolver;
 use heuristic::solvers::solver_heurheur::HeurHeur;
+use heuristic::solvers::solver_heurheur2::HeurHeur2;
 use heuristic::solvers::solver_random::RandomHeuristic;
 use heuristic::solvers::train_queue::QueueTrainSolver;
-use heuristic::{problem::*, ConflictSolver};
 use heuristic::{problem, TrainSolver};
+use heuristic::{problem::*, ConflictSolver};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -51,7 +52,7 @@ pub struct App<Solver> {
     pub model: Model<Solver>,
 }
 
-impl<Solver :ConflictSolver+StatusGui> App<Solver> {
+impl<Solver: ConflictSolver + StatusGui> App<Solver> {
     pub fn draw_gui(&mut self, ctx: &eframe::egui::Context) {
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::SidePanel::left("left_panel")
@@ -71,7 +72,7 @@ impl<Solver :ConflictSolver+StatusGui> App<Solver> {
                                 self.model.current_cost = Some(cost);
                             }
                         }
-                
+
                         self.model.solver.status_gui(ui);
                     })
                 });
@@ -124,8 +125,6 @@ impl<Solver :ConflictSolver+StatusGui> App<Solver> {
         }
     }
 
-
-
     fn plot_traingraph(&mut self, ui: &mut egui::Ui) {
         let mut autocolor = AutoColor::new();
         let plot = egui::plot::Plot::new("grph");
@@ -136,7 +135,8 @@ impl<Solver :ConflictSolver+StatusGui> App<Solver> {
                 }
             }
 
-            for (train_idx, train_solver) in self.model.solver.trainset().trains.iter().enumerate() {
+            for (train_idx, train_solver) in self.model.solver.trainset().trains.iter().enumerate()
+            {
                 let color = autocolor.next_color();
                 let direction = guess_train_direction(train_solver, &self.model.locations);
                 let mut curr = &train_solver.current_node;
@@ -182,6 +182,20 @@ impl<Solver :ConflictSolver+StatusGui> App<Solver> {
                                 }
                             }
 
+                            let weight = self
+                                .model
+                                .solver
+                                .visit_weights()
+                                .and_then(|w| {
+                                    w.range(
+                                        (train_idx as TrainRef, curr.block)
+                                            ..(train_idx as TrainRef, u32::MAX),
+                                    )
+                                    .nth(0)
+                                    .map(|(_, w)| *w)
+                                })
+                                .unwrap_or(0.);
+
                             plot_ui.line(
                                 Line::new(PlotPoints::from_iter([
                                     [prev_time as f64, ys.0],
@@ -194,8 +208,8 @@ impl<Solver :ConflictSolver+StatusGui> App<Solver> {
                                 .color(color)
                                 .width(2.0)
                                 .name(&format!(
-                                    "Train {} Track {:?} dir {}",
-                                    train_solver.id, trackname, direction
+                                    "Train {} Track {:?} dir {} w={:.2}",
+                                    train_solver.id, trackname, direction, weight
                                 )),
                             );
 
@@ -353,7 +367,7 @@ fn guess_train_direction(
     dir
 }
 
-impl<Solver:ConflictSolver +StatusGui> eframe::App for App<Solver> {
+impl<Solver: ConflictSolver + StatusGui> eframe::App for App<Solver> {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         // self.get_messages();
         self.draw_gui(ctx);
@@ -380,18 +394,18 @@ fn main() {
     let mut locations = HashMap::new();
     for i in 1..=35 {
         locations.insert(format!("T{}", i), i);
-        locations.insert(format!("T{}_S{}_to_S{}", i, i,i+1),i);
+        locations.insert(format!("T{}_S{}_to_S{}", i, i, i + 1), i);
     }
 
     locations.insert("T1_S1_to_S2".to_string(), 1);
     locations.insert("DT_T2_DT_S2_to_S3".to_string(), 2);
     locations.insert("DT_T4_DT_S2_to_S3".to_string(), 2);
-    locations.insert("DT_T6_DT_S2_to_S3".to_string(),2);
-    locations.insert("DT_T6_DT_S4_to_S5X".to_string(),4);
-    locations.insert("DT_T4_DT_S3_to_S4X".to_string(),3);
-    locations.insert("DT_T2_DT_S2_to_S3X".to_string(),2);
-    locations.insert("DT_T4_DT_S3_to_S4".to_string(),3);
-    locations.insert("DT_T6_DT_S4_to_S5".to_string(),4);
+    locations.insert("DT_T6_DT_S2_to_S3".to_string(), 2);
+    locations.insert("DT_T6_DT_S4_to_S5X".to_string(), 4);
+    locations.insert("DT_T4_DT_S3_to_S4X".to_string(), 3);
+    locations.insert("DT_T2_DT_S2_to_S3X".to_string(), 2);
+    locations.insert("DT_T4_DT_S3_to_S4".to_string(), 3);
+    locations.insert("DT_T6_DT_S4_to_S5".to_string(), 4);
     locations.insert("T8_S5_to_S6".to_string(), 5);
     locations.insert("T9_S6_to_S7".to_string(), 6);
     locations.insert("T10_S7_to_S8".to_string(), 7);
@@ -419,11 +433,9 @@ fn main() {
     locations.insert("T32_S29_to_S30".to_string(), 29);
     locations.insert("T33_S30_to_S31".to_string(), 30);
 
-    
-
     let app = App {
         model: Model {
-            solver: HeurHeur::new(input),
+            solver: HeurHeur2::new(input),
             selected_train: 0,
             current_cost: None,
             locations,
@@ -442,63 +454,55 @@ fn main() {
     );
 }
 
-
 pub trait StatusGui {
     fn status_gui(&self, ui: &mut egui::Ui);
 }
 
 impl StatusGui for BnBConflictSolver<QueueTrainSolver> {
     fn status_gui(&self, ui: &mut egui::Ui) {
-            ui.heading("Conflict solver");
-            ui.label(&format!("Status: {:?}", self.status()));
-            
-            ui.label(&format!(
-                "Total number of nodes {}",
-                self.conflict_space.n_nodes_generated
-            ));
-            ui.label(&format!(
-                "Queued nodes: {}",
-                self.queued_nodes.len()
-            ));
-            ui.label(&format!(
-                "Unsolved trains: {:?}",
-                self.trainset.dirty_trains
-            ));
-            ui.label(&format!(
-                "Total conflicts: {}",
-                self.conflicts.conflicting_resource_set.len()
-            ));
-    
+        ui.heading("Conflict solver");
+        ui.label(&format!("Status: {:?}", self.status()));
 
-            ui.heading("Current resource occupations");
-            for resource in self.conflicts.conflicting_resource_set.iter() {
-                for occ in self.conflicts.resources[*resource as usize]
-                    .occupations
-                    .iter()
-                {
-                    ui.label(&format!("res {} {:?}", resource, occ));
-                }
+        ui.label(&format!(
+            "Total number of nodes {}",
+            self.conflict_space.n_nodes_generated
+        ));
+        ui.label(&format!("Queued nodes: {}", self.queued_nodes.len()));
+        ui.label(&format!(
+            "Unsolved trains: {:?}",
+            self.trainset.dirty_trains
+        ));
+        ui.label(&format!(
+            "Total conflicts: {}",
+            self.conflicts.conflicting_resource_set.len()
+        ));
+
+        ui.heading("Current resource occupations");
+        for resource in self.conflicts.conflicting_resource_set.iter() {
+            for occ in self.conflicts.resources[*resource as usize]
+                .occupations
+                .iter()
+            {
+                ui.label(&format!("res {} {:?}", resource, occ));
             }
-            ui.heading("Current node");
-            ui.label(&format!(
-                "{:?}",
-                self.conflict_space.current_node
-            ));
-            ui.heading("Open nodes");
-            for n in self.queued_nodes.iter() {
-                ui.label(&format!("{:?}", n));
-            }
+        }
+        ui.heading("Current node");
+        ui.label(&format!("{:?}", self.conflict_space.current_node));
+        ui.heading("Open nodes");
+        for n in self.queued_nodes.iter() {
+            ui.label(&format!("{:?}", n));
+        }
     }
 }
 
 impl StatusGui for RandomHeuristic {
-    fn status_gui(&self, _ui: &mut egui::Ui) {
-        
-    }
+    fn status_gui(&self, _ui: &mut egui::Ui) {}
 }
 
 impl StatusGui for HeurHeur {
-    fn status_gui(&self, _ui: &mut egui::Ui) {
-        
-    }
+    fn status_gui(&self, _ui: &mut egui::Ui) {}
+}
+
+impl StatusGui for HeurHeur2 {
+    fn status_gui(&self, _ui: &mut egui::Ui) {}
 }

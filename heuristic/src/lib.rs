@@ -1,6 +1,8 @@
+use std::collections::{HashMap, BTreeMap};
+
 use interval::TimeInterval;
 use occupation::ResourceConflicts;
-use problem::{TimeValue, BlockRef, ResourceRef};
+use problem::{TimeValue, BlockRef, ResourceRef, TrainRef};
 use solvers::train_queue::QueueTrainSolver;
 use trainset::TrainSet;
 
@@ -41,6 +43,7 @@ pub trait TrainSolver {
 pub trait ConflictSolver {
     fn trainset(&self) -> &TrainSet<QueueTrainSolver>;
     fn conflicts(&self) -> &ResourceConflicts;
+    fn visit_weights(&self) -> Option<&BTreeMap<(TrainRef,BlockRef), f32>> { None }
     fn small_step(&mut self) -> Option<(i32,Vec<Vec<i32>>)>;
     fn big_step(&mut self) -> Option<(i32,Vec<Vec<i32>>)>;
 }
