@@ -43,6 +43,18 @@ pub enum MCTSError {
 
 pub type Solution = (i32, Vec<Vec<i32>>);
 
+#[derive(PartialEq, PartialOrd, Ord, Eq, Hash)]
+struct MoveCode {
+    first_train: TrainRef,
+    last_train: TrainRef,
+}
+
+#[derive(PartialEq, PartialOrd, Ord, Eq, Hash)]
+struct SimpleMoveCode {
+    train: TrainRef,
+    important: bool,
+}
+
 pub fn solve(
     problem: problem::Problem,
     mut terminate: impl FnMut() -> bool,
@@ -57,12 +69,7 @@ pub fn solve(
     let mut rng = thread_rng();
     let mut n_rollouts = 0usize;
 
-    #[derive(PartialEq, PartialOrd, Ord, Eq, Hash)]
-    struct MoveCode {
-        first_train: TrainRef,
-        last_train: TrainRef,
-    }
-
+    let mut simple_policy: HashMap<SimpleMoveCode, (i64, usize)> = HashMap::new();
     let mut policy: HashMap<MoveCode, (i64, usize)> = HashMap::new();
 
     // Add root node
@@ -104,29 +111,12 @@ pub fn solve(
                         // assert!(left_constraint.train == right_constraint.other_train);
                         // assert!(right_constraint.train == left_constraint.other_train);
 
-                        let left_policy = policy
-                            .get(&MoveCode {
-                                first_train: left_constraint.train,
-                                last_train: left_constraint.other_train,
-                            })
-                            .unwrap_or(&(0, 0));
-                        let right_policy = policy
-                            .get(&MoveCode {
-                                first_train: right_constraint.train,
-                                last_train: right_constraint.other_train,
-                            })
-                            .unwrap_or(&(0, 0));
-
-                        let mean_left = if left_policy.1 == 0 {
-                            f64::INFINITY
-                        } else {
-                            left_policy.0 as f64 / left_policy.1 as f64
-                        };
-                        let mean_right = if left_policy.1 == 0 {
-                            f64::INFINITY
-                        } else {
-                            left_policy.0 as f64 / left_policy.1 as f64
-                        };
+                        let (mean_left, mean_right) = policy_value(
+                            &policy,
+                            &simple_policy,
+                            Some(left_constraint),
+                            Some(right_constraint),
+                        );
 
                         let total_count = left_count as f64 + right_count as f64;
                         let log = (total_count).log10();
@@ -233,7 +223,7 @@ pub fn solve(
 
         // Rollout phase
 
-        const N_ROLLOUTS: usize = 1;
+        const N_ROLLOUTS: usize = 10;
         for _ in 0..N_ROLLOUTS {
             if is_terminal {
                 break;
@@ -265,44 +255,25 @@ pub fn solve(
                     });
 
                     let greedy_choice = node_a.as_ref().map(|n| n.eval.a_score).unwrap_or(0.5);
-                    let left_policy = node_a
-                        .as_ref()
-                        .and_then(|n| {
-                            policy.get(&MoveCode {
-                                first_train: n.constraint.train,
-                                last_train: n.constraint.other_train,
-                            })
-                        })
-                        .unwrap_or(&(0, 0));
 
-                    let right_policy = node_b
-                        .as_ref()
-                        .and_then(|n| {
-                            policy.get(&MoveCode {
-                                first_train: n.constraint.train,
-                                last_train: n.constraint.other_train,
-                            })
-                        })
-                        .unwrap_or(&(0, 0));
-
-                    let mean_left = if left_policy.1 == 0 {
-                        f64::INFINITY
-                    } else {
-                        left_policy.0 as f64 / left_policy.1 as f64
-                    };
-                    let mean_right = if left_policy.1 == 0 {
-                        f64::INFINITY
-                    } else {
-                        left_policy.0 as f64 / left_policy.1 as f64
-                    };
+                    let (mean_left, mean_right) = policy_value(
+                        &policy,
+                        &simple_policy,
+                        node_a.as_ref().map(|n| &n.constraint),
+                        node_b.as_ref().map(|n| &n.constraint),
+                    );
 
                     let policy_choice = match (mean_left.is_infinite(), mean_right.is_infinite()) {
                         (true, true) => 0.5,
                         (true, false) => 0.0,
                         (false, true) => 1.0,
-                        (false, false) => if mean_left < mean_right {
-                            0.05
-                        } else { 0.95 }
+                        (false, false) => {
+                            if mean_left < mean_right {
+                                0.05
+                            } else {
+                                0.95
+                            }
+                        }
                     };
 
                     let greedy_weight = (1.0 - 2.0 * greedy_choice).abs();
@@ -360,7 +331,7 @@ pub fn solve(
                 best = Some((cost, sol));
             }
 
-            // Backpropagate tree statistics
+            // Update tree statistics
             for node_idx in path.iter().rev() {
                 match &mut nodes[*node_idx].score {
                     NodeScore::Approximate {
@@ -374,8 +345,8 @@ pub fn solve(
                 }
             }
 
-            // Backpropagate policy
-            // These are the nodes of the branching tree, not the MC tree.
+            // Update policy
+            // These are calculated from the nodes of the branching tree, not the MC tree.
             let mut curr = branching.current_node.as_ref();
             while let Some(conflict_node) = curr {
                 let move_code = MoveCode {
@@ -386,6 +357,26 @@ pub fn solve(
                 let policy_entry = policy.entry(move_code).or_insert((0, 0));
                 policy_entry.0 += cost as i64;
                 policy_entry.1 += 1;
+
+                let simple_policy_entry = simple_policy
+                    .entry(SimpleMoveCode {
+                        train: conflict_node.constraint.other_train,
+                        important: true,
+                    })
+                    .or_insert((0, 0));
+
+                simple_policy_entry.0 += cost as i64;
+                simple_policy_entry.1 += 1;
+
+                let simple_policy_entry = simple_policy
+                    .entry(SimpleMoveCode {
+                        train: conflict_node.constraint.train,
+                        important: false,
+                    })
+                    .or_insert((0, 0));
+
+                simple_policy_entry.0 += cost as i64;
+                simple_policy_entry.1 += 1;
 
                 curr = conflict_node.parent.as_ref();
             }
@@ -421,6 +412,104 @@ pub fn solve(
     }
 }
 
+fn policy_value(
+    policy: &HashMap<MoveCode, (i64, usize)>,
+    simple_policy: &HashMap<SimpleMoveCode, (i64, usize)>,
+    left_constraint: Option<&crate::branching::ConflictConstraint>,
+    right_constraint: Option<&crate::branching::ConflictConstraint>,
+) -> (f64, f64) {
+    let left_policy = left_constraint
+        .and_then(|c| {
+            policy.get(&MoveCode {
+                first_train: c.train,
+                last_train: c.other_train,
+            })
+        })
+        .unwrap_or(&(0, 0));
+    let right_policy = right_constraint
+        .and_then(|c| {
+            policy.get(&MoveCode {
+                first_train: c.train,
+                last_train: c.other_train,
+            })
+        })
+        .unwrap_or(&(0, 0));
+
+    let mean_left = if left_policy.1 == 0 {
+        f64::INFINITY
+    } else {
+        left_policy.0 as f64 / left_policy.1 as f64
+    };
+    let mean_right = if right_policy.1 == 0 {
+        f64::INFINITY
+    } else {
+        right_policy.0 as f64 / right_policy.1 as f64
+    };
+
+    let simple_left_policy_important = left_constraint
+        .and_then(|c| {
+            simple_policy.get(&SimpleMoveCode {
+                train: c.other_train,
+                important: true,
+            })
+        })
+        .unwrap_or(&(0, 0));
+    let simple_left_policy_not_important = left_constraint
+        .and_then(|c| {
+            simple_policy.get(&SimpleMoveCode {
+                train: c.train,
+                important: false,
+            })
+        })
+        .unwrap_or(&(0, 0));
+    let simple_right_policy_important = right_constraint
+        .and_then(|c| {
+            simple_policy.get(&SimpleMoveCode {
+                train: c.other_train,
+                important: true,
+            })
+        })
+        .unwrap_or(&(0, 0));
+    let simple_right_policy_not_important = right_constraint
+        .and_then(|c| {
+            simple_policy.get(&SimpleMoveCode {
+                train: c.train,
+                important: false,
+            })
+        })
+        .unwrap_or(&(0, 0));
+
+    let simple_mean_left =
+        if simple_left_policy_important.1 + simple_right_policy_not_important.1 == 0 {
+            f64::INFINITY
+        } else {
+            simple_left_policy_important.0 as f64
+                + simple_right_policy_not_important.0 as f64
+                    / (simple_left_policy_important.1 as f64
+                        + simple_right_policy_not_important.1 as f64)
+        };
+
+    let simple_mean_right =
+        if simple_right_policy_important.1 + simple_left_policy_not_important.1 == 0 {
+            f64::INFINITY
+        } else {
+            simple_right_policy_important.0 as f64
+                + simple_left_policy_not_important.0 as f64
+                    / (simple_right_policy_important.1 as f64
+                        + simple_left_policy_not_important.1 as f64)
+        };
+
+    let beta = ((left_policy.1 as f64 + right_policy.1 as f64) / 4.0).clamp(0., 1.);
+
+    // const K: f64 = 5.0;
+    // let beta = (K / (3.0 * (left_policy.1 as f64 + right_policy.1 as f64) + K)).sqrt();
+
+    (
+        beta * mean_left + (1.0 - beta) * simple_mean_left,
+        beta * mean_right + (1.0 - beta) * simple_mean_right,
+    )
+}
+
 fn uct(cost: f64, count: f64, log: f64, total_count: f64, movecode_mean: f64) -> f64 {
     if count == 0.0 {
         f64::INFINITY
@@ -430,6 +519,6 @@ fn uct(cost: f64, count: f64, log: f64, total_count: f64, movecode_mean: f64) ->
         // let beta = 0.0;
         (1.0 - beta) * (-cost / count)
             + beta * (-movecode_mean)
-            + 2.0f64.sqrt() * 3331.0 * (log / count).sqrt()
+            + 2.0f64.sqrt() * 60000.0 * (log / count).sqrt()
     }
 }
