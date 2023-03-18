@@ -5,3 +5,4 @@ pub mod solver_dummy;
 pub mod solver_heurheur;
 pub mod solver_random;
 pub mod solver_heurheur2;
+pub mod solver_mcts;

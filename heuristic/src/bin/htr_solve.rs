@@ -1,5 +1,7 @@
 use heuristic::{
-    problem::convert_ddd_problem, solvers::train_queue::QueueTrainSolver, solvers::solver_brb::BnBConflictSolver,
+    problem::convert_ddd_problem,
+    solvers::train_queue::QueueTrainSolver,
+    solvers::{solver_brb::BnBConflictSolver, solver_mcts},
 };
 use std::{
     path::PathBuf,
@@ -21,8 +23,8 @@ struct Opt {
     files: Vec<PathBuf>,
 
     /// Time limit (milliseconds)
-    #[structopt(short,long,name = "TIME")]
-    time_limit :Option<u128>,
+    #[structopt(short, long, name = "TIME")]
+    time_limit: Option<u128>,
 }
 
 pub fn main() {
@@ -37,6 +39,7 @@ pub fn main() {
         HeurHeur,
         HeurHeur2,
         Random,
+        Uct,
     }
 
     let mode = match opt.mode.as_str() {
@@ -45,6 +48,7 @@ pub fn main() {
         "heurheur" => SolverMode::HeurHeur,
         "heurheur2" => SolverMode::HeurHeur2,
         "random" => SolverMode::Random,
+        "uct" => SolverMode::Uct,
         _ => panic!("unknown solver mode"),
     };
 
@@ -80,17 +84,28 @@ pub fn main() {
                 let mut solver = BnBConflictSolver::<QueueTrainSolver>::new(htr_problem);
                 let mut best = (i32::MAX, None);
                 let mut n_solutions = 0;
-                while let Some((cost,sol)) = solver.solve_next_stopcb(|| start_time.elapsed().as_millis() >= opt.time_limit.unwrap_or(u128::MAX) ) {
+                while let Some((cost, sol)) = solver.solve_next_stopcb(|| {
+                    start_time.elapsed().as_millis() >= opt.time_limit.unwrap_or(u128::MAX)
+                }) {
                     if cost < best.0 {
                         best = (cost, Some(sol));
                         println!("{}", cost);
-                        println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.conflict_space.n_nodes_generated, solver.conflict_space.n_nodes_explored);
+                        println!(
+                            "solutions:{} nodes_created:{} nodes_explored:{}",
+                            n_solutions,
+                            solver.conflict_space.n_nodes_generated,
+                            solver.conflict_space.n_nodes_explored
+                        );
                     }
                     n_solutions += 1;
                 }
 
-
-                println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.conflict_space.n_nodes_generated, solver.conflict_space.n_nodes_explored);
+                println!(
+                    "solutions:{} nodes_created:{} nodes_explored:{}",
+                    n_solutions,
+                    solver.conflict_space.n_nodes_generated,
+                    solver.conflict_space.n_nodes_explored
+                );
                 (best.0, best.1.unwrap())
             }
             SolverMode::First => {
@@ -103,6 +118,13 @@ pub fn main() {
                 let mut solver = heuristic::solvers::solver_heurheur::HeurHeur::new(htr_problem);
                 solver.solve().unwrap()
             }
+            SolverMode::Uct => {
+                let _p = hprof::enter("solve uct");
+                solver_mcts::solve(htr_problem, || {
+                    start_time.elapsed().as_millis() >= opt.time_limit.unwrap_or(u128::MAX)
+                })
+                .unwrap()
+            }
             SolverMode::HeurHeur2 => {
                 let _p = hprof::enter("solve heurheur2");
                 let mut solver = heuristic::solvers::solver_heurheur2::HeurHeur2::new(htr_problem);
@@ -110,7 +132,8 @@ pub fn main() {
             }
             SolverMode::Random => {
                 let _p = hprof::enter("solve random");
-                let mut solver = heuristic::solvers::solver_random::RandomHeuristic::new(htr_problem);
+                let mut solver =
+                    heuristic::solvers::solver_random::RandomHeuristic::new(htr_problem);
                 solver.solve().unwrap()
             }
         };
