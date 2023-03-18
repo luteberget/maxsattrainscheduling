@@ -499,14 +499,18 @@ fn policy_value(
                         + simple_left_policy_not_important.1 as f64)
         };
 
-    let beta = ((left_policy.1 as f64 + right_policy.1 as f64) / 4.0).clamp(0., 1.);
+    const K: f64 = 100.0;
+    let beta_count = left_policy.1 as f64 + right_policy.1 as f64;
+    let beta = (K / (3.0 * beta_count + K)).sqrt();
+
+    let beta = 1.0 - ((left_policy.1 as f64 + right_policy.1 as f64) / 20.0).clamp(0., 1.);
 
     // const K: f64 = 5.0;
     // let beta = (K / (3.0 * (left_policy.1 as f64 + right_policy.1 as f64) + K)).sqrt();
 
     (
-        beta * mean_left + (1.0 - beta) * simple_mean_left,
-        beta * mean_right + (1.0 - beta) * simple_mean_right,
+        (1.0 - beta) * mean_left + (beta) * simple_mean_left,
+        (1.0 - beta) * mean_right + (beta) * simple_mean_right,
     )
 }
 
