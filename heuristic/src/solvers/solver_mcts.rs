@@ -95,9 +95,45 @@ pub fn solve(
                             total_cost: right_cost,
                         },
                     ) => {
-                        let log = (left_count as f64 + right_count as f64).log10();
-                        let left_better = uct(left_cost as f64, left_count as f64, log)
-                            >= uct(right_cost as f64, right_count as f64, log);
+
+                        let left_constraint =
+                            &nodes[left_idx].constraint.as_ref().unwrap().constraint;
+                        let right_constraint =
+                            &nodes[right_idx].constraint.as_ref().unwrap().constraint;
+
+                        // assert!(left_constraint.train == right_constraint.other_train);
+                        // assert!(right_constraint.train == left_constraint.other_train);
+
+                        let left_policy = policy
+                            .get(&MoveCode {
+                                first_train: left_constraint.train,
+                                last_train: left_constraint.other_train,
+                            })
+                            .unwrap_or(&(0, 0));
+                        let right_policy = policy
+                            .get(&MoveCode {
+                                first_train: right_constraint.train,
+                                last_train: right_constraint.other_train,
+                            })
+                            .unwrap_or(&(0, 0));
+
+                        let mean_left = if left_policy.1 == 0 {
+                            f64::INFINITY
+                        } else {
+                            left_policy.0 as f64 / left_policy.1 as f64
+                        };
+                        let mean_right = if left_policy.1 == 0 {
+                            f64::INFINITY
+                        } else {
+                            left_policy.0 as f64 / left_policy.1 as f64
+                        };
+
+                        let total_count = left_count as f64 + right_count as f64;
+                        let log = (total_count).log10();
+                        let left_better = uct(left_cost as f64, left_count as f64, log, total_count, mean_left)
+                            >= uct(right_cost as f64, right_count as f64, log, total_count, mean_right);
+
+
                         // print!("test  1/0={} 0/0={} " , 1.0f64/0.0f64, 0.0f64/0.0f64);
                         if left_better {
                             // println!(
@@ -258,7 +294,20 @@ pub fn solve(
             }
 
             // Backpropagate policy
-            // TODO
+            // These are the nodes of the branching tree, not the MC tree.
+            let mut curr = branching.current_node.as_ref();
+            while let Some(conflict_node) = curr {
+                let move_code = MoveCode {
+                    first_train: conflict_node.constraint.train,
+                    last_train: conflict_node.constraint.other_train,
+                };
+
+                let policy_entry = policy.entry(move_code).or_insert((0, 0));
+                policy_entry.0 += cost as i64;
+                policy_entry.1 += 1;
+
+                curr = conflict_node.parent.as_ref();
+            }
         }
 
         if is_terminal {
@@ -291,10 +340,13 @@ pub fn solve(
     }
 }
 
-fn uct(cost: f64, count: f64, log: f64) -> f64 {
+fn uct(cost: f64, count: f64, log: f64, total_count :f64, movecode_mean :f64) -> f64 {
     if count == 0.0 {
         f64::INFINITY
     } else {
-        -cost / count + 2.0f64.sqrt() * 3331.0 * (log / count).sqrt()
+        const K :f64 = 250.0;
+        let beta = (K / (3.0*total_count + K)).sqrt();
+        // let beta = 0.0;
+        (1.0-beta)*(-cost / count ) + beta*(-movecode_mean) + 2.0f64.sqrt() * 3331.0 * (log / count).sqrt()
     }
 }
