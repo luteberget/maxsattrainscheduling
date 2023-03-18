@@ -6,19 +6,20 @@ use std::{collections::HashMap, rc::Rc};
 use super::train_queue::QueueTrainSolver;
 use crate::{
     branching::{Branching, ConflictSolverNode},
+    node_eval::NodeEval,
     occupation::ResourceConflicts,
     problem::{self, TrainRef},
     trainset::TrainSet,
 };
 
 struct Node {
-    constraint: Option<Rc<ConflictSolverNode<()>>>,
+    constraint: Option<Rc<ConflictSolverNode<NodeEval>>>,
     children: Option<(usize, usize)>,
     score: NodeScore,
 }
 
 impl Node {
-    pub fn new(constraint: Option<Rc<ConflictSolverNode<()>>>) -> Self {
+    pub fn new(constraint: Option<Rc<ConflictSolverNode<NodeEval>>>) -> Self {
         Node {
             constraint,
             children: None,
@@ -51,7 +52,7 @@ pub fn solve(
     let mut orig_trains = problem.trains.clone();
     let mut conflicts = ResourceConflicts::empty(problem.n_resources);
     let mut trainset: TrainSet<QueueTrainSolver> = TrainSet::new(problem);
-    let mut branching: Branching<()> = Branching::new(orig_trains.len());
+    let mut branching: Branching<NodeEval> = Branching::new(orig_trains.len());
     let mut best: Option<(i32, Vec<Vec<i32>>)> = None;
     let mut rng = thread_rng();
     let mut n_rollouts = 0usize;
@@ -95,7 +96,6 @@ pub fn solve(
                             total_cost: right_cost,
                         },
                     ) => {
-
                         let left_constraint =
                             &nodes[left_idx].constraint.as_ref().unwrap().constraint;
                         let right_constraint =
@@ -130,9 +130,19 @@ pub fn solve(
 
                         let total_count = left_count as f64 + right_count as f64;
                         let log = (total_count).log10();
-                        let left_better = uct(left_cost as f64, left_count as f64, log, total_count, mean_left)
-                            >= uct(right_cost as f64, right_count as f64, log, total_count, mean_right);
-
+                        let left_better = uct(
+                            left_cost as f64,
+                            left_count as f64,
+                            log,
+                            total_count,
+                            mean_left,
+                        ) >= uct(
+                            right_cost as f64,
+                            right_count as f64,
+                            log,
+                            total_count,
+                            mean_right,
+                        );
 
                         // print!("test  1/0={} 0/0={} " , 1.0f64/0.0f64, 0.0f64/0.0f64);
                         if left_better {
@@ -183,7 +193,19 @@ pub fn solve(
 
         if let Some(conflict) = conflicts.first_conflict() {
             // Create the branching constraints
-            let (node_a, node_b) = branching.branch(conflict, |c| ((), ()));
+            let (node_a, node_b) = branching.branch(conflict, |c| {
+                let eval = crate::node_eval::node_evaluation(
+                    &trainset.original_trains,
+                    &trainset.slacks,
+                    c.occ_a,
+                    c.c_a,
+                    c.occ_b,
+                    c.c_b,
+                    None,
+                    false,
+                );
+                (eval, eval)
+            });
 
             match (node_a, node_b) {
                 (None, None) => {
@@ -228,20 +250,79 @@ pub fn solve(
             'rollout: loop {
                 trainset.solve_all_trains(&mut conflicts);
                 if let Some(conflict) = conflicts.first_conflict() {
-                    let (node_a, node_b) = branching.branch(conflict, |c| ((), ()));
+                    let (node_a, node_b) = branching.branch(conflict, |c| {
+                        let eval = crate::node_eval::node_evaluation(
+                            &trainset.original_trains,
+                            &trainset.slacks,
+                            c.occ_a,
+                            c.c_a,
+                            c.occ_b,
+                            c.c_b,
+                            None,
+                            false,
+                        );
+                        (eval, eval)
+                    });
 
-                    let choose_left = rng.gen::<bool>();
+                    let greedy_choice = node_a.as_ref().map(|n| n.eval.a_score).unwrap_or(0.5);
+                    let left_policy = node_a
+                        .as_ref()
+                        .and_then(|n| {
+                            policy.get(&MoveCode {
+                                first_train: n.constraint.train,
+                                last_train: n.constraint.other_train,
+                            })
+                        })
+                        .unwrap_or(&(0, 0));
+
+                    let right_policy = node_b
+                        .as_ref()
+                        .and_then(|n| {
+                            policy.get(&MoveCode {
+                                first_train: n.constraint.train,
+                                last_train: n.constraint.other_train,
+                            })
+                        })
+                        .unwrap_or(&(0, 0));
+
+                    let mean_left = if left_policy.1 == 0 {
+                        f64::INFINITY
+                    } else {
+                        left_policy.0 as f64 / left_policy.1 as f64
+                    };
+                    let mean_right = if left_policy.1 == 0 {
+                        f64::INFINITY
+                    } else {
+                        left_policy.0 as f64 / left_policy.1 as f64
+                    };
+
+                    let policy_choice = match (mean_left.is_infinite(), mean_right.is_infinite()) {
+                        (true, true) => 0.5,
+                        (true, false) => 0.0,
+                        (false, true) => 1.0,
+                        (false, false) => if mean_left < mean_right {
+                            0.05
+                        } else { 0.95 }
+                    };
+
+                    let greedy_weight = (1.0 - 2.0 * greedy_choice).abs();
+
+                    let p = (greedy_weight * greedy_choice + (1.0 - greedy_weight) * policy_choice)
+                        .clamp(0.05, 0.95);
+                    let choice = rng.gen_bool(p);
+
                     let mut chosen_node = None;
 
                     if let Some(node_a) = node_a {
-                        if choose_left {
+                        if !choice {
                             chosen_node = Some(node_a);
                         } else {
                             queue_dive.push(node_a);
                         }
                     }
+
                     if let Some(node_b) = node_b {
-                        if !choose_left {
+                        if choice {
                             chosen_node = Some(node_b);
                         } else {
                             queue_dive.push(node_b);
@@ -340,13 +421,15 @@ pub fn solve(
     }
 }
 
-fn uct(cost: f64, count: f64, log: f64, total_count :f64, movecode_mean :f64) -> f64 {
+fn uct(cost: f64, count: f64, log: f64, total_count: f64, movecode_mean: f64) -> f64 {
     if count == 0.0 {
         f64::INFINITY
     } else {
-        const K :f64 = 250.0;
-        let beta = (K / (3.0*total_count + K)).sqrt();
+        const K: f64 = 250.0;
+        let beta = (K / (3.0 * total_count + K)).sqrt();
         // let beta = 0.0;
-        (1.0-beta)*(-cost / count ) + beta*(-movecode_mean) + 2.0f64.sqrt() * 3331.0 * (log / count).sqrt()
+        (1.0 - beta) * (-cost / count)
+            + beta * (-movecode_mean)
+            + 2.0f64.sqrt() * 3331.0 * (log / count).sqrt()
     }
 }
