@@ -32,13 +32,13 @@ pub fn txt_instances(path_prefix :&str, mut x: impl FnMut(String, NamedProblem))
     // let c_instances = [21, 22, 23, 24];
 
     for (dir, shortname) in [
-        ("instances_original", "orig"),
-        ("instances_addtracktime", "track"),
+        // ("instances_original", "orig"),
+        // ("instances_addtracktime", "track"),
         ("instances_addstationtime", "station"),
     ] {
-        let instances = ["A" ,"B"]
+        let instances = ["A" /* ,"B"*/]
             .iter()
-            .flat_map(move |n| (1..=12).map(move |i| (n, i)));
+            .flat_map(move |n| (12..=12).map(move |i| (n, i)));
 
         // let instances = instances.skip(16).take(1);
 
@@ -68,7 +68,7 @@ pub fn verify_instances(mut x: impl FnMut(String, NamedProblem, Vec<Vec<i32>>) -
     let b_instances = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     #[allow(unused)]
     let c_instances = [21, 22, 23, 24];
-    let instances = [20];
+    let _instances = [20];
 
     for solvertype in ["BigMComplete", "BigMLazyCon"] {
         for instance_id in a_instances
@@ -86,7 +86,7 @@ pub fn verify_instances(mut x: impl FnMut(String, NamedProblem, Vec<Vec<i32>>) -
                 None,
                 |_| {},
             );
-            let new_solution = x(
+            let _new_solution = x(
                 format!("{} {}", solvertype, instance_id),
                 problem,
                 solution.unwrap(),

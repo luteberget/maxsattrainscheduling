@@ -504,5 +504,10 @@ impl StatusGui for HeurHeur {
 }
 
 impl StatusGui for HeurHeur2 {
-    fn status_gui(&self, _ui: &mut egui::Ui) {}
+    fn status_gui(&self, ui: &mut egui::Ui) {
+        ui.heading("Queue main");
+        for x in self.queue_main.iter() {
+            ui.label(&format!("{:?}", x));
+        }
+    }
 }

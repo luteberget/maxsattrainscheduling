@@ -4,7 +4,10 @@ use std::{
 };
 
 use super::SolverError;
-use crate::solvers::minimize;
+use crate::solvers::{
+    maxsatddd::{self, TrainVisitCostBound},
+    minimize,
+};
 use ddd_problem::problem::{iter_infinite_staircase, DelayCostThresholds, DelayCostType, Problem};
 const M: f64 = 2.0 * 6.0 * 3600.0;
 
@@ -19,6 +22,7 @@ pub fn solve_bigm(
     train_names: &[String],
     resource_names: &[String],
     mut output_stats: impl FnMut(String, serde_json::Value),
+    name: Option<&str>,
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
@@ -30,6 +34,7 @@ pub fn solve_bigm(
         resource_names,
         add_bigm_conflict_constraint,
         output_stats,
+        name,
     )
 }
 
@@ -43,6 +48,7 @@ pub fn solve_hull(
     train_names: &[String],
     resource_names: &[String],
     mut output_stats: impl FnMut(String, serde_json::Value),
+    name: Option<&str>,
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
@@ -54,6 +60,7 @@ pub fn solve_hull(
         resource_names,
         add_hull_conflict_constraint,
         output_stats,
+        name,
     )
 }
 
@@ -68,6 +75,7 @@ fn solve(
     resource_names: &[String],
     add_conflict_constraint: ConflictHandler,
     mut output_stats: impl FnMut(String, serde_json::Value),
+    name: Option<&str>,
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
@@ -86,7 +94,7 @@ fn solve(
     // .set_param(param::LazyConstraints, 1)
     // .map_err(SolverError::GurobiError)?;
 
-    // model.set_param(grb::param::OutputFlag, 1);
+    model.set_param(grb::param::OutputFlag, 1);
 
     // timing variables
     let t_vars = problem
@@ -220,6 +228,9 @@ fn solve(
                 _ => panic!(),
             };
 
+            let mut cost_vars: HashMap<(usize, usize), Var> = HashMap::new();
+            let mut cost_threshold_vars: HashMap<TrainVisitCostBound, Var> = HashMap::new();
+
             for (train_idx, train) in problem.trains.iter().enumerate() {
                 for visit_idx in 0..train.visits.len() {
                     if let Some(aimed) = train.visits[visit_idx].aimed {
@@ -234,6 +245,8 @@ fn solve(
                             add_intvar!(model, name:&objective_var_name,bounds:0.., obj: 1.0)
                                 .map_err(SolverError::GurobiError)?;
 
+                        cost_vars.insert((train_idx, visit_idx), objective_var);
+
                         #[allow(clippy::useless_conversion)]
                         model
                             .add_constr(
@@ -244,8 +257,71 @@ fn solve(
                     }
                 }
             }
+
+            const USE_MAXSAT_CUTS_WITH_TIMEOUT: Option<f64> = Some(10.0);
+
+            let mut n_maxsat_cuts = 0;
+            let mut total_cost = 0;
+            if let Some(maxsat_timeout) = USE_MAXSAT_CUTS_WITH_TIMEOUT {
+                for _ in 0..5 {
+                    let _ = maxsatddd::solve(
+                        satcoder::solvers::minisat::Solver::new(),
+                        &problem,
+                        maxsat_timeout,
+                        delay_cost_type,
+                        |_, _| {},
+                        |tot_cost, coeffs, rhs| {
+                            total_cost = tot_cost;
+                            if coeffs.len() > 10 {
+                                return;
+                            }
+                            let mut coeffs = coeffs.to_vec();
+                            coeffs.sort_by_key(|(c, _)| (c.train, c.visit));
+                            // Add missing variables
+                            for (cost, _) in coeffs.iter() {
+                                cost_threshold_vars
+                            .entry(*cost)
+                            .or_insert_with(|| {
+
+                                let var = add_binvar!(model, name: &format!("t{}v{}c{}", cost.train, cost.visit, cost.cost), obj: 0.0)
+                    .unwrap();
+                model.add_constr(&format!("cost_t{}v{}c{}",  cost.train, cost.visit, cost.cost), c!(  cost_vars[&(cost.train, cost.visit)] >= var*cost.cost )).unwrap();
+                                var
+                            });
+                            }
+
+                            model
+                                .add_constr(
+                                    &format!("maxsatcut{}", n_maxsat_cuts),
+                                    c!(coeffs
+                                        .iter()
+                                        .map(|(cost, coeff)| {
+                                            (*coeff) * cost_threshold_vars[cost]
+                                        })
+                                        .sum::<Expr>()
+                                        >= rhs),
+                                )
+                                .unwrap();
+
+                            n_maxsat_cuts += 1;
+                            println!("Got core {:?} {}", coeffs, rhs);
+                        },
+                    );
+                }
+
+                println!("Added {} maxsat cuts", n_maxsat_cuts);
+
+                model
+                    .add_constr(
+                        &format!("maxsatcost"),
+                        c!(cost_vars.iter().map(|(_, v)| { v }).sum::<Expr>() >= total_cost as f64),
+                    )
+                    .unwrap();
+            }
         }
         DelayCostType::Continuous => {
+            let mut cost_vars: HashMap<(usize, usize), Var> = HashMap::new();
+
             for (train_idx, train) in problem.trains.iter().enumerate() {
                 for visit_idx in 0..train.visits.len() {
                     if let Some(aimed) = train.visits[visit_idx].aimed {
@@ -259,6 +335,7 @@ fn solve(
                         let objective_var =
                             add_ctsvar!(model, name:&objective_var_name,bounds:0.., obj: 1.0)
                                 .map_err(SolverError::GurobiError)?;
+                        cost_vars.insert((train_idx, visit_idx), objective_var);
 
                         #[allow(clippy::useless_conversion)]
                         model
@@ -269,6 +346,50 @@ fn solve(
                             .map_err(SolverError::GurobiError)?;
                     }
                 }
+            }
+
+            const USE_MAXSAT_CUTS_WITH_TIMEOUT: Option<f64> = Some(2.0);
+            let mut cost_threshold_vars: HashMap<TrainVisitCostBound, Var> = HashMap::new();
+
+            let mut n_maxsat_cuts = 0;
+            if let Some(maxsat_timeout) = USE_MAXSAT_CUTS_WITH_TIMEOUT {
+                let _ = maxsatddd::solve(
+                    satcoder::solvers::minisat::Solver::new(),
+                    &problem,
+                    maxsat_timeout,
+                    DelayCostType::InfiniteSteps180,
+                    |_, _| {},
+                    |_totalcost, coeffs, rhs| {
+                        // Add missing variables
+                        for (cost, _) in coeffs.iter() {
+                            cost_threshold_vars
+                            .entry(*cost)
+                            .or_insert_with(|| {
+
+                                let var = add_binvar!(model, name: &format!("t{}v{}c{}", cost.train, cost.visit, cost.cost), obj: 0.0)
+                    .unwrap();
+                model.add_constr(&format!("cost_t{}v{}c{}",  cost.train, cost.visit, cost.cost), c!(  cost_vars[&(cost.train, cost.visit)] >= var*180.0*cost.cost )).unwrap();
+                                var
+                            });
+                        }
+
+                        model
+                            .add_constr(
+                                &format!("maxsatcut{}", n_maxsat_cuts),
+                                c!(coeffs
+                                    .iter()
+                                    .map(|(cost, coeff)| { (*coeff) * cost_threshold_vars[cost] })
+                                    .sum::<Expr>()
+                                    >= rhs),
+                            )
+                            .unwrap();
+
+                        n_maxsat_cuts += 1;
+                        println!("Got core {:?} {}", coeffs, rhs);
+                    },
+                );
+
+                println!("Added {} maxsat cuts", n_maxsat_cuts);
             }
         }
     }
@@ -288,7 +409,14 @@ fn solve(
             //     .unwrap();
             // model
             //     .write(&format!("model{}.mps", refinement_iterations + 1))
-            //     .unwrap();
+            //     .unwrap()
+
+            if !lazy_constraints {
+                model
+                    .write(&format!("{}_full_bigm.lp", name.unwrap()))
+                    .unwrap()
+            }
+
             let _p = hprof::enter("optimize");
             model
                 .set_param(

@@ -106,7 +106,20 @@ pub fn main() {
             SolverMode::HeurHeur2 => {
                 let _p = hprof::enter("solve heurheur2");
                 let mut solver = heuristic::solvers::solver_heurheur2::HeurHeur2::new(htr_problem);
-                solver.solve().unwrap()
+                let mut best = (i32::MAX, None);
+                let mut n_solutions = 0;
+                while let Some((cost,sol)) = solver.solve_next_stopcb(|| start_time.elapsed().as_millis() >= opt.time_limit.unwrap_or(u128::MAX) ) {
+                    if cost < best.0 {
+                        best = (cost, Some(sol));
+                        println!("{}", cost);
+                        println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.conflict_space.n_nodes_generated, solver.conflict_space.n_nodes_explored);
+                    }
+                    n_solutions += 1;
+                }
+
+
+                println!("solutions:{} nodes_created:{} nodes_explored:{}", n_solutions, solver.conflict_space.n_nodes_generated, solver.conflict_space.n_nodes_explored);
+                (best.0, best.1.unwrap())
             }
             SolverMode::Random => {
                 let _p = hprof::enter("solve random");

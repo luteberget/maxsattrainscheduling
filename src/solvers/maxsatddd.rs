@@ -1,10 +1,12 @@
 use std::{
+    borrow::Borrow,
     cell::RefCell,
     collections::{BTreeMap, HashMap},
+    rc::Rc,
     time::Instant,
 };
 
-use ddd_problem::problem::{Problem, DelayCostType};
+use ddd_problem::problem::{DelayCostType, Problem};
 
 #[allow(unused)]
 use crate::{
@@ -70,7 +72,9 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
-    mut output_stats: impl FnMut(String, serde_json::Value),
+    output_stats: impl FnMut(String, serde_json::Value),
+    output_cores :impl FnMut(usize, &[(TrainVisitCostBound, f64)], f64)
+
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     solve_debug(
         solver,
@@ -79,7 +83,102 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
         delay_cost_type,
         |_| {},
         output_stats,
+        output_cores
     )
+}
+
+#[derive(Clone, Copy, Debug)]
+#[derive(Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub struct TrainVisitCostBound {
+    pub train: usize,
+    pub visit: usize,
+    pub cost: usize,
+}
+
+#[derive(Debug)]
+pub enum CostExpr {
+    Bound(TrainVisitCostBound),
+    Disjunction(Vec<Rc<CostExpr>>, usize),
+}
+
+impl CostExpr {
+    pub fn complexity(&self) -> usize {
+        match self {
+            CostExpr::Bound(_) => 1,
+            CostExpr::Disjunction(c, _) => 1 + c.iter().map(|c| c.complexity()).sum::<usize>(),
+        }
+    }
+
+    pub fn print_expr(&self) -> String {
+        match self {
+            CostExpr::Bound(TrainVisitCostBound { train, visit, cost }) => {
+                format!("t{}v{}c{}", train, visit, cost)
+            }
+            CostExpr::Disjunction(vec, bound) => {
+                format!(
+                    "{}*({})",
+                    1.0 / (*bound as f64 + 1.0),
+                    vec.iter()
+                        .map(|x| x.print_expr())
+                        .collect::<Vec<_>>()
+                        .join(" + ")
+                )
+            }
+        }
+    }
+    pub fn print_constraint(&self) -> String {
+        match self {
+            CostExpr::Disjunction(vec, bound) => {
+                assert!(*bound == 1);
+                format!(
+                    "{} >= 1",
+                    vec.iter()
+                        .map(|x| x.print_expr())
+                        .collect::<Vec<_>>()
+                        .join(" + ")
+                )
+            }
+            _ => panic!("bound is not a constraint"),
+        }
+    }
+
+    pub  fn print_accumulated_coeffs(&self) -> (String, HashMap<TrainVisitCostBound,f64>) {
+        match self {
+            CostExpr::Disjunction(vec, bound) => {
+                assert!(*bound == 1);
+                
+                let mut map = HashMap::new();
+                for v in vec.iter() {
+                    v.accumulate_coeffs(1.0, &mut map);
+                }
+
+                (format!(
+                    "{} >= 1",
+                    map.iter()
+                        .map(|(n,c)| format!("{} t{}v{}c{}", c, n.train, n.visit, n.cost))
+                        .collect::<Vec<_>>()
+                        .join(" + ")
+                ), map)
+            }
+            _ => panic!("bound is not a constraint"),
+        }
+    }
+
+    pub fn accumulate_coeffs(&self, coeff: f64, map :&mut HashMap<TrainVisitCostBound, f64>) {
+        match self {
+            CostExpr::Bound(b) => {
+                let x = map.entry(*b).or_default();
+                *x +=  coeff;
+            }
+            CostExpr::Disjunction(vec, bound) => {
+                let coeff = coeff  / (*bound as f64 + 1.0 );
+                for v in vec.iter() {
+                    v.accumulate_coeffs(coeff, map);
+                }
+            }
+        }
+    }
 }
 
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
@@ -95,6 +194,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     delay_cost_type: DelayCostType,
     debug_out: impl Fn(DebugInfo),
     mut output_stats: impl FnMut(String, serde_json::Value),
+    mut output_cores :impl FnMut(usize, &[(TrainVisitCostBound, f64)], f64)
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     // TODO
     //  - more eager constraint generation
@@ -158,7 +258,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut total_cost = 0;
     let mut soft_constraints = HashMap::new();
     let mut debug_actions = Vec::new();
-    // let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
+    let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
+    let mut cost_var_exprs: HashMap<Bool<L>, Rc<CostExpr>> = HashMap::new();
 
     // let mut conflicts_added: HashSet<((VisitId, i32), (VisitId, i32))> = Default::default();
     let mut conflict_vars: HashMap<(VisitId, VisitId), Bool<L>> = Default::default();
@@ -579,12 +680,12 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 //     train_idx, visit_idx, new_t, new_timepoint_cost
                 // );
 
-                // let var_name = format!(
-                //     "t{}v{}t{}cost{}",
-                //     train_idx, visit_idx, new_t, new_timepoint_cost
-                // );
+                let var_name = format!(
+                    "t{}v{}t{}cost{}",
+                    train_idx, visit_idx, new_t, new_timepoint_cost
+                );
 
-                const USE_COST_TREE: bool = true;
+                const USE_COST_TREE: bool = false;
                 if !USE_COST_TREE {
                     for cost in occupations[visit].cost.len()..=new_timepoint_cost {
                         let prev_cost_var = occupations[visit].cost[cost - 1];
@@ -594,6 +695,22 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
                         occupations[visit].cost.push(next_cost_var);
                         assert!(cost + 1 == occupations[visit].cost.len());
+
+                        assert!(cost_var_names
+                            .insert(
+                                !next_cost_var,
+                                format!("t{}v{}cost{}", train_idx, visit_idx, cost)
+                            )
+                            .is_none());
+
+                        cost_var_exprs.insert(
+                            !next_cost_var,
+                            Rc::new(CostExpr::Bound(TrainVisitCostBound {
+                                train: train_idx,
+                                visit: visit_idx,
+                                cost: cost,
+                            })),
+                        );
 
                         soft_constraints.insert(!next_cost_var, (Soft::Delay, 1, 1));
                         // println!(
@@ -625,9 +742,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         &mut solver,
                         new_timepoint_var,
                         new_timepoint_cost,
-                        // var_name,
-                        &mut |weight, cost_var| {
-                            // cost_var_names.insert(!cost_var, name);
+                        &var_name,
+                        &mut |name, weight, cost_var| {
+                            cost_var_names.insert(!cost_var, name);
                             soft_constraints.insert(!cost_var, (Soft::Delay, weight, weight));
                         },
                     );
@@ -916,11 +1033,11 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
             let mut core = core.iter().map(|c| Bool::Lit(*c)).collect::<Vec<_>>();
 
-            // println!("Core size {}", core.len());
-            // // *core_sizes.entry(core.len()).or_default() += 1;
-            // trim_core(&mut core, &mut solver);
-            // minimize_core(&mut core, &mut solver);
-            // println!("Post core size {}", core.len());
+            println!("Core size {}", core.len());
+            // *core_sizes.entry(core.len()).or_default() += 1;
+            trim_core(&mut core, &mut solver);
+            minimize_core(&mut core, &mut solver);
+            println!("Post core size {}", core.len());
 
             // *processed_core_sizes.entry(core.len()).or_default() += 1;
             // println!("  pre sizes {:?}", core_sizes);
@@ -929,20 +1046,26 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             debug_actions.push(SolverAction::Core(core.len()));
 
             let min_weight = core.iter().map(|c| soft_constraints[c].1).min().unwrap();
-            // let max_weight = core.iter().map(|c| soft_constraints[c].1).max().unwrap();
+            let max_weight = core.iter().map(|c| soft_constraints[c].1).max().unwrap();
             assert!(min_weight >= 1);
 
-            // println!("Core sz{} weight range {} -- {} assumps {}/{}",  core.len(), min_weight, max_weight, n_assumps, soft_constraints.len());
+            let mut non_primary = false;
 
             for c in core.iter() {
                 let (soft, cost, original_cost) = soft_constraints.remove(c).unwrap();
 
-                // let soft_str = match &soft {
-                //     Soft::Delay => "delay".to_string(),
-                //     Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
-                // };
+                let soft_str = match &soft {
+                    Soft::Delay => "delay".to_string(),
+                    Soft::Totalizer(_, b) => format!("totalizer w/bound={}", b),
+                };
 
-                // println!("  * {:?} {:?} {} {}", c, cost_var_names.get(c), soft_str, cost);
+                // println!(
+                //     "  * {:?} {:?} {} {}",
+                //     c,
+                //     cost_var_exprs.get(c),
+                //     soft_str,
+                //     cost
+                // );
 
                 assert!(cost >= min_weight);
                 let new_cost = cost - min_weight;
@@ -959,7 +1082,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         /* primary soft constraint, when we relax to new_cost=0 we are done */
                     }
                     Soft::Totalizer(mut tot, bound) => {
+                        non_primary = true;
                         // panic!();
+
                         if new_cost > 0 {
                             // println!("  ** Reducing totalizer cost from {} to {}", cost, new_cost);
 
@@ -977,9 +1102,20 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                                 //     original_cost
                                 // );
 
-                                // let mut name = cost_var_names[c].clone();
-                                // name.push_str(&format!("<={}", new_bound));
-                                // cost_var_names.insert(!tot.rhs()[new_bound], name);
+                                let mut name = cost_var_names[c].clone();
+                                let pos = name.rfind("<=").unwrap();
+                                name.truncate(pos);
+                                name.push_str(&format!("<={}", new_bound));
+                                cost_var_names.insert(!tot.rhs()[new_bound], name);
+
+                                let cost_expr = cost_var_exprs[c].clone();
+                                let cost_expr = match cost_expr.borrow() {
+                                    CostExpr::Disjunction(vec, bound) => {
+                                        Rc::new(CostExpr::Disjunction(vec.clone(), new_bound))
+                                    }
+                                    _ => panic!("should be a totalizer/disjunction"),
+                                };
+                                cost_var_exprs.insert(!tot.rhs()[new_bound], cost_expr);
 
                                 soft_constraints.insert(
                                     !tot.rhs()[new_bound], // tot <= 2, 3, 4...
@@ -996,30 +1132,56 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                     }
                 }
             }
-
             // println!(
-            //     "increasing cost from {} to {}",
-            //     total_cost,
-            //     total_cost + min_weight
+            //     "Core sz{} primary {} weight range {} -- {} assumps {}/{}",
+            //     core.len(),
+            //     !non_primary,
+            //     min_weight,
+            //     max_weight,
+            //     n_assumps,
+            //     soft_constraints.len()
             // );
+
+            println!(
+                "increasing cost from {} to {}",
+                total_cost,
+                total_cost + min_weight
+            );
             total_cost += min_weight;
             if core.len() > 1 {
                 let bound = 1;
                 let tot = Totalizer::count(&mut solver, core.iter().map(|c| !*c), bound as u32);
                 assert!(bound < tot.rhs().len());
 
-                // let mut name = String::new();
-                // for c in core {
-                //     name.push_str(&format!("{}+", cost_var_names[&c]));
-                // }
-                // name.push_str(&format!("<={}", bound));
-                // cost_var_names.insert(!tot.rhs()[bound], name);
+                let mut name = String::new();
+                for c in &core {
+                    if name.ends_with(")") {
+                        name.push_str("+");
+                    }
+                    name.push_str(&format!("({})", cost_var_names[&c]));
+                }
+                name.push_str(&format!("<={}", bound));
+                cost_var_names.insert(!tot.rhs()[bound], name);
+
+                let expr = Rc::new(CostExpr::Disjunction(
+                    core.iter().map(|c| cost_var_exprs[c].clone()).collect(),
+                    bound,
+                ));
+
+                cost_var_exprs.insert(!tot.rhs()[bound], expr.clone());
+
+                let (expr_string, expr_map) = expr.print_accumulated_coeffs();
+                println!("{}  costvars {}", expr_string, cost_var_names.len());
+
+                output_cores(total_cost, &expr_map.into_iter().collect::<Vec<_>>(), 1.0);
+
                 soft_constraints.insert(
                     !tot.rhs()[bound], // tot <= 1
                     (Soft::Totalizer(tot, bound), min_weight, min_weight),
                 );
             } else {
                 // panic!();
+                // println!("{}", 1);
                 SatInstance::add_clause(&mut solver, vec![!core[0]]);
             }
         }

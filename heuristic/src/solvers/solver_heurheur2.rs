@@ -5,14 +5,15 @@ use std::{
 
 use itertools::Itertools;
 use log::warn;
+use ordered_float::OrderedFloat;
 
 use crate::{
     branching::{Branching, ConflictSolverNode},
     node_eval::NodeEval,
     occupation::ResourceConflicts,
-    problem::{BlockRef, Problem, TrainRef},
+    problem::{BlockRef, Problem, TimeValue, TrainRef},
     trainset::TrainSet,
-    ConflictSolver,
+    ConflictSolver, TrainSolver,
 };
 
 use super::train_queue::QueueTrainSolver;
@@ -27,8 +28,8 @@ pub struct HeurHeur2 {
     best_cost: i32,
     visit_weights: Option<BTreeMap<(TrainRef, BlockRef), f32>>,
 
-    queue_main: Vec<Rc<ConflictSolverNode<NodeEval>>>,
-    queue_dive: Vec<Rc<ConflictSolverNode<NodeEval>>>,
+    pub queue_main: Vec<(f64, Rc<ConflictSolverNode<NodeEval>>)>,
+    pub queue_dive: Vec<Rc<ConflictSolverNode<NodeEval>>>,
 }
 
 impl HeurHeur2 {
@@ -48,6 +49,7 @@ impl HeurHeur2 {
         };
 
         h.dive(None);
+        println!("ROOT heuristic cost {}", h.best_cost);
         h
     }
 
@@ -59,6 +61,24 @@ impl HeurHeur2 {
             self.visit_weights = Some(self.create_visit_weights());
         }
         cost
+    }
+
+    pub fn solve_next_stopcb(
+        &mut self,
+        mut stop: impl FnMut() -> bool,
+    ) -> Option<(i32, Vec<Vec<i32>>)> {
+        loop {
+            let done = !self.conflicts.has_conflict()
+                && !self.trainset.is_dirty()
+                && self.queue_main.is_empty();
+            if stop() || done {
+                return None;
+            }
+
+            if let Some((cost, sol)) = self.big_step() {
+                return Some((cost, sol));
+            }
+        }
     }
 
     fn create_visit_weights(&self) -> BTreeMap<(TrainRef, BlockRef), f32> {
@@ -88,18 +108,19 @@ impl HeurHeur2 {
             }
         }
 
-        println!("New weights");
-        for ((x, y), z) in map.iter() {
-            println!(" {} {} {}", x, y, z);
-        }
+        // println!("New weights");
+        // for ((x, y), z) in map.iter() {
+        //     println!(" {} {} {}", x, y, z);
+        // }
 
         map
     }
 
-    fn dive(&mut self, from_node: Option<&Rc<ConflictSolverNode<NodeEval>>>) -> i32 {
+    fn dive(&mut self, from_node: Option<&Rc<ConflictSolverNode<NodeEval>>>) -> (i32, Vec<i32>) {
         let prev_node = self.conflict_space.current_node.clone();
         self.set_node(from_node.cloned());
         self.queue_dive.clear();
+        let mut heur_nodes = 0;
         loop {
             if let Some(conflict) = self.conflicts.first_conflict() {
                 let (node_a, node_b) = self.conflict_space.branch(conflict, |c| {
@@ -136,21 +157,37 @@ impl HeurHeur2 {
                 if let Some(chosen_node) = chosen_node {
                     self.set_node(Some(chosen_node));
                 } else {
-                    let node = Some(self.queue_dive.pop().unwrap());
-                    self.set_node(node);
+                    if self.queue_dive.is_empty() || heur_nodes > 10000 {
+                        return (i32::MAX, vec![]);
+                    }
+                    let n = self.queue_dive.pop().unwrap();
+                    self.set_node(Some(n));
                 }
+                heur_nodes += 1;
             } else if self.trainset.is_dirty() {
                 self.trainset.solve_all_trains(&mut self.conflicts);
             } else {
                 let cost = self.solution_event();
+                let cost_vector = self
+                    .trainset
+                    .trains
+                    .iter()
+                    .map(|t| t.current_solution().0)
+                    .collect();
+
                 self.set_node(prev_node);
-                return cost;
+                return (cost, cost_vector);
             }
         }
     }
 
     pub fn solve_step(&mut self) -> Option<Option<(i32, Vec<Vec<i32>>)>> {
         if let Some(conflict) = self.conflicts.first_conflict() {
+            // println!(
+            //     "Train A: {}  Train B: {}",
+            //     conflict.occ_a.train, conflict.occ_b.train
+            // );
+
             let (node_a, node_b) = self.conflict_space.branch(conflict, |c| {
                 let eval = crate::node_eval::node_evaluation(
                     &self.trainset.original_trains,
@@ -160,24 +197,37 @@ impl HeurHeur2 {
                     c.occ_b,
                     c.c_b,
                     self.visit_weights.as_ref(),
-                    true,
+                    false,
                 );
                 (eval, eval)
             });
             // Evaluate each node using a dive.
 
-            let score_a = node_a
+            let (score_a, costs_a) = node_a
                 .as_ref()
                 .map(|n| self.dive(Some(n)))
-                .unwrap_or(i32::MAX);
-            let score_b = node_b
+                .unwrap_or((i32::MAX, vec![]));
+            let (score_b, costs_b) = node_b
                 .as_ref()
                 .map(|n| self.dive(Some(n)))
-                .unwrap_or(i32::MAX);
+                .unwrap_or((i32::MAX, vec![]));
+
+            let cost_diff = costs_a
+                .iter()
+                .zip(costs_b.iter())
+                .map(|(a, b)| (a - b).abs())
+                .sum::<TimeValue>();
+            let criticality = (cost_diff as f64) / ((score_a - score_b).abs() as f64);
 
             println!("Heuristic dive calculated");
-            println!("  node_a:{}", score_a);
-            println!("  node_b:{}", score_b);
+            println!("  node_a:{}   costs {:?}", score_a, costs_a);
+            println!("  node_b:{}   costs {:?}", score_b, costs_b);
+            println!(
+                "  total cost diff {}, train cost diff {}",
+                (score_a - score_b).abs(),
+                cost_diff
+            );
+            println!(" criticality? {}", criticality);
 
             let mut chosen_node = None;
 
@@ -185,20 +235,25 @@ impl HeurHeur2 {
                 if score_a < score_b {
                     chosen_node = Some(node_a);
                 } else {
-                    self.queue_main.push(node_a);
+                    println!("pushed a {}", score_a as f64- cost_diff as f64);
+                    self.queue_main.push((score_a as f64- cost_diff as f64, node_a));
                 }
             }
             if let Some(node_b) = node_b {
                 if score_b < score_a {
                     chosen_node = Some(node_b);
                 } else {
-                    self.queue_main.push(node_b);
+                    println!("pushed b {}", score_b as f64- cost_diff as f64);
+                    self.queue_main.push((score_b as f64 - cost_diff as f64, node_b));
                 }
             }
 
             if let Some(node) = chosen_node {
                 self.set_node(Some(node));
             } else {
+                if self.queue_main.is_empty() {
+                    return Some(None);
+                }
                 self.switch_to_any_node();
             }
 
@@ -213,7 +268,9 @@ impl HeurHeur2 {
             None
         } else {
             // Done.
-            Some(Some(self.trainset.current_solution()))
+            let sol = self.trainset.current_solution();
+            self.switch_to_any_node();
+            Some(Some(sol))
         }
     }
 
@@ -225,14 +282,14 @@ impl HeurHeur2 {
     }
 
     fn switch_to_any_node(&mut self) {
-        println!("switch to any");
+        // println!("switch to any");
         warn!("non-DFS node");
         if self.queue_main.is_empty() {
-            println!("No more nodes");
+            // println!("No more nodes");
         } else {
-            let new_node = self
-                .queue_main
-                .remove(rand::random::<usize>() % self.queue_main.len());
+            self.queue_main.sort_by_key(|(crit, _)| OrderedFloat(*crit));
+            let (crit, new_node) = self.queue_main.pop().unwrap();
+            // println!("Popping node with criticality {}", crit);
             self.set_node(Some(new_node));
         }
     }

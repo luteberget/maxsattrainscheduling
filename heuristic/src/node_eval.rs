@@ -31,7 +31,7 @@ pub fn node_evaluation(
     occ_b: &ResourceOccupation,
     c_b: &ConflictConstraint,
     weights: Option<&BTreeMap<(TrainRef, BlockRef), f32>>,
-    print :bool,
+    print: bool,
 ) -> NodeEval {
     let mut priorities: Vec<(LocalHeuristicType, f64, f64)> = Vec::new();
     priorities.push((
@@ -46,30 +46,31 @@ pub fn node_evaluation(
     ));
 
     // Fastest first doesn't seem like a good heuristic.
-    // priorities.push((
-    //     LocalHeuristicType::FastestFirst,
-    //     fastest_first(trains, slacks, occ_a, c_a, occ_b, c_b),
-    // ));
-
     priorities.push((
-        LocalHeuristicType::TimetableFirst,
-        timetable_first(trains, slacks, occ_a, c_a, occ_b, c_b),
-        1.0,
-    ));
-
-    priorities.push((
-        LocalHeuristicType::CriticalDependencies,
-        critical_dependencies(trains, slacks, occ_a, c_a, occ_b, c_b, weights),
+        LocalHeuristicType::FastestFirst,
+        fastest_first(trains, slacks, occ_a, c_a, occ_b, c_b),
         3.0,
     ));
 
+    // priorities.push((
+    //     LocalHeuristicType::TimetableFirst,
+    //     timetable_first(trains, slacks, occ_a, c_a, occ_b, c_b),
+    //     1.0,
+    // ));
+
+    // priorities.push((
+    //     LocalHeuristicType::CriticalDependencies,
+    //     critical_dependencies(trains, slacks, occ_a, c_a, occ_b, c_b, weights),
+    //     3.0,
+    // ));
+
     if print {
-    println!("NODE EVAL");
-    for (pri_type, pri_value, factor) in &priorities {
-        assert!(*pri_value >= 0.0 - 1.0e-5 && *pri_value <= 1.0 + 1.0e-5);
-        println!(" -  {:?} * {}", (pri_type, pri_value), factor);
+        println!("NODE EVAL");
+        for (pri_type, pri_value, factor) in &priorities {
+            assert!(*pri_value >= 0.0 - 1.0e-5 && *pri_value <= 1.0 + 1.0e-5);
+            println!(" -  {:?} * {}", (pri_type, pri_value), factor);
+        }
     }
-}
 
     let a_best = priorities.iter().map(|(_, v, f)| (*f) * (*v)).sum::<f64>()
         / priorities.iter().map(|(_, _, f)| (*f)).sum::<f64>()
@@ -138,7 +139,7 @@ fn first_leaving(
     }
 }
 
-fn _fastest_first(
+fn fastest_first(
     _trains: &Vec<crate::problem::Train>,
 
     _slacks: &Vec<Vec<i32>>,
@@ -147,6 +148,12 @@ fn _fastest_first(
     occ_b: &ResourceOccupation,
     _c_b: &ConflictConstraint,
 ) -> f64 {
+
+    let factor = occ_a.interval.length() as f64/ occ_b.interval.length() as f64;
+    if factor > 0.2 && factor < 5.0 {
+        return 0.5;
+    }
+
     if occ_a.interval.length() < occ_b.interval.length() {
         0.5 - 0.5 * (1.0 - occ_a.interval.length() as f64 / occ_b.interval.length() as f64)
     } else {
@@ -185,14 +192,14 @@ fn critical_dependencies(
     'res: for b1 in trains[occ_a.train as usize]
         .blocks
         .iter()
-        .skip(occ_a.block as usize+1)
+        .skip(occ_a.block as usize + 1)
         .take(3)
     {
         for r1 in b1.resource_usage.iter() {
             for b2 in trains[occ_b.train as usize]
                 .blocks
                 .iter()
-                .skip(occ_b.block as usize+1)
+                .skip(occ_b.block as usize + 1)
                 .take(3)
             {
                 for r2 in b2.resource_usage.iter() {

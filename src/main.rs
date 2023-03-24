@@ -165,6 +165,7 @@ fn main() {
                     |k, v| {
                         solve_data.insert(k, v);
                     },
+                    Some(&name),
                 ),
                 SolverType::MipHull => bigm::solve_hull(
                     &env,
@@ -177,6 +178,7 @@ fn main() {
                     |k, v| {
                         solve_data.insert(k, v);
                     },
+                    Some(&name),
                 ),
                 SolverType::BigMLazy => bigm::solve_bigm(
                     &env,
@@ -189,6 +191,7 @@ fn main() {
                     |k, v| {
                         solve_data.insert(k, v);
                     },
+                    Some(&name),
                 ),
                 SolverType::MaxSatDdd => maxsatddd::solve(
                     // &env,
@@ -199,6 +202,7 @@ fn main() {
                     |k, v| {
                         solve_data.insert(k, v);
                     },
+                    |_,_,_| {},
                 )
                 .map(|(v, _)| v),
                 SolverType::MaxSatDddCadical => maxsatddd::solve(
@@ -210,6 +214,7 @@ fn main() {
                     |k, v| {
                         solve_data.insert(k, v);
                     },
+                    |_,_,_| {},
                 )
                 .map(|(v, _)| v),
                 SolverType::MaxSatIdl => {
@@ -410,7 +415,7 @@ fn print_problem_stats(problem: &problem::Problem) -> ProblemStats {
 
 #[cfg(test)]
 mod tests {
-    use ddd::problem::{DelayCostType, NamedProblem};
+    use ddd_problem::problem::{DelayMeasurementType, DelayCostType, NamedProblem};
 
     #[test]
     pub fn testproblem_maxsatddd() {
@@ -427,6 +432,7 @@ mod tests {
             30.0,
             DelayCostType::FiniteSteps123,
             |_, _| {},
+            |_,_| {},
         )
         .unwrap()
         .0;
@@ -464,6 +470,7 @@ mod tests {
             30.0,
             delay_cost_type,
             |_, _| {},
+            |_,_| {},
         )
         .unwrap()
         .0;
@@ -477,6 +484,7 @@ mod tests {
                 30.0,
                 DelayCostType::FiniteSteps123,
                 |_, _| {},
+                |_,_| {},
             )
             .unwrap()
             .0;
@@ -493,15 +501,15 @@ mod tests {
 
         let delay_cost_type = DelayCostType::FiniteSteps123;
         for delaytype in [
-            ddd::problem::DelayMeasurementType::AllStationArrivals,
-            ddd::problem::DelayMeasurementType::FinalStationArrival,
+            DelayMeasurementType::AllStationArrivals,
+            DelayMeasurementType::FinalStationArrival,
         ] {
             for instance_number in
                 // [                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,            ]
                 [3, 4, 5]
             {
                 println!("{}", instance_number);
-                let NamedProblem { problem, .. } = crate::parser::read_xml_file(
+                let NamedProblem { problem, .. } = ddd_problem::parser::read_xml_file(
                     &format!("instances/Instance{}.xml", instance_number,),
                     delaytype,
                 );
@@ -513,6 +521,7 @@ mod tests {
                     30.0,
                     delay_cost_type,
                     |_, _| {},
+                    |_,_| {},
                 )
                 .unwrap()
                 .0;
@@ -527,6 +536,7 @@ mod tests {
                         30.0,
                         DelayCostType::FiniteSteps123,
                         |_, _| {},
+                        |_,_| {},
                     )
                     .unwrap()
                     .0;
