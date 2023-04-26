@@ -15,9 +15,9 @@ def tr_name(x):
 comparison = {}
 
 for filename in [
-        "2022-06-28-cont.json",
-        "2022-06-28-infsteps180.json",
-        "2022-06-28-finsteps123.json",
+        "results/2022-06-28-cont.json",
+        "results/2022-06-28-infsteps180.json",
+        "results/2022-06-28-finsteps123.json",
         ]:
 
     print(f"# {filename}")
