@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Tuple
@@ -11,24 +12,34 @@ from torch_geometric.data import HeteroData
 from torch_geometric.nn import HeteroConv, summary, MLP
 from torch_geometric.nn.conv import GATv2Conv
 
+from jobshopdata import random_data
 
 
-data = random_data(5, 2, 9, 25)
+N_MACHINES = 4
+N_JOBS = 3
+DUR_LO = 5
+DUR_HI = 50
+
+N_SAMPLES = 2000
+
+
+
+data = random_data(None, N_JOBS, N_MACHINES, DUR_LO, DUR_HI)
 print(data)
 
 print("X")
 for key, value in data.x_dict.items():
-    print("  key", key, "shape", value)
+    print("  key", key, "shape",value.shape, value)
 print(".")
 
 print("EDGE_INDEX")
 for key, value in data.edge_index_dict.items():
-    print("  key", key, "shape", value)
+    print("  key", key, "shape", value.shape, value)
 print(".")
 
 print("EDGE_ATTR")
 for key, value in data.edge_attr_dict.items():
-    print("  key", key, "shape", value)
+    print("  key", key, "shape", value.shape, value)
 print(".")
 
 
@@ -37,9 +48,9 @@ class MyGNN(torch.nn.Module):
         super().__init__()
 
         # hyperparameters
-        hidden_channels = 4
+        hidden_channels = 8
         out_channels = 1
-        num_layers = 3
+        num_layers = 4
 
         self.encode = MLP(
             in_channels=-1, hidden_channels=4,
@@ -54,8 +65,12 @@ class MyGNN(torch.nn.Module):
             }, aggr='cat')
             self.convs.append(conv)
 
-        self.decode = MLP(
-            in_channels=hidden_channels * len(self.convs) * num_layers, hidden_channels=4,
+        self.decode1 = MLP(
+            in_channels=hidden_channels * len(self.convs) * 3, hidden_channels=4,
+            out_channels=5, num_layers=3)
+
+        self.decode2 = MLP(
+            in_channels=10, hidden_channels=4,
             out_channels=out_channels, num_layers=3)
 
     def forward(self, x_dict, edge_index_dict, edge_attr_dict):
@@ -77,21 +92,31 @@ class MyGNN(torch.nn.Module):
         edge_index = edge_index_dict["operation", "conflictswith", "operation"]
         edge_feat_first = cat_xs['operation'][edge_index[0]]
         edge_feat_second = cat_xs['operation'][edge_index[1]]
-        prod = (edge_feat_first * edge_feat_second)
+        # prod = torch.cat([edge_feat_first, edge_feat_second], dim=-1)
+        
+        # prod = edge_feat_first - edge_feat_second
+        #     # print("edge first", edge_feat_first.shape)
+        #     # print("edge second", edge_feat_second.shape)
+        #     # print("dot prod shape", prod.shape)
 
-        output = self.decode(prod)
-        # print(output)
+        e1 = self.decode1(edge_feat_first)
+        e2 = self.decode1(edge_feat_second)
+        output = self.decode2(torch.cat([e1,e2], dim=-1))
+        output = 2.0 * torch.special.expit(output) - 1.0
 
-        num_edges, num_output_features = output.shape
-        # print(num_edges)
+        # output = self.decode(cat_xs["operation"])
+        # print("out shape", output.shape)
 
-        output_pairs = output.view(num_edges//2, 2, num_output_features)
-        softmax = torch.nn.Softmax(dim=1)(output_pairs)
-        softmax = softmax.view(num_edges, num_output_features)
+        # num_edges, num_output_features = output.shape
+        # # print(num_edges)
+
+        # output_pairs = output.view(num_edges//2, 2, num_output_features)
+        # softmax = torch.nn.Softmax(dim=1)(output_pairs)
+        # softmax = softmax.view(num_edges, num_output_features)
 
         # print(output_pairs)
         # print(softmax)
-        return softmax
+        return output
 
 
 model = MyGNN()
@@ -108,8 +133,24 @@ with torch.no_grad():  # Initialize lazy modules.
 #       data.edge_attr_dict, max_depth=99, leaf_module=None))
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
-dataset = [data] * 100
-train_loader = torch_geometric.loader.DataLoader(dataset, 50)
+
+
+filename = f"jobshop-{N_MACHINES}-{N_JOBS}-{DUR_LO}-{DUR_HI}-{N_SAMPLES}.dat"
+
+if not os.path.exists(filename):
+    print("Generating data")
+    dataset = [random_data(i, N_JOBS, N_MACHINES, DUR_LO, DUR_HI)
+                for i in range(N_SAMPLES)]
+    torch.save(dataset, filename)
+else:
+    print("Loading data...")
+    dataset = torch.load(filename)
+
+
+# dataset = [dataset[0]]
+print("Training...")
+
+train_loader = torch_geometric.loader.DataLoader(dataset, 25)
 
 
 def apply(model, batch):
@@ -122,14 +163,16 @@ def apply(model, batch):
 
 def train(train_loader):
     model.train()
-    for batch in train_loader:
+    for batch_idx, batch in enumerate(train_loader):
         optimizer.zero_grad()
 
         out = apply(model, batch)
         truth = batch.edge_attr_dict["operation", "conflictswith", "operation"]
+        #truth = batch.y_dict["operation"]
         loss = torch.nn.functional.mse_loss(out,
                                             truth)
-        # print(loss)
+        if batch_idx % 100 == 0:
+            print(f"batch{batch_idx} loss={loss}")
         loss.backward()
         optimizer.step()
 
@@ -142,9 +185,11 @@ def test(loader):
     for batch in loader:  # Iterate in batches over the training/test dataset.
 
         out = apply(model, batch)
+        #truth = batch.y_dict["operation"]
         truth = batch.edge_attr_dict["operation",
                                      "conflictswith", "operation"].round().int()
-        pred = out.round().int()  # Use the class with highest probability.
+        # pred = out.round().int()  # Use the class with highest probability.
+        pred = torch.tensor([[1 if x >= 0.0 else -1] for x in out])
 
         # Check against ground-truth labels.
         correct += int((pred == truth).sum())
@@ -153,9 +198,26 @@ def test(loader):
     return correct / count  # Derive ratio of correct predictions.
 
 
-for epoch in range(200):
-    train(train_loader)
-    train_acc = test(train_loader)
-    test_acc = 0.0
-    print(
-        f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
+for epoch in range(10000):
+    try:
+        train(train_loader)
+        train_acc = test(train_loader)
+        test_acc = 0.0
+        print(
+            f'Epoch: {epoch:03d}, Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
+    except KeyboardInterrupt:
+        print("Cancelling...")
+        break
+
+
+
+# Single point test
+
+data = random_data(None, N_JOBS, N_MACHINES, DUR_LO, DUR_HI)
+print(data)
+
+out = model(data.x_dict, data.edge_index_dict, edge_attrs)
+print(data.y_dict)
+print(out)
+print(torch.tensor([[1 if x >= 0.0 else -1] for x in out]))
+print("number ", sum([1 if x >= 0.0 else 0 for x in out]), len([x for x in out]))
