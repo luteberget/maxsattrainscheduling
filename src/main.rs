@@ -246,16 +246,17 @@ fn main() {
             let mut solve_data = serde_json::Map::new();
 
             solution = match solver {
-                SolverType::Cutting => ddd::solvers::cutting::solve_cutting(
-                    &p.problem,
-                    delay_cost_type,
-                    TIMEOUT,
-                    &p.train_names,
-                    &p.resource_names,
-                    |k, v| {
-                        solve_data.insert(k, v);
-                    },
-                ),
+                SolverType::Cutting => unimplemented!(),
+                // ddd::solvers::cutting::solve_cutting(
+                //     &p.problem,
+                //     delay_cost_type,
+                //     TIMEOUT,
+                //     &p.train_names,
+                //     &p.resource_names,
+                //     |k, v| {
+                //         solve_data.insert(k, v);
+                //     },
+                // ),
                 SolverType::Greedy => {
                     greedy::solve2(&p.problem, &env, delay_cost_type, default_heuristic)
                 }
@@ -325,7 +326,7 @@ fn main() {
                     }
                 }
                 SolverType::MipDdd => {
-                    ddd::solvers::mipdddpack::solve(&env, &p.problem, delay_cost_type)
+                    ddd::solvers::mipdddpack::solve(&env, &p.problem, delay_cost_type, TIMEOUT)
                 }
             };
             hprof::end_frame();

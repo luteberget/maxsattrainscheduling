@@ -2,7 +2,7 @@
 //!
 //!
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, VecDeque, HashSet};
 
 use grb::prelude::*;
 use log::{warn, info};
@@ -12,8 +12,10 @@ use crate::problem::{Problem, DelayCostType};
 use super::SolverError;
 const M: f64 = 100_000.0;
 
-pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -> Result<Vec<Vec<i32>>, SolverError> {
+pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, timeout :f64) -> Result<Vec<Vec<i32>>, SolverError> {
     // assert!(matches!(delay_cost_type, DelayCostType::FiniteSteps123));
+    let start_time = std::time::Instant::now();
+
     let _p_init = hprof::enter("mip solve init");
     let mut intervals = problem
         .trains
@@ -31,16 +33,18 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
         for visit_idx in 0..(train.visits.len()-1) {
             if train.visits[visit_idx].earliest + train.visits[visit_idx].travel_time
             > train.visits[visit_idx+1].earliest {
-                warn!("Train {} visit {} earliest {} travel {} is later than visit {} earliest {}", 
+                panic!("Train {} visit {} earliest {} travel {} is later than visit {} earliest {}", 
                 train_idx, visit_idx, train.visits[visit_idx].earliest, train.visits[visit_idx].travel_time,
                 visit_idx+1, train.visits[visit_idx+1].earliest)
             }
         }
     }
 
+    let mut occupations = Vec::new();
     let mut resource_usage: HashMap<usize, Vec<(usize, usize)>> = HashMap::new();
     for (train_idx, train) in problem.trains.iter().enumerate() {
         for (visit_idx, visit) in train.visits.iter().enumerate() {
+            occupations.push((train_idx,visit_idx));
             if problem.conflicts.contains(&(visit.resource_id, visit.resource_id)) {
                 resource_usage
                     .entry(visit.resource_id)
@@ -49,6 +53,7 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
             }
         }
     }
+
     // println!("PROBLEM {:?}", problem);
     // println!("RESOURCE USAGE {:?}", resource_usage);
 
@@ -60,7 +65,6 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
 
     loop {
         iteration += 1;
-        info!("MIPDDD iteration {}", iteration);
         let _p_enc = hprof::enter("build mip");
         let mut model = Model::with_env("model1", env).map_err(SolverError::GurobiError)?;
         let interval_vars = intervals.iter().enumerate().map(|(train_idx,t)| {
@@ -92,6 +96,11 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
             }).collect::<Vec<_>>()
         }).collect::<Vec<_>>();
 
+        let mut incompat :HashMap<(usize,usize,usize),Vec<(usize,usize,usize)>> = Default::default();
+
+        let mut n_travel_time_constraints = 0;
+        let mut n_conflict_constraints = 0;
+
         // travel time constraint
         for (train_idx, train) in problem.trains.iter().enumerate() {
             for visit_idx in 0..train.visits.len() - 1 {
@@ -103,15 +112,24 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
                         .iter()
                         .enumerate()
                         .take_while(|(_, (_v2start, v2end))| v1start + dt >= *v2end)
-                        .map(|(idx2, _)| interval_vars[train_idx][visit_idx + 1][idx2]);
+                        .map(|(idx2, _)|idx2).collect::<Vec<_>>();
+
+                    for idx2 in incompatible_intervals.iter().copied() {
+                        incompat.entry((train_idx,visit_idx,idx1)).or_default().push((train_idx,visit_idx+1,idx2));
+                        incompat.entry((train_idx,visit_idx+1,idx2)).or_default().push((train_idx,visit_idx,idx1));
+                    }
 
                     #[allow(clippy::useless_conversion)]
                     model
                         .add_constr(
                             &format!("t{}v{}i{}tt", train_idx, visit_idx, idx1),
-                            c!(source_interval + incompatible_intervals.grb_sum() <= 1.0_f64),
+                            c!(source_interval +
+                                 incompatible_intervals.iter().copied().map(|idx2|  
+                                    interval_vars[train_idx][visit_idx + 1][idx2]).grb_sum() <= 1.0_f64),
                         )
                         .unwrap();
+
+                    n_travel_time_constraints += 1;
                 }
             }
         }
@@ -140,6 +158,9 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
                                 let i1 = interval_vars[*t1][*v1][t1_idx];
                                 let i2 = interval_vars[*t2][*v2][t2_idx];
 
+                                incompat.entry((*t1,*v1,t1_idx)).or_default().push((*t2,*v2,t2_idx));
+                                incompat.entry((*t2,*v2,t2_idx)).or_default().push((*t1,*v1,t1_idx));
+
                                 #[allow(clippy::useless_conversion)]
                                 model
                                     .add_constr(
@@ -150,6 +171,8 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
                                         c!(i1 + i2 <= 1.0),
                                     )
                                     .unwrap();
+
+                                n_conflict_constraints += 1;
                             } else {
                                 // println!("COMPATIBLE t{}v{}x{}-{},dt{}  t{}v{}x{}-{},dt{}", t1, v1, t1_start, t1_end, travel1, t2, v2, t2_start, t2_end, travel2);
                             }
@@ -161,15 +184,29 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
 
         drop(_p_enc);
 
+        info!("Solving MIPDDD iteration {} with {} travel time {} conflicts", iteration, n_travel_time_constraints, n_conflict_constraints);
+
+        model
+        .set_param(
+            param::TimeLimit,
+            timeout - start_time.elapsed().as_secs_f64(),
+        )
+        .map_err(SolverError::GurobiError)?;
+
         model.write(&format!("mipddd_it{}.lp", iteration)).unwrap();
 
-        {
+        let status = {
             let _p = hprof::enter("mip solve");
             model.optimize().map_err(SolverError::GurobiError)?;
-        }
+            model.status().map_err(SolverError::GurobiError)?
+        };
 
         let _p = hprof::enter("mipddd refine");
-        if model.status().map_err(SolverError::GurobiError)? != Status::Optimal {
+
+        
+        if status == Status::TimeLimit {
+            return Err(SolverError::Timeout);
+        } else if status != Status::Optimal {
             model.compute_iis().map_err(SolverError::GurobiError)?;
             model
                 .write("infeasible.ilp")
@@ -183,38 +220,66 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
 
         info!("cost {}", cost);
 
-        let solution = intervals
-            .iter()
-            .enumerate()
-            .map(|(train_idx, t)| {
-                let mut train_times = t
-                    .iter()
-                    .enumerate()
-                    .map(|(visit_idx, v)| {
-                        v.iter()
-                            .enumerate()
-                            .find_map(|(iidx, (t, _))| {
-                                (model
-                                    .get_obj_attr(
-                                        attr::X,
-                                        &interval_vars[train_idx][visit_idx][iidx],
-                                    )
-                                    .map_err(SolverError::GurobiError)
-                                    .unwrap()
-                                    > 0.5)
-                                    .then(|| *t)
-                            })
-                            .unwrap()
-                    })
-                    .collect::<Vec<_>>();
-                let last = train_times.last().copied().unwrap()
-                    + problem.trains[train_idx].visits.last().unwrap().travel_time;
-                train_times.push(last);
-                train_times
-            })
-            .collect::<Vec<_>>();
+        let mut selected_interval = intervals.iter().enumerate().map(|(train_idx,ts)| {
+           ts.iter().enumerate().map(|(visit_idx,is)| {
+                is.iter().enumerate().position(|(iidx,_)|
+                model.get_obj_attr(
+                    attr::X,
+                    &interval_vars[train_idx][visit_idx][iidx],
+                )
+                .map_err(SolverError::GurobiError)
+                .unwrap()
+                > 0.5
+            ).unwrap()
+           }).collect::<Vec<_>>() 
+        }).collect::<Vec<_>>();
 
+        // LOCALLY MINIMIZE
+        // iteratively select an earlier interval if that preserves feasibility
+
+            let mut consecutive_unmodified_occupations = 0;
+            let mut i = 0;
+            let occs_len = occupations.len();
+            while consecutive_unmodified_occupations < occs_len {
+                let mut touched = false;
+                let occ_idx = i % occupations.len();
+                let (train_idx, visit_idx) = occupations[occ_idx];
+                while selected_interval[train_idx][visit_idx] > 0 {
+
+                    let prev_interval = selected_interval[train_idx][visit_idx]-1;
+                        let can_reduce = !incompat.entry((train_idx,visit_idx,prev_interval))
+                        .or_default().iter().copied()
+                        .any(|(t2,v2,i2)| {
+                            selected_interval[t2][v2] == i2
+                        });
+
+                        if can_reduce {
+                            selected_interval[train_idx][visit_idx] = prev_interval;
+                            touched = true;
+                            consecutive_unmodified_occupations = 0;
+                        } else {
+                            break;
+                        }
+
+                }
+                i+=1;
+                if !touched {
+                    consecutive_unmodified_occupations += 1;
+                }
+        }
+
+        let solution:Vec<Vec<i32>> = selected_interval.iter().enumerate().map(|(train_idx,vs)|{
+            let mut train_times = vs.iter().enumerate().map(|(visit_idx,interval_idx)|
+            intervals[train_idx][visit_idx][*interval_idx].0
+        ).collect::<Vec<_>>();
+                        let last = train_times.last().copied().unwrap()
+                            + problem.trains[train_idx].visits.last().unwrap().travel_time;
+                        train_times.push(last);   train_times }
+        ).collect::<Vec<_>>();
+        
         let mut new_intervals = VecDeque::new();
+        let mut n_new_intervals = 0;
+        let mut n_conflicts = 0;
 
         // Check the travel times
         {
@@ -223,7 +288,7 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
                 for visit_idx in 0..train.visits.len() - 1 {
                     let dt = problem.trains[train_idx].visits[visit_idx].travel_time;
                     if solution[train_idx][visit_idx] + dt > solution[train_idx][visit_idx + 1] {
-                        warn!("travel time refinement t{}v{}x{}", train_idx, visit_idx+1, solution[train_idx][visit_idx]+dt);
+                        panic!("travel time refinement t{}v{}x{}", train_idx, visit_idx+1, solution[train_idx][visit_idx]+dt);
                         new_intervals.push_back((
                             train_idx,
                             visit_idx + 1,
@@ -238,15 +303,16 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
             let _p = hprof::enter("mip_ddd check conflicts");
             for visit_pair @ ((t1, v1), (t2, v2)) in visit_conflicts.iter().copied() {
                 if !check_conflict(visit_pair, &solution)? {
-                    warn!("conflict refinement t{}v{}x{}--{} vee t{}v{}x{}--{}", 
-                    t1, v1, solution[t1][v1], solution[t1][v1+1],
-                    t2, v2, solution[t2][v2], solution[t2][v2+1]);
-                    warn!("   t1-v1   intervals {:?}", intervals[t1][v1]);
-                    warn!("   t1-v1+1 intervals {:?}", intervals[t1][v1+1]);
-                    warn!("   t2-v2   intervals {:?}", intervals[t2][v2]);
-                    warn!("   t2-v2+1 intervals {:?}", intervals[t2][v2+1]);
+                    // warn!("conflict refinement t{}v{}x{}--{} vee t{}v{}x{}--{}", 
+                    // t1, v1, solution[t1][v1], solution[t1][v1+1],
+                    // t2, v2, solution[t2][v2], solution[t2][v2+1]);
+                    // warn!("   t1-v1   intervals {:?}", intervals[t1][v1]);
+                    // warn!("   t1-v1+1 intervals {:?}", intervals[t1][v1+1]);
+                    // warn!("   t2-v2   intervals {:?}", intervals[t2][v2]);
+                    // warn!("   t2-v2+1 intervals {:?}", intervals[t2][v2+1]);
                     new_intervals.push_back((t2, v2, solution[t1][v1 + 1]));
                     new_intervals.push_back((t1, v1, solution[t2][v2 + 1]));
+                    n_conflicts += 1;
                 }
             }
         }
@@ -270,6 +336,7 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
                         let old_end = is[idx - 1].1;
                         is[idx - 1].1 = time;
                         is.insert(idx, (time, old_end));
+                        n_new_intervals += 1;
 
                         if visit_idx + 1 < problem.trains[train_idx].visits.len() {
                             let next_time =
@@ -279,6 +346,7 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType) -
                     }
                 };
             }
+            info!("Added {} new intervals to solve {} conflicts", n_new_intervals, n_conflicts);
         } else {
             // success
             let n_intervals = intervals
