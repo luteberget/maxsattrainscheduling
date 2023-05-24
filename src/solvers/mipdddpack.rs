@@ -298,6 +298,12 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
                 }
             }
         }
+
+        const ADD_ALL_CONFLICTS :bool = false;
+
+
+        if ADD_ALL_CONFLICTS {
+
         // Check the conflicts
         {
             let _p = hprof::enter("mip_ddd check conflicts");
@@ -316,6 +322,32 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
                 }
             }
         }
+
+        } else {
+                // Check the conflicts
+                let violated_conflicts = {
+                    let _p = hprof::enter("check conflicts");
+        
+                    let mut cs: HashMap<(usize, usize), Vec<(usize, usize)>> = HashMap::new();
+                    for visit_pair @ ((t1, v1), (t2, v2)) in visit_conflicts.iter().copied() {
+                        if !check_conflict(visit_pair, &solution)? {
+                            cs.entry((t1, t2)).or_default().push((v1, v2));
+                        }
+                    }
+                    cs
+                };
+
+                for ((t1, t2), pairs) in violated_conflicts {
+                    let (v1, v2) = *pairs.iter().min_by_key(|(v1, v2)| v1 + v2).unwrap();
+                    new_intervals.push_back((t2, v2, solution[t1][v1 + 1]));
+                    new_intervals.push_back((t1, v1, solution[t2][v2 + 1]));
+                    n_conflicts += 1;
+                }
+
+    
+        }
+
+
 
         if !new_intervals.is_empty() {
             while let Some((train_idx, visit_idx, time)) = new_intervals.pop_front() {
