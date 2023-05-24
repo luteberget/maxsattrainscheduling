@@ -15,9 +15,9 @@ def tr_name(x):
 comparison = {}
 
 for filename in [
-        "results/2022-06-28-cont.json",
-        "results/2022-06-28-infsteps180.json",
-        "results/2022-06-28-finsteps123.json",
+        "results/2023-05-23-continuous.json",
+        "results/2023-05-23-infsteps180.json",
+        "results/2023-05-23-finsteps123.json",
         ]:
 
     print(f"# {filename}")
@@ -33,25 +33,39 @@ for filename in [
         worsttime = max([s["sol_time"] if "sol_time" in s else 9999 for s in instance["solves"]])
 
         bigm = next((s for s in instance["solves"] if s["solver_name"] == "BigMLazy"))
-        ddd = next((s for s in instance["solves"] if s["solver_name"] == "MaxSatDdd"))
+        satddd = next((s for s in instance["solves"] if s["solver_name"] == "MaxSatDdd"))
+        mipddd = next((s for s in instance["solves"] if s["solver_name"] == "MipDdd"))
 
-        comparison[instance["name"]].append((filename,"bigm",bigm["sol_time"] if "sol_time" in bigm else None, f"{bigm['sol_time']:.0f}" if "sol_time" in bigm else "\\timeout"))
-        comparison[instance["name"]].append((filename,"ddd", ddd["sol_time"] if "sol_time" in ddd else None, f"{ddd['sol_time']:.0f}" if "sol_time" in ddd else "\\timeout"))
+        # The "worst instances" comparison in done on the finsteps123 objective.
+        if "finsteps123" in filename:
+            comparison[instance["name"]].append((filename,"bigm",bigm["sol_time"] if "sol_time" in bigm else None, f"{bigm['sol_time']:.0f}" if "sol_time" in bigm else "\\timeout"))
+            comparison[instance["name"]].append((filename,"satddd", satddd["sol_time"] if "sol_time" in satddd else None, f"{satddd['sol_time']:.0f}" if "sol_time" in satddd else "\\timeout"))
+            comparison[instance["name"]].append((filename,"mipddd", mipddd["sol_time"] if "sol_time" in mipddd else None, f"{mipddd['sol_time']:.0f}" if "sol_time" in mipddd else "\\timeout"))
         #comparison.append((instance["name"],cmpx))
 
         #if worsttime < 100.0:
         #    continue
         cols = [
+                # Instance name
                 tr_name(instance["name"]),
+
+                # BIGM iterations, conflicts, solve time
                 str(bigm["iteration"]) if "iteration" in bigm else "-",
                 str(bigm["added_conflict_pairs"]) if "added_conflict_pairs" in bigm else "-",
                 f"{bigm['sol_time']:.0f}" if "sol_time" in bigm else "\\timeout",
-                # & Iter. & Interv. & Avg. Interv. & Time
-                str(ddd["iterations"]) if "iterations" in ddd else "-",
-                str(ddd["num_time_points"]) if "num_time_points" in ddd else "-",
-                f"{ddd['avg_time_points']:.1f}" if "avg_time_points" in ddd else "-",
-                f"{ddd['sol_time']:.0f}" if "sol_time" in ddd else "\\timeout",
-                f"{(bigm['sol_time']/ddd['sol_time']):.1f}x" if "sol_time" in bigm and "sol_time" in ddd else "-",
+
+
+                # MIP DDD solve time
+                f"{mipddd['sol_time']:.0f}" if "sol_time" in mipddd else "\\timeout",
+
+                # Iterations, total intervals, avg. intervals (per event), solve time
+                str(satddd["iterations"]) if "iterations" in satddd else "-",
+                str(satddd["num_time_points"]) if "num_time_points" in satddd else "-",
+                f"{satddd['avg_time_points']:.1f}" if "avg_time_points" in satddd else "-",
+                f"{satddd['sol_time']:.0f}" if "sol_time" in satddd else "\\timeout",
+
+                # Ratio of solve time between bigm and satddd
+                f"{(bigm['sol_time']/satddd['sol_time']):.1f}x" if "sol_time" in bigm and "sol_time" in satddd else "-",
                 ]
 
         print(" & ".join(cols) + " \\\\")
