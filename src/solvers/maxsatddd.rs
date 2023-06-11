@@ -70,7 +70,7 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
-    mut output_stats: impl FnMut(String, serde_json::Value),
+    output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     solve_debug(
         solver,
@@ -107,6 +107,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let _p = hprof::enter("solver");
 
     let start_time = Instant::now();
+    let mut solver_time = std::time::Duration::ZERO;
     let mut stats = SolveStats::default();
 
     let mut visits: TiVec<VisitId, (usize, usize)> = TiVec::new();
@@ -360,9 +361,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             //     );
 
                             // We should not need to use these.
-                            #[allow(unused)]
+                            #[allow(unused, clippy::let_unit_value)]
                             let t1_in = ();
-                            #[allow(unused)]
+                            #[allow(unused, clippy::let_unit_value)]
                             let t2_in = ();
 
                             // The constraint is:
@@ -554,6 +555,16 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         .into(),
                 );
 
+                output_stats(
+                    "total_time".to_string(),
+                    start_time.elapsed().as_secs_f64().into(),
+                );
+                output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
+                output_stats(
+                    "algorithm_time".to_string(),
+                    (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
+                );
+
                 return Ok((trains, stats));
             }
         }
@@ -666,6 +677,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
         assumptions.sort_by_key(|(_, w)| -(*w as isize));
 
         let core = loop {
+            let solve_start = Instant::now();
             let result = {
                 // println!("solving");
                 let _p = hprof::enter("sat check");
@@ -674,6 +686,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                     assumptions.iter().map(|(k, _)| *k).take(n_assumps),
                 )
             };
+            solver_time += solve_start.elapsed();
 
             // println!("solving done");
             match result {
@@ -910,7 +923,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 return Err(SolverError::NoSolution); // UNSAT
             }
 
-            let mut core = core.iter().map(|c| Bool::Lit(*c)).collect::<Vec<_>>();
+            let core = core.iter().map(|c| Bool::Lit(*c)).collect::<Vec<_>>();
 
             // println!("Core size {}", core.len());
             // // *core_sizes.entry(core.len()).or_default() += 1;

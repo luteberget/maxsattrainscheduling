@@ -83,7 +83,7 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
         ("instances_addtracktime", "track"),
         ("instances_addstationtime", "station"),
     ] {
-        let instances = ["A" ,"B"]
+        let instances = ["A", "B"]
             .iter()
             .flat_map(move |n| (1..=12).map(move |i| (n, i)));
 
@@ -325,9 +325,15 @@ fn main() {
                         panic!("Unsupported delay cost type for IDL solver.");
                     }
                 }
-                SolverType::MipDdd => {
-                    ddd::solvers::mipdddpack::solve(&env, &p.problem, delay_cost_type, TIMEOUT)
-                }
+                SolverType::MipDdd => ddd::solvers::mipdddpack::solve(
+                    &env,
+                    &p.problem,
+                    delay_cost_type,
+                    TIMEOUT,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                ),
             };
             hprof::end_frame();
             let solver_name = format!("{:?}", solver);
@@ -550,7 +556,7 @@ mod tests {
         env.set(grb::param::OutputFlag, 0).unwrap();
 
         let problem = crate::problem::problem1_with_stations();
-        let result = ddd::solvers::mipdddpack::solve(&env, &problem, delay_cost_type).unwrap();
+        let result = ddd::solvers::mipdddpack::solve(&env, &problem, delay_cost_type, 120.0, |_,_| {}).unwrap();
         let score = problem.verify_solution(&result, delay_cost_type);
         assert!(score.is_some());
     }

@@ -2,19 +2,21 @@
 //!
 //!
 
-use std::collections::{HashMap, VecDeque, HashSet};
+use std::collections::{HashMap, VecDeque};
 
 use grb::prelude::*;
-use log::{warn, info};
+use log::info;
 
 use crate::problem::{Problem, DelayCostType};
 
 use super::SolverError;
 const M: f64 = 100_000.0;
 
-pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, timeout :f64) -> Result<Vec<Vec<i32>>, SolverError> {
+pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, timeout :f64, mut output_stats :impl FnMut(String, serde_json::Value),
+) -> Result<Vec<Vec<i32>>, SolverError> {
     // assert!(matches!(delay_cost_type, DelayCostType::FiniteSteps123));
     let start_time = std::time::Instant::now();
+    let mut solver_time = std::time::Duration::ZERO;
 
     let _p_init = hprof::enter("mip solve init");
     let mut intervals = problem
@@ -67,10 +69,20 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
         iteration += 1;
         let _p_enc = hprof::enter("build mip");
         let mut model = Model::with_env("model1", env).map_err(SolverError::GurobiError)?;
+
+        // The following parameters were found by grbtune on a selected
+        // subset of (hard) mipddd-IAP instances. They gave a good speedup
+        // on the tuning set, but seemed to not make much of a difference 
+        // on the full benchmark.
+        // model.set_param(grb::param::Presolve, 2).map_err(SolverError::GurobiError)?;
+        // model.set_param(grb::param::AggFill, 1000).map_err(SolverError::GurobiError)?;
+        // model.set_param(grb::param::Heuristics, 0.0).map_err(SolverError::GurobiError)?;
+        // model.set_param(grb::param::BranchDir, -1).map_err(SolverError::GurobiError)?;
+
         let interval_vars = intervals.iter().enumerate().map(|(train_idx,t)| {
             t.iter().enumerate().map(|(visit_idx,v)| {
                 let intervals = v.iter().map(|(time,time_out)| {
-                    let mut cost = problem.trains[train_idx].visit_delay_cost(delay_cost_type, visit_idx, *time) as f64;
+                    let cost = problem.trains[train_idx].visit_delay_cost(delay_cost_type, visit_idx, *time) as f64;
 
                     // if cost > 1e-5 {
                     //     cost = 1800.0 * cost + ((*time) - problem.trains[train_idx].visits[visit_idx].earliest) as f64;
@@ -96,6 +108,7 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
             }).collect::<Vec<_>>()
         }).collect::<Vec<_>>();
 
+        #[allow(clippy::type_complexity)]
         let mut incompat :HashMap<(usize,usize,usize),Vec<(usize,usize,usize)>> = Default::default();
 
         let mut n_travel_time_constraints = 0;
@@ -197,7 +210,12 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
 
         let status = {
             let _p = hprof::enter("mip solve");
+
+
+            let start_solve = std::time::Instant::now();
             model.optimize().map_err(SolverError::GurobiError)?;
+            solver_time += start_solve.elapsed();
+
             model.status().map_err(SolverError::GurobiError)?
         };
 
@@ -289,11 +307,16 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
                     let dt = problem.trains[train_idx].visits[visit_idx].travel_time;
                     if solution[train_idx][visit_idx] + dt > solution[train_idx][visit_idx + 1] {
                         panic!("travel time refinement t{}v{}x{}", train_idx, visit_idx+1, solution[train_idx][visit_idx]+dt);
-                        new_intervals.push_back((
-                            train_idx,
-                            visit_idx + 1,
-                            solution[train_idx][visit_idx] + dt,
-                        ));
+
+                        // Because we always "propagate" the new shortest traveling time to subsequent
+                        // train resource occupations, we should never have this conflict type.
+
+                        // If we don't eagerly propagate like this, then we need this refinement:
+                        // new_intervals.push_back((
+                        //     train_idx,
+                        //     visit_idx + 1,
+                        //     solution[train_idx][visit_idx] + dt,
+                        // ));
                     }
                 }
             }
@@ -386,6 +409,24 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
                 .flat_map(|t| t.iter().map(|v| v.len()))
                 .sum::<usize>();
             println!("Solved with cost {} and {} intervals", cost, n_intervals);
+
+
+            output_stats("iteration".to_string(), iteration.into());
+            output_stats("intervals".to_string(), interval_vars.iter().map(|is| is.iter().map(|i| i.len()).sum::<usize>()).sum::<usize>().into());
+            output_stats("travel_constraints".to_string(), n_travel_time_constraints.into());
+            output_stats("resource_constraints".to_string(), n_conflict_constraints.into());
+            output_stats("internal_cost".to_string(), cost.into());
+
+            output_stats(
+                "total_time".to_string(),
+                start_time.elapsed().as_secs_f64().into(),
+            );
+            output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
+            output_stats(
+                "algorithm_time".to_string(),
+                (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
+            );
+
             return Ok(solution);
         }
 

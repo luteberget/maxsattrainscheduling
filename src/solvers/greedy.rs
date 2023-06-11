@@ -1,9 +1,4 @@
-use std::collections::{HashMap, HashSet};
-
-use grb::add_ctsvar;
-
 use crate::problem::{DelayCostType, Problem};
-
 use super::{bigm::visit_conflicts, minimize, SolverError};
 
 pub struct ChoiceCharacteristics {
@@ -13,7 +8,7 @@ pub struct ChoiceCharacteristics {
     pub total_lateness: i32,
 }
 
-pub fn default_heuristic(a: &ChoiceCharacteristics, b: &ChoiceCharacteristics) -> f64 {
+pub fn default_heuristic(a: &ChoiceCharacteristics, _b: &ChoiceCharacteristics) -> f64 {
     a.objective_cost as f64
 }
 

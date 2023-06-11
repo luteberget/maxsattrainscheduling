@@ -12,6 +12,7 @@ const M: f64 = 2.0 * 6.0 * 3600.0;
 
 type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<grb::Var, SolverError>;
 
+#[allow(clippy::too_many_arguments)]
 pub fn solve_bigm(
     env: &grb::Env,
     problem: &Problem,
@@ -20,7 +21,7 @@ pub fn solve_bigm(
     timeout: f64,
     train_names: &[String],
     resource_names: &[String],
-    mut output_stats :impl FnMut(String, serde_json::Value),
+    output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
@@ -35,6 +36,7 @@ pub fn solve_bigm(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn solve_hull(
     env: &grb::Env,
     problem: &Problem,
@@ -44,7 +46,7 @@ pub fn solve_hull(
 
     train_names: &[String],
     resource_names: &[String],
-    mut output_stats :impl FnMut(String, serde_json::Value),
+    output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
@@ -69,7 +71,7 @@ fn solve(
     train_names: &[String],
     resource_names: &[String],
     add_conflict_constraint: ConflictHandler,
-    mut output_stats :impl FnMut(String, serde_json::Value),
+    mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     let _p = hprof::enter("bigm solver");
     use grb::prelude::*;
@@ -84,9 +86,9 @@ fn solve(
     //     .set_param(param::IntFeasTol, 1e-8)
     //     .map_err(SolverError::GurobiError)?;
 
-        // model
-        // .set_param(param::LazyConstraints, 1)
-        // .map_err(SolverError::GurobiError)?;
+    // model
+    // .set_param(param::LazyConstraints, 1)
+    // .map_err(SolverError::GurobiError)?;
 
     // model.set_param(grb::param::OutputFlag, 1);
 
@@ -276,6 +278,7 @@ fn solve(
     }
 
     let mut refinement_iterations = 0usize;
+    let mut solver_time = std::time::Duration::ZERO;
     // println!("INSTANCE");
     loop {
         {
@@ -298,7 +301,9 @@ fn solve(
                     timeout - start_time.elapsed().as_secs_f64(),
                 )
                 .map_err(SolverError::GurobiError)?;
+            let start_solve = Instant::now();
             model.optimize().map_err(SolverError::GurobiError)?;
+            solver_time += start_solve.elapsed();
 
             // let n_nodes = model.get_attr(grb::attr::NodeCount).map_err(SolverError::GurobiError)?;
             // println!("NODECOUNT {}", n_nodes);
@@ -489,12 +494,29 @@ fn solve(
             );
 
             output_stats("refinements".to_string(), refinement_iterations.into());
-            output_stats("added_conflict_pairs".to_string(), added_conflicts.len().into());
+            output_stats(
+                "added_conflict_pairs".to_string(),
+                added_conflicts.len().into(),
+            );
             output_stats("iteration".to_string(), iteration.into());
-            output_stats("travel_constraints".to_string(), n_travel_constraints.into());
-            output_stats("resource_constraints".to_string(), n_resource_constraints.into());
+            output_stats(
+                "travel_constraints".to_string(),
+                n_travel_constraints.into(),
+            );
+            output_stats(
+                "resource_constraints".to_string(),
+                n_resource_constraints.into(),
+            );
             output_stats("internal_cost".to_string(), cost.into());
-
+            output_stats(
+                "total_time".to_string(),
+                start_time.elapsed().as_secs_f64().into(),
+            );
+            output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
+            output_stats(
+                "algorithm_time".to_string(),
+                (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
+            );
 
             // let mip_objective =  model.get_attr(grb::attr::ObjVal).unwrap();
             // println!("MIP obj {}", mip_objective);
