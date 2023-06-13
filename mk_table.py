@@ -20,9 +20,9 @@ alg_time = {"bigm": {"total_time": 0.0, "alg_time": 0.0},
             "mipddd": {"total_time": 0.0, "alg_time": 0.0}}
 
 for filename in [
-        "results/2023-06-11-continuous.json",
-        "results/2023-06-11-infsteps180.json",
-        "results/2023-06-11-finsteps123.json",
+        "results/2023-06-13-cont.json",
+        "results/2023-06-13-infsteps180.json",
+        "results/2023-06-13-finsteps123.json",
         ]:
 
     print(f"# {filename}")
