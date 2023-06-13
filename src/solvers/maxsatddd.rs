@@ -1,6 +1,6 @@
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, HashMap, HashSet},
     time::Instant,
 };
 
@@ -260,7 +260,13 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
             // SOLVE ALL SIMPLE PRESEDENCES BEFORE CONFLICTS
             // if !found_conflict {
-            for visit_id in touched_intervals.iter().copied() {
+
+            let mut deconflicted_train_pairs: HashSet<(usize, usize)> = HashSet::new();
+            // for visit_id in touched_intervals.iter().copied() {
+
+            touched_intervals.retain(|visit_id| {
+                let visit_id = *visit_id;
+
                 let _p = hprof::enter("conflict check");
                 let (train_idx, visit_idx) = visits[visit_id];
                 let next_visit: Option<VisitId> =
@@ -277,6 +283,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 // RESOURCE CONFLICT
                 // println!("touchesd {:?}", usize::from(visit_id));
 
+                let mut retain = false;
+
                 if let Some(conflicting_resources) = conflicts.get(&visit.resource_id) {
                     for other_resource in conflicting_resources.iter().copied() {
                         // println!(" other resource {:?}", other_resource);
@@ -291,6 +299,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             if usize::from(visit_id) == usize::from(other_visit) {
                                 continue;
                             }
+
                             let _v1 = &occupations[visit_id];
                             let v2 = &occupations[other_visit];
                             let t2_in = v2.incumbent_time();
@@ -300,6 +309,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             if other_train_idx == train_idx {
                                 continue; // Assume for now that the train doesn't conflict with itself.
                             }
+
 
                             let other_next_visit: Option<VisitId> = if other_visit_idx + 1
                                 < problem.trains[other_train_idx].visits.len()
@@ -342,6 +352,14 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                             // if t1_out <= t2_in || t2_out <= t1_in {
                             //     panic!("kejks");
                             // }
+
+                            if !deconflicted_train_pairs.insert((train_idx, other_train_idx))
+                                || !deconflicted_train_pairs.insert((other_train_idx, train_idx))
+                            {
+                                retain = true;
+                                continue;
+                            }
+
 
                             found_resource_conflict = true;
                             stats.n_conflict += 1;
@@ -435,10 +453,12 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                         }
                     }
                 }
-            }
 
-            touched_intervals.clear();
-            assert!(touched_intervals.is_empty());
+                retain
+            });
+
+            // touched_intervals.clear();
+            // assert!(touched_intervals.is_empty());
             // }
 
             let iterationtype = if found_travel_time_conflict && found_resource_conflict {
@@ -539,18 +559,25 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                     "num_time_points".to_string(),
                     occupations
                         .iter()
-                        .map(|o| o.delays.len())
+                        .map(|o| o.delays.len() - 1)
                         .sum::<usize>()
                         .into(),
                 );
                 output_stats(
                     "max_time_points".to_string(),
-                    occupations.iter().map(|o| o.delays.len()).max().unwrap()
+                    occupations
+                        .iter()
+                        .map(|o| o.delays.len() - 1)
+                        .max()
+                        .unwrap()
                         .into(),
                 );
                 output_stats(
                     "avg_time_points".to_string(),
-                    ((occupations.iter().map(|o| o.delays.len()).sum::<usize>() as f64)
+                    ((occupations
+                        .iter()
+                        .map(|o| o.delays.len() - 1)
+                        .sum::<usize>() as f64)
                         / (occupations.len() as f64))
                         .into(),
                 );
