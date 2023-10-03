@@ -314,6 +314,7 @@ fn solve(
         if status == Status::TimeLimit {
             return Err(SolverError::Timeout);
         } else if status == Status::Infeasible {
+            println!("INFEASIBLE problem");
             model.compute_iis().map_err(SolverError::GurobiError)?;
             model
                 .write("infeasible.ilp")

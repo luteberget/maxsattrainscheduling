@@ -163,6 +163,12 @@ enum SolverType {
     MipHull,
     Greedy,
     Cutting,
+    BinarizedBigMEager10Sec,
+    BinarizedBigMEager30Sec,
+    BinarizedBigMEager60Sec,
+    BinarizedBigMLazy10Sec,
+    BinarizedBigMLazy30Sec,
+    BinarizedBigMLazy60Sec,
 }
 
 const TIMEOUT: f64 = 120.0;
@@ -188,6 +194,12 @@ fn main() {
             "mip_hull" => SolverType::MipHull,
             "greedy" => SolverType::Greedy,
             "cutting" => SolverType::Cutting,
+            "bin_bigm_eager_10s" => SolverType::BinarizedBigMEager10Sec,
+            "bin_bigm_eager_30s" => SolverType::BinarizedBigMEager30Sec,
+            "bin_bigm_eager_60s" => SolverType::BinarizedBigMEager60Sec,
+            "bin_bigm_lazy_10s" => SolverType::BinarizedBigMLazy10Sec,
+            "bin_bigm_lazy_30s" => SolverType::BinarizedBigMLazy30Sec,
+            "bin_bigm_lazy_60s" => SolverType::BinarizedBigMLazy60Sec,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -334,6 +346,96 @@ fn main() {
                         solve_data.insert(k, v);
                     },
                 ),
+                SolverType::BinarizedBigMEager10Sec => {
+                    ddd::solvers::binarizedbigm::solve_binarized_bigm(
+                        &env,
+                        &p.problem,
+                        delay_cost_type,
+                        false,
+                        10,
+                        TIMEOUT,
+                        &p.train_names,
+                        &p.resource_names,
+                        |k, v| {
+                            solve_data.insert(k, v);
+                        },
+                    )
+                }
+                SolverType::BinarizedBigMEager30Sec => {
+                    ddd::solvers::binarizedbigm::solve_binarized_bigm(
+                        &env,
+                        &p.problem,
+                        delay_cost_type,
+                        false,
+                        30,
+                        TIMEOUT,
+                        &p.train_names,
+                        &p.resource_names,
+                        |k, v| {
+                            solve_data.insert(k, v);
+                        },
+                    )
+                }
+                SolverType::BinarizedBigMEager60Sec => {
+                    ddd::solvers::binarizedbigm::solve_binarized_bigm(
+                        &env,
+                        &p.problem,
+                        delay_cost_type,
+                        false,
+                        60,
+                        TIMEOUT,
+                        &p.train_names,
+                        &p.resource_names,
+                        |k, v| {
+                            solve_data.insert(k, v);
+                        },
+                    )
+                }
+                SolverType::BinarizedBigMLazy10Sec => {
+                    ddd::solvers::binarizedbigm::solve_binarized_bigm(
+                        &env,
+                        &p.problem,
+                        delay_cost_type,
+                        true,
+                        10,
+                        TIMEOUT,
+                        &p.train_names,
+                        &p.resource_names,
+                        |k, v| {
+                            solve_data.insert(k, v);
+                        },
+                    )
+                }
+                SolverType::BinarizedBigMLazy30Sec => {
+                    ddd::solvers::binarizedbigm::solve_binarized_bigm(
+                        &env,
+                        &p.problem,
+                        delay_cost_type,
+                        true,
+                        30,
+                        TIMEOUT,
+                        &p.train_names,
+                        &p.resource_names,
+                        |k, v| {
+                            solve_data.insert(k, v);
+                        },
+                    )
+                }
+                SolverType::BinarizedBigMLazy60Sec => {
+                    ddd::solvers::binarizedbigm::solve_binarized_bigm(
+                        &env,
+                        &p.problem,
+                        delay_cost_type,
+                        true,
+                        60,
+                        TIMEOUT,
+                        &p.train_names,
+                        &p.resource_names,
+                        |k, v| {
+                            solve_data.insert(k, v);
+                        },
+                    )
+                }
             };
             hprof::end_frame();
             let solver_name = format!("{:?}", solver);
@@ -556,7 +658,9 @@ mod tests {
         env.set(grb::param::OutputFlag, 0).unwrap();
 
         let problem = crate::problem::problem1_with_stations();
-        let result = ddd::solvers::mipdddpack::solve(&env, &problem, delay_cost_type, 120.0, |_,_| {}).unwrap();
+        let result =
+            ddd::solvers::mipdddpack::solve(&env, &problem, delay_cost_type, 120.0, |_, _| {})
+                .unwrap();
         let score = problem.verify_solution(&result, delay_cost_type);
         assert!(score.is_some());
     }

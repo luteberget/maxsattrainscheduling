@@ -1,5 +1,6 @@
 pub mod maxsatddd;
 pub mod bigm;
+pub mod binarizedbigm;
 pub mod greedy;
 pub mod idl;
 pub mod mipdddpack;
