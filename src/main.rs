@@ -6,7 +6,7 @@ use ddd::{
     solvers::{
         bigm,
         greedy::{self, default_heuristic},
-        maxsatddd, SolverError,
+        maxsatddd, maxsatddd_full, SolverError,
     },
 };
 
@@ -169,6 +169,7 @@ enum SolverType {
     BinarizedBigMLazy10Sec,
     BinarizedBigMLazy30Sec,
     BinarizedBigMLazy60Sec,
+    ExternalMaxSat,
 }
 
 const TIMEOUT: f64 = 120.0;
@@ -200,6 +201,7 @@ fn main() {
             "bin_bigm_lazy_10s" => SolverType::BinarizedBigMLazy10Sec,
             "bin_bigm_lazy_30s" => SolverType::BinarizedBigMLazy30Sec,
             "bin_bigm_lazy_60s" => SolverType::BinarizedBigMLazy60Sec,
+            "external_maxsat" => SolverType::ExternalMaxSat,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -308,6 +310,18 @@ fn main() {
                         solve_data.insert(k, v);
                     },
                 ),
+                SolverType::ExternalMaxSat => maxsatddd_full::solve(
+                    &env,
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                    5,
+                    900,
+                )
+                .map(|(v, _)| v),
                 SolverType::MaxSatDdd => maxsatddd::solve(
                     // &env,
                     satcoder::solvers::minisat::Solver::new(),

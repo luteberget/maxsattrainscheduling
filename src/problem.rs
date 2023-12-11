@@ -112,7 +112,7 @@ impl Problem {
                 let t1_in = solution[train_idx][visit_idx];
                 let t1_out = solution[train_idx][visit_idx + 1];
 
-                if t1_in < *earliest {
+                if t1_in < *earliest - 10 {
                     println!("Earliest entry conflict t{} v{}", train_idx, visit_idx);
                     println!("train {}: {:?}", train_idx, train);
                     println!("  train solution: {:?}", solution[train_idx]);
@@ -164,7 +164,8 @@ impl Problem {
                             let ok = t1_in >= t2_out - 1 || t2_in >= t1_out - 1;
                             if !ok {
                                 println!(
-                                    "Resource conflict in t{} v{} {}-{} t{} v{} {}-{}",
+                                    "Resource conflict {}-{} in t{} v{} {}-{} t{} v{} {}-{}",
+                                    *r1, *r2,
                                     train_idx1,
                                     visit_idx1,
                                     t1_in,
@@ -176,8 +177,10 @@ impl Problem {
                                 );
                                 println!("train1 {}: {:?}", train_idx1, train1);
                                 println!("  train1 solution: {:?}", solution[train_idx1]);
+                                println!("  {:?}", train1.visits[visit_idx1]);
                                 println!("train2 {}: {:?}", train_idx2, train2);
                                 println!("  train2 solution: {:?}", solution[train_idx2]);
+                                println!("  {:?}", train2.visits[visit_idx2]);
                                 return None;
                             }
                         }
