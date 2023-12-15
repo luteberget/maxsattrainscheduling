@@ -65,7 +65,7 @@ pub struct SolveStats {
 }
 
 pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
-    // env: &grb::Env,
+    mk_env: impl Fn() -> grb::Env + Send + 'static,
     solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
@@ -73,6 +73,7 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
     output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     solve_debug(
+        mk_env,
         solver,
         problem,
         timeout,
@@ -84,11 +85,11 @@ pub fn solve<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
 thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
 
-use crate::{debug::DebugInfo, problem::DelayCostType};
+use crate::{debug::DebugInfo, problem::DelayCostType, solvers::heuristic};
 
 use super::{costtree::CostTree, SolverError};
 pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
-    // env: &grb::Env,
+    mk_env: impl Fn() -> grb::Env + Send + 'static,
     mut solver: impl SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
@@ -165,6 +166,32 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut conflict_vars: HashMap<(VisitId, VisitId), Bool<L>> = Default::default();
     // let mut priorities: Vec<(VisitId, VisitId)> = Vec::new();
 
+    const USE_HEURISTIC: bool = true;
+
+    let heur_thread = USE_HEURISTIC.then(|| {
+        let (sol_in_tx, sol_in_rx) = std::sync::mpsc::channel();
+        let (sol_out_tx, sol_out_rx) = std::sync::mpsc::channel();
+        let problem = problem.clone();
+
+        std::thread::spawn(move || {
+            let env = mk_env();
+            while let Ok(mut sol) = sol_in_rx.recv() {
+                while let Ok(more_recent_sol) = sol_in_rx.try_recv() {
+                    sol = more_recent_sol;
+                }
+                let ub_sol = heuristic::solve_heuristic(&env, &problem, &sol).unwrap();
+                if let Some(ub_sol) = ub_sol {
+                    let ub_cost = problem.verify_solution(&ub_sol, delay_cost_type).unwrap();
+                    let _ = sol_out_tx.send((ub_cost, ub_sol));
+                    println!("HEUR.FEAS. {} {}", iteration, ub_cost);
+                } else {
+                }
+            }
+        });
+
+        (sol_in_tx, sol_out_rx)
+    });
+
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
             return Err(SolverError::Timeout);
@@ -173,6 +200,17 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
         let _p = hprof::enter("iteration");
         if is_sat {
             // println!("Iteration {} conflict detection starting...", iteration);
+
+            if let Some((sol_tx, sol_rx)) = heur_thread.as_ref() {
+                let sol = extract_solution(problem, &occupations);
+                let _ = sol_tx.send(sol);
+
+                while let Ok((ub_cost, ub_sol)) = sol_rx.try_recv() {
+                    if ub_cost == total_cost as i32 {
+                        return Ok((ub_sol, stats));
+                    }
+                }
+            }
 
             let mut found_travel_time_conflict = false;
             let mut found_resource_conflict = false;
@@ -310,7 +348,6 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                                 continue; // Assume for now that the train doesn't conflict with itself.
                             }
 
-
                             let other_next_visit: Option<VisitId> = if other_visit_idx + 1
                                 < problem.trains[other_train_idx].visits.len()
                             {
@@ -359,7 +396,6 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                                 retain = true;
                                 continue;
                             }
-
 
                             found_resource_conflict = true;
                             stats.n_conflict += 1;

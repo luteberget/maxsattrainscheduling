@@ -1,7 +1,4 @@
-use crate::{
-    problem::Problem,
-    solvers::SolverError,
-};
+use crate::{problem::Problem, solvers::SolverError};
 
 pub type VisitPair = ((usize, usize), (usize, usize));
 pub fn minimize_solution(
@@ -37,10 +34,10 @@ pub fn minimize_solution(
                 .enumerate()
                 .map(|(_visit_idx, visit)| {
                     add_ctsvar!(model,
-                // name : &format!("tn{}_v{}_tk{}", train_names[train_idx], visit_idx, resource_names[visit.resource_id]), 
-                bounds: visit.earliest..,
-                obj: 1.0
-            )
+                        // name : &format!("tn{}_v{}_tk{}", train_names[train_idx], visit_idx, resource_names[visit.resource_id]),
+                        bounds: visit.earliest..,
+                        obj: 1.0
+                    )
                     .map_err(SolverError::GurobiError)
                 })
                 .collect::<Result<Vec<_>, _>>()
@@ -48,21 +45,20 @@ pub fn minimize_solution(
         .collect::<Result<Vec<_>, _>>()?;
 
     // Travel time constraints
-    for (train,ts) in problem.trains.iter().zip(t_vars.iter()) {
+    for (train, ts) in problem.trains.iter().zip(t_vars.iter()) {
         for visit_idx in 0..train.visits.len() - 1 {
             #[allow(clippy::useless_conversion)]
             model
-                .add_constr("",
+                .add_constr(
+                    "",
                     // &format!(
                     //     "tn{}_v{}_tk{}_travel",
                     //     train_names[train_idx],
                     //     visit_idx,
                     //     resource_names[problem.trains[train_idx].visits[visit_idx].resource_id]
                     // ),
-                    c!(
-                        (ts[visit_idx + 1]) - (ts[visit_idx])
-                            >= train.visits[visit_idx].travel_time
-                    ),
+                    c!((ts[visit_idx + 1]) - (ts[visit_idx])
+                        >= train.visits[visit_idx].travel_time),
                 )
                 .map_err(SolverError::GurobiError)?;
         }
@@ -72,7 +68,8 @@ pub fn minimize_solution(
     for ((t1, v1), (t2, v2)) in priorities {
         #[allow(clippy::useless_conversion)]
         model
-            .add_constr("",
+            .add_constr(
+                "",
                 // &format!(
                 //     "tn{}_v{}_tk{}_pri_tn{}_v{}_tk{}",
                 //     train_names[t1],
@@ -91,7 +88,15 @@ pub fn minimize_solution(
     {
         let _p = hprof::enter("solve");
         model.optimize().map_err(SolverError::GurobiError)?;
-        assert!(model.status().map_err(SolverError::GurobiError)? == Status::Optimal);
+        assert!(
+            model.status().map_err(SolverError::GurobiError)? == Status::Optimal
+                || model.status().map_err(SolverError::GurobiError)? == Status::Infeasible
+                || model.status().map_err(SolverError::GurobiError)? == Status::InfOrUnbd
+        );
+    }
+
+    if model.status().map_err(SolverError::GurobiError)? != Status::Optimal {
+        return Err(SolverError::NoSolution);
     }
 
     let _p2 = hprof::enter("extract");

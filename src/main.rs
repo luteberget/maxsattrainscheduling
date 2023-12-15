@@ -174,6 +174,12 @@ enum SolverType {
 
 const TIMEOUT: f64 = 120.0;
 
+fn mk_env() -> grb::Env {
+    let mut env = grb::Env::new("").unwrap();
+    env.set(grb::param::OutputFlag, 0).unwrap();
+    env    
+}
+
 fn main() {
     pretty_env_logger::env_logger::Builder::from_env(
         pretty_env_logger::env_logger::Env::default().default_filter_or("trace"),
@@ -238,8 +244,10 @@ fn main() {
     let perf_out = RefCell::new(String::new());
 
     println!("Starting gurobi environment...");
-    let mut env = grb::Env::new("").unwrap();
-    env.set(grb::param::OutputFlag, 0).unwrap();
+
+    
+
+    let env = mk_env();
     println!("...ok.");
 
     let mut problems: Vec<serde_json::Value> = Default::default();
@@ -323,7 +331,7 @@ fn main() {
                 )
                 .map(|(v, _)| v),
                 SolverType::MaxSatDdd => maxsatddd::solve(
-                    // &env,
+                    &mk_env,
                     satcoder::solvers::minisat::Solver::new(),
                     &p.problem,
                     TIMEOUT,
@@ -334,7 +342,7 @@ fn main() {
                 )
                 .map(|(v, _)| v),
                 SolverType::MaxSatDddCadical => maxsatddd::solve(
-                    // &env,
+                    &mk_env,
                     satcoder::solvers::cadical::Solver::new(),
                     &p.problem,
                     TIMEOUT,
@@ -649,7 +657,7 @@ mod tests {
 
         let problem = crate::problem::problem1_with_stations();
         let result = ddd::solvers::maxsatddd::solve(
-            // &env,
+            &crate::mk_env,
             satcoder::solvers::minisat::Solver::new(),
             &problem,
             30.0,
@@ -688,7 +696,7 @@ mod tests {
         let delay_cost_type = DelayCostType::FiniteSteps123;
 
         let result = ddd::solvers::maxsatddd::solve(
-            // &env,
+            &crate::mk_env,
             satcoder::solvers::minisat::Solver::new(),
             &problem,
             30.0,
@@ -701,7 +709,7 @@ mod tests {
 
         for _ in 0..100 {
             let result = ddd::solvers::maxsatddd::solve(
-                // &env,
+                &crate::mk_env,
                 satcoder::solvers::minisat::Solver::new(),
                 &problem,
                 30.0,
@@ -737,7 +745,7 @@ mod tests {
                 );
 
                 let result = ddd::solvers::maxsatddd::solve(
-                    // &env,
+                    &crate::mk_env,
                     satcoder::solvers::minisat::Solver::new(),
                     &problem,
                     30.0,
@@ -751,7 +759,7 @@ mod tests {
                 for iteration in 0..100 {
                     println!("iteration {} {}", instance_number, iteration);
                     let result = ddd::solvers::maxsatddd::solve(
-                        // &env,
+                        &crate::mk_env,
                         satcoder::solvers::minisat::Solver::new(),
                         &problem,
                         30.0,

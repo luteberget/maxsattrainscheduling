@@ -7,6 +7,7 @@ pub mod mipdddpack;
 pub mod costtree;
 mod minimize;
 pub mod maxsatddd_full;
+pub mod heuristic;
 // pub mod cutting;
 
 

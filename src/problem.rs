@@ -27,12 +27,14 @@ pub struct NamedProblem {
 }
 
 #[derive(Debug)]
+#[derive(Clone)]
 pub struct Problem {
     pub trains: Vec<Train>,
     pub conflicts: Vec<(usize, usize)>,
 }
 
 #[derive(Debug)]
+#[derive(Clone)]
 pub struct Train {
     pub visits: Vec<Visit>,
 }
