@@ -173,6 +173,7 @@ enum SolverType {
     MaxSatTi,
     MaxSatDddExternal,
     MaxSatDddIpamir,
+    MaxSatDddIncremental,
 }
 
 const TIMEOUT: f64 = 30.0;
@@ -216,6 +217,7 @@ fn main() {
             "maxsat_ti" => SolverType::MaxSatTi,
             "maxsat_ddd_external" => SolverType::MaxSatDddExternal,
             "maxsat_ddd_ipamir" => SolverType::MaxSatDddIpamir,
+            "maxsat_ddd_incremental" => SolverType::MaxSatDddIncremental,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -352,7 +354,18 @@ fn main() {
                 )
                 .map(|(v, _)| v),
                 SolverType::MaxSatDddIpamir => maxsat_ddd::solve(
-                    || maxsatsolver::Internal::new(),
+                    || maxsatsolver::Incremental::new(),
+                    &env,
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                )
+                .map(|(v, _)| v),
+                SolverType::MaxSatDddIncremental => maxsat_ddd::solve_incremental(
+                    || maxsatsolver::Incremental::new(),
                     &env,
                     &p.problem,
                     TIMEOUT,

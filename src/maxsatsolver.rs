@@ -100,13 +100,13 @@ impl std::fmt::Display for WCNF {
     }
 }
 
-pub struct Internal {
+pub struct Incremental {
     ipamir: ipamir_rs::IPAMIR,
     n_vars: usize,
     n_clauses: usize,
 }
 
-impl Internal {
+impl Incremental {
     pub fn new() -> Self {
         Self {
             ipamir: ipamir_rs::IPAMIR::new(),
@@ -116,7 +116,7 @@ impl Internal {
     }
 }
 
-impl MaxSatSolver for Internal {
+impl MaxSatSolver for Incremental {
     fn add_clause(&mut self, weight: Option<u32>, clause: Vec<isize>) {
         if let Some(w) = weight {
             if clause.len() != 1 {
