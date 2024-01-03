@@ -22,4 +22,5 @@ pretty_env_logger = "0.4"
 serde_json = "1.0"
 serde = { version = "1.0.193", features = ["derive"] }
 duct = "0.13.6"
+ipamir-rs = { version = "0.1.0", path = "../ipamir-rs" }
 #highs-sys = "1.2"

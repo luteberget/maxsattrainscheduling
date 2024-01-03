@@ -131,6 +131,7 @@ pub fn verify_instances(mut x: impl FnMut(String, NamedProblem, Vec<Vec<i32>>) -
                 None,
                 |_| {},
             );
+
             let new_solution = x(
                 format!("{} {}", solvertype, instance_id),
                 problem,
@@ -171,7 +172,7 @@ enum SolverType {
     BinarizedBigMLazy60Sec,
     MaxSatTi,
     MaxSatDddExternal,
-    MaxSatDddIncremental,
+    MaxSatDddIpamir,
 }
 
 const TIMEOUT: f64 = 30.0;
@@ -214,7 +215,7 @@ fn main() {
             "bin_bigm_lazy_60s" => SolverType::BinarizedBigMLazy60Sec,
             "maxsat_ti" => SolverType::MaxSatTi,
             "maxsat_ddd_external" => SolverType::MaxSatDddExternal,
-            "maxsat_ddd_incremental" => SolverType::MaxSatDddIncremental,
+            "maxsat_ddd_ipamir" => SolverType::MaxSatDddIpamir,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -340,7 +341,7 @@ fn main() {
                 )
                 .map(|(v, _)| v),
                 SolverType::MaxSatDddExternal => maxsat_ddd::solve(
-                    maxsatsolver::External::new(/* "./uwrmaxsat" */),
+                    || maxsatsolver::External::new(/* "./uwrmaxsat" */),
                     &env,
                     &p.problem,
                     TIMEOUT,
@@ -350,8 +351,8 @@ fn main() {
                     },
                 )
                 .map(|(v, _)| v),
-                SolverType::MaxSatDddIncremental => maxsat_ddd::solve(
-                    maxsatsolver::Incremental::new(),
+                SolverType::MaxSatDddIpamir => maxsat_ddd::solve(
+                    || maxsatsolver::Internal::new(),
                     &env,
                     &p.problem,
                     TIMEOUT,

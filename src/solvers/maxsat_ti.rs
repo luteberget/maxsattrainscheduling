@@ -7,23 +7,28 @@ use std::{
 
 use super::{maxsatddd_ladder::SolveStats, SolverError};
 use crate::{
-    maxsatsolver::MaxSatSolver,
+    maxsatsolver::{External, MaxSatSolver},
     problem::{DelayCostType, Problem},
     solvers::bigm::visit_conflicts,
 };
 
-pub fn solve(
+pub fn solve_maxsat_fixed_ti(
     mut solver: impl MaxSatSolver,
-    env: &grb::Env,
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
-    output_stats: impl FnMut(String, serde_json::Value),
-    discretization_interval: u32,
-    big_m: u32,
-) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
+    time_discretization: Vec<Vec<Vec<i32>>>,
+) -> Result<Vec<Vec<i32>>, SolverError> {
+    assert!(problem.trains.len() == time_discretization.len());
+    assert!(problem
+        .trains
+        .iter()
+        .enumerate()
+        .all(|(train_idx, t)| t.visits.len() == time_discretization[train_idx].len()));
+
     let start_time = std::time::Instant::now();
-    let mut solver_time = std::time::Duration::ZERO;
+
+    let _p_init = hprof::enter("solve_maxsat_fixed_ti encode");
 
     let mut conflicting_resources: HashMap<usize, Vec<usize>> = HashMap::new();
     for (a, b) in problem.conflicts.iter() {
@@ -33,25 +38,7 @@ pub fn solve(
         }
     }
 
-    // #[derive(Serialize)]
-    // enum VarInfo {
-    //     EventTime {
-    //         train: usize,
-    //         visit: usize,
-    //         time: i32,
-    //     },
-    //     Other,
-    // }
-
     let mut resource_visits: Vec<Vec<(usize, usize)>> = Vec::new();
-
-    let discretization_interval = discretization_interval as i32;
-    let big_m = big_m as i32;
-    let round = |t: i32| {
-        ((t + discretization_interval / 2) / discretization_interval) * discretization_interval
-    };
-
-    // let vars = HashMap::new();
 
     let mut t_vars = Vec::new();
 
@@ -65,29 +52,20 @@ pub fn solve(
 
             resource_visits[visit.resource_id].push((train_idx, visit_idx));
 
-            let mut time_vars = Vec::new();
-            let mut time = round(visit.earliest);
-            while time < visit.earliest + big_m {
-                let v = solver.new_var();
-                // vars.insert(
-                //     v,
-                //     VarInfo::EventTime {
-                //         train: train_idx,
-                //         visit: visit_idx,
-                //         time,
-                //     },
-                // );
-                time_vars.push((time, v));
-                let cost = train.visit_delay_cost(delay_cost_type, visit_idx, time) as u32;
-                solver.add_clause(Some(cost), vec![-v]);
-                time += discretization_interval;
-            }
+            let time_vars = time_discretization[train_idx][visit_idx]
+                .iter()
+                .copied()
+                .map(|time| {
+                    let v = solver.new_var();
+                    let cost = train.visit_delay_cost(delay_cost_type, visit_idx, time) as u32;
+                    solver.add_clause(Some(cost), vec![-v]);
+                    (time, v)
+                })
+                .collect::<Vec<_>>();
             train_ts.push(time_vars);
         }
         t_vars.push(train_ts);
     }
-
-    println!("T_VARS");
 
     // CONSTRAINT 1: select one interval per time slot
     for (train_idx, train) in problem.trains.iter().enumerate() {
@@ -165,39 +143,95 @@ pub fn solve(
         }
     }
 
-    println!(
-        "C3 {}",
-        solver.status()
-    );
+    println!("C3 {}", solver.status());
 
-    let input_vec = solver.optimize().unwrap().1;
+    drop(_p_init);
+    let _p_solve = hprof::enter("solve_maxsat_fixed_ti solve");
+    let input_vec = solver
+        .optimize(Some(timeout - start_time.elapsed().as_secs_f64()))
+        .map_err(|e| match e {
+            crate::maxsatsolver::MaxSatError::NoSolution => SolverError::NoSolution,
+            crate::maxsatsolver::MaxSatError::Timeout => SolverError::Timeout,
+        })?
+        .1;
 
     let mut solution = Vec::new();
     for train_idx in 0..t_vars.len() {
         let mut train_sol = Vec::new();
 
         for visit_idx in 0..t_vars[train_idx].len() {
-            for (t,var) in t_vars[train_idx][visit_idx].iter().copied() {
-
+            for (t, var) in t_vars[train_idx][visit_idx].iter().copied() {
                 assert!(var > 0);
-                if input_vec[var as usize] {
+                if input_vec[var as usize - 1] {
                     train_sol.push(t);
                 }
-
-
-                
             }
             // Workaround for avoiding conflict in the special relaxation where stations are uncapacitated:
             if problem.trains[train_idx].visits[visit_idx].resource_id == 0 && visit_idx > 0 {
-                train_sol[visit_idx] =
-                    train_sol[visit_idx - 1] + problem.trains[train_idx].visits[visit_idx - 1].travel_time;
+                train_sol[visit_idx] = train_sol[visit_idx - 1]
+                    + problem.trains[train_idx].visits[visit_idx - 1].travel_time;
             }
 
             assert!(train_sol.len() == visit_idx + 1);
         }
-        train_sol.push(train_sol.last().unwrap() + problem.trains[train_idx].visits.last().unwrap().travel_time);
+        train_sol.push(
+            train_sol.last().unwrap()
+                + problem.trains[train_idx].visits.last().unwrap().travel_time,
+        );
         solution.push(train_sol);
     }
+
+    Ok(solution)
+}
+
+pub fn solve(
+    mut solver: impl MaxSatSolver,
+    env: &grb::Env,
+    problem: &Problem,
+    timeout: f64,
+    delay_cost_type: DelayCostType,
+    output_stats: impl FnMut(String, serde_json::Value),
+    discretization_interval: u32,
+    big_m: u32,
+) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
+    let start_time = std::time::Instant::now();
+    let mut solver_time = std::time::Duration::ZERO;
+
+    let discretization_interval = discretization_interval as i32;
+    let big_m = big_m as i32;
+    let round = |t: i32| {
+        ((t + discretization_interval / 2) / discretization_interval) * discretization_interval
+    };
+
+    let time_discretization = problem
+        .trains
+        .iter()
+        .map(|train| {
+            train
+                .visits
+                .iter()
+                .map(|visit| {
+                    let mut time_vars = Vec::new();
+                    let mut time = round(visit.earliest);
+                    while time < visit.earliest + big_m {
+                        time_vars.push(time);
+                        time += discretization_interval;
+                    }
+                    time_vars
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+
+    let solution = solve_maxsat_fixed_ti(
+        solver,
+        problem,
+        timeout,
+        delay_cost_type,
+        time_discretization,
+    )?;
+
+    let _p_post = hprof::enter("maxsat_ti postprocessing");
 
     let mut priorities = Vec::new();
     for (a @ (t1, v1), b @ (t2, v2)) in visit_conflicts(&problem) {
