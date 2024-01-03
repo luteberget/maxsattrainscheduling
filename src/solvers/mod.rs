@@ -1,4 +1,4 @@
-pub mod maxsatddd;
+pub mod maxsatddd_ladder;
 pub mod bigm;
 pub mod binarizedbigm;
 pub mod greedy;
@@ -6,7 +6,8 @@ pub mod idl;
 pub mod mipdddpack;
 pub mod costtree;
 mod minimize;
-pub mod maxsatddd_full;
+pub mod maxsat_ti;
+pub mod maxsat_ddd;
 pub mod heuristic;
 // pub mod cutting;
 

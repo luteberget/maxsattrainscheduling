@@ -15,6 +15,7 @@ type ConflictHandler = fn(&mut grb::Model, &ConflictInformation) -> Result<grb::
 #[allow(clippy::too_many_arguments)]
 pub fn solve_bigm(
     env: &grb::Env,
+    mk_env: impl Fn() -> grb::Env + Send + 'static,
     problem: &Problem,
     delay_cost_type: DelayCostType,
     lazy: bool,
@@ -25,6 +26,7 @@ pub fn solve_bigm(
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
+        mk_env,
         problem,
         delay_cost_type,
         lazy,
@@ -39,6 +41,7 @@ pub fn solve_bigm(
 #[allow(clippy::too_many_arguments)]
 pub fn solve_hull(
     env: &grb::Env,
+    mk_env: impl Fn() -> grb::Env + Send + 'static,
     problem: &Problem,
     delay_cost_type: DelayCostType,
     lazy: bool,
@@ -50,6 +53,7 @@ pub fn solve_hull(
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     solve(
         env,
+        mk_env,
         problem,
         delay_cost_type,
         lazy,
@@ -64,6 +68,7 @@ pub fn solve_hull(
 #[allow(clippy::too_many_arguments)]
 fn solve(
     env: &grb::Env,
+    mk_env: impl Fn() -> grb::Env + Send + 'static,
     problem: &Problem,
     delay_cost_type: DelayCostType,
     lazy_constraints: bool,
@@ -91,6 +96,10 @@ fn solve(
     // .map_err(SolverError::GurobiError)?;
 
     // model.set_param(grb::param::OutputFlag, 1);
+
+    model.set_param(grb::param::Cuts, 0).unwrap();
+    model.set_param(grb::param::Heuristics, 0.0).unwrap();
+
 
     // timing variables
     let t_vars = problem
@@ -149,6 +158,34 @@ fn solve(
     }
 
     let mut lazy_stepfunction: Option<HashMap<(usize, usize), Vec<()>>> = None;
+
+    const USE_HEURISTIC: bool = true;
+
+    let heur_thread = USE_HEURISTIC.then(|| {
+        let env = mk_env();
+        let (sol_in_tx, sol_in_rx) = std::sync::mpsc::channel();
+        let (sol_out_tx, sol_out_rx) = std::sync::mpsc::channel();
+        let problem = problem.clone();
+
+        std::thread::spawn(move || {
+            let env = mk_env();
+            while let Ok(mut sol) = sol_in_rx.recv() {
+                while let Ok(more_recent_sol) = sol_in_rx.try_recv() {
+                    sol = more_recent_sol;
+                }
+                let ub_sol =
+                    crate::solvers::heuristic::solve_heuristic(&env, &problem, &sol).unwrap();
+                if let Some(ub_sol) = ub_sol {
+                    let ub_cost = problem.verify_solution(&ub_sol, delay_cost_type).unwrap();
+                    let _ = sol_out_tx.send((ub_cost, ub_sol));
+                    println!("HEUR.FEAS. {} {}", iteration, ub_cost);
+                } else {
+                }
+            }
+        });
+
+        (sol_in_tx, sol_out_rx)
+    });
 
     // Objective
     match delay_cost_type {
@@ -385,6 +422,19 @@ fn solve(
 
         // println!("Iteration {} cost {}", refinement_iterations, cost);
 
+        if let Some((sol_tx, sol_rx)) = heur_thread.as_ref() {
+            let _ = sol_tx.send(solution.clone());
+
+            while let Ok((ub_cost, ub_sol)) = sol_rx.try_recv() {
+                let lb_cost = cost.round() as i32;
+                assert!(ub_cost >= lb_cost);
+                if ub_cost == lb_cost {
+                    println!("HEURISTIC UB=LB");
+                    return Ok(ub_sol);
+                }
+            }
+        }
+
         // Check the conflicts
         let violated_conflicts = {
             let _p = hprof::enter("check conflicts");
@@ -523,7 +573,9 @@ fn solve(
             // println!("MIP obj {}", mip_objective);
 
             // model.write("model_final.sol").unwrap();
-            // model.write("model_final.lp").unwrap();
+            let filename = format!("{}_model_final.lp", problem.name);
+            println!("SAVING {}", filename);
+            model.write(&filename).unwrap();
 
             // let mut solution = Vec::new();
             // for (train_idx, train_ts) in t_vars.iter().enumerate() {

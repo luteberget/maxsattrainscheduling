@@ -28,6 +28,7 @@ pub fn read_txt_file(
     let mut current_train: Option<Vec<Visit>> = None;
     let mut next_earliest: Option<i32> = None;
     let mut problem = Problem {
+        name:instance_fn.to_string(),
         conflicts: Vec::new(),
         trains: Vec::new(),
     };
@@ -399,6 +400,7 @@ pub fn read_xml_file(instance_fn: &str, measurement: DelayMeasurementType) -> Na
         .collect::<HashMap<_, _>>();
 
     let mut problem = crate::problem::Problem {
+        name: instance_fn.to_string(),
         trains: Vec::new(),
         conflicts: Vec::new(),
     };

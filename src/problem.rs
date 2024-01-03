@@ -29,6 +29,7 @@ pub struct NamedProblem {
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct Problem {
+    pub name :String,
     pub trains: Vec<Train>,
     pub conflicts: Vec<(usize, usize)>,
 }
@@ -296,6 +297,7 @@ pub fn problem1_with_stations() -> Problem {
 
     let travel_times = vec![6, 3, 4, 9, 10, 5, 8];
     Problem {
+        name: "Unnamed".to_string(),
         trains: vec![
             Train {
                 visits: vec![
@@ -345,6 +347,7 @@ pub fn problem1() -> Problem {
     // g = 6
     let travel_times = vec![6, 3, 4, 9, 10, 5, 8];
     Problem {
+        name: "Unnamed".to_string(),
         trains: vec![
             Train {
                 visits: vec![

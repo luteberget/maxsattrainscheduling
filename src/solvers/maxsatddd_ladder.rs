@@ -206,7 +206,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 let _ = sol_tx.send(sol);
 
                 while let Ok((ub_cost, ub_sol)) = sol_rx.try_recv() {
+                    assert!(ub_cost >= total_cost as i32);
                     if ub_cost == total_cost as i32 {
+                        println!("HEURISTIC UB=LB");
                         return Ok((ub_sol, stats));
                     }
                 }

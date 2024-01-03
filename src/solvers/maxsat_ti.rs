@@ -1,96 +1,19 @@
 use serde::Serialize;
-use std::{collections::HashMap, fmt::Display};
+use std::{
+    collections::HashMap,
+    fmt::Display,
+    io::{BufRead, BufReader, Read},
+};
 
-use super::{maxsatddd::SolveStats, SolverError};
+use super::{maxsatddd_ladder::SolveStats, SolverError};
 use crate::{
+    maxsatsolver::MaxSatSolver,
     problem::{DelayCostType, Problem},
     solvers::bigm::visit_conflicts,
 };
 
-#[derive(Serialize)]
-struct VarInfo {
-    train: usize,
-    visit: usize,
-    time: i32,
-}
-
-struct Clause {
-    weight: Option<u32>,
-    lits: Vec<isize>,
-}
-
-#[derive(Default)]
-struct WCNF {
-    variables: Vec<VarInfo>,
-    clauses: Vec<Clause>,
-}
-
-impl WCNF {
-    pub fn new_var(&mut self, info: VarInfo) -> isize {
-        self.variables.push(info);
-        self.variables.len() as isize
-    }
-
-    pub fn add_clause(&mut self, weight: Option<u32>, lits: Vec<isize>) {
-        if weight != Some(0) {
-            self.clauses.push(Clause { weight, lits });
-        }
-    }
-}
-
-impl Display for WCNF {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "c cnf file for partial weighted maxsat")?;
-
-        for (var_idx, var) in self.variables.iter().enumerate() {
-            writeln!(
-                f,
-                "c VAR {}",
-                serde_json::to_string(&(var_idx, var)).unwrap()
-            )?;
-        }
-
-        let hard_weight = self
-            .clauses
-            .iter()
-            .map(|w| w.weight.unwrap_or(0))
-            .sum::<u32>()
-            + 1;
-
-        writeln!(
-            f,
-            "p wcnf {} {} {}",
-            self.variables.len(),
-            self.clauses.len(),
-            hard_weight
-        )?;
-
-        for c in self.clauses.iter() {
-            write!(f, "{}", c.weight.unwrap_or(hard_weight))?;
-            for l in c.lits.iter() {
-                write!(f, " {}", *l)?;
-            }
-            writeln!(f, " 0")?;
-        }
-
-        Ok(())
-    }
-}
-
-fn at_most_one(problem: &mut WCNF, set: &[isize]) {
-    for i in 0..set.len() {
-        for j in (i + 1)..set.len() {
-            problem.add_clause(None, vec![-set[i], -set[j]]);
-        }
-    }
-}
-
-fn exactly_one(problem: &mut WCNF, set: &[isize]) {
-    problem.add_clause(None, set.iter().map(|v| *v).collect());
-    at_most_one(problem, set);
-}
-
 pub fn solve(
+    mut solver: impl MaxSatSolver,
     env: &grb::Env,
     problem: &Problem,
     timeout: f64,
@@ -110,7 +33,16 @@ pub fn solve(
         }
     }
 
-    let mut satproblem = WCNF::default();
+    // #[derive(Serialize)]
+    // enum VarInfo {
+    //     EventTime {
+    //         train: usize,
+    //         visit: usize,
+    //         time: i32,
+    //     },
+    //     Other,
+    // }
+
     let mut resource_visits: Vec<Vec<(usize, usize)>> = Vec::new();
 
     let discretization_interval = discretization_interval as i32;
@@ -118,6 +50,8 @@ pub fn solve(
     let round = |t: i32| {
         ((t + discretization_interval / 2) / discretization_interval) * discretization_interval
     };
+
+    // let vars = HashMap::new();
 
     let mut t_vars = Vec::new();
 
@@ -134,14 +68,18 @@ pub fn solve(
             let mut time_vars = Vec::new();
             let mut time = round(visit.earliest);
             while time < visit.earliest + big_m {
-                let v = satproblem.new_var(VarInfo {
-                    train: train_idx,
-                    visit: visit_idx,
-                    time,
-                });
+                let v = solver.new_var();
+                // vars.insert(
+                //     v,
+                //     VarInfo::EventTime {
+                //         train: train_idx,
+                //         visit: visit_idx,
+                //         time,
+                //     },
+                // );
                 time_vars.push((time, v));
                 let cost = train.visit_delay_cost(delay_cost_type, visit_idx, time) as u32;
-                satproblem.add_clause(Some(cost), vec![-v]);
+                solver.add_clause(Some(cost), vec![-v]);
                 time += discretization_interval;
             }
             train_ts.push(time_vars);
@@ -154,8 +92,7 @@ pub fn solve(
     // CONSTRAINT 1: select one interval per time slot
     for (train_idx, train) in problem.trains.iter().enumerate() {
         for (visit_idx, visit) in train.visits.iter().enumerate() {
-            exactly_one(
-                &mut satproblem,
+            solver.exactly_one(
                 &t_vars[train_idx][visit_idx]
                     .iter()
                     .map(|(_, v)| *v)
@@ -164,11 +101,7 @@ pub fn solve(
         }
     }
 
-    println!(
-        "C1 vars={} clauses={}",
-        satproblem.variables.len(),
-        satproblem.clauses.len()
-    );
+    println!("C1 {}", solver.status());
 
     // CONSTRAINT 2: travel time constraints
     for (t_idx, train) in problem.trains.iter().enumerate() {
@@ -176,25 +109,28 @@ pub fn solve(
             if v1_idx + 1 < train.visits.len() {
                 let v2_idx = v1_idx + 1;
                 for (t1, v1) in t_vars[t_idx][v1_idx].iter() {
+                    let mut cannot_reach = Vec::new();
                     for (t2, v2) in t_vars[t_idx][v2_idx].iter() {
                         let can_reach = *t1 + visit.travel_time <= *t2;
                         // if t_idx == 0 && v1_idx == 0 {
                         //     println!("  t0v0 {}-{} -- {}", t1, t2, can_reach);
                         // }
                         if !can_reach {
-                            satproblem.add_clause(None, vec![-v1, -v2]);
+                            solver.add_clause(None, vec![-v1, -v2]);
+                            cannot_reach.push(*v2);
                         }
                     }
+
+                    let mut clause = cannot_reach;
+                    clause.push(*v1);
+
+                    // at_most_one(&mut satproblem, &clause);
                 }
             }
         }
     }
 
-    println!(
-        "C2 vars={} clauses={}",
-        satproblem.variables.len(),
-        satproblem.clauses.len()
-    );
+    println!("C2 {}", solver.status());
 
     // CONSTRAINT 3: resource conflict
     for (train1_idx, train) in problem.trains.iter().enumerate() {
@@ -219,7 +155,7 @@ pub fn solve(
                                 let has_separation = separation >= 0;
 
                                 if !has_separation {
-                                    satproblem.add_clause(None, vec![-var1, -var2]);
+                                    solver.add_clause(None, vec![-var1, -var2]);
                                 }
                             }
                         }
@@ -230,83 +166,36 @@ pub fn solve(
     }
 
     println!(
-        "C3 vars={} clauses={}",
-        satproblem.variables.len(),
-        satproblem.clauses.len()
+        "C3 {}",
+        solver.status()
     );
 
-    // std::fs::write("test.wcnf", format!("{}", satproblem)).unwrap();
-    // todo!();
-
-    // let output = std::fs::read_to_string("eval_out.txt").unwrap();
-    // let mut input_vec = Vec::new();
-    // for line in output.lines() {
-    //     if line.starts_with("v ") {
-    //         input_vec = line
-    //             .chars()
-    //             .filter_map(|v| {
-    //                 if v == '0' {
-    //                     Some(false)
-    //                 } else if v == '1' {
-    //                     Some(true)
-    //                 } else {
-    //                     None
-    //                 }
-    //             })
-    //             .collect::<Vec<_>>();
-    //     }
-    // }
-
-    let output = std::fs::read_to_string("uwr_out.txt").unwrap();
-    let mut input_vec = Vec::new();
-    for line in output.lines() {
-        if line.starts_with("v ") {
-            let mut counter = 0;
-            input_vec = line
-                .split(' ')
-                .filter_map(|v| {
-                    if v == "v" {
-                        None
-                    } else {
-                        counter += 1;
-                        if v.starts_with("-") {
-                            assert!(v[1..].parse::<i32>().unwrap() == counter);
-                            Some(false)
-                        } else {
-                            assert!(v.parse::<i32>().unwrap() == counter);
-                            Some(true)
-                        }
-                    }
-                })
-                .collect::<Vec<_>>();
-        }
-    }
-
-    println!("Got solution with {} vars", input_vec.len());
-    assert!(input_vec.len() == satproblem.variables.len());
+    let input_vec = solver.optimize().unwrap().1;
 
     let mut solution = Vec::new();
-    for (train_idx, train) in problem.trains.iter().enumerate() {
+    for train_idx in 0..t_vars.len() {
         let mut train_sol = Vec::new();
-        for (visit_idx, visit) in train.visits.iter().enumerate() {
-            for (var_idx, value) in input_vec.iter().enumerate() {
-                let var_info = &satproblem.variables[var_idx];
-                if *value && var_info.train == train_idx && var_info.visit == visit_idx {
-                    train_sol.push(var_info.time);
-                }
-            }
 
+        for visit_idx in 0..t_vars[train_idx].len() {
+            for (t,var) in t_vars[train_idx][visit_idx].iter().copied() {
+
+                assert!(var > 0);
+                if input_vec[var as usize] {
+                    train_sol.push(t);
+                }
+
+
+                
+            }
             // Workaround for avoiding conflict in the special relaxation where stations are uncapacitated:
-            if visit.resource_id == 0 && visit_idx > 0 {
+            if problem.trains[train_idx].visits[visit_idx].resource_id == 0 && visit_idx > 0 {
                 train_sol[visit_idx] =
-                    train_sol[visit_idx - 1] + train.visits[visit_idx - 1].travel_time;
+                    train_sol[visit_idx - 1] + problem.trains[train_idx].visits[visit_idx - 1].travel_time;
             }
 
             assert!(train_sol.len() == visit_idx + 1);
         }
-
-        train_sol.push(train_sol.last().unwrap() + train.visits.last().unwrap().travel_time);
-
+        train_sol.push(train_sol.last().unwrap() + problem.trains[train_idx].visits.last().unwrap().travel_time);
         solution.push(train_sol);
     }
 
@@ -322,6 +211,4 @@ pub fn solve(
     let sol = crate::solvers::minimize::minimize_solution(env, problem, priorities).unwrap();
 
     return Ok((sol, SolveStats::default()));
-
-    todo!()
 }

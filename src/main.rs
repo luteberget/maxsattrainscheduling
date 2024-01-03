@@ -1,12 +1,12 @@
 use std::{cell::RefCell, collections::HashSet, fmt::Write};
 
 use ddd::{
-    parser,
+    maxsatsolver, parser,
     problem::{self, DelayCostThresholds, DelayCostType, NamedProblem, Visit},
     solvers::{
         bigm,
         greedy::{self, default_heuristic},
-        maxsatddd, maxsatddd_full, SolverError,
+        maxsat_ddd, maxsat_ti, maxsatddd_ladder, SolverError,
     },
 };
 
@@ -156,7 +156,7 @@ pub fn verify_instances(mut x: impl FnMut(String, NamedProblem, Vec<Vec<i32>>) -
 enum SolverType {
     BigMEager,
     BigMLazy,
-    MaxSatDdd,
+    MaxSatDddLadderRC2,
     MaxSatDddCadical,
     MaxSatIdl,
     MipDdd,
@@ -169,15 +169,20 @@ enum SolverType {
     BinarizedBigMLazy10Sec,
     BinarizedBigMLazy30Sec,
     BinarizedBigMLazy60Sec,
-    ExternalMaxSat,
+    MaxSatTi,
+    MaxSatDddExternal,
+    MaxSatDddIncremental,
 }
 
-const TIMEOUT: f64 = 120.0;
+const TIMEOUT: f64 = 30.0;
 
 fn mk_env() -> grb::Env {
     let mut env = grb::Env::new("").unwrap();
+    env.set(grb::param::Threads, 4).unwrap();
     env.set(grb::param::OutputFlag, 0).unwrap();
-    env    
+    env.set(grb::param::Cuts, 0).unwrap();
+    env.set(grb::param::Heuristics, 0.0).unwrap();
+    env
 }
 
 fn main() {
@@ -194,7 +199,7 @@ fn main() {
         .map(|x| match x.as_str() {
             "bigm_eager" => SolverType::BigMEager,
             "bigm_lazy" => SolverType::BigMLazy,
-            "maxsat_ddd" => SolverType::MaxSatDdd,
+            "maxsat_ddd" => SolverType::MaxSatDddLadderRC2,
             "maxsat_ddd_cdc" => SolverType::MaxSatDddCadical,
             "maxsat_idl" => SolverType::MaxSatIdl,
             "mip_ddd" => SolverType::MipDdd,
@@ -207,7 +212,9 @@ fn main() {
             "bin_bigm_lazy_10s" => SolverType::BinarizedBigMLazy10Sec,
             "bin_bigm_lazy_30s" => SolverType::BinarizedBigMLazy30Sec,
             "bin_bigm_lazy_60s" => SolverType::BinarizedBigMLazy60Sec,
-            "external_maxsat" => SolverType::ExternalMaxSat,
+            "maxsat_ti" => SolverType::MaxSatTi,
+            "maxsat_ddd_external" => SolverType::MaxSatDddExternal,
+            "maxsat_ddd_incremental" => SolverType::MaxSatDddIncremental,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -244,8 +251,6 @@ fn main() {
     let perf_out = RefCell::new(String::new());
 
     println!("Starting gurobi environment...");
-
-    
 
     let env = mk_env();
     println!("...ok.");
@@ -284,6 +289,7 @@ fn main() {
                 }
                 SolverType::BigMEager => bigm::solve_bigm(
                     &env,
+                    &mk_env,
                     &p.problem,
                     delay_cost_type,
                     false,
@@ -296,6 +302,7 @@ fn main() {
                 ),
                 SolverType::MipHull => bigm::solve_hull(
                     &env,
+                    &mk_env,
                     &p.problem,
                     delay_cost_type,
                     true,
@@ -308,6 +315,7 @@ fn main() {
                 ),
                 SolverType::BigMLazy => bigm::solve_bigm(
                     &env,
+                    &mk_env,
                     &p.problem,
                     delay_cost_type,
                     true,
@@ -318,7 +326,8 @@ fn main() {
                         solve_data.insert(k, v);
                     },
                 ),
-                SolverType::ExternalMaxSat => maxsatddd_full::solve(
+                SolverType::MaxSatTi => maxsat_ti::solve(
+                    maxsatsolver::External::new(),
                     &env,
                     &p.problem,
                     TIMEOUT,
@@ -330,7 +339,29 @@ fn main() {
                     900,
                 )
                 .map(|(v, _)| v),
-                SolverType::MaxSatDdd => maxsatddd::solve(
+                SolverType::MaxSatDddExternal => maxsat_ddd::solve(
+                    maxsatsolver::External::new(/* "./uwrmaxsat" */),
+                    &env,
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                )
+                .map(|(v, _)| v),
+                SolverType::MaxSatDddIncremental => maxsat_ddd::solve(
+                    maxsatsolver::Incremental::new(),
+                    &env,
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                )
+                .map(|(v, _)| v),
+                SolverType::MaxSatDddLadderRC2 => maxsatddd_ladder::solve(
                     &mk_env,
                     satcoder::solvers::minisat::Solver::new(),
                     &p.problem,
@@ -341,7 +372,7 @@ fn main() {
                     },
                 )
                 .map(|(v, _)| v),
-                SolverType::MaxSatDddCadical => maxsatddd::solve(
+                SolverType::MaxSatDddCadical => maxsatddd_ladder::solve(
                     &mk_env,
                     satcoder::solvers::cadical::Solver::new(),
                     &p.problem,
@@ -656,7 +687,7 @@ mod tests {
         let delay_cost_type = DelayCostType::FiniteSteps123;
 
         let problem = crate::problem::problem1_with_stations();
-        let result = ddd::solvers::maxsatddd::solve(
+        let result = ddd::solvers::maxsatddd_ladder::solve(
             &crate::mk_env,
             satcoder::solvers::minisat::Solver::new(),
             &problem,
@@ -695,7 +726,7 @@ mod tests {
         let problem = crate::problem::problem1_with_stations();
         let delay_cost_type = DelayCostType::FiniteSteps123;
 
-        let result = ddd::solvers::maxsatddd::solve(
+        let result = ddd::solvers::maxsatddd_ladder::solve(
             &crate::mk_env,
             satcoder::solvers::minisat::Solver::new(),
             &problem,
@@ -708,7 +739,7 @@ mod tests {
         let first_score = problem.verify_solution(&result, delay_cost_type);
 
         for _ in 0..100 {
-            let result = ddd::solvers::maxsatddd::solve(
+            let result = ddd::solvers::maxsatddd_ladder::solve(
                 &crate::mk_env,
                 satcoder::solvers::minisat::Solver::new(),
                 &problem,
@@ -744,7 +775,7 @@ mod tests {
                     delaytype,
                 );
 
-                let result = ddd::solvers::maxsatddd::solve(
+                let result = ddd::solvers::maxsatddd_ladder::solve(
                     &crate::mk_env,
                     satcoder::solvers::minisat::Solver::new(),
                     &problem,
@@ -758,7 +789,7 @@ mod tests {
 
                 for iteration in 0..100 {
                     println!("iteration {} {}", instance_number, iteration);
-                    let result = ddd::solvers::maxsatddd::solve(
+                    let result = ddd::solvers::maxsatddd_ladder::solve(
                         &crate::mk_env,
                         satcoder::solvers::minisat::Solver::new(),
                         &problem,
