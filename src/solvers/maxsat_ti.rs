@@ -148,7 +148,7 @@ pub fn solve_maxsat_fixed_ti(
     drop(_p_init);
     let _p_solve = hprof::enter("solve_maxsat_fixed_ti solve");
     let input_vec = solver
-        .optimize(Some(timeout - start_time.elapsed().as_secs_f64()))
+        .optimize(Some(timeout - start_time.elapsed().as_secs_f64()), std::iter::empty())
         .map_err(|e| match e {
             crate::maxsatsolver::MaxSatError::NoSolution => SolverError::NoSolution,
             crate::maxsatsolver::MaxSatError::Timeout => SolverError::Timeout,

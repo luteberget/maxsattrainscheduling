@@ -85,7 +85,7 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
     ] {
         let instances = ["A", "B"]
             .iter()
-            .flat_map(move |n| (1..=12).map(move |i| (n, i)));
+            .flat_map(move |n| (1..=7).map(move |i| (n, i)));
 
         // let instances = instances.skip(16).take(1);
 
@@ -104,7 +104,9 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
                 format!("{}{}{}", shortname, infrastructure, number),
                 problem,
             );
+            break;
         }
+        break;
     }
 }
 

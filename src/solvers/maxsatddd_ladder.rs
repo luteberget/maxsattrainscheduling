@@ -107,7 +107,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
     let _p = hprof::enter("solver");
 
-    let start_time = Instant::now();
+    let start_time: Instant = Instant::now();
     let mut solver_time = std::time::Duration::ZERO;
     let mut stats = SolveStats::default();
 
@@ -166,7 +166,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut conflict_vars: HashMap<(VisitId, VisitId), Bool<L>> = Default::default();
     // let mut priorities: Vec<(VisitId, VisitId)> = Vec::new();
 
-    const USE_HEURISTIC: bool = true;
+    const USE_HEURISTIC: bool = false;
 
     let heur_thread = USE_HEURISTIC.then(|| {
         let (sol_in_tx, sol_in_rx) = std::sync::mpsc::channel();

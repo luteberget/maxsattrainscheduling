@@ -10,7 +10,11 @@ pub trait MaxSatSolver {
     fn add_clause(&mut self, weight: Option<u32>, clause: Vec<isize>);
     fn new_var(&mut self) -> isize;
     fn status(&mut self) -> String;
-    fn optimize(&mut self, timeout: Option<f64>) -> Result<(i32, Vec<bool>), MaxSatError>;
+    fn optimize(
+        &mut self,
+        timeout: Option<f64>,
+        assumptions: impl Iterator<Item = isize>,
+    ) -> Result<(i32, Vec<bool>), MaxSatError>;
 
     fn at_most_one(&mut self, set: &[isize]) {
         if set.len() <= 5 {
@@ -122,7 +126,7 @@ impl MaxSatSolver for Incremental {
             if clause.len() != 1 {
                 panic!("only soft lits supported (not clauses)");
             }
-            self.ipamir.add_soft_lit(clause[0] as i32, w as u64);
+            self.ipamir.add_soft_lit(-clause[0] as i32, w as u64);
         } else {
             self.ipamir.add_clause(clause.iter().map(|l| *l as i32));
             self.n_clauses += 1;
@@ -143,10 +147,18 @@ impl MaxSatSolver for Incremental {
         )
     }
 
-    fn optimize(&mut self, timeout: Option<f64>) -> Result<(i32, Vec<bool>), MaxSatError> {
+    fn optimize(
+        &mut self,
+        timeout: Option<f64>,
+        assumptions: impl Iterator<Item = isize>,
+    ) -> Result<(i32, Vec<bool>), MaxSatError> {
+        if timeout.map(|x| x <= 0.0).unwrap_or(false) {
+            return Err(MaxSatError::Timeout);
+        }
+
         match self.ipamir.solve(
             timeout.map(|t| std::time::Duration::from_secs_f64(t)),
-            std::iter::empty(),
+            assumptions.map(|l| l as i32),
         ) {
             ipamir_rs::MaxSatResult::Optimal(s) => {
                 let obj = s.get_objective_value() as i32;
@@ -184,7 +196,12 @@ impl MaxSatSolver for External {
         self.wcnf.new_var()
     }
 
-    fn optimize(&mut self, timeout: Option<f64>) -> Result<(i32, Vec<bool>), MaxSatError> {
+    fn optimize(
+        &mut self,
+        timeout: Option<f64>,
+        assumptions: impl Iterator<Item = isize>,
+    ) -> Result<(i32, Vec<bool>), MaxSatError> {
+        assert!(assumptions.count() == 0);
         let _p = hprof::enter("external maxsat solver");
         {
             let _p1: hprof::ProfileGuard<'_> = hprof::enter("write wcnf");
