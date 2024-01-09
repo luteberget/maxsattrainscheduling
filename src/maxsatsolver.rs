@@ -1,4 +1,12 @@
-use std::io::{BufRead, BufReader};
+use core::fmt;
+use std::{
+    collections::HashMap,
+    io::{BufRead, BufReader},
+};
+
+use satcoder::{
+    constraints::Totalizer, symbolic::SymbolicModel, Bool, SatInstance, SatSolverWithCore,
+};
 
 #[derive(Clone, Copy)]
 pub enum MaxSatError {
@@ -122,6 +130,7 @@ impl Incremental {
 
 impl MaxSatSolver for Incremental {
     fn add_clause(&mut self, weight: Option<u32>, clause: Vec<isize>) {
+        let _p_analyse = hprof::enter("addclause");
         if let Some(w) = weight {
             if clause.len() != 1 {
                 panic!("only soft lits supported (not clauses)");
@@ -152,14 +161,18 @@ impl MaxSatSolver for Incremental {
         timeout: Option<f64>,
         assumptions: impl Iterator<Item = isize>,
     ) -> Result<(i32, Vec<bool>), MaxSatError> {
+        let _p_analyse = hprof::enter("optimize");
         if timeout.map(|x| x <= 0.0).unwrap_or(false) {
             return Err(MaxSatError::Timeout);
         }
 
-        match self.ipamir.solve(
-            timeout.map(|t| std::time::Duration::from_secs_f64(t)),
-            assumptions.map(|l| l as i32),
-        ) {
+        match {
+            let _p = hprof::enter("solve");
+            self.ipamir.solve(
+                timeout.map(|t| std::time::Duration::from_secs_f64(t)),
+                assumptions.map(|l| l as i32),
+            )
+        } {
             ipamir_rs::MaxSatResult::Optimal(s) => {
                 let obj = s.get_objective_value() as i32;
                 let lits = (0..self.n_vars).map(|i| (i + 1) as i32);
@@ -169,6 +182,215 @@ impl MaxSatSolver for Incremental {
             ipamir_rs::MaxSatResult::Unsat => Err(MaxSatError::NoSolution),
             ipamir_rs::MaxSatResult::Error => panic!(),
             ipamir_rs::MaxSatResult::Timeout(_) => Err(MaxSatError::Timeout),
+        }
+    }
+}
+
+enum SoftConstraint<L: satcoder::Lit> {
+    Original,
+    Totalizer(Totalizer<L>, usize),
+}
+impl<L: satcoder::Lit> fmt::Debug for SoftConstraint<L> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Original => write!(f, "Original"),
+            Self::Totalizer(arg0, arg1) => f.debug_tuple("Totalizer").field(arg1).finish(),
+        }
+    }
+}
+
+pub struct CustomRC2Incremental<
+    L: satcoder::Lit + Copy + std::fmt::Debug,
+    S: SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
+> {
+    satsolver: S,
+    total_cost: u32,
+    soft_constraints: HashMap<Bool<L>, (SoftConstraint<L>, u32, u32)>,
+    vars: Vec<Bool<L>>,
+    n_assumps: usize,
+}
+
+impl<
+        L: satcoder::Lit + Copy + std::fmt::Debug,
+        S: SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
+    > CustomRC2Incremental<L, S>
+{
+    pub fn new(solver: S) -> Self {
+        Self {
+            satsolver: solver,
+            total_cost: 0,
+            soft_constraints: Default::default(),
+            vars: Default::default(),
+            n_assumps: 20,
+        }
+    }
+
+    fn isize_to_bool(vars: &[Bool<L>], x: isize) -> Bool<L> {
+        let idx = x.abs() as usize - 1;
+        assert!(idx < vars.len());
+        let var = vars[idx];
+        if x < 0 {
+            !var
+        } else {
+            var
+        }
+    }
+}
+
+impl<
+        L: satcoder::Lit + Copy + std::fmt::Debug,
+        S: SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
+    > MaxSatSolver for CustomRC2Incremental<L, S>
+{
+    fn add_clause(&mut self, weight: Option<u32>, clause: Vec<isize>) {
+        if let Some(w) = weight {
+            if w == 0 {
+                return;
+            }
+
+            if clause.len() != 1 {
+                panic!("only soft lits supported (not clauses)");
+            }
+
+            self.soft_constraints.insert(
+                Self::isize_to_bool(&self.vars, clause[0]),
+                (SoftConstraint::Original, w, w),
+            );
+        } else {
+            self.satsolver
+                .add_clause(clause.iter().map(|l| Self::isize_to_bool(&self.vars, *l)));
+        }
+    }
+
+    fn new_var(&mut self) -> isize {
+        self.vars.push(self.satsolver.new_var());
+        self.vars.len() as isize
+    }
+
+    fn status(&mut self) -> String {
+        format!("CustomRC2 {:?} cost={}", self.satsolver, self.total_cost)
+    }
+
+    fn optimize(
+        &mut self,
+        timeout: Option<f64>,
+        assumptions: impl Iterator<Item = isize>,
+    ) -> Result<(i32, Vec<bool>), MaxSatError> {
+        // WARNING: when using assumptions and incremental optimization,
+        // you need to be sure that your assumptions are only used as part
+        // of creating a relaxed version of the optimization problem.
+        let external_assumptions = assumptions
+            .map(|k| Self::isize_to_bool(&self.vars, k))
+            .collect::<Vec<_>>();
+
+        loop {
+            let core = {
+                let mut softs_assumptions = self
+                    .soft_constraints
+                    .iter()
+                    .map(|(k, (_, w, _))| (*k, *w))
+                    .collect::<Vec<_>>();
+                softs_assumptions.sort_by_key(|(_, w)| -(*w as isize));
+
+                let result = self.satsolver.solve_with_assumptions(
+                    external_assumptions.iter().copied().chain(
+                        softs_assumptions
+                            .iter()
+                            .map(|(k, _)| *k)
+                            .take(self.n_assumps),
+                    ),
+                );
+
+                match result {
+                    satcoder::SatResultWithCore::Sat(_)
+                        if self.n_assumps < self.soft_constraints.len() =>
+                    {
+                        // println!("increasing assumps");
+                        self.n_assumps += 20;
+                        None
+                    }
+                    satcoder::SatResultWithCore::Sat(model) => {
+                        // println!("sat");
+                        let sol = self.vars.iter().map(|v| model.value(v)).collect::<Vec<_>>();
+                        return Ok((self.total_cost as i32, sol));
+                    }
+                    satcoder::SatResultWithCore::Unsat(core) => {
+                        Some(core.iter().map(|c| Bool::Lit(*c)).collect::<Vec<_>>())
+                    }
+                }
+            };
+
+            if let Some(core) = core {
+                // let unfiltered_core_size = core.len();
+                let core = {
+                    let mut core = core;
+                    core.retain(|l| self.soft_constraints.contains_key(l));
+                    core
+                };
+
+                // println!("core size {}/{}", core.len(), unfiltered_core_size);
+                if core.len() == 0 {
+                    // println!("unsat");
+                    return Err(MaxSatError::NoSolution);
+                }
+                let min_weight = core
+                    .iter()
+                    .map(|c| self.soft_constraints[c].1)
+                    .min()
+                    .unwrap();
+
+                for c in core.iter() {
+                    if let Some((soft, cost, original_cost)) = self.soft_constraints.remove(c) {
+                        assert!(cost >= min_weight);
+                        let new_cost = cost - min_weight;
+                        match soft {
+                            SoftConstraint::Original => {
+                                if new_cost > 0 {
+                                    self.soft_constraints
+                                        .insert(*c, (SoftConstraint::Original, new_cost, new_cost));
+                                }
+                            }
+                            SoftConstraint::Totalizer(mut tot, bound) => {
+                                let new_bound = bound + 1;
+                                tot.increase_bound(&mut self.satsolver, new_bound as u32);
+                                if new_bound < tot.rhs().len() {
+                                    self.soft_constraints.insert(
+                                        !tot.rhs()[new_bound],
+                                        (
+                                            SoftConstraint::Totalizer(tot, new_bound),
+                                            original_cost,
+                                            original_cost,
+                                        ),
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+
+                self.total_cost += min_weight;
+                if core.len() > 1 {
+                    println!("adding totalizer");
+                    let bound = 1;
+                    let tot = Totalizer::count(
+                        &mut self.satsolver,
+                        core.iter().map(|c| !*c),
+                        bound as u32,
+                    );
+                    assert!(bound < tot.rhs().len());
+                    self.soft_constraints.insert(
+                        !tot.rhs()[bound], // tot <= 1
+                        (
+                            SoftConstraint::Totalizer(tot, bound),
+                            min_weight,
+                            min_weight,
+                        ),
+                    );
+                } else {
+                    println!("adding constraint {:?}", !core[0]);
+                    SatInstance::add_clause(&mut self.satsolver, vec![!core[0]]);
+                }
+            }
         }
     }
 }

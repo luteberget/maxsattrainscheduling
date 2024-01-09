@@ -79,17 +79,20 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
     // let c_instances = [21, 22, 23, 24];
 
     for (dir, shortname) in [
-        ("instances_original", "orig"),
+        // ("instances_original", "orig"),
         ("instances_addtracktime", "track"),
         ("instances_addstationtime", "station"),
     ] {
         let instances = ["A", "B"]
             .iter()
-            .flat_map(move |n| (1..=7).map(move |i| (n, i)));
+            .flat_map(move |n| (1..=12).map(move |i| (n, i)));
 
         // let instances = instances.skip(16).take(1);
 
         for (infrastructure, number) in instances {
+            if *infrastructure == "B" && number == 11 {
+                continue;
+            }
             let filename = format!("{}/Instance{}{}.txt", dir, infrastructure, number);
             println!("Reading {}", filename);
             #[allow(unused)]
@@ -104,9 +107,9 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
                 format!("{}{}{}", shortname, infrastructure, number),
                 problem,
             );
-            break;
+            // break;
         }
-        break;
+        // break;
     }
 }
 
@@ -176,6 +179,7 @@ enum SolverType {
     MaxSatDddExternal,
     MaxSatDddIpamir,
     MaxSatDddIncremental,
+    MaxSatDddPairwiseCustomRc2,
 }
 
 const TIMEOUT: f64 = 30.0;
@@ -220,6 +224,7 @@ fn main() {
             "maxsat_ddd_external" => SolverType::MaxSatDddExternal,
             "maxsat_ddd_ipamir" => SolverType::MaxSatDddIpamir,
             "maxsat_ddd_incremental" => SolverType::MaxSatDddIncremental,
+            "maxsat_ddd_pairwise_customrc2" => SolverType::MaxSatDddPairwiseCustomRc2,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -377,6 +382,21 @@ fn main() {
                     },
                 )
                 .map(|(v, _)| v),
+                SolverType::MaxSatDddPairwiseCustomRc2 => maxsat_ddd::solve_incremental(
+                    || {
+                        maxsatsolver::CustomRC2Incremental::new(
+                            satcoder::solvers::minisat::Solver::new(),
+                        )
+                    },
+                    &env,
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                )
+                .map(|(v, _)| v),
                 SolverType::MaxSatDddLadderRC2 => maxsatddd_ladder::solve(
                     &mk_env,
                     satcoder::solvers::minisat::Solver::new(),
@@ -390,7 +410,7 @@ fn main() {
                 .map(|(v, _)| v),
                 SolverType::MaxSatDddCadical => maxsatddd_ladder::solve(
                     &mk_env,
-                    satcoder::solvers::cadical::Solver::new(),
+                    satcoder::solvers::minisat::Solver::new(),
                     &p.problem,
                     TIMEOUT,
                     delay_cost_type,

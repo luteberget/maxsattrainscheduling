@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-satcoder = { path = "../salvers/satcoder" }
+satcoder = { path = "../salvers/satcoder", default-features = false, features = ["solver_minisat"] }
 
 typed-index-collections = "3.0"
 derive_more = "0.99"

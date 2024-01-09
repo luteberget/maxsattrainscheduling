@@ -18,23 +18,57 @@ pub fn solve_incremental<S: MaxSatSolver>(
     delay_cost_type: DelayCostType,
     mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
+    let _p = hprof::enter("ipamir incremental");
+    let _p_init = hprof::enter("init");
     type Lit = isize;
     let start_time = std::time::Instant::now();
 
     let mut s = mk_solver();
     let mut resource_visits: Vec<Vec<(usize, usize)>> = Vec::new();
-    let mut conflicts: HashMap<usize, Vec<usize>> = HashMap::new();
-    for (a, b) in problem.conflicts.iter() {
-        conflicts.entry(*a).or_default().push(*b);
-        if *a != *b {
-            conflicts.entry(*b).or_default().push(*a);
+    let mut new_time_points = VecDeque::new();
+
+    let mut resource_usage: HashMap<usize, Vec<(usize, usize)>> = HashMap::new();
+    for (train_idx, train) in problem.trains.iter().enumerate() {
+        for (visit_idx, visit) in train.visits.iter().enumerate() {
+            if problem
+                .conflicts
+                .contains(&(visit.resource_id, visit.resource_id))
+            {
+                resource_usage
+                    .entry(visit.resource_id)
+                    .or_default()
+                    .push((train_idx, visit_idx));
+            }
         }
     }
-    let visit_conflicts = super::bigm::visit_conflicts(problem);
-    let mut new_time_points = VecDeque::new();
+
+    #[derive(Default)]
+    struct CostVars {
+        vars: Vec<Lit>,
+    }
+
+    impl CostVars {
+        fn set_soft_lit(&mut self, solver: &mut impl MaxSatSolver, l: Lit, cost: u32) {
+            if cost == 0 {
+                return;
+            }
+
+            while self.vars.len() < cost as usize {
+                let cost_var = solver.new_var();
+                if self.vars.len() > 0 {
+                    solver.add_clause(None, vec![-cost_var, self.vars[self.vars.len() - 1]]);
+                }
+                self.vars.push(cost_var);
+                solver.add_clause(Some(1), vec![-cost_var]);
+            }
+
+            solver.add_clause(None, vec![l, self.vars[cost as usize - 1]]);
+        }
+    }
 
     struct Occ {
         time: Vec<TimePoint>,
+        cost_vars: CostVars,
         next_lit: Lit,
     }
 
@@ -58,8 +92,8 @@ pub fn solve_incremental<S: MaxSatSolver>(
                     let v1 = s.new_var();
                     let v2 = s.new_var();
                     let cost = train.visit_delay_cost(delay_cost_type, visit_idx, visit.earliest);
-
-                    s.add_clause(Some(cost as u32), vec![-v1]);
+                    let mut cost_vars: CostVars = Default::default();
+                    cost_vars.set_soft_lit(&mut s, -v1, cost as u32);
                     s.add_clause(None, vec![v1, v2]);
 
                     while resource_visits.len() <= visit.resource_id {
@@ -75,6 +109,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
                             lit: v1,
                             incompat: Default::default(),
                         }],
+                        cost_vars,
                         next_lit: v2,
                     }
                 })
@@ -82,6 +117,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
         })
         .collect();
 
+    let visit_conflicts = super::bigm::visit_conflicts(problem);
     let visit_conflicts_map: Vec<Vec<Vec<(usize, usize)>>> = {
         let mut visit_conflicts_map: Vec<Vec<Vec<(usize, usize)>>> = (0..problem.trains.len())
             .map(|t| {
@@ -110,13 +146,15 @@ pub fn solve_incremental<S: MaxSatSolver>(
     type TPRef = ((usize, usize), usize);
     let mut potentially_new_incompatibilties: Vec<(TPRef, TPRef)> = Vec::new();
     let mut iteration = 0;
+    drop(_p_init);
     loop {
+        let _p_init = hprof::enter("iteration");
         iteration += 1;
 
-        if start_time.elapsed().as_secs_f64() > timeout || iteration >= 100 {
+        if start_time.elapsed().as_secs_f64() > timeout {
             return Err(SolverError::Timeout);
         }
-
+        let _p_solve = hprof::enter("solve");
         info!("Iteration {} {}", iteration, s.status());
 
         for train_idx in 0..problem.trains.len() {
@@ -131,7 +169,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
                 })
                 .collect::<Vec<_>>();
 
-            println!("tr {} {:?}", train_idx, x);
+            // println!("tr {} {:?}", train_idx, x);
         }
 
         let assumptions = occupations
@@ -149,6 +187,9 @@ pub fn solve_incremental<S: MaxSatSolver>(
             })?;
 
         info!("Solved with cost {}", cost);
+
+        drop(_p_solve);
+        let _p_analyse = hprof::enter("analyse");
 
         let mut selected_interval: Vec<Vec<usize>> = occupations
             .iter()
@@ -217,13 +258,13 @@ pub fn solve_incremental<S: MaxSatSolver>(
                 let last = train_times.last().copied().unwrap()
                     + problem.trains[train_idx].visits.last().unwrap().travel_time;
 
-                for visit_idx in 0..train_times.len() {
-                    if problem.trains[train_idx].visits[visit_idx].resource_id == 0 && visit_idx > 0
-                    {
-                        train_times[visit_idx] = train_times[visit_idx - 1]
-                            + problem.trains[train_idx].visits[visit_idx - 1].travel_time;
-                    }
-                }
+                // for visit_idx in 0..train_times.len() {
+                //     if problem.trains[train_idx].visits[visit_idx].resource_id == 0 && visit_idx > 0
+                //     {
+                //         train_times[visit_idx] = train_times[visit_idx - 1]
+                //             + problem.trains[train_idx].visits[visit_idx - 1].travel_time;
+                //     }
+                // }
 
                 train_times.push(last);
                 train_times
@@ -253,20 +294,70 @@ pub fn solve_incremental<S: MaxSatSolver>(
                         );
                     } else {
                         // If we don't eagerly propagate like this, then we need this refinement:
-                        println!(
-                            "travel time refinement t{}v{}-{} t0={} t1={} dt={}",
-                            train_idx,
-                            visit_idx,
-                            visit_idx + 1,
-                            solution[train_idx][visit_idx],
-                            solution[train_idx][visit_idx + 1],
-                            dt
-                        );
+                        // println!(
+                        //     "travel time refinement t{}v{}-{} t0={} t1={} dt={}",
+                        //     train_idx,
+                        //     visit_idx,
+                        //     visit_idx + 1,
+                        //     solution[train_idx][visit_idx],
+                        //     solution[train_idx][visit_idx + 1],
+                        //     dt
+                        // );
+                        // println!(
+                        //     "  {:?}",
+                        //     occupations[train_idx][visit_idx]
+                        //         .time
+                        //         .iter()
+                        //         .map(|t| (t.start, t.end))
+                        //         .collect::<Vec<_>>()
+                        // );
+                        // println!(
+                        //     "  {:?}",
+                        //     occupations[train_idx][visit_idx + 1]
+                        //         .time
+                        //         .iter()
+                        //         .map(|t| (t.start, t.end))
+                        //         .collect::<Vec<_>>()
+                        // );
 
-                        assert!(!occupations[train_idx][visit_idx + 1]
+                        let interval_exists = occupations[train_idx][visit_idx + 1]
                             .time
                             .iter()
-                            .any(|tp| tp.start == solution[train_idx][visit_idx] + dt));
+                            .any(|tp| tp.start == solution[train_idx][visit_idx] + dt);
+
+                        assert!(!interval_exists);
+
+                        let xx = occupations[train_idx][visit_idx + 1].time[0].start
+                            >= solution[train_idx][visit_idx] + dt;
+                        if !xx {
+                            // If we don't eagerly propagate like this, then we need this refinement:
+                            println!(
+                                "travel time refinement t{}v{}-{} t0={} t1={} dt={}",
+                                train_idx,
+                                visit_idx,
+                                visit_idx + 1,
+                                solution[train_idx][visit_idx],
+                                solution[train_idx][visit_idx + 1],
+                                dt
+                            );
+                            println!(
+                                "  {:?}",
+                                occupations[train_idx][visit_idx]
+                                    .time
+                                    .iter()
+                                    .map(|t| (t.start, t.end))
+                                    .collect::<Vec<_>>()
+                            );
+                            println!(
+                                "  {:?}",
+                                occupations[train_idx][visit_idx + 1]
+                                    .time
+                                    .iter()
+                                    .map(|t| (t.start, t.end))
+                                    .collect::<Vec<_>>()
+                            );
+                            panic!();
+                        }
 
                         new_time_points.push_back((
                             train_idx,
@@ -281,81 +372,230 @@ pub fn solve_incremental<S: MaxSatSolver>(
 
         // CHECK RESOURCE CONFLICTS
 
-        //
-        // TODO use only the travel time for checking conflicts!
-        //
+        // Conflict constraints
+        for (_res, vs) in resource_usage.iter() {
+            for (train_idx1, visit_idx1) in vs.iter() {
+                for (train_idx2, visit_idx2) in vs.iter() {
+                    if train_idx1 == train_idx2 {
+                        assert!(visit_idx1 == visit_idx2);
+                        continue;
+                    }
+                    if train_idx1 > train_idx2 {
+                        continue;
+                    }
 
-        for visit_pair @ ((t1, v1), (t2, v2)) in visit_conflicts.iter().copied() {
-            if !check_conflict(visit_pair, &solution)? {
-                let travel1 = problem.trains[t1].visits[v1].travel_time;
-                let travel2 = problem.trains[t2].visits[v2].travel_time;
+                    // let rel = *train_idx1 == 2 && *visit_idx1 == 11 && *train_idx2 == 4;
+                    // if rel {
+                    //     println!(
+                    //         "Checking {} {} {} {}",
+                    //         train_idx1, visit_idx1, train_idx2, visit_idx2
+                    //     );
+                    // }
 
-                assert!(solution[t1][v1+1] - solution[t1][v1] == travel1);
-                assert!(solution[t2][v2+1] - solution[t2][v2] == travel2);
-                println!(
-                    "CONFLICT BETWEEN {}-{} dt={} {}-{} dt={}",
-                    t1, v1, travel1, t2, v2, travel2
-                );
-                println!(
-                    "  @{}-{} {:?}",
-                    solution[t1][v1],
-                    solution[t1][v1 + 1],
-                    occupations[t1][v1]
-                        .time
-                        .iter()
-                        .map(|tp| (tp.start, tp.end))
-                        .collect::<Vec<_>>()
-                );
-                println!(
-                    "  @{}-{} {:?}",
-                    solution[t2][v2],
-                    solution[t2][v2 + 1],
-                    occupations[t2][v2]
-                        .time
-                        .iter()
-                        .map(|tp| (tp.start, tp.end))
-                        .collect::<Vec<_>>()
-                );
+                    let travel1 = problem.trains[*train_idx1].visits[*visit_idx1].travel_time;
+                    let travel2 = problem.trains[*train_idx2].visits[*visit_idx2].travel_time;
 
-                assert!(!occupations[t1][v1]
-                    .time
-                    .iter()
-                    .any(|tp| tp.start == solution[t2][v2 + 1]));
+                    let tp1_idx = selected_interval[*train_idx1][*visit_idx1];
+                    let tp2_idx = selected_interval[*train_idx2][*visit_idx2];
+                    let tp1 = &occupations[*train_idx1][*visit_idx1].time[tp1_idx];
+                    let tp2 = &occupations[*train_idx2][*visit_idx2].time[tp2_idx];
 
-                // TODO should we use minimum running time (`travel1`) instead of chosen running time (which has been relaxed)
+                    assert!(solution[*train_idx1][*visit_idx1] == tp1.start);
+                    assert!(solution[*train_idx2][*visit_idx2] == tp2.start);
 
-                assert!(!occupations[t2][v2]
-                    .time
-                    .iter()
-                    .any(|tp| tp.start == solution[t1][v1 + 1]));
+                    let separation =
+                        (tp2.start - (tp1.start + travel1)).max(tp1.start - (tp2.start + travel2));
+                    let has_separation = separation >= 0;
+                    let incompatible = !has_separation;
 
-                new_time_points.push_back((t2, v2, solution[t1][v1 + 1]));
-                new_time_points.push_back((t1, v1, solution[t2][v2 + 1]));
-                n_conflicts += 1;
+                    // let test1 = tp2.start + travel2 >= tp1.end;
+                    // let test2 = tp1.start + travel1 >= tp2.end;
+                    // let incompatible = test1 && test2;
+                    // if rel {
+                    //     println!(
+                    //         "Checking {} {} {} {} {} {} dt1={} dt2={} {}",
+                    //         train_idx1,
+                    //         visit_idx1,
+                    //         train_idx2,
+                    //         visit_idx2,
+                    //         tp1.start,
+                    //         tp2.start,
+                    //         travel1,
+                    //         travel2,
+                    //         incompatible
+                    //     );
+                    // }
+
+                    if incompatible {
+                        new_time_points.push_back((*train_idx2, *visit_idx2, tp1.start + travel1));
+                        new_time_points.push_back((*train_idx1, *visit_idx1, tp2.start + travel2));
+
+                        // println!("incomp t{}v{}x{}-{},dt{}  t{}v{}x{}-{},dt{}", t1, v1, t1_start, t1_end, travel1, t2, v2, t2_start, t2_end, travel2);
+
+                        assert!(
+                            occupations[*train_idx1][*visit_idx1].time[0].start
+                                < tp2.start + travel2
+                        );
+                        assert!(
+                            occupations[*train_idx2][*visit_idx2].time[0].start
+                                < tp1.start + travel1
+                        );
+
+                        // println!(
+                        //     "SPLIT {} {} {}",
+                        //     train_idx2,
+                        //     visit_idx2,
+                        //     tp1.start + travel1
+                        // );
+                        // println!(
+                        //     "SPLIT {} {} {}",
+                        //     train_idx1,
+                        //     visit_idx1,
+                        //     tp2.start + travel2
+                        // );
+
+                        // let i1 = interval_vars[*train_idx1][*visit_idx1][t1_idx];
+                        // let i2 = interval_vars[*train_idx2][*visit_idx2][t2_idx];
+
+                        // incompat
+                        //     .entry((*train_idx1, *visit_idx1, t1_idx))
+                        //     .or_default()
+                        //     .push((*train_idx2, *visit_idx2, t2_idx));
+                        // incompat
+                        //     .entry((*train_idx2, *visit_idx2, t2_idx))
+                        //     .or_default()
+                        //     .push((*train_idx1, *visit_idx1, t1_idx));
+
+                        // #[allow(clippy::useless_conversion)]
+                        // model
+                        //     .add_constr(
+                        //         &format!(
+                        //             "t{}v{}i{}--t{}v{}i{}",
+                        //             train_idx1, visit_idx1, t1_idx, train_idx2, visit_idx2, t2_idx
+                        //         ),
+                        //         c!(i1 + i2 <= 1.0),
+                        //     )
+                        //     .unwrap();
+
+                        n_conflicts += 1;
+                    } else {
+                        // println!("COMPATIBLE t{}v{}x{}-{},dt{}  t{}v{}x{}-{},dt{}", t1, v1, t1_start, t1_end, travel1, t2, v2, t2_start, t2_end, travel2);
+                    }
+                }
             }
         }
 
+        // for visit_pair @ ((t1, v1), (t2, v2)) in visit_conflicts.iter().copied() {
+        //     if !check_conflict(visit_pair, &solution)? {
+        //         let travel1 = problem.trains[t1].visits[v1].travel_time;
+        //         let travel2 = problem.trains[t2].visits[v2].travel_time;
+
+        //         // assert!(solution[t1][v1+1] - solution[t1][v1] == travel1);
+        //         // assert!(solution[t2][v2+1] - solution[t2][v2] == travel2);
+        //         println!(
+        //             "CONFLICT BETWEEN {}-{} dt={} {}-{} dt={}",
+        //             t1, v1, travel1, t2, v2, travel2
+        //         );
+        //         println!(
+        //             "  @{}-{} {:?}",
+        //             solution[t1][v1],
+        //             solution[t1][v1 + 1],
+        //             occupations[t1][v1]
+        //                 .time
+        //                 .iter()
+        //                 .map(|tp| (tp.start, tp.end))
+        //                 .collect::<Vec<_>>()
+        //         );
+        //         println!(
+        //             "  @{}-{} {:?}",
+        //             solution[t2][v2],
+        //             solution[t2][v2 + 1],
+        //             occupations[t2][v2]
+        //                 .time
+        //                 .iter()
+        //                 .map(|tp| (tp.start, tp.end))
+        //                 .collect::<Vec<_>>()
+        //         );
+
+        //         assert!(!occupations[t1][v1]
+        //             .time
+        //             .iter()
+        //             .any(|tp| tp.start == solution[t2][v2 + 1]));
+
+        //         // TODO should we use minimum running time (`travel1`) instead of chosen running time (which has been relaxed)
+
+        //         assert!(!occupations[t2][v2]
+        //             .time
+        //             .iter()
+        //             .any(|tp| tp.start == solution[t1][v1 + 1]));
+
+        //         new_time_points.push_back((t2, v2, solution[t1][v1 + 1]));
+        //         new_time_points.push_back((t1, v1, solution[t2][v2 + 1]));
+        //         n_conflicts += 1;
+        //     }
+        // }
+
         if new_time_points.is_empty() {
+            println!("NO CONFLICTS");
+
+            let solution: Vec<Vec<i32>> = selected_interval
+                .iter()
+                .enumerate()
+                .map(|(train_idx, ts)| {
+                    let mut train_times: Vec<i32> = ts
+                        .iter()
+                        .enumerate()
+                        .map(|(visit_idx, occ)| occupations[train_idx][visit_idx].time[*occ].start)
+                        .collect();
+
+                    let last = train_times.last().copied().unwrap()
+                        + problem.trains[train_idx].visits.last().unwrap().travel_time;
+
+                    for visit_idx in 0..train_times.len() {
+                        if problem.trains[train_idx].visits[visit_idx].resource_id == 0
+                            && visit_idx > 0
+                        {
+                            train_times[visit_idx] = train_times[visit_idx - 1]
+                                + problem.trains[train_idx].visits[visit_idx - 1].travel_time;
+                        }
+                    }
+
+                    train_times.push(last);
+                    train_times
+                })
+                .collect();
+
             return Ok((solution, Default::default()));
         }
 
         while let Some((train_idx, visit_idx, new_time)) = new_time_points.pop_front() {
-            let relevant = train_idx == 4 && (visit_idx == 11 || visit_idx == 12);
-
-            if relevant {
-                println!(" NEW TIME {} {} @{}", train_idx, visit_idx, new_time);
+            if occupations[train_idx][visit_idx]
+                .time
+                .iter()
+                .any(|tp| tp.start == new_time)
+            {
+                // panic!("skipping");
+                continue;
             }
+
+            // let relevant = train_idx == 4 && (visit_idx == 11 || visit_idx == 12);
+
+            // if relevant {
+            //     println!(" NEW TIME {} {} @{}", train_idx, visit_idx, new_time);
+            // }
+            // println!("SPLIT {} {} {}", train_idx, visit_idx, new_time);
             let (prev_idx, next_idx) = {
                 let occ = &mut occupations[train_idx][visit_idx];
-                if relevant {
-                    println!(
-                        "   BEFORE {:?}",
-                        occ.time
-                            .iter()
-                            .map(|tp| (tp.start, tp.end))
-                            .collect::<Vec<_>>()
-                    );
-                }
+                // // if relevant {
+                // println!(
+                //     "   split at {} BEFORE {:?}",
+                //     new_time,
+                //     occ.time
+                //         .iter()
+                //         .map(|tp| (tp.start, tp.end))
+                //         .collect::<Vec<_>>()
+                // );
+                // // }
 
                 let mut prev_interval = (0, i32::MIN);
                 for (i_idx, tp) in occ.time.iter().enumerate() {
@@ -375,7 +615,6 @@ pub fn solve_incremental<S: MaxSatSolver>(
                     visit_idx,
                     new_time,
                 );
-                s.add_clause(Some(cost as u32), vec![-v1]);
 
                 for t in occ.time.iter() {
                     s.at_most_one(&[v1, t.lit]);
@@ -388,17 +627,23 @@ pub fn solve_incremental<S: MaxSatSolver>(
                     lit: v1,
                     incompat: Default::default(),
                 });
+
+                assert!(end_time >= new_time);
+                assert!(occ.time[prev_interval].end >= occ.time[prev_interval].start);
+
                 s.add_clause(None, vec![-occ.next_lit, v1, v2]);
                 occ.next_lit = v2;
-                if relevant {
-                    println!(
-                        "   AFTER {:?}",
-                        occ.time
-                            .iter()
-                            .map(|tp| (tp.start, tp.end))
-                            .collect::<Vec<_>>()
-                    );
-                }
+                occ.cost_vars.set_soft_lit(&mut s, -v1, cost as u32);
+
+                // if relevant {
+                //     println!(
+                //         "   AFTER {:?}",
+                //         occ.time
+                //             .iter()
+                //             .map(|tp| (tp.start, tp.end))
+                //             .collect::<Vec<_>>()
+                //     );
+                // }
                 (prev_interval, next_interval)
             };
 
@@ -414,13 +659,13 @@ pub fn solve_incremental<S: MaxSatSolver>(
                         .iter()
                         .enumerate()
                     {
-                        if relevant {
-                            println!("CHECK BEFORE {} {} {}", prev_tp.start, dt, next_tp.end);
-                        }
+                        // if relevant {
+                        //     println!("CHECK BEFORE {} {} {}", prev_tp.start, dt, next_tp.end);
+                        // }
                         if prev_tp.start + dt >= next_tp.end {
-                            if relevant {
-                                println!("  INCOPMAT");
-                            }
+                            // if relevant {
+                            //     println!("  INCOPMAT");
+                            // }
                             potentially_new_incompatibilties.push((
                                 ((train_idx, visit_idx), x),
                                 ((train_idx, visit_idx - 1), i2),
@@ -431,24 +676,29 @@ pub fn solve_incremental<S: MaxSatSolver>(
             }
 
             if visit_idx + 1 < problem.trains[train_idx].visits.len() {
+                let dt = problem.trains[train_idx].visits[visit_idx].travel_time;
+
+                if occupations[train_idx][visit_idx + 1].time[0].start >= new_time + dt {
+                    new_time_points.push_back((train_idx, visit_idx + 1, new_time + dt));
+                }
+
                 for x in [prev_idx, next_idx] {
                     let prev_tp = &occupations[train_idx][visit_idx].time[x];
-                    let dt = problem.trains[train_idx].visits[visit_idx].travel_time;
                     for (i2, next_tp) in occupations[train_idx][visit_idx + 1]
                         .time
                         .iter()
                         .enumerate()
                     {
-                        if relevant {
-                            println!(
-                                "CHECK AFTER {}-{} {} {}-{}",
-                                prev_tp.start, prev_tp.end, dt, next_tp.start, next_tp.end
-                            );
-                        }
+                        // if relevant {
+                        //     println!(
+                        //         "CHECK AFTER {}-{} {} {}-{}",
+                        //         prev_tp.start, prev_tp.end, dt, next_tp.start, next_tp.end
+                        //     );
+                        // }
                         if prev_tp.start + dt >= next_tp.end {
-                            if relevant {
-                                println!("  INCOPMAT");
-                            }
+                            // if relevant {
+                            //     println!("  INCOPMAT");
+                            // }
 
                             potentially_new_incompatibilties.push((
                                 ((train_idx, visit_idx), x),
@@ -460,11 +710,11 @@ pub fn solve_incremental<S: MaxSatSolver>(
             }
 
             for (t2, v2) in visit_conflicts_map[train_idx][visit_idx].iter() {
-                if ((train_idx == 3 && visit_idx == 25) && (*t2 == 4 && *v2 == 11))
-                    || ((*t2 == 3 && *v2 == 25) && (train_idx == 4 && train_idx == 11))
-                {
-                    println!("checking t{}v{}", train_idx, visit_idx);
-                }
+                // if ((train_idx == 3 && visit_idx == 25) && (*t2 == 4 && *v2 == 11))
+                //     || ((*t2 == 3 && *v2 == 25) && (train_idx == 4 && train_idx == 11))
+                // {
+                //     println!("checking t{}v{}", train_idx, visit_idx);
+                // }
 
                 assert!(train_idx != *t2);
                 for occ1_idx in [prev_idx, next_idx] {
@@ -481,19 +731,19 @@ pub fn solve_incremental<S: MaxSatSolver>(
                         let test2 = occ1_start + occ1_travel >= occ2_end;
                         let incompatible = test1 && test2;
 
-                        if ((train_idx == 3 && visit_idx == 25) && (*t2 == 4 && *v2 == 11))
-                            || ((*t2 == 3 && *v2 == 25) && (train_idx == 4 && train_idx == 11))
-                        {
-                            println!(
-                                "t{}v{} {}-{} dt={}",
-                                train_idx, visit_idx, occ1_start, occ1_end, occ1_travel
-                            );
-                            println!(
-                                " t{}v{} {}-{} dt={}",
-                                t2, v2, occ2_start, occ2_end, occ2_travel
-                            );
-                            println!(" INCOMPAT = {}", incompatible);
-                        }
+                        // if ((train_idx == 3 && visit_idx == 25) && (*t2 == 4 && *v2 == 11))
+                        //     || ((*t2 == 3 && *v2 == 25) && (train_idx == 4 && train_idx == 11))
+                        // {
+                        //     println!(
+                        //         "t{}v{} {}-{} dt={}",
+                        //         train_idx, visit_idx, occ1_start, occ1_end, occ1_travel
+                        //     );
+                        //     println!(
+                        //         " t{}v{} {}-{} dt={}",
+                        //         t2, v2, occ2_start, occ2_end, occ2_travel
+                        //     );
+                        //     println!(" INCOMPAT = {}", incompatible);
+                        // }
 
                         if incompatible {
                             potentially_new_incompatibilties
@@ -511,10 +761,10 @@ pub fn solve_incremental<S: MaxSatSolver>(
                     .any(|((tx, vx), ox)| tx == t2 && vx == v2 && ox == o2);
 
                 if !already_incompat {
-                    println!(
-                        "Adding incompatibility {}-{}-{}   {}-{}-{}",
-                        t1, v1, o1, t2, v2, o2
-                    );
+                    // println!(
+                    //     "Adding incompatibility {}-{}-{}   {}-{}-{}",
+                    //     t1, v1, o1, t2, v2, o2
+                    // );
                     occupations[t1][v1].time[o1].incompat.push(((t2, v2), o2));
                     occupations[t2][v2].time[o2].incompat.push(((t1, v1), o1));
                     s.at_most_one(&[
@@ -522,10 +772,10 @@ pub fn solve_incremental<S: MaxSatSolver>(
                         occupations[t2][v2].time[o2].lit,
                     ]);
                 } else {
-                    println!(
-                        "Already incompat {}-{}-{}   {}-{}-{}",
-                        t1, v1, o1, t2, v2, o2
-                    );
+                    // println!(
+                    //     "Already incompat {}-{}-{}   {}-{}-{}",
+                    //     t1, v1, o1, t2, v2, o2
+                    // );
                     assert!(occupations[t2][v2].time[o2]
                         .incompat
                         .iter()
