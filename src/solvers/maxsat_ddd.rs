@@ -16,6 +16,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
+    propagate_traveltime_discretization :bool,
     mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     let _p = hprof::enter("ipamir incremental");
@@ -26,6 +27,11 @@ pub fn solve_incremental<S: MaxSatSolver>(
     let mut s = mk_solver();
     let mut resource_visits: Vec<Vec<(usize, usize)>> = Vec::new();
     let mut new_time_points = VecDeque::new();
+
+    let mut n_new_intervals = 0;
+    let mut n_traveltime = 0;
+    let mut n_conflicts = 0;
+    let mut n_timepoints = 0;
 
     let mut resource_usage: HashMap<usize, Vec<(usize, usize)>> = HashMap::new();
     for (train_idx, train) in problem.trains.iter().enumerate() {
@@ -102,6 +108,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
 
                     resource_visits[visit.resource_id].push((train_idx, visit_idx));
 
+                    n_timepoints += 1;
                     Occ {
                         time: vec![TimePoint {
                             start: visit.earliest,
@@ -144,7 +151,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
         .collect();
 
     type TPRef = ((usize, usize), usize);
-    let mut potentially_new_incompatibilties: Vec<(TPRef, TPRef)> = Vec::new();
+    let mut potentially_new_incompatibilities: Vec<(TPRef, TPRef)> = Vec::new();
     let mut iteration = 0;
     drop(_p_init);
     loop {
@@ -176,6 +183,12 @@ pub fn solve_incremental<S: MaxSatSolver>(
             .iter()
             .flat_map(|t| t.iter().map(|o| -o.next_lit));
 
+        log::info!(
+            "solving it{} with {} timepoints {} conflicts",
+            iteration,
+            n_timepoints,
+            n_conflicts
+        );
         let (cost, solution) = s
             .optimize(
                 Some(timeout - start_time.elapsed().as_secs_f64()),
@@ -271,18 +284,13 @@ pub fn solve_incremental<S: MaxSatSolver>(
             })
             .collect();
 
-        let mut n_new_intervals = 0;
-        let mut n_traveltime = 0;
-        let mut n_conflicts = 0;
-
         // CHECK TRAVEL TIME CONFLICTS
 
-        const PROPAGATE_TRAVELTIME_DISCRETIZATION: bool = false;
         for (train_idx, train) in problem.trains.iter().enumerate() {
             for visit_idx in 0..train.visits.len() - 1 {
                 let dt = problem.trains[train_idx].visits[visit_idx].travel_time;
                 if solution[train_idx][visit_idx] + dt > solution[train_idx][visit_idx + 1] {
-                    if PROPAGATE_TRAVELTIME_DISCRETIZATION {
+                    if propagate_traveltime_discretization {
                         // Because we always "propagate" the new shortest traveling time to subsequent
                         // train resource occupations, we should never have this conflict type.
 
@@ -328,7 +336,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
                         assert!(!interval_exists);
 
                         let xx = occupations[train_idx][visit_idx + 1].time[0].start
-                            >= solution[train_idx][visit_idx] + dt;
+                            <= solution[train_idx][visit_idx] + dt;
                         if !xx {
                             // If we don't eagerly propagate like this, then we need this refinement:
                             println!(
@@ -363,6 +371,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
                             train_idx,
                             visit_idx + 1,
                             solution[train_idx][visit_idx] + dt,
+                            "tt",
                         ));
                         n_traveltime += 1;
                     }
@@ -427,8 +436,18 @@ pub fn solve_incremental<S: MaxSatSolver>(
                     // }
 
                     if incompatible {
-                        new_time_points.push_back((*train_idx2, *visit_idx2, tp1.start + travel1));
-                        new_time_points.push_back((*train_idx1, *visit_idx1, tp2.start + travel2));
+                        new_time_points.push_back((
+                            *train_idx2,
+                            *visit_idx2,
+                            tp1.start + travel1,
+                            "res1",
+                        ));
+                        new_time_points.push_back((
+                            *train_idx1,
+                            *visit_idx1,
+                            tp2.start + travel2,
+                            "res2",
+                        ));
 
                         // println!("incomp t{}v{}x{}-{},dt{}  t{}v{}x{}-{},dt{}", t1, v1, t1_start, t1_end, travel1, t2, v2, t2_start, t2_end, travel2);
 
@@ -568,7 +587,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
             return Ok((solution, Default::default()));
         }
 
-        while let Some((train_idx, visit_idx, new_time)) = new_time_points.pop_front() {
+        while let Some((train_idx, visit_idx, new_time, type_)) = new_time_points.pop_front() {
             if occupations[train_idx][visit_idx]
                 .time
                 .iter()
@@ -621,6 +640,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
                 }
 
                 let v2 = s.new_var();
+                n_timepoints += 1;
                 occ.time.push(TimePoint {
                     start: new_time,
                     end: end_time,
@@ -629,7 +649,19 @@ pub fn solve_incremental<S: MaxSatSolver>(
                 });
 
                 assert!(end_time >= new_time);
-                assert!(occ.time[prev_interval].end >= occ.time[prev_interval].start);
+                let monotone = occ.time[prev_interval].end >= occ.time[prev_interval].start;
+                if !monotone {
+                    println!(
+                        "   split {} at {} BEFORE {:?}",
+                        type_,
+                        new_time,
+                        occ.time
+                            .iter()
+                            .map(|tp| (tp.start, tp.end))
+                            .collect::<Vec<_>>()
+                    );
+                }
+                assert!(monotone);
 
                 s.add_clause(None, vec![-occ.next_lit, v1, v2]);
                 occ.next_lit = v2;
@@ -647,7 +679,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
                 (prev_interval, next_interval)
             };
 
-            assert!(potentially_new_incompatibilties.is_empty());
+            assert!(potentially_new_incompatibilities.is_empty());
 
             // TRAVEL TIME CONFLICTS (WITH PREVIOUS VISIT)
             if visit_idx > 0 {
@@ -666,7 +698,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
                             // if relevant {
                             //     println!("  INCOPMAT");
                             // }
-                            potentially_new_incompatibilties.push((
+                            potentially_new_incompatibilities.push((
                                 ((train_idx, visit_idx), x),
                                 ((train_idx, visit_idx - 1), i2),
                             ));
@@ -678,8 +710,15 @@ pub fn solve_incremental<S: MaxSatSolver>(
             if visit_idx + 1 < problem.trains[train_idx].visits.len() {
                 let dt = problem.trains[train_idx].visits[visit_idx].travel_time;
 
-                if occupations[train_idx][visit_idx + 1].time[0].start >= new_time + dt {
-                    new_time_points.push_back((train_idx, visit_idx + 1, new_time + dt));
+                if propagate_traveltime_discretization {
+                    if new_time + dt >= occupations[train_idx][visit_idx + 1].time[0].start {
+                        new_time_points.push_back((
+                            train_idx,
+                            visit_idx + 1,
+                            new_time + dt,
+                            "proptt",
+                        ));
+                    }
                 }
 
                 for x in [prev_idx, next_idx] {
@@ -700,7 +739,7 @@ pub fn solve_incremental<S: MaxSatSolver>(
                             //     println!("  INCOPMAT");
                             // }
 
-                            potentially_new_incompatibilties.push((
+                            potentially_new_incompatibilities.push((
                                 ((train_idx, visit_idx), x),
                                 ((train_idx, visit_idx + 1), i2),
                             ));
@@ -746,14 +785,14 @@ pub fn solve_incremental<S: MaxSatSolver>(
                         // }
 
                         if incompatible {
-                            potentially_new_incompatibilties
+                            potentially_new_incompatibilities
                                 .push((((train_idx, visit_idx), occ1_idx), ((*t2, *v2), occ2_idx)));
                         }
                     }
                 }
             }
 
-            for (((t1, v1), o1), ((t2, v2), o2)) in potentially_new_incompatibilties.drain(..) {
+            for (((t1, v1), o1), ((t2, v2), o2)) in potentially_new_incompatibilities.drain(..) {
                 let already_incompat = occupations[t1][v1].time[o1]
                     .incompat
                     .iter()

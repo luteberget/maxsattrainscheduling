@@ -124,6 +124,9 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
     let mut processed_core_sizes: BTreeMap<usize, usize> = BTreeMap::new();
     let mut iteration_types: BTreeMap<IterationType, usize> = BTreeMap::new();
 
+    let mut n_timepoints = 0;
+    let mut n_conflict_constraints = 0;
+
     for (a, b) in problem.conflicts.iter() {
         conflicts.entry(*a).or_default().push(*b);
         if *a != *b {
@@ -141,6 +144,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                 delays: vec![(true.into(), visit.earliest), (false.into(), i32::MAX)],
                 incumbent_idx: 0,
             });
+            n_timepoints += 1;
 
             while resource_visits.len() <= visit.resource_id {
                 resource_visits.push(Vec::new());
@@ -454,7 +458,8 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                                 .map(|v| occupations[v].delays[occupations[v].incumbent_idx].0)
                                 .unwrap_or_else(|| true.into());
 
-                            const USE_CHOICE_VAR: bool = true;
+                            const USE_CHOICE_VAR: bool = false;
+                            n_conflict_constraints += 1;
 
                             if USE_CHOICE_VAR {
                                 let (pa, pb) = (visit_id, other_visit);
@@ -639,6 +644,7 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
         }
 
         for (visit, new_timepoint_var, new_t) in new_time_points.drain(..) {
+            n_timepoints += 1;
             let (train_idx, visit_idx) = visits[visit];
             // let resource = problem.trains[train_idx].visits[visit_idx].resource_id;
 
@@ -741,10 +747,15 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             .collect::<Vec<_>>();
         assumptions.sort_by_key(|(_, w)| -(*w as isize));
 
+        log::info!(
+            "solving it{} with {} timepoints {} conflicts",
+            iteration,
+            n_timepoints,
+            n_conflict_constraints
+        );
         let core = loop {
             let solve_start = Instant::now();
             let result = {
-                // println!("solving");
                 let _p = hprof::enter("sat check");
                 SatSolverWithCore::solve_with_assumptions(
                     &mut solver,

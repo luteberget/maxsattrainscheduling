@@ -6,7 +6,7 @@ use ddd::{
     solvers::{
         bigm,
         greedy::{self, default_heuristic},
-        maxsat_ddd, maxsat_ti, maxsatddd_ladder, SolverError,
+        maxsat_ddd, maxsat_ti, maxsatddd_ladder, maxsatddd_ladder_abstract, SolverError,
     },
 };
 
@@ -79,7 +79,7 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
     // let c_instances = [21, 22, 23, 24];
 
     for (dir, shortname) in [
-        // ("instances_original", "orig"),
+        ("instances_original", "orig"),
         ("instances_addtracktime", "track"),
         ("instances_addstationtime", "station"),
     ] {
@@ -90,9 +90,6 @@ pub fn txt_instances(mut x: impl FnMut(String, NamedProblem)) {
         // let instances = instances.skip(16).take(1);
 
         for (infrastructure, number) in instances {
-            if *infrastructure == "B" && number == 11 {
-                continue;
-            }
             let filename = format!("{}/Instance{}{}.txt", dir, infrastructure, number);
             println!("Reading {}", filename);
             #[allow(unused)]
@@ -163,6 +160,7 @@ enum SolverType {
     BigMEager,
     BigMLazy,
     MaxSatDddLadderRC2,
+    MaxSatDddLadderRC2Abstract,
     MaxSatDddCadical,
     MaxSatIdl,
     MipDdd,
@@ -179,10 +177,12 @@ enum SolverType {
     MaxSatDddExternal,
     MaxSatDddIpamir,
     MaxSatDddIncremental,
+    MaxSatDddIncrementalNoProp,
     MaxSatDddPairwiseCustomRc2,
+    MaxSatDddPairwiseCustomRc2NoProp,
 }
 
-const TIMEOUT: f64 = 30.0;
+const TIMEOUT: f64 = 120.0;
 
 fn mk_env() -> grb::Env {
     let mut env = grb::Env::new("").unwrap();
@@ -208,6 +208,7 @@ fn main() {
             "bigm_eager" => SolverType::BigMEager,
             "bigm_lazy" => SolverType::BigMLazy,
             "maxsat_ddd" => SolverType::MaxSatDddLadderRC2,
+            "maxsat_ddd_abstract" => SolverType::MaxSatDddLadderRC2Abstract,
             "maxsat_ddd_cdc" => SolverType::MaxSatDddCadical,
             "maxsat_idl" => SolverType::MaxSatIdl,
             "mip_ddd" => SolverType::MipDdd,
@@ -224,7 +225,9 @@ fn main() {
             "maxsat_ddd_external" => SolverType::MaxSatDddExternal,
             "maxsat_ddd_ipamir" => SolverType::MaxSatDddIpamir,
             "maxsat_ddd_incremental" => SolverType::MaxSatDddIncremental,
+            "maxsat_ddd_incremental_noprop" => SolverType::MaxSatDddIncrementalNoProp,
             "maxsat_ddd_pairwise_customrc2" => SolverType::MaxSatDddPairwiseCustomRc2,
+            "maxsat_ddd_pairwise_customrc2_noprop" => SolverType::MaxSatDddPairwiseCustomRc2NoProp,
             _ => panic!("unknown solver type"),
         })
         .collect::<Vec<_>>();
@@ -377,6 +380,19 @@ fn main() {
                     &p.problem,
                     TIMEOUT,
                     delay_cost_type,
+                    true,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                )
+                .map(|(v, _)| v),
+                SolverType::MaxSatDddIncrementalNoProp => maxsat_ddd::solve_incremental(
+                    || maxsatsolver::Incremental::new(),
+                    &env,
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    false,
                     |k, v| {
                         solve_data.insert(k, v);
                     },
@@ -392,6 +408,23 @@ fn main() {
                     &p.problem,
                     TIMEOUT,
                     delay_cost_type,
+                    true,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                )
+                .map(|(v, _)| v),
+                SolverType::MaxSatDddPairwiseCustomRc2NoProp => maxsat_ddd::solve_incremental(
+                    || {
+                        maxsatsolver::CustomRC2Incremental::new(
+                            satcoder::solvers::minisat::Solver::new(),
+                        )
+                    },
+                    &env,
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    false,
                     |k, v| {
                         solve_data.insert(k, v);
                     },
@@ -400,6 +433,19 @@ fn main() {
                 SolverType::MaxSatDddLadderRC2 => maxsatddd_ladder::solve(
                     &mk_env,
                     satcoder::solvers::minisat::Solver::new(),
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                )
+                .map(|(v, _)| v),
+                SolverType::MaxSatDddLadderRC2Abstract => maxsatddd_ladder_abstract::solve(
+                    &mk_env,
+                    maxsatsolver::CustomRC2Incremental::new(
+                        satcoder::solvers::minisat::Solver::new(),
+                    ),
                     &p.problem,
                     TIMEOUT,
                     delay_cost_type,

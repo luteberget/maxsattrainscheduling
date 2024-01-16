@@ -213,6 +213,22 @@ pub struct CustomRC2Incremental<
 impl<
         L: satcoder::Lit + Copy + std::fmt::Debug,
         S: SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
+    > fmt::Debug for CustomRC2Incremental<L, S>
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CustomRC2Incremental")
+            .field("satsolver", &self.satsolver)
+            .field("total_cost", &self.total_cost)
+            // .field("soft_constraints", &self.soft_constraints)
+            // .field("vars", &self.vars)
+            .field("n_assumps", &self.n_assumps)
+            .finish()
+    }
+}
+
+impl<
+        L: satcoder::Lit + Copy + std::fmt::Debug,
+        S: SatInstance<L> + SatSolverWithCore<Lit = L> + std::fmt::Debug,
     > CustomRC2Incremental<L, S>
 {
     pub fn new(solver: S) -> Self {

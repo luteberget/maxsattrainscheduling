@@ -9,6 +9,7 @@ mod minimize;
 pub mod maxsat_ti;
 pub mod maxsat_ddd;
 pub mod heuristic;
+pub mod maxsatddd_ladder_abstract;
 // pub mod cutting;
 
 
