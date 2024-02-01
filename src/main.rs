@@ -4,9 +4,7 @@ use ddd::{
     maxsatsolver, parser,
     problem::{self, DelayCostThresholds, DelayCostType, NamedProblem, Visit},
     solvers::{
-        bigm,
-        greedy::{self, default_heuristic},
-        maxsat_ddd, maxsat_ti, maxsatddd_ladder, maxsatddd_ladder_abstract, SolverError,
+        bigm, greedy::{self, default_heuristic}, maxsat_ddd, maxsat_ti, maxsatddd_ladder, maxsatddd_ladder_abstract, milp_ti, SolverError
     },
 };
 
@@ -174,6 +172,7 @@ enum SolverType {
     BinarizedBigMLazy30Sec,
     BinarizedBigMLazy60Sec,
     MaxSatTi,
+    MipTi,
     MaxSatDddExternal,
     MaxSatDddIpamir,
     MaxSatDddIncremental,
@@ -222,6 +221,7 @@ fn main() {
             "bin_bigm_lazy_30s" => SolverType::BinarizedBigMLazy30Sec,
             "bin_bigm_lazy_60s" => SolverType::BinarizedBigMLazy60Sec,
             "maxsat_ti" => SolverType::MaxSatTi,
+            "mip_ti" => SolverType::MipTi,
             "maxsat_ddd_external" => SolverType::MaxSatDddExternal,
             "maxsat_ddd_ipamir" => SolverType::MaxSatDddIpamir,
             "maxsat_ddd_incremental" => SolverType::MaxSatDddIncremental,
@@ -340,7 +340,7 @@ fn main() {
                     },
                 ),
                 SolverType::MaxSatTi => maxsat_ti::solve(
-                    maxsatsolver::External::new(),
+                    maxsatsolver::Incremental::new(),
                     &env,
                     &p.problem,
                     TIMEOUT,
@@ -348,7 +348,19 @@ fn main() {
                     |k, v| {
                         solve_data.insert(k, v);
                     },
-                    5,
+                    10,
+                    900,
+                )
+                .map(|(v, _)| v),
+                SolverType::MipTi => milp_ti::solve(
+                    &env,
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                    10,
                     900,
                 )
                 .map(|(v, _)| v),

@@ -10,6 +10,7 @@ pub mod maxsat_ti;
 pub mod maxsat_ddd;
 pub mod heuristic;
 pub mod maxsatddd_ladder_abstract;
+pub mod milp_ti;
 // pub mod cutting;
 
 
