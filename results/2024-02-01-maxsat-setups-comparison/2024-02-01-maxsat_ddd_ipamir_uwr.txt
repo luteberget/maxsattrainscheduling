@@ -1,0 +1,4718 @@
+Opt { debug: false, solvers: ["maxsat_ddd", "maxsat_ddd_ipamir"], xml_instances: false, txt_instances: true, instance_name_filter: None, verify_instances: false, objective: None, other_objective: None, json_output: None }
+Using solvers [MaxSatDddLadderRC2, MaxSatDddIpamir]
+Using delay cost type FiniteSteps123
+Starting gurobi environment...
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+...ok.
+Reading instances_original/InstanceA1.txt
+trains 29 tracks 33 avgtracks 20.93 trackpairs 5915 delays 0 avgdelay0
+29 & 33 & 20.93 & 5915 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 11 iterations 127 solver SAT instance (MiniSAT v2.1.0) { variables: 678, clauses: 1073 }
+Core size bins {}
+Iteration types {Objective: 11, TravelTimeConflict: 90, ResourceConflict: 1, TravelAndResourceConflict: 24, Solution: 1}
+STATS 127 11 90 1 24 1 601 31
+Solution verified. Cost 11
+Timing information for root profiler:
+  solver - 1 * 4.5ms = 4.5ms (99.2%)
+    iteration - 127 * 34.3us = 4.4ms (95.9%)
+      travel time check - 5393 * 65ns = 352.3us (8.1%)
+      conflict check - 5393 * 127ns = 685.4us (15.7%)
+      sat check - 126 * 7.7us = 965.0us (22.2%)
+      treat core - 11 * 744ns = 8.2us (0.2%)
+      update times - 115 * 14.3us = 1.6ms (37.7%)
+        extract solution - 115 * 4.9us = 559.0us (34.0%)
+      extract solution - 2 * 5.8us = 11.5us (0.3%)
+  verify_solution - 1 * 22.4ms = 22.4ms (489.0%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1747 intervals
+Solution verified. Cost 11
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 22.4ms = 22.4ms (85.7%)
+  maxsat ddd external solve init - 1 * 16.7ms = 16.7ms (63.7%)
+  build wcnf - 4 * 702.2us = 2.8ms (10.7%)
+    addclause - 15747 * 99ns = 1.6ms (56.1%)
+  solve wcnf - 4 * 1.6ms = 6.5ms (24.7%)
+    optimize - 4 * 1.6ms = 6.3ms (96.9%)
+      solve - 4 * 1.6ms = 6.2ms (99.7%)
+    mip_ddd check travel - 4 * 1.2us = 4.8us (0.1%)
+    check conflicts - 4 * 19.8us = 79.1us (1.2%)
+Reading instances_original/InstanceA2.txt
+trains 25 tracks 33 avgtracks 19.00 trackpairs 3735 delays 0 avgdelay0
+25 & 33 & 19.00 & 3735 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 25 iterations 95 solver SAT instance (MiniSAT v2.1.0) { variables: 606, clauses: 841 }
+Core size bins {}
+Iteration types {Objective: 25, TravelTimeConflict: 49, ResourceConflict: 2, TravelAndResourceConflict: 18, Solution: 1}
+STATS 95 25 49 2 18 1 508 36
+Solution verified. Cost 25
+Timing information for root profiler:
+  solver - 1 * 4.1ms = 4.1ms (99.6%)
+    iteration - 95 * 41.9us = 4.0ms (98.0%)
+      travel time check - 7753 * 49ns = 382.4us (9.6%)
+      conflict check - 7753 * 118ns = 919.0us (23.1%)
+      sat check - 94 * 5.7us = 538.3us (13.5%)
+      treat core - 25 * 253ns = 6.3us (0.2%)
+      update times - 69 * 19.8us = 1.4ms (34.3%)
+        extract solution - 69 * 4.6us = 318.1us (23.3%)
+      extract solution - 2 * 4.3us = 8.7us (0.2%)
+  verify_solution - 1 * 13.8ms = 13.8ms (338.9%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1983 intervals
+Solution verified. Cost 25
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 13.8ms = 13.8ms (43.4%)
+  maxsat ddd external solve init - 1 * 10.1ms = 10.1ms (31.7%)
+  build wcnf - 5 * 1.1ms = 5.3ms (16.8%)
+    addclause - 29512 * 97ns = 2.9ms (53.9%)
+  solve wcnf - 5 * 3.2ms = 16.0ms (50.3%)
+    optimize - 5 * 3.2ms = 15.8ms (98.5%)
+      solve - 5 * 3.2ms = 15.8ms (99.8%)
+    mip_ddd check travel - 5 * 1.2us = 6.0us (0.0%)
+    check conflicts - 5 * 12.3us = 61.7us (0.4%)
+Reading instances_original/InstanceA3.txt
+trains 16 tracks 33 avgtracks 22.38 trackpairs 2061 delays 0 avgdelay0
+16 & 33 & 22.38 & 2061 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 10 iterations 102 solver SAT instance (MiniSAT v2.1.0) { variables: 634, clauses: 934 }
+Core size bins {}
+Iteration types {Objective: 10, TravelTimeConflict: 70, ResourceConflict: 1, TravelAndResourceConflict: 20, Solution: 1}
+STATS 102 10 70 1 20 1 569 26
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 1 * 4.1ms = 4.1ms (99.7%)
+    iteration - 102 * 39.9us = 4.1ms (98.6%)
+      travel time check - 8956 * 49ns = 439.6us (10.8%)
+      conflict check - 8956 * 93ns = 834.6us (20.5%)
+      sat check - 101 * 7.0us = 707.6us (17.4%)
+      treat core - 10 * 371ns = 3.7us (0.1%)
+      update times - 91 * 13.7us = 1.2ms (30.6%)
+        extract solution - 91 * 2.9us = 259.7us (20.9%)
+      extract solution - 2 * 2.9us = 5.8us (0.1%)
+  verify_solution - 1 * 7.8ms = 7.8ms (188.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1214 intervals
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 7.8ms = 7.8ms (67.6%)
+  maxsat ddd external solve init - 1 * 5.6ms = 5.6ms (48.4%)
+  build wcnf - 4 * 469.7us = 1.9ms (16.3%)
+    addclause - 11199 * 92ns = 1.0ms (54.9%)
+  solve wcnf - 4 * 971.7us = 3.9ms (33.7%)
+    optimize - 4 * 940.6us = 3.8ms (96.8%)
+      solve - 4 * 937.4us = 3.7ms (99.7%)
+    mip_ddd check travel - 4 * 770ns = 3.1us (0.1%)
+    check conflicts - 4 * 6.4us = 25.5us (0.7%)
+Reading instances_original/InstanceA4.txt
+trains 14 tracks 33 avgtracks 19.21 trackpairs 1175 delays 0 avgdelay0
+14 & 33 & 19.21 & 1175 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 17 iterations 150 solver SAT instance (MiniSAT v2.1.0) { variables: 571, clauses: 774 }
+Core size bins {}
+Iteration types {Objective: 17, TravelTimeConflict: 116, ResourceConflict: 1, TravelAndResourceConflict: 15, Solution: 1}
+STATS 150 17 116 1 15 1 496 21
+Solution verified. Cost 17
+Timing information for root profiler:
+  solver - 1 * 5.0ms = 5.0ms (99.7%)
+    iteration - 150 * 32.8us = 4.9ms (98.8%)
+      travel time check - 11584 * 42ns = 496.1us (10.1%)
+      conflict check - 11584 * 81ns = 947.8us (19.3%)
+      sat check - 149 * 6.1us = 902.1us (18.3%)
+      treat core - 17 * 336ns = 5.7us (0.1%)
+      update times - 132 * 10.9us = 1.4ms (29.4%)
+        extract solution - 132 * 2.3us = 305.4us (21.1%)
+      extract solution - 2 * 2.4us = 4.7us (0.1%)
+  verify_solution - 1 * 4.5ms = 4.5ms (89.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1130 intervals
+Solution verified. Cost 17
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 4.5ms = 4.5ms (42.4%)
+  maxsat ddd external solve init - 1 * 3.2ms = 3.2ms (30.2%)
+  build wcnf - 5 * 494.8us = 2.5ms (23.5%)
+    addclause - 13232 * 103ns = 1.4ms (55.2%)
+  solve wcnf - 5 * 931.5us = 4.7ms (44.3%)
+    optimize - 5 * 901.5us = 4.5ms (96.8%)
+      solve - 5 * 898.6us = 4.5ms (99.7%)
+    mip_ddd check travel - 5 * 764ns = 3.8us (0.1%)
+    check conflicts - 5 * 4.2us = 20.8us (0.4%)
+Reading instances_original/InstanceA5.txt
+trains 12 tracks 33 avgtracks 19.25 trackpairs 876 delays 0 avgdelay0
+12 & 33 & 19.25 & 876 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 15 iterations 79 solver SAT instance (MiniSAT v2.1.0) { variables: 301, clauses: 369 }
+Core size bins {}
+Iteration types {Objective: 15, TravelTimeConflict: 56, ResourceConflict: 1, TravelAndResourceConflict: 6, Solution: 1}
+STATS 79 15 56 1 6 1 259 11
+Solution verified. Cost 15
+Timing information for root profiler:
+  solver - 1 * 1.7ms = 1.7ms (99.5%)
+    iteration - 79 * 20.9us = 1.7ms (97.2%)
+      travel time check - 3684 * 52ns = 192.7us (11.7%)
+      conflict check - 3684 * 79ns = 292.4us (17.7%)
+      sat check - 78 * 3.0us = 232.9us (14.1%)
+      treat core - 15 * 354ns = 5.3us (0.3%)
+      update times - 63 * 7.6us = 478.2us (29.0%)
+        extract solution - 63 * 2.0us = 127.6us (26.7%)
+      extract solution - 2 * 2.0us = 4.1us (0.2%)
+  verify_solution - 1 * 3.3ms = 3.3ms (193.0%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 794 intervals
+Solution verified. Cost 15
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 3.3ms = 3.3ms (69.2%)
+  maxsat ddd external solve init - 1 * 2.3ms = 2.3ms (48.9%)
+  build wcnf - 3 * 311.5us = 934.5us (19.7%)
+    addclause - 5296 * 97ns = 515.3us (55.1%)
+  solve wcnf - 3 * 467.7us = 1.4ms (29.5%)
+    optimize - 3 * 443.3us = 1.3ms (94.8%)
+      solve - 3 * 441.5us = 1.3ms (99.6%)
+    mip_ddd check travel - 3 * 613ns = 1.8us (0.1%)
+    check conflicts - 3 * 3.2us = 9.6us (0.7%)
+Reading instances_original/InstanceA6.txt
+trains 8 tracks 33 avgtracks 18.62 trackpairs 307 delays 0 avgdelay0
+8 & 33 & 18.62 & 307 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 10 iterations 93 solver SAT instance (MiniSAT v2.1.0) { variables: 230, clauses: 298 }
+Core size bins {}
+Iteration types {Objective: 10, TravelTimeConflict: 78, ResourceConflict: 1, TravelAndResourceConflict: 3, Solution: 1}
+STATS 93 10 78 1 3 1 204 6
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 1 * 1.3ms = 1.3ms (99.5%)
+    iteration - 93 * 13.8us = 1.3ms (97.3%)
+      travel time check - 2215 * 60ns = 133.3us (10.4%)
+      conflict check - 2215 * 64ns = 141.8us (11.0%)
+      sat check - 92 * 2.7us = 248.4us (19.3%)
+      treat core - 10 * 412ns = 4.1us (0.3%)
+      update times - 82 * 4.5us = 365.4us (28.4%)
+        extract solution - 82 * 1.3us = 105.9us (29.0%)
+      extract solution - 2 * 1.3us = 2.7us (0.2%)
+  verify_solution - 1 * 1.4ms = 1.4ms (104.3%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 552 intervals
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 1.4ms = 1.4ms (49.4%)
+  maxsat ddd external solve init - 1 * 931.6us = 931.6us (33.2%)
+  build wcnf - 4 * 215.6us = 862.4us (30.7%)
+    addclause - 4628 * 103ns = 478.4us (55.5%)
+  solve wcnf - 4 * 235.7us = 942.7us (33.6%)
+    optimize - 4 * 217.8us = 871.2us (92.4%)
+      solve - 4 * 216.5us = 866.0us (99.4%)
+    mip_ddd check travel - 4 * 447ns = 1.8us (0.2%)
+    check conflicts - 4 * 1.4us = 5.4us (0.6%)
+Reading instances_original/InstanceA7.txt
+trains 8 tracks 33 avgtracks 12.62 trackpairs 126 delays 0 avgdelay0
+8 & 33 & 12.62 & 126 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 10 iterations 55 solver SAT instance (MiniSAT v2.1.0) { variables: 200, clauses: 254 }
+Core size bins {}
+Iteration types {Objective: 10, TravelTimeConflict: 38, ResourceConflict: 1, TravelAndResourceConflict: 5, Solution: 1}
+STATS 55 10 38 1 5 1 173 10
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 1 * 884.3us = 884.3us (99.3%)
+    iteration - 55 * 15.7us = 862.9us (97.6%)
+      travel time check - 2354 * 53ns = 126.1us (14.6%)
+      conflict check - 2354 * 60ns = 141.8us (16.4%)
+      sat check - 54 * 2.1us = 116.0us (13.4%)
+      treat core - 10 * 223ns = 2.2us (0.3%)
+      update times - 44 * 4.0us = 174.1us (20.2%)
+        extract solution - 44 * 1.1us = 48.1us (27.6%)
+      extract solution - 2 * 1.1us = 2.2us (0.3%)
+  verify_solution - 1 * 657.3us = 657.3us (73.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 724 intervals
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 680.8us = 680.8us (15.9%)
+  maxsat ddd external solve init - 1 * 438.6us = 438.6us (10.2%)
+  build wcnf - 4 * 428.2us = 1.7ms (39.9%)
+    addclause - 8544 * 109ns = 934.0us (54.5%)
+  solve wcnf - 4 * 512.3us = 2.0ms (47.7%)
+    optimize - 4 * 492.2us = 2.0ms (96.1%)
+      solve - 4 * 490.6us = 2.0ms (99.7%)
+    mip_ddd check travel - 4 * 345ns = 1.4us (0.1%)
+    check conflicts - 4 * 772ns = 3.1us (0.2%)
+Reading instances_original/InstanceA8.txt
+trains 28 tracks 33 avgtracks 19.21 trackpairs 4877 delays 0 avgdelay0
+28 & 33 & 19.21 & 4877 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 31 iterations 241 solver SAT instance (MiniSAT v2.1.0) { variables: 2541, clauses: 4632 }
+Core size bins {}
+Iteration types {Objective: 31, TravelTimeConflict: 126, ResourceConflict: 1, TravelAndResourceConflict: 82, Solution: 1}
+STATS 241 31 126 1 82 1 2157 209
+Solution verified. Cost 31
+Timing information for root profiler:
+  solver - 1 * 38.5ms = 38.5ms (99.8%)
+    iteration - 241 * 159.5us = 38.4ms (99.7%)
+      travel time check - 69337 * 38ns = 2.7ms (7.0%)
+      conflict check - 69337 * 130ns = 9.0ms (23.5%)
+      sat check - 240 * 43.0us = 10.3ms (26.8%)
+      treat core - 31 * 396ns = 12.3us (0.0%)
+      update times - 209 * 54.5us = 11.4ms (29.6%)
+        extract solution - 209 * 5.1us = 1.1ms (9.4%)
+      extract solution - 2 * 5.1us = 10.2us (0.0%)
+  verify_solution - 1 * 17.8ms = 17.8ms (46.0%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 4446 intervals
+Solution verified. Cost 31
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 16.7ms = 16.7ms (4.4%)
+  maxsat ddd external solve init - 1 * 13.1ms = 13.1ms (3.5%)
+  build wcnf - 10 * 3.7ms = 37.1ms (9.8%)
+    addclause - 186769 * 108ns = 20.2ms (54.4%)
+  solve wcnf - 10 * 32.5ms = 325.2ms (86.0%)
+    optimize - 10 * 32.4ms = 324.3ms (99.7%)
+      solve - 10 * 32.4ms = 324.2ms (100.0%)
+    mip_ddd check travel - 10 * 1.3us = 12.8us (0.0%)
+    check conflicts - 10 * 14.8us = 148.5us (0.0%)
+Reading instances_original/InstanceA9.txt
+trains 20 tracks 33 avgtracks 20.05 trackpairs 2616 delays 0 avgdelay0
+20 & 33 & 20.05 & 2616 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 18 iterations 131 solver SAT instance (MiniSAT v2.1.0) { variables: 1050, clauses: 1736 }
+Core size bins {}
+Iteration types {Objective: 18, TravelTimeConflict: 68, ResourceConflict: 1, TravelAndResourceConflict: 43, Solution: 1}
+STATS 131 18 68 1 43 1 910 65
+Solution verified. Cost 18
+Timing information for root profiler:
+  solver - 1 * 5.5ms = 5.5ms (99.5%)
+    iteration - 131 * 41.1us = 5.4ms (98.6%)
+      travel time check - 9197 * 55ns = 506.0us (9.4%)
+      conflict check - 9197 * 102ns = 945.2us (17.6%)
+      sat check - 130 * 11.0us = 1.4ms (26.6%)
+      treat core - 18 * 240ns = 4.3us (0.1%)
+      update times - 112 * 14.2us = 1.6ms (29.5%)
+        extract solution - 112 * 3.1us = 344.2us (21.7%)
+      extract solution - 2 * 3.2us = 6.3us (0.1%)
+  verify_solution - 1 * 9.3ms = 9.3ms (170.1%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1636 intervals
+Solution verified. Cost 18
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 9.3ms = 9.3ms (58.8%)
+  maxsat ddd external solve init - 1 * 6.8ms = 6.8ms (43.0%)
+  build wcnf - 5 * 724.3us = 3.6ms (22.8%)
+    addclause - 21142 * 91ns = 1.9ms (53.7%)
+  solve wcnf - 5 * 1.0ms = 5.2ms (32.5%)
+    optimize - 5 * 995.6us = 5.0ms (96.4%)
+      solve - 5 * 991.8us = 5.0ms (99.6%)
+    mip_ddd check travel - 5 * 938ns = 4.7us (0.1%)
+    check conflicts - 5 * 8.7us = 43.7us (0.8%)
+Reading instances_original/InstanceA10.txt
+trains 17 tracks 33 avgtracks 18.18 trackpairs 1632 delays 0 avgdelay0
+17 & 33 & 18.18 & 1632 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 17 iterations 93 solver SAT instance (MiniSAT v2.1.0) { variables: 625, clauses: 933 }
+Core size bins {}
+Iteration types {Objective: 17, TravelTimeConflict: 51, ResourceConflict: 1, TravelAndResourceConflict: 23, Solution: 1}
+STATS 93 17 51 1 23 1 529 40
+Solution verified. Cost 17
+Timing information for root profiler:
+  solver - 1 * 3.4ms = 3.4ms (99.5%)
+    iteration - 93 * 35.7us = 3.3ms (98.3%)
+      travel time check - 6891 * 51ns = 355.0us (10.7%)
+      conflict check - 6891 * 93ns = 641.7us (19.3%)
+      sat check - 92 * 7.3us = 668.5us (20.2%)
+      treat core - 17 * 265ns = 4.5us (0.1%)
+      update times - 75 * 13.2us = 986.8us (29.7%)
+        extract solution - 75 * 2.5us = 185.3us (18.8%)
+      extract solution - 2 * 2.5us = 5.1us (0.2%)
+  verify_solution - 1 * 5.6ms = 5.6ms (164.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1601 intervals
+Solution verified. Cost 17
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 5.6ms = 5.6ms (19.6%)
+  maxsat ddd external solve init - 1 * 4.1ms = 4.1ms (14.3%)
+  build wcnf - 6 * 852.1us = 5.1ms (18.0%)
+    addclause - 28779 * 97ns = 2.8ms (55.2%)
+  solve wcnf - 6 * 3.1ms = 18.9ms (66.4%)
+    optimize - 6 * 3.1ms = 18.7ms (98.9%)
+      solve - 6 * 3.1ms = 18.6ms (99.9%)
+    mip_ddd check travel - 6 * 760ns = 4.6us (0.0%)
+    check conflicts - 6 * 5.1us = 30.7us (0.2%)
+Reading instances_original/InstanceA11.txt
+trains 30 tracks 33 avgtracks 19.83 trackpairs 6162 delays 0 avgdelay0
+30 & 33 & 19.83 & 6162 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 23 iterations 114 solver SAT instance (MiniSAT v2.1.0) { variables: 1723, clauses: 2727 }
+Core size bins {}
+Iteration types {Objective: 23, TravelTimeConflict: 30, ResourceConflict: 1, TravelAndResourceConflict: 59, Solution: 1}
+STATS 114 23 30 1 59 1 1454 104
+Solution verified. Cost 23
+Timing information for root profiler:
+  solver - 1 * 12.0ms = 12.0ms (99.5%)
+    iteration - 114 * 104.5us = 11.9ms (99.2%)
+      travel time check - 22189 * 46ns = 1.0ms (8.7%)
+      conflict check - 22189 * 135ns = 3.0ms (25.2%)
+      sat check - 161 * 21.3us = 3.4ms (28.8%)
+      treat core - 23 * 540ns = 12.4us (0.1%)
+      update times - 90 * 31.0us = 2.8ms (23.4%)
+        extract solution - 90 * 5.1us = 457.3us (16.4%)
+      extract solution - 2 * 5.1us = 10.1us (0.1%)
+  verify_solution - 1 * 20.5ms = 20.5ms (169.9%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 2928 intervals
+Solution verified. Cost 23
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 20.5ms = 20.5ms (24.9%)
+  maxsat ddd external solve init - 1 * 15.5ms = 15.5ms (18.8%)
+  build wcnf - 6 * 1.4ms = 8.7ms (10.6%)
+    addclause - 47632 * 97ns = 4.6ms (53.3%)
+  solve wcnf - 6 * 9.5ms = 57.3ms (69.6%)
+    optimize - 6 * 9.5ms = 56.8ms (99.2%)
+      solve - 6 * 9.5ms = 56.8ms (99.9%)
+    mip_ddd check travel - 6 * 1.5us = 8.9us (0.0%)
+    check conflicts - 6 * 18.9us = 113.2us (0.2%)
+Reading instances_original/InstanceA12.txt
+trains 28 tracks 33 avgtracks 21.71 trackpairs 6393 delays 0 avgdelay0
+28 & 33 & 21.71 & 6393 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 24 iterations 227 solver SAT instance (MiniSAT v2.1.0) { variables: 2444, clauses: 4068 }
+Core size bins {}
+Iteration types {Objective: 24, TravelTimeConflict: 119, ResourceConflict: 1, TravelAndResourceConflict: 82, Solution: 1}
+STATS 227 24 119 1 82 1 2096 137
+Solution verified. Cost 24
+Timing information for root profiler:
+  solver - 1 * 41.3ms = 41.3ms (99.8%)
+    iteration - 227 * 181.3us = 41.2ms (99.7%)
+      travel time check - 65331 * 37ns = 2.5ms (6.0%)
+      conflict check - 65331 * 134ns = 8.8ms (21.3%)
+      sat check - 381 * 38.6us = 14.7ms (35.7%)
+      treat core - 24 * 781ns = 18.8us (0.0%)
+      update times - 202 * 52.7us = 10.6ms (25.9%)
+        extract solution - 202 * 5.1us = 1.0ms (9.7%)
+      extract solution - 2 * 5.0us = 10.1us (0.0%)
+  verify_solution - 1 * 21.4ms = 21.4ms (51.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_original/InstanceB1.txt
+trains 18 tracks 25 avgtracks 17.33 trackpairs 2022 delays 0 avgdelay0
+18 & 25 & 17.33 & 2022 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 4 iterations 39 solver SAT instance (MiniSAT v2.1.0) { variables: 81, clauses: 82 }
+Core size bins {}
+Iteration types {Objective: 4, TravelTimeConflict: 31, ResourceConflict: 1, TravelAndResourceConflict: 2, Solution: 1}
+STATS 39 4 31 1 2 1 70 4
+Solution verified. Cost 4
+Timing information for root profiler:
+  solver - 1 * 670.3us = 670.3us (99.0%)
+    iteration - 39 * 16.0us = 622.4us (92.9%)
+      travel time check - 1470 * 39ns = 58.4us (9.4%)
+      conflict check - 1470 * 94ns = 138.5us (22.3%)
+      sat check - 38 * 819ns = 31.1us (5.0%)
+      treat core - 4 * 375ns = 1.5us (0.2%)
+      update times - 34 * 6.0us = 205.0us (32.9%)
+        extract solution - 34 * 2.4us = 82.2us (40.1%)
+      extract solution - 2 * 2.5us = 5.0us (0.8%)
+  verify_solution - 1 * 4.2ms = 4.2ms (626.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 726 intervals
+Solution verified. Cost 4
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 4.3ms = 4.3ms (90.0%)
+  maxsat ddd external solve init - 1 * 4.1ms = 4.1ms (85.2%)
+  build wcnf - 2 * 204.6us = 409.1us (8.6%)
+    addclause - 2842 * 76ns = 217.0us (53.1%)
+  solve wcnf - 2 * 132.4us = 264.7us (5.6%)
+    optimize - 2 * 112.4us = 224.9us (84.9%)
+      solve - 2 * 110.7us = 221.5us (98.5%)
+    mip_ddd check travel - 2 * 595ns = 1.2us (0.4%)
+    check conflicts - 2 * 5.6us = 11.1us (4.2%)
+Reading instances_original/InstanceB2.txt
+trains 5 tracks 25 avgtracks 14.80 trackpairs 87 delays 0 avgdelay0
+5 & 25 & 14.80 & 87 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 5 iterations 56 solver SAT instance (MiniSAT v2.1.0) { variables: 90, clauses: 108 }
+Core size bins {}
+Iteration types {Objective: 5, TravelTimeConflict: 46, ResourceConflict: 1, TravelAndResourceConflict: 3, Solution: 1}
+STATS 56 5 46 1 3 1 72 4
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 1 * 362.5us = 362.5us (99.1%)
+    iteration - 56 * 6.2us = 346.7us (95.6%)
+      travel time check - 430 * 72ns = 31.1us (9.0%)
+      conflict check - 430 * 60ns = 25.9us (7.5%)
+      sat check - 55 * 784ns = 43.1us (12.4%)
+      treat core - 5 * 410ns = 2.0us (0.6%)
+      update times - 50 * 1.8us = 91.2us (26.3%)
+        extract solution - 50 * 639ns = 32.0us (35.1%)
+      extract solution - 2 * 585ns = 1.2us (0.3%)
+  verify_solution - 1 * 248.0us = 248.0us (67.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 205 intervals
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 247.8us = 247.8us (55.0%)
+  maxsat ddd external solve init - 1 * 218.5us = 218.5us (48.5%)
+  build wcnf - 2 * 61.5us = 122.9us (27.3%)
+    addclause - 767 * 93ns = 71.4us (58.1%)
+  solve wcnf - 2 * 49.8us = 99.6us (22.1%)
+    optimize - 2 * 41.1us = 82.2us (82.6%)
+      solve - 2 * 40.4us = 80.8us (98.3%)
+    mip_ddd check travel - 2 * 155ns = 310ns (0.3%)
+    check conflicts - 2 * 325ns = 650ns (0.7%)
+Reading instances_original/InstanceB3.txt
+trains 5 tracks 20 avgtracks 16.80 trackpairs 136 delays 0 avgdelay0
+5 & 20 & 16.80 & 136 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 5 iterations 50 solver SAT instance (MiniSAT v2.1.0) { variables: 183, clauses: 236 }
+Core size bins {}
+Iteration types {Objective: 5, TravelTimeConflict: 38, ResourceConflict: 1, TravelAndResourceConflict: 5, Solution: 1}
+STATS 50 5 38 1 5 1 160 8
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 1 * 563.2us = 563.2us (99.3%)
+    iteration - 50 * 10.9us = 547.4us (97.2%)
+      travel time check - 1298 * 56ns = 73.3us (13.4%)
+      conflict check - 1298 * 57ns = 74.2us (13.6%)
+      sat check - 49 * 1.8us = 86.6us (15.8%)
+      treat core - 5 * 276ns = 1.4us (0.3%)
+      update times - 44 * 2.8us = 121.9us (22.3%)
+        extract solution - 44 * 722ns = 31.8us (26.1%)
+      extract solution - 2 * 710ns = 1.4us (0.3%)
+  verify_solution - 1 * 258.5us = 258.5us (45.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 341 intervals
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 258.8us = 258.8us (20.2%)
+  maxsat ddd external solve init - 1 * 253.5us = 253.5us (19.8%)
+  build wcnf - 3 * 126.5us = 379.6us (29.7%)
+    addclause - 2167 * 99ns = 216.1us (56.9%)
+  solve wcnf - 3 * 206.9us = 620.8us (48.5%)
+    optimize - 3 * 194.0us = 582.0us (93.7%)
+      solve - 3 * 193.1us = 579.4us (99.5%)
+    mip_ddd check travel - 3 * 183ns = 550ns (0.1%)
+    check conflicts - 3 * 656ns = 2.0us (0.3%)
+Reading instances_original/InstanceB4.txt
+trains 20 tracks 25 avgtracks 15.95 trackpairs 2246 delays 0 avgdelay0
+20 & 25 & 15.95 & 2246 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 16 iterations 121 solver SAT instance (MiniSAT v2.1.0) { variables: 781, clauses: 1389 }
+Core size bins {}
+Iteration types {Objective: 16, TravelTimeConflict: 56, ResourceConflict: 1, TravelAndResourceConflict: 47, Solution: 1}
+STATS 121 16 56 1 47 1 658 80
+Solution verified. Cost 16
+Timing information for root profiler:
+  solver - 1 * 3.8ms = 3.8ms (99.6%)
+    iteration - 121 * 31.3us = 3.8ms (98.6%)
+      travel time check - 5685 * 57ns = 325.1us (8.6%)
+      conflict check - 5685 * 103ns = 585.7us (15.5%)
+      sat check - 120 * 9.8us = 1.2ms (30.9%)
+      treat core - 16 * 193ns = 3.1us (0.1%)
+      update times - 104 * 10.6us = 1.1ms (29.1%)
+        extract solution - 104 * 2.5us = 264.7us (24.0%)
+      extract solution - 2 * 2.5us = 5.0us (0.1%)
+  verify_solution - 1 * 4.5ms = 4.5ms (116.4%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 968 intervals
+Solution verified. Cost 16
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 4.5ms = 4.5ms (69.4%)
+  maxsat ddd external solve init - 1 * 4.3ms = 4.3ms (66.9%)
+  build wcnf - 3 * 320.9us = 962.8us (14.8%)
+    addclause - 6220 * 79ns = 496.4us (51.6%)
+  solve wcnf - 3 * 374.9us = 1.1ms (17.3%)
+    optimize - 3 * 349.6us = 1.0ms (93.3%)
+      solve - 3 * 347.8us = 1.0ms (99.5%)
+    mip_ddd check travel - 3 * 623ns = 1.9us (0.2%)
+    check conflicts - 3 * 6.1us = 18.3us (1.6%)
+Reading instances_original/InstanceB5.txt
+trains 5 tracks 25 avgtracks 17.80 trackpairs 136 delays 0 avgdelay0
+5 & 25 & 17.80 & 136 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 2 iterations 73 solver SAT instance (MiniSAT v2.1.0) { variables: 117, clauses: 140 }
+Core size bins {}
+Iteration types {Objective: 2, TravelTimeConflict: 66, ResourceConflict: 1, TravelAndResourceConflict: 3, Solution: 1}
+STATS 73 2 66 1 3 1 102 4
+Solution verified. Cost 2
+Timing information for root profiler:
+  solver - 1 * 556.3us = 556.3us (99.3%)
+    iteration - 73 * 7.4us = 538.3us (96.8%)
+      travel time check - 664 * 68ns = 45.6us (8.5%)
+      conflict check - 664 * 58ns = 38.7us (7.2%)
+      sat check - 72 * 1.2us = 88.7us (16.5%)
+      treat core - 2 * 640ns = 1.3us (0.2%)
+      update times - 70 * 2.3us = 160.5us (29.8%)
+        extract solution - 70 * 741ns = 51.9us (32.3%)
+      extract solution - 2 * 680ns = 1.4us (0.3%)
+  verify_solution - 1 * 357.2us = 357.2us (63.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_original/InstanceB6.txt
+trains 5 tracks 25 avgtracks 15.20 trackpairs 93 delays 0 avgdelay0
+5 & 25 & 15.20 & 93 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 2 iterations 17 solver SAT instance (MiniSAT v2.1.0) { variables: 17, clauses: 14 }
+Core size bins {}
+Iteration types {Objective: 2, TravelTimeConflict: 13, ResourceConflict: 1, Solution: 1}
+STATS 17 2 13 1 0 1 13 1
+Solution verified. Cost 2
+Timing information for root profiler:
+  solver - 1 * 215.9us = 215.9us (96.9%)
+    iteration - 17 * 10.7us = 181.6us (84.1%)
+      travel time check - 186 * 92ns = 17.3us (9.5%)
+      conflict check - 186 * 102ns = 19.0us (10.5%)
+      sat check - 16 * 589ns = 9.4us (5.2%)
+      treat core - 2 * 710ns = 1.4us (0.8%)
+      update times - 14 * 3.3us = 45.8us (25.2%)
+        extract solution - 14 * 1.6us = 23.0us (50.2%)
+      extract solution - 2 * 1.2us = 2.4us (1.3%)
+  verify_solution - 1 * 278.3us = 278.3us (124.9%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_original/InstanceB7.txt
+trains 24 tracks 25 avgtracks 15.25 trackpairs 2865 delays 0 avgdelay0
+24 & 25 & 15.25 & 2865 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 25 iterations 103 solver SAT instance (MiniSAT v2.1.0) { variables: 1610, clauses: 3261 }
+Core size bins {}
+Iteration types {Objective: 25, TravelTimeConflict: 25, ResourceConflict: 1, TravelAndResourceConflict: 51, Solution: 1}
+STATS 103 25 25 1 51 1 1451 196
+Solution verified. Cost 25
+Timing information for root profiler:
+  solver - 1 * 7.1ms = 7.1ms (99.3%)
+    iteration - 103 * 68.6us = 7.1ms (99.0%)
+      travel time check - 13240 * 60ns = 803.4us (11.4%)
+      conflict check - 13240 * 116ns = 1.5ms (21.9%)
+      sat check - 102 * 18.7us = 1.9ms (27.0%)
+      treat core - 25 * 272ns = 6.8us (0.1%)
+      update times - 77 * 22.7us = 1.7ms (24.7%)
+        extract solution - 77 * 4.1us = 313.2us (17.9%)
+      extract solution - 2 * 5.9us = 11.7us (0.2%)
+  verify_solution - 1 * 5.9ms = 5.9ms (82.0%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 4956 intervals
+Solution verified. Cost 25
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 5.9ms = 5.9ms (0.2%)
+  maxsat ddd external solve init - 1 * 5.7ms = 5.7ms (0.2%)
+  build wcnf - 49 * 9.0ms = 442.1ms (16.0%)
+    addclause - 2618564 * 81ns = 214.2ms (48.5%)
+  solve wcnf - 49 * 46.9ms = 2.3s (83.3%)
+    optimize - 49 * 46.8ms = 2.3s (99.8%)
+      solve - 49 * 46.8ms = 2.3s (100.0%)
+    mip_ddd check travel - 49 * 1.1us = 54.0us (0.0%)
+    check conflicts - 49 * 7.9us = 389.1us (0.0%)
+Reading instances_original/InstanceB8.txt
+trains 5 tracks 25 avgtracks 13.40 trackpairs 72 delays 0 avgdelay0
+5 & 25 & 13.40 & 72 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 6 iterations 47 solver SAT instance (MiniSAT v2.1.0) { variables: 48, clauses: 41 }
+Core size bins {}
+Iteration types {Objective: 6, TravelTimeConflict: 39, ResourceConflict: 1, Solution: 1}
+STATS 47 6 39 1 0 1 39 1
+Solution verified. Cost 6
+Timing information for root profiler:
+  solver - 1 * 285.3us = 285.3us (98.2%)
+    iteration - 47 * 5.7us = 266.2us (93.3%)
+      travel time check - 247 * 77ns = 19.2us (7.2%)
+      conflict check - 247 * 64ns = 16.0us (6.0%)
+      sat check - 46 * 479ns = 22.1us (8.3%)
+      treat core - 6 * 263ns = 1.6us (0.6%)
+      update times - 40 * 1.7us = 68.0us (25.5%)
+        extract solution - 40 * 689ns = 27.6us (40.5%)
+      extract solution - 2 * 615ns = 1.2us (0.5%)
+  verify_solution - 1 * 204.2us = 204.2us (70.3%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_original/InstanceB9.txt
+trains 7 tracks 25 avgtracks 13.57 trackpairs 150 delays 0 avgdelay0
+7 & 25 & 13.57 & 150 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 7 iterations 96 solver SAT instance (MiniSAT v2.1.0) { variables: 365, clauses: 595 }
+Core size bins {}
+Iteration types {Objective: 7, TravelTimeConflict: 78, ResourceConflict: 1, TravelAndResourceConflict: 9, Solution: 1}
+STATS 96 7 78 1 9 1 326 15
+Solution verified. Cost 7
+Timing information for root profiler:
+  solver - 1 * 1.8ms = 1.8ms (99.3%)
+    iteration - 96 * 18.6us = 1.8ms (98.1%)
+      travel time check - 3593 * 82ns = 295.9us (16.6%)
+      conflict check - 3593 * 59ns = 214.3us (12.0%)
+      sat check - 95 * 4.2us = 394.9us (22.1%)
+      treat core - 7 * 1.2us = 8.2us (0.5%)
+      update times - 88 * 4.7us = 414.8us (23.2%)
+        extract solution - 88 * 1.6us = 138.2us (33.3%)
+      extract solution - 2 * 885ns = 1.8us (0.1%)
+  verify_solution - 1 * 411.1us = 411.1us (22.4%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 563 intervals
+Solution verified. Cost 7
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 411.5us = 411.5us (11.7%)
+  maxsat ddd external solve init - 1 * 365.9us = 365.9us (10.4%)
+  build wcnf - 4 * 319.8us = 1.3ms (36.5%)
+    addclause - 6682 * 110ns = 739.1us (57.8%)
+  solve wcnf - 4 * 450.6us = 1.8ms (51.4%)
+    optimize - 4 * 433.9us = 1.7ms (96.3%)
+      solve - 4 * 432.6us = 1.7ms (99.7%)
+    mip_ddd check travel - 4 * 237ns = 950ns (0.1%)
+    check conflicts - 4 * 742ns = 3.0us (0.2%)
+Reading instances_original/InstanceB10.txt
+trains 8 tracks 25 avgtracks 11.38 trackpairs 130 delays 0 avgdelay0
+8 & 25 & 11.38 & 130 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 10 iterations 64 solver SAT instance (MiniSAT v2.1.0) { variables: 332, clauses: 495 }
+Core size bins {}
+Iteration types {Objective: 10, TravelTimeConflict: 40, ResourceConflict: 1, TravelAndResourceConflict: 12, Solution: 1}
+STATS 64 10 40 1 12 1 285 19
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 1 * 1.2ms = 1.2ms (99.4%)
+    iteration - 64 * 18.3us = 1.2ms (98.5%)
+      travel time check - 3253 * 54ns = 176.2us (15.0%)
+      conflict check - 3253 * 57ns = 187.2us (16.0%)
+      sat check - 63 * 3.4us = 216.9us (18.5%)
+      treat core - 10 * 314ns = 3.1us (0.3%)
+      update times - 53 * 4.1us = 217.6us (18.6%)
+        extract solution - 53 * 979ns = 51.9us (23.9%)
+      extract solution - 2 * 830ns = 1.7us (0.1%)
+  verify_solution - 1 * 383.0us = 383.0us (32.0%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 588 intervals
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 384.1us = 384.1us (11.9%)
+  maxsat ddd external solve init - 1 * 362.1us = 362.1us (11.3%)
+  build wcnf - 3 * 269.3us = 807.9us (25.1%)
+    addclause - 4362 * 108ns = 473.6us (58.6%)
+  solve wcnf - 3 * 668.7us = 2.0ms (62.3%)
+    optimize - 3 * 649.1us = 1.9ms (97.1%)
+      solve - 3 * 647.9us = 1.9ms (99.8%)
+    mip_ddd check travel - 3 * 226ns = 680ns (0.0%)
+    check conflicts - 3 * 680ns = 2.0us (0.1%)
+Reading instances_original/InstanceB11.txt
+trains 25 tracks 25 avgtracks 15.40 trackpairs 3202 delays 0 avgdelay0
+25 & 25 & 15.40 & 3202 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 23 iterations 112 solver SAT instance (MiniSAT v2.1.0) { variables: 1398, clauses: 3191 }
+Core size bins {}
+Iteration types {Objective: 23, TravelTimeConflict: 12, ResourceConflict: 1, TravelAndResourceConflict: 75, Solution: 1}
+STATS 112 23 12 1 75 1 1270 305
+Solution verified. Cost 23
+Timing information for root profiler:
+  solver - 1 * 6.6ms = 6.6ms (99.7%)
+    iteration - 112 * 58.8us = 6.6ms (99.1%)
+      travel time check - 9615 * 59ns = 571.7us (8.7%)
+      conflict check - 9615 * 142ns = 1.4ms (20.7%)
+      sat check - 111 * 19.3us = 2.1ms (32.5%)
+      treat core - 23 * 206ns = 4.8us (0.1%)
+      update times - 88 * 19.1us = 1.7ms (25.5%)
+        extract solution - 88 * 3.5us = 307.5us (18.3%)
+      extract solution - 2 * 3.2us = 6.5us (0.1%)
+  verify_solution - 1 * 6.5ms = 6.5ms (97.7%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 2613 intervals
+Solution verified. Cost 23
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 6.5ms = 6.5ms (2.1%)
+  maxsat ddd external solve init - 1 * 6.5ms = 6.5ms (2.1%)
+  build wcnf - 24 * 3.0ms = 71.4ms (23.4%)
+    addclause - 414852 * 86ns = 35.8ms (50.1%)
+  solve wcnf - 24 * 9.4ms = 224.7ms (73.6%)
+    optimize - 24 * 9.3ms = 223.6ms (99.5%)
+      solve - 24 * 9.3ms = 223.5ms (99.9%)
+    mip_ddd check travel - 24 * 849ns = 20.4us (0.0%)
+    check conflicts - 24 * 8.4us = 202.6us (0.1%)
+Reading instances_original/InstanceB12.txt
+trains 14 tracks 25 avgtracks 16.21 trackpairs 970 delays 0 avgdelay0
+14 & 25 & 16.21 & 970 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 6 iterations 57 solver SAT instance (MiniSAT v2.1.0) { variables: 277, clauses: 385 }
+Core size bins {}
+Iteration types {Objective: 6, TravelTimeConflict: 33, ResourceConflict: 1, TravelAndResourceConflict: 16, Solution: 1}
+STATS 57 6 33 1 16 1 224 20
+Solution verified. Cost 6
+Timing information for root profiler:
+  solver - 1 * 1.1ms = 1.1ms (99.3%)
+    iteration - 57 * 18.3us = 1.0ms (96.9%)
+      travel time check - 2227 * 57ns = 127.1us (12.2%)
+      conflict check - 2227 * 78ns = 175.1us (16.8%)
+      sat check - 56 * 2.4us = 132.1us (12.7%)
+      treat core - 6 * 440ns = 2.6us (0.3%)
+      update times - 50 * 6.6us = 331.9us (31.9%)
+        extract solution - 50 * 1.9us = 95.5us (28.8%)
+      extract solution - 2 * 1.8us = 3.5us (0.3%)
+  verify_solution - 1 * 2.3ms = 2.3ms (209.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 604 intervals
+Solution verified. Cost 6
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 2.3ms = 2.3ms (0.6%)
+  maxsat ddd external solve init - 1 * 2.2ms = 2.2ms (0.6%)
+  build wcnf - 2 * 175.2us = 350.3us (0.1%)
+    addclause - 2313 * 81ns = 188.5us (53.8%)
+  solve wcnf - 2 * 192.4ms = 384.8ms (99.3%)
+    optimize - 2 * 192.4ms = 384.7ms (100.0%)
+      solve - 2 * 192.4ms = 384.7ms (100.0%)
+    mip_ddd check travel - 2 * 685ns = 1.4us (0.0%)
+    check conflicts - 2 * 2.6us = 5.3us (0.0%)
+Reading instances_addtracktime/InstanceA1.txt
+trains 29 tracks 33 avgtracks 20.93 trackpairs 5915 delays 0 avgdelay0
+29 & 33 & 20.93 & 5915 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 23 iterations 148 solver SAT instance (MiniSAT v2.1.0) { variables: 4041, clauses: 7680 }
+Core size bins {}
+Iteration types {Objective: 23, TravelTimeConflict: 32, ResourceConflict: 1, TravelAndResourceConflict: 91, Solution: 1}
+STATS 148 23 32 1 91 1 3503 297
+Solution verified. Cost 23
+Timing information for root profiler:
+  solver - 1 * 41.4ms = 41.4ms (99.7%)
+    iteration - 148 * 279.2us = 41.3ms (99.8%)
+      travel time check - 57963 * 43ns = 2.5ms (6.1%)
+      conflict check - 57963 * 123ns = 7.2ms (17.4%)
+      sat check - 261 * 70.0us = 18.3ms (44.2%)
+      treat core - 23 * 806ns = 18.6us (0.0%)
+      update times - 124 * 77.8us = 9.6ms (23.3%)
+        extract solution - 124 * 5.1us = 634.8us (6.6%)
+      extract solution - 2 * 5.0us = 10.0us (0.0%)
+  verify_solution - 1 * 20.5ms = 20.5ms (49.3%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 6735 intervals
+Solution verified. Cost 23
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 20.4ms = 20.4ms (1.8%)
+  maxsat ddd external solve init - 1 * 15.4ms = 15.4ms (1.4%)
+  build wcnf - 10 * 6.0ms = 60.2ms (5.3%)
+    addclause - 333023 * 96ns = 32.0ms (53.1%)
+  solve wcnf - 10 * 105.3ms = 1.1s (92.9%)
+    optimize - 10 * 105.2ms = 1.1s (99.9%)
+      solve - 10 * 105.1ms = 1.1s (100.0%)
+    mip_ddd check travel - 10 * 1.7us = 17.3us (0.0%)
+    check conflicts - 10 * 18.4us = 184.1us (0.0%)
+Reading instances_addtracktime/InstanceA2.txt
+trains 25 tracks 33 avgtracks 19.00 trackpairs 3735 delays 0 avgdelay0
+25 & 33 & 19.00 & 3735 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 33 iterations 194 solver SAT instance (MiniSAT v2.1.0) { variables: 3046, clauses: 5749 }
+Core size bins {}
+Iteration types {Objective: 33, TravelTimeConflict: 85, ResourceConflict: 2, TravelAndResourceConflict: 73, Solution: 1}
+STATS 194 33 85 2 73 1 2675 192
+Solution verified. Cost 33
+Timing information for root profiler:
+  solver - 1 * 29.1ms = 29.1ms (99.6%)
+    iteration - 194 * 149.6us = 29.0ms (99.7%)
+      travel time check - 50325 * 42ns = 2.1ms (7.3%)
+      conflict check - 50325 * 108ns = 5.5ms (18.8%)
+      sat check - 205 * 49.9us = 10.2ms (35.3%)
+      treat core - 33 * 522ns = 17.2us (0.1%)
+      update times - 160 * 48.6us = 7.8ms (26.8%)
+        extract solution - 160 * 3.8us = 606.0us (7.8%)
+      extract solution - 2 * 3.7us = 7.4us (0.0%)
+  verify_solution - 1 * 12.7ms = 12.7ms (43.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addtracktime/InstanceA3.txt
+trains 16 tracks 33 avgtracks 22.38 trackpairs 2061 delays 0 avgdelay0
+16 & 33 & 22.38 & 2061 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 15 iterations 231 solver SAT instance (MiniSAT v2.1.0) { variables: 2243, clauses: 4177 }
+Core size bins {}
+Iteration types {Objective: 15, TravelTimeConflict: 149, ResourceConflict: 1, TravelAndResourceConflict: 65, Solution: 1}
+STATS 231 15 149 1 65 1 1988 117
+Solution verified. Cost 15
+Timing information for root profiler:
+  solver - 1 * 25.5ms = 25.5ms (99.7%)
+    iteration - 231 * 109.8us = 25.4ms (99.6%)
+      travel time check - 46616 * 39ns = 1.8ms (7.2%)
+      conflict check - 46616 * 89ns = 4.2ms (16.4%)
+      sat check - 230 * 38.3us = 8.8ms (34.7%)
+      treat core - 15 * 1.0us = 15.5us (0.1%)
+      update times - 215 * 33.9us = 7.3ms (28.7%)
+        extract solution - 215 * 2.7us = 590.1us (8.1%)
+      extract solution - 2 * 2.7us = 5.5us (0.0%)
+  verify_solution - 1 * 7.1ms = 7.1ms (27.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addtracktime/InstanceA4.txt
+trains 14 tracks 33 avgtracks 19.21 trackpairs 1175 delays 0 avgdelay0
+14 & 33 & 19.21 & 1175 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 15 iterations 96 solver SAT instance (MiniSAT v2.1.0) { variables: 1039, clauses: 1725 }
+Core size bins {}
+Iteration types {Objective: 15, TravelTimeConflict: 49, ResourceConflict: 1, TravelAndResourceConflict: 30, Solution: 1}
+STATS 96 15 49 1 30 1 907 54
+Solution verified. Cost 15
+Timing information for root profiler:
+  solver - 1 * 4.9ms = 4.9ms (99.5%)
+    iteration - 96 * 50.7us = 4.9ms (99.0%)
+      travel time check - 11683 * 47ns = 550.1us (11.3%)
+      conflict check - 11683 * 77ns = 911.2us (18.7%)
+      sat check - 95 * 12.7us = 1.2ms (24.8%)
+      treat core - 15 * 710ns = 10.7us (0.2%)
+      update times - 80 * 16.0us = 1.3ms (26.3%)
+        extract solution - 80 * 1.9us = 155.6us (12.1%)
+      extract solution - 2 * 2.0us = 3.9us (0.1%)
+  verify_solution - 1 * 4.1ms = 4.1ms (82.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 2072 intervals
+Solution verified. Cost 15
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 4.1ms = 4.1ms (4.2%)
+  maxsat ddd external solve init - 1 * 2.9ms = 2.9ms (3.0%)
+  build wcnf - 8 * 1.6ms = 12.7ms (13.1%)
+    addclause - 66810 * 103ns = 6.9ms (54.1%)
+  solve wcnf - 8 * 10.1ms = 80.8ms (83.0%)
+    optimize - 8 * 10.1ms = 80.4ms (99.6%)
+      solve - 8 * 10.1ms = 80.4ms (99.9%)
+    mip_ddd check travel - 8 * 573ns = 4.6us (0.0%)
+    check conflicts - 8 * 3.7us = 29.5us (0.0%)
+Reading instances_addtracktime/InstanceA5.txt
+trains 12 tracks 33 avgtracks 19.25 trackpairs 876 delays 0 avgdelay0
+12 & 33 & 19.25 & 876 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 12 iterations 104 solver SAT instance (MiniSAT v2.1.0) { variables: 649, clauses: 1054 }
+Core size bins {}
+Iteration types {Objective: 12, TravelTimeConflict: 71, ResourceConflict: 1, TravelAndResourceConflict: 19, Solution: 1}
+STATS 104 12 71 1 19 1 575 32
+Solution verified. Cost 12
+Timing information for root profiler:
+  solver - 1 * 3.1ms = 3.1ms (99.5%)
+    iteration - 104 * 28.9us = 3.0ms (97.6%)
+      travel time check - 5792 * 57ns = 330.2us (11.0%)
+      conflict check - 5792 * 76ns = 441.4us (14.7%)
+      sat check - 103 * 7.6us = 778.9us (25.9%)
+      treat core - 12 * 479ns = 5.8us (0.2%)
+      update times - 91 * 9.5us = 862.7us (28.7%)
+        extract solution - 91 * 1.7us = 158.9us (18.4%)
+      extract solution - 2 * 1.8us = 3.6us (0.1%)
+  verify_solution - 1 * 3.0ms = 3.0ms (98.2%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 980 intervals
+Solution verified. Cost 12
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 3.0ms = 3.0ms (43.4%)
+  maxsat ddd external solve init - 1 * 2.2ms = 2.2ms (31.0%)
+  build wcnf - 3 * 459.8us = 1.4ms (19.6%)
+    addclause - 7419 * 103ns = 768.3us (55.7%)
+  solve wcnf - 3 * 1.1ms = 3.4ms (48.1%)
+    optimize - 3 * 1.1ms = 3.3ms (97.5%)
+      solve - 3 * 1.1ms = 3.3ms (99.8%)
+    mip_ddd check travel - 3 * 476ns = 1.4us (0.0%)
+    check conflicts - 3 * 2.7us = 8.1us (0.2%)
+Reading instances_addtracktime/InstanceA6.txt
+trains 8 tracks 33 avgtracks 18.62 trackpairs 307 delays 0 avgdelay0
+8 & 33 & 18.62 & 307 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 8 iterations 78 solver SAT instance (MiniSAT v2.1.0) { variables: 284, clauses: 430 }
+Core size bins {}
+Iteration types {Objective: 8, TravelTimeConflict: 61, ResourceConflict: 1, TravelAndResourceConflict: 7, Solution: 1}
+STATS 78 8 61 1 7 1 246 13
+Solution verified. Cost 8
+Timing information for root profiler:
+  solver - 1 * 1.3ms = 1.3ms (99.4%)
+    iteration - 78 * 15.9us = 1.2ms (96.5%)
+      travel time check - 2125 * 62ns = 133.0us (10.7%)
+      conflict check - 2125 * 61ns = 131.1us (10.5%)
+      sat check - 77 * 3.6us = 278.9us (22.4%)
+      treat core - 8 * 436ns = 3.5us (0.3%)
+      update times - 69 * 5.2us = 361.9us (29.1%)
+        extract solution - 69 * 1.2us = 80.5us (22.2%)
+      extract solution - 2 * 1.2us = 2.3us (0.2%)
+  verify_solution - 1 * 1.3ms = 1.3ms (98.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 682 intervals
+Solution verified. Cost 8
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 1.3ms = 1.3ms (20.7%)
+  maxsat ddd external solve init - 1 * 868.8us = 868.8us (14.1%)
+  build wcnf - 5 * 322.7us = 1.6ms (26.1%)
+    addclause - 8956 * 102ns = 914.2us (56.7%)
+  solve wcnf - 5 * 719.9us = 3.6ms (58.3%)
+    optimize - 5 * 702.3us = 3.5ms (97.6%)
+      solve - 5 * 700.8us = 3.5ms (99.8%)
+    mip_ddd check travel - 5 * 318ns = 1.6us (0.0%)
+    check conflicts - 5 * 1.0us = 5.2us (0.1%)
+Reading instances_addtracktime/InstanceA7.txt
+trains 8 tracks 33 avgtracks 12.62 trackpairs 126 delays 0 avgdelay0
+8 & 33 & 12.62 & 126 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 8 iterations 58 solver SAT instance (MiniSAT v2.1.0) { variables: 242, clauses: 330 }
+Core size bins {}
+Iteration types {Objective: 8, TravelTimeConflict: 44, ResourceConflict: 1, TravelAndResourceConflict: 4, Solution: 1}
+STATS 58 8 44 1 4 1 208 10
+Solution verified. Cost 8
+Timing information for root profiler:
+  solver - 1 * 907.9us = 907.9us (99.2%)
+    iteration - 58 * 15.1us = 873.9us (96.3%)
+      travel time check - 2015 * 56ns = 114.1us (13.1%)
+      conflict check - 2015 * 56ns = 112.9us (12.9%)
+      sat check - 57 * 2.9us = 163.9us (18.8%)
+      treat core - 8 * 422ns = 3.4us (0.4%)
+      update times - 49 * 4.4us = 214.8us (24.6%)
+        extract solution - 49 * 892ns = 43.7us (20.3%)
+      extract solution - 2 * 825ns = 1.6us (0.2%)
+  verify_solution - 1 * 605.2us = 605.2us (66.1%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 524 intervals
+Solution verified. Cost 8
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 604.8us = 604.8us (22.0%)
+  maxsat ddd external solve init - 1 * 399.3us = 399.3us (14.5%)
+  build wcnf - 3 * 236.4us = 709.2us (25.8%)
+    addclause - 3773 * 110ns = 415.0us (58.5%)
+  solve wcnf - 3 * 533.1us = 1.6ms (58.1%)
+    optimize - 3 * 516.3us = 1.5ms (96.8%)
+      solve - 3 * 515.1us = 1.5ms (99.8%)
+    mip_ddd check travel - 3 * 236ns = 710ns (0.0%)
+    check conflicts - 3 * 576ns = 1.7us (0.1%)
+Reading instances_addtracktime/InstanceA8.txt
+trains 27 tracks 33 avgtracks 19.89 trackpairs 4862 delays 0 avgdelay0
+27 & 33 & 19.89 & 4862 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 34 iterations 281 solver SAT instance (MiniSAT v2.1.0) { variables: 8264, clauses: 18743 }
+Core size bins {}
+Iteration types {Objective: 34, TravelTimeConflict: 86, ResourceConflict: 3, TravelAndResourceConflict: 157, Solution: 1}
+STATS 281 34 86 3 157 1 6867 986
+Solution verified. Cost 34
+Timing information for root profiler:
+  solver - 1 * 146.9ms = 146.9ms (99.7%)
+    iteration - 281 * 522.1us = 146.7ms (99.9%)
+      travel time check - 160547 * 41ns = 6.7ms (4.6%)
+      conflict check - 160547 * 122ns = 19.6ms (13.4%)
+      sat check - 355 * 241.7us = 85.8ms (58.5%)
+      treat core - 34 * 1.1us = 37.6us (0.0%)
+      update times - 246 * 99.2us = 24.4ms (16.6%)
+        extract solution - 246 * 5.8us = 1.4ms (5.9%)
+      extract solution - 2 * 5.8us = 11.6us (0.0%)
+  verify_solution - 1 * 16.3ms = 16.3ms (11.0%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 12723 intervals
+Solution verified. Cost 34
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 16.1ms = 16.1ms (0.1%)
+  maxsat ddd external solve init - 1 * 12.4ms = 12.4ms (0.1%)
+  build wcnf - 36 * 25.6ms = 923.4ms (4.0%)
+    addclause - 4950713 * 92ns = 458.8ms (49.7%)
+  solve wcnf - 36 * 610.2ms = 22.0s (95.7%)
+    optimize - 36 * 609.8ms = 22.0s (99.9%)
+      solve - 36 * 609.8ms = 22.0s (100.0%)
+    mip_ddd check travel - 36 * 3.8us = 135.4us (0.0%)
+    check conflicts - 36 * 15.0us = 541.3us (0.0%)
+Reading instances_addtracktime/InstanceA9.txt
+trains 20 tracks 33 avgtracks 20.05 trackpairs 2616 delays 0 avgdelay0
+20 & 33 & 20.05 & 2616 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 25 iterations 118 solver SAT instance (MiniSAT v2.1.0) { variables: 1830, clauses: 3225 }
+Core size bins {}
+Iteration types {Objective: 25, TravelTimeConflict: 31, ResourceConflict: 2, TravelAndResourceConflict: 59, Solution: 1}
+STATS 118 25 31 2 59 1 1572 129
+Solution verified. Cost 25
+Timing information for root profiler:
+  solver - 1 * 10.3ms = 10.3ms (99.1%)
+    iteration - 118 * 86.3us = 10.2ms (99.2%)
+      travel time check - 20682 * 54ns = 1.1ms (11.0%)
+      conflict check - 20682 * 99ns = 2.1ms (20.2%)
+      sat check - 117 * 23.2us = 2.7ms (26.6%)
+      treat core - 25 * 553ns = 13.8us (0.1%)
+      update times - 92 * 30.2us = 2.8ms (27.3%)
+        extract solution - 92 * 3.5us = 320.7us (11.5%)
+      extract solution - 2 * 3.0us = 6.1us (0.1%)
+  verify_solution - 1 * 9.1ms = 9.1ms (87.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 3468 intervals
+Solution verified. Cost 25
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 9.0ms = 9.0ms (2.6%)
+  maxsat ddd external solve init - 1 * 6.8ms = 6.8ms (1.9%)
+  build wcnf - 12 * 2.9ms = 35.3ms (10.0%)
+    addclause - 190432 * 100ns = 19.1ms (54.1%)
+  solve wcnf - 12 * 25.7ms = 307.9ms (87.3%)
+    optimize - 12 * 25.6ms = 307.1ms (99.7%)
+      solve - 12 * 25.6ms = 307.0ms (100.0%)
+    mip_ddd check travel - 12 * 840ns = 10.1us (0.0%)
+    check conflicts - 12 * 7.2us = 87.0us (0.0%)
+Reading instances_addtracktime/InstanceA10.txt
+trains 17 tracks 33 avgtracks 18.18 trackpairs 1632 delays 0 avgdelay0
+17 & 33 & 18.18 & 1632 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 17 iterations 74 solver SAT instance (MiniSAT v2.1.0) { variables: 806, clauses: 1278 }
+Core size bins {}
+Iteration types {Objective: 17, TravelTimeConflict: 26, ResourceConflict: 1, TravelAndResourceConflict: 29, Solution: 1}
+STATS 74 17 26 1 29 1 682 63
+Solution verified. Cost 17
+Timing information for root profiler:
+  solver - 1 * 3.3ms = 3.3ms (99.5%)
+    iteration - 74 * 44.0us = 3.3ms (98.1%)
+      travel time check - 7173 * 55ns = 396.4us (12.2%)
+      conflict check - 7173 * 92ns = 660.4us (20.3%)
+      sat check - 73 * 9.0us = 655.1us (20.1%)
+      treat core - 17 * 331ns = 5.6us (0.2%)
+      update times - 56 * 16.5us = 925.9us (28.5%)
+        extract solution - 56 * 2.6us = 143.0us (15.4%)
+      extract solution - 2 * 2.5us = 5.1us (0.2%)
+  verify_solution - 1 * 5.4ms = 5.4ms (162.7%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1655 intervals
+Solution verified. Cost 17
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 5.4ms = 5.4ms (17.8%)
+  maxsat ddd external solve init - 1 * 4.0ms = 4.0ms (13.0%)
+  build wcnf - 6 * 993.5us = 6.0ms (19.6%)
+    addclause - 33191 * 98ns = 3.3ms (54.7%)
+  solve wcnf - 6 * 3.3ms = 20.1ms (66.0%)
+    optimize - 6 * 3.3ms = 19.8ms (98.9%)
+      solve - 6 * 3.3ms = 19.8ms (99.9%)
+    mip_ddd check travel - 6 * 633ns = 3.8us (0.0%)
+    check conflicts - 6 * 4.7us = 28.2us (0.1%)
+Reading instances_addtracktime/InstanceA11.txt
+trains 29 tracks 33 avgtracks 20.48 trackpairs 6144 delays 0 avgdelay0
+29 & 33 & 20.48 & 6144 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 33 iterations 243 solver SAT instance (MiniSAT v2.1.0) { variables: 10607, clauses: 24436 }
+Core size bins {}
+Iteration types {Objective: 33, TravelTimeConflict: 32, ResourceConflict: 1, TravelAndResourceConflict: 176, Solution: 1}
+STATS 243 33 32 1 176 1 8851 1287
+Solution verified. Cost 33
+Timing information for root profiler:
+  solver - 1 * 208.5ms = 208.5ms (99.8%)
+    iteration - 243 * 857.6us = 208.4ms (99.9%)
+      travel time check - 134882 * 45ns = 6.1ms (2.9%)
+      conflict check - 134882 * 135ns = 18.3ms (8.8%)
+      sat check - 374 * 406.5us = 152.0ms (73.0%)
+      treat core - 33 * 1.6us = 51.6us (0.0%)
+      update times - 209 * 111.9us = 23.4ms (11.2%)
+        extract solution - 209 * 5.8us = 1.2ms (5.2%)
+      extract solution - 2 * 5.1us = 10.3us (0.0%)
+  verify_solution - 1 * 19.8ms = 19.8ms (9.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addtracktime/InstanceA12.txt
+trains 28 tracks 33 avgtracks 21.71 trackpairs 6393 delays 0 avgdelay0
+28 & 33 & 21.71 & 6393 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 36 iterations 165 solver SAT instance (MiniSAT v2.1.0) { variables: 10517, clauses: 23677 }
+Core size bins {}
+Iteration types {Objective: 36, TravelTimeConflict: 13, ResourceConflict: 1, TravelAndResourceConflict: 114, Solution: 1}
+STATS 165 36 13 1 114 1 8721 1352
+Solution verified. Cost 36
+Timing information for root profiler:
+  solver - 1 * 94.8ms = 94.8ms (99.5%)
+    iteration - 165 * 573.3us = 94.6ms (99.8%)
+      travel time check - 84994 * 57ns = 4.9ms (5.2%)
+      conflict check - 84994 * 144ns = 12.3ms (13.0%)
+      sat check - 232 * 250.9us = 58.2ms (61.5%)
+      treat core - 36 * 1.5us = 53.4us (0.1%)
+      update times - 128 * 106.7us = 13.7ms (14.4%)
+        extract solution - 128 * 5.6us = 716.4us (5.2%)
+      extract solution - 2 * 5.4us = 10.7us (0.0%)
+  verify_solution - 1 * 20.6ms = 20.6ms (21.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 16514 intervals
+Solution verified. Cost 36
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 20.5ms = 20.5ms (0.1%)
+  maxsat ddd external solve init - 1 * 16.3ms = 16.3ms (0.1%)
+  build wcnf - 24 * 37.4ms = 897.1ms (4.0%)
+    addclause - 4632142 * 95ns = 444.5ms (49.5%)
+  solve wcnf - 24 * 903.1ms = 21.7s (95.7%)
+    optimize - 24 * 902.6ms = 21.7s (99.9%)
+      solve - 24 * 902.6ms = 21.7s (100.0%)
+    mip_ddd check travel - 24 * 4.4us = 105.2us (0.0%)
+    check conflicts - 24 * 20.4us = 489.2us (0.0%)
+Reading instances_addtracktime/InstanceB1.txt
+trains 18 tracks 25 avgtracks 17.33 trackpairs 2022 delays 0 avgdelay0
+18 & 25 & 17.33 & 2022 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 13 iterations 102 solver SAT instance (MiniSAT v2.1.0) { variables: 926, clauses: 1443 }
+Core size bins {}
+Iteration types {Objective: 13, TravelTimeConflict: 64, ResourceConflict: 1, TravelAndResourceConflict: 23, Solution: 1}
+STATS 102 13 64 1 23 1 795 49
+Solution verified. Cost 13
+Timing information for root profiler:
+  solver - 1 * 5.6ms = 5.6ms (98.9%)
+    iteration - 102 * 54.5us = 5.6ms (98.6%)
+      travel time check - 11830 * 49ns = 582.0us (10.5%)
+      conflict check - 11830 * 95ns = 1.1ms (20.2%)
+      sat check - 107 * 11.9us = 1.3ms (23.0%)
+      treat core - 13 * 861ns = 11.2us (0.2%)
+      update times - 88 * 17.9us = 1.6ms (28.4%)
+        extract solution - 88 * 3.2us = 278.3us (17.7%)
+      extract solution - 2 * 3.8us = 7.7us (0.1%)
+  verify_solution - 1 * 4.3ms = 4.3ms (75.4%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addtracktime/InstanceB2.txt
+trains 5 tracks 25 avgtracks 14.80 trackpairs 87 delays 0 avgdelay0
+5 & 25 & 14.80 & 87 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 5 iterations 58 solver SAT instance (MiniSAT v2.1.0) { variables: 143, clauses: 176 }
+Core size bins {}
+Iteration types {Objective: 5, TravelTimeConflict: 47, ResourceConflict: 2, TravelAndResourceConflict: 3, Solution: 1}
+STATS 58 5 47 2 3 1 109 9
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 1 * 591.2us = 591.2us (98.7%)
+    iteration - 58 * 9.8us = 568.8us (96.2%)
+      travel time check - 606 * 86ns = 52.6us (9.2%)
+      conflict check - 606 * 69ns = 42.2us (7.4%)
+      sat check - 57 * 2.3us = 128.5us (22.6%)
+      treat core - 5 * 936ns = 4.7us (0.8%)
+      update times - 52 * 2.7us = 139.2us (24.5%)
+        extract solution - 52 * 718ns = 37.4us (26.8%)
+      extract solution - 2 * 605ns = 1.2us (0.2%)
+  verify_solution - 1 * 249.5us = 249.5us (41.7%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 339 intervals
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 250.5us = 250.5us (11.5%)
+  maxsat ddd external solve init - 1 * 223.9us = 223.9us (10.3%)
+  build wcnf - 4 * 172.4us = 689.8us (31.8%)
+    addclause - 3418 * 110ns = 378.2us (54.8%)
+  solve wcnf - 4 * 303.9us = 1.2ms (56.0%)
+    optimize - 4 * 289.7us = 1.2ms (95.3%)
+      solve - 4 * 288.7us = 1.2ms (99.6%)
+    mip_ddd check travel - 4 * 190ns = 760ns (0.1%)
+    check conflicts - 4 * 575ns = 2.3us (0.2%)
+Reading instances_addtracktime/InstanceB3.txt
+trains 5 tracks 20 avgtracks 16.80 trackpairs 136 delays 0 avgdelay0
+5 & 20 & 16.80 & 136 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 4 iterations 75 solver SAT instance (MiniSAT v2.1.0) { variables: 333, clauses: 558 }
+Core size bins {}
+Iteration types {Objective: 4, TravelTimeConflict: 52, ResourceConflict: 1, TravelAndResourceConflict: 17, Solution: 1}
+STATS 75 4 52 1 17 1 282 23
+Solution verified. Cost 4
+Timing information for root profiler:
+  solver - 1 * 1.4ms = 1.4ms (99.4%)
+    iteration - 75 * 18.3us = 1.4ms (98.8%)
+      travel time check - 3274 * 57ns = 188.6us (13.8%)
+      conflict check - 3274 * 58ns = 190.4us (13.9%)
+      sat check - 74 * 3.9us = 290.9us (21.2%)
+      treat core - 4 * 707ns = 2.8us (0.2%)
+      update times - 70 * 4.5us = 316.0us (23.1%)
+        extract solution - 70 * 820ns = 57.4us (18.2%)
+      extract solution - 2 * 805ns = 1.6us (0.1%)
+  verify_solution - 1 * 259.8us = 259.8us (18.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 411 intervals
+Solution verified. Cost 4
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 275.4us = 275.4us (14.7%)
+  maxsat ddd external solve init - 1 * 263.6us = 263.6us (14.1%)
+  build wcnf - 3 * 167.2us = 501.6us (26.8%)
+    addclause - 2785 * 101ns = 282.9us (56.4%)
+  solve wcnf - 3 * 358.9us = 1.1ms (57.4%)
+    optimize - 3 * 344.5us = 1.0ms (96.0%)
+      solve - 3 * 343.5us = 1.0ms (99.7%)
+    mip_ddd check travel - 3 * 193ns = 580ns (0.1%)
+    check conflicts - 3 * 590ns = 1.8us (0.2%)
+Reading instances_addtracktime/InstanceB4.txt
+trains 20 tracks 25 avgtracks 15.95 trackpairs 2246 delays 0 avgdelay0
+20 & 25 & 15.95 & 2246 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 19 iterations 105 solver SAT instance (MiniSAT v2.1.0) { variables: 1720, clauses: 3235 }
+Core size bins {}
+Iteration types {Objective: 19, TravelTimeConflict: 28, ResourceConflict: 1, TravelAndResourceConflict: 56, Solution: 1}
+STATS 105 19 28 1 56 1 1460 144
+Solution verified. Cost 19
+Timing information for root profiler:
+  solver - 1 * 10.7ms = 10.7ms (99.4%)
+    iteration - 105 * 100.9us = 10.6ms (99.2%)
+      travel time check - 18336 * 50ns = 935.0us (8.8%)
+      conflict check - 18336 * 103ns = 1.9ms (17.9%)
+      sat check - 146 * 26.3us = 3.8ms (36.2%)
+      treat core - 19 * 313ns = 6.0us (0.1%)
+      update times - 85 * 30.3us = 2.6ms (24.3%)
+        extract solution - 85 * 3.2us = 272.9us (10.6%)
+      extract solution - 2 * 2.9us = 5.8us (0.1%)
+  verify_solution - 1 * 4.5ms = 4.5ms (42.0%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 2230 intervals
+Solution verified. Cost 19
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 4.5ms = 4.5ms (10.1%)
+  maxsat ddd external solve init - 1 * 4.7ms = 4.7ms (10.5%)
+  build wcnf - 5 * 1.4ms = 6.9ms (15.5%)
+    addclause - 36649 * 99ns = 3.7ms (53.4%)
+  solve wcnf - 5 * 6.5ms = 32.3ms (72.9%)
+    optimize - 5 * 6.4ms = 32.1ms (99.2%)
+      solve - 5 * 6.4ms = 32.1ms (99.9%)
+    mip_ddd check travel - 5 * 686ns = 3.4us (0.0%)
+    check conflicts - 5 * 6.6us = 33.1us (0.1%)
+Reading instances_addtracktime/InstanceB5.txt
+trains 5 tracks 25 avgtracks 17.80 trackpairs 136 delays 0 avgdelay0
+5 & 25 & 17.80 & 136 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 7 iterations 89 solver SAT instance (MiniSAT v2.1.0) { variables: 610, clauses: 1120 }
+Core size bins {}
+Iteration types {Objective: 7, TravelTimeConflict: 53, ResourceConflict: 1, TravelAndResourceConflict: 27, Solution: 1}
+STATS 89 7 53 1 27 1 528 35
+Solution verified. Cost 7
+Timing information for root profiler:
+  solver - 1 * 2.2ms = 2.2ms (99.2%)
+    iteration - 89 * 24.9us = 2.2ms (98.8%)
+      travel time check - 4492 * 65ns = 295.1us (13.3%)
+      conflict check - 4492 * 60ns = 272.5us (12.3%)
+      sat check - 88 * 7.3us = 639.8us (28.9%)
+      treat core - 7 * 1.1us = 7.6us (0.3%)
+      update times - 81 * 6.0us = 487.4us (22.0%)
+        extract solution - 81 * 884ns = 71.6us (14.7%)
+      extract solution - 2 * 845ns = 1.7us (0.1%)
+  verify_solution - 1 * 354.7us = 354.7us (15.7%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addtracktime/InstanceB6.txt
+trains 5 tracks 25 avgtracks 15.20 trackpairs 93 delays 0 avgdelay0
+5 & 25 & 15.20 & 93 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 2 iterations 51 solver SAT instance (MiniSAT v2.1.0) { variables: 118, clauses: 140 }
+Core size bins {}
+Iteration types {Objective: 2, TravelTimeConflict: 46, ResourceConflict: 1, TravelAndResourceConflict: 1, Solution: 1}
+STATS 51 2 46 1 1 1 105 4
+Solution verified. Cost 2
+Timing information for root profiler:
+  solver - 1 * 530.8us = 530.8us (98.5%)
+    iteration - 51 * 9.9us = 504.7us (95.1%)
+      travel time check - 899 * 60ns = 54.1us (10.7%)
+      conflict check - 899 * 59ns = 53.7us (10.6%)
+      sat check - 50 * 1.5us = 75.3us (14.9%)
+      treat core - 2 * 1.3us = 2.5us (0.5%)
+      update times - 48 * 2.4us = 117.2us (23.2%)
+        extract solution - 48 * 687ns = 33.0us (28.1%)
+      extract solution - 2 * 920ns = 1.8us (0.4%)
+  verify_solution - 1 * 259.8us = 259.8us (48.2%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 279 intervals
+Solution verified. Cost 2
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 258.4us = 258.4us (38.9%)
+  maxsat ddd external solve init - 1 * 238.3us = 238.3us (35.8%)
+  build wcnf - 2 * 106.6us = 213.2us (32.1%)
+    addclause - 1043 * 120ns = 125.8us (59.0%)
+  solve wcnf - 2 * 99.2us = 198.4us (29.8%)
+    optimize - 2 * 87.2us = 174.4us (87.9%)
+      solve - 2 * 86.2us = 172.4us (98.8%)
+    mip_ddd check travel - 2 * 180ns = 360ns (0.2%)
+    check conflicts - 2 * 745ns = 1.5us (0.8%)
+Reading instances_addtracktime/InstanceB7.txt
+trains 24 tracks 25 avgtracks 15.25 trackpairs 2865 delays 0 avgdelay0
+24 & 25 & 15.25 & 2865 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 27 iterations 120 solver SAT instance (MiniSAT v2.1.0) { variables: 1928, clauses: 3655 }
+Core size bins {}
+Iteration types {Objective: 27, TravelTimeConflict: 30, ResourceConflict: 1, TravelAndResourceConflict: 61, Solution: 1}
+STATS 120 27 30 1 61 1 1626 145
+Solution verified. Cost 27
+Timing information for root profiler:
+  solver - 1 * 11.6ms = 11.6ms (99.5%)
+    iteration - 120 * 96.0us = 11.5ms (99.3%)
+      travel time check - 16874 * 56ns = 945.3us (8.2%)
+      conflict check - 16874 * 109ns = 1.9ms (16.1%)
+      sat check - 169 * 27.2us = 4.6ms (39.8%)
+      treat core - 27 * 374ns = 10.1us (0.1%)
+      update times - 92 * 30.4us = 2.8ms (24.3%)
+        extract solution - 92 * 3.6us = 331.5us (11.8%)
+      extract solution - 2 * 4.5us = 8.9us (0.1%)
+  verify_solution - 1 * 5.9ms = 5.9ms (50.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 2384 intervals
+Solution verified. Cost 27
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 5.9ms = 5.9ms (8.9%)
+  maxsat ddd external solve init - 1 * 5.9ms = 5.9ms (9.0%)
+  build wcnf - 6 * 1.6ms = 9.6ms (14.6%)
+    addclause - 46857 * 110ns = 5.2ms (54.0%)
+  solve wcnf - 6 * 8.2ms = 49.4ms (75.2%)
+    optimize - 6 * 8.2ms = 49.1ms (99.3%)
+      solve - 6 * 8.2ms = 49.0ms (99.9%)
+    mip_ddd check travel - 6 * 816ns = 4.9us (0.0%)
+    check conflicts - 6 * 8.1us = 48.4us (0.1%)
+Reading instances_addtracktime/InstanceB8.txt
+trains 5 tracks 25 avgtracks 13.40 trackpairs 72 delays 0 avgdelay0
+5 & 25 & 13.40 & 72 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 8 iterations 93 solver SAT instance (MiniSAT v2.1.0) { variables: 266, clauses: 412 }
+Core size bins {}
+Iteration types {Objective: 8, TravelTimeConflict: 74, ResourceConflict: 1, TravelAndResourceConflict: 9, Solution: 1}
+STATS 93 8 74 1 9 1 221 12
+Solution verified. Cost 8
+Timing information for root profiler:
+  solver - 1 * 1.1ms = 1.1ms (99.4%)
+    iteration - 93 * 11.5us = 1.1ms (98.1%)
+      travel time check - 1666 * 63ns = 106.5us (10.0%)
+      conflict check - 1666 * 57ns = 96.2us (9.0%)
+      sat check - 92 * 2.8us = 257.5us (24.1%)
+      treat core - 8 * 538ns = 4.3us (0.4%)
+      update times - 84 * 3.1us = 259.0us (24.3%)
+        extract solution - 84 * 637ns = 53.5us (20.7%)
+      extract solution - 2 * 590ns = 1.2us (0.1%)
+  verify_solution - 1 * 210.6us = 210.6us (19.2%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 371 intervals
+Solution verified. Cost 8
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 206.9us = 206.9us (8.5%)
+  maxsat ddd external solve init - 1 * 191.1us = 191.1us (7.8%)
+  build wcnf - 4 * 174.0us = 696.1us (28.5%)
+    addclause - 3535 * 117ns = 416.8us (59.9%)
+  solve wcnf - 4 * 378.8us = 1.5ms (62.0%)
+    optimize - 4 * 365.9us = 1.5ms (96.6%)
+      solve - 4 * 365.0us = 1.5ms (99.8%)
+    mip_ddd check travel - 4 * 177ns = 710ns (0.0%)
+    check conflicts - 4 * 407ns = 1.6us (0.1%)
+Reading instances_addtracktime/InstanceB9.txt
+trains 7 tracks 25 avgtracks 13.57 trackpairs 150 delays 0 avgdelay0
+7 & 25 & 13.57 & 150 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 9 iterations 63 solver SAT instance (MiniSAT v2.1.0) { variables: 504, clauses: 931 }
+Core size bins {}
+Iteration types {Objective: 9, TravelTimeConflict: 20, ResourceConflict: 1, TravelAndResourceConflict: 32, Solution: 1}
+STATS 63 9 20 1 32 1 399 48
+Solution verified. Cost 9
+Timing information for root profiler:
+  solver - 1 * 1.4ms = 1.4ms (99.3%)
+    iteration - 63 * 21.9us = 1.4ms (98.4%)
+      travel time check - 2495 * 74ns = 186.4us (13.5%)
+      conflict check - 2495 * 67ns = 169.5us (12.3%)
+      sat check - 62 * 7.1us = 439.8us (31.9%)
+      treat core - 9 * 556ns = 5.0us (0.4%)
+      update times - 53 * 5.2us = 277.5us (20.1%)
+        extract solution - 53 * 842ns = 44.7us (16.1%)
+      extract solution - 2 * 865ns = 1.7us (0.1%)
+  verify_solution - 1 * 409.9us = 409.9us (29.1%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 583 intervals
+Solution verified. Cost 9
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 411.4us = 411.4us (3.4%)
+  maxsat ddd external solve init - 1 * 383.6us = 383.6us (3.1%)
+  build wcnf - 6 * 381.0us = 2.3ms (18.7%)
+    addclause - 11602 * 112ns = 1.3ms (57.1%)
+  solve wcnf - 6 * 1.6ms = 9.4ms (77.1%)
+    optimize - 6 * 1.6ms = 9.3ms (98.9%)
+      solve - 6 * 1.6ms = 9.3ms (99.9%)
+    mip_ddd check travel - 6 * 258ns = 1.6us (0.0%)
+    check conflicts - 6 * 681ns = 4.1us (0.0%)
+Reading instances_addtracktime/InstanceB10.txt
+trains 7 tracks 25 avgtracks 12.86 trackpairs 126 delays 0 avgdelay0
+7 & 25 & 12.86 & 126 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 8 iterations 49 solver SAT instance (MiniSAT v2.1.0) { variables: 123, clauses: 120 }
+Core size bins {}
+Iteration types {Objective: 8, TravelTimeConflict: 37, ResourceConflict: 1, TravelAndResourceConflict: 2, Solution: 1}
+STATS 49 8 37 1 2 1 99 5
+Solution verified. Cost 8
+Timing information for root profiler:
+  solver - 1 * 496.2us = 496.2us (99.2%)
+    iteration - 49 * 9.7us = 475.8us (95.9%)
+      travel time check - 1016 * 53ns = 54.8us (11.5%)
+      conflict check - 1016 * 56ns = 57.5us (12.1%)
+      sat check - 48 * 1.1us = 55.0us (11.5%)
+      treat core - 8 * 246ns = 2.0us (0.4%)
+      update times - 40 * 2.9us = 115.3us (24.2%)
+        extract solution - 40 * 943ns = 37.7us (32.7%)
+      extract solution - 2 * 830ns = 1.7us (0.3%)
+  verify_solution - 1 * 372.6us = 372.6us (74.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 291 intervals
+Solution verified. Cost 8
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 373.6us = 373.6us (56.2%)
+  maxsat ddd external solve init - 1 * 328.3us = 328.3us (49.4%)
+  build wcnf - 2 * 94.1us = 188.2us (28.3%)
+    addclause - 1057 * 105ns = 111.0us (59.0%)
+  solve wcnf - 2 * 66.6us = 133.2us (20.1%)
+    optimize - 2 * 55.5us = 110.9us (83.3%)
+      solve - 2 * 54.8us = 109.5us (98.7%)
+    mip_ddd check travel - 2 * 195ns = 390ns (0.3%)
+    check conflicts - 2 * 505ns = 1.0us (0.8%)
+Reading instances_addtracktime/InstanceB11.txt
+trains 25 tracks 25 avgtracks 15.40 trackpairs 3202 delays 0 avgdelay0
+25 & 25 & 15.40 & 3202 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 31 iterations 152 solver SAT instance (MiniSAT v2.1.0) { variables: 1825, clauses: 3235 }
+Core size bins {}
+Iteration types {Objective: 31, TravelTimeConflict: 65, ResourceConflict: 1, TravelAndResourceConflict: 54, Solution: 1}
+STATS 152 31 65 1 54 1 1540 129
+Solution verified. Cost 31
+Timing information for root profiler:
+  solver - 1 * 15.1ms = 15.1ms (99.6%)
+    iteration - 152 * 99.1us = 15.1ms (99.5%)
+      travel time check - 26521 * 42ns = 1.1ms (7.6%)
+      conflict check - 26521 * 111ns = 3.0ms (19.7%)
+      sat check - 164 * 26.2us = 4.3ms (28.5%)
+      treat core - 31 * 409ns = 12.7us (0.1%)
+      update times - 120 * 39.7us = 4.8ms (31.6%)
+        extract solution - 120 * 3.9us = 468.5us (9.8%)
+      extract solution - 2 * 3.7us = 7.3us (0.0%)
+  verify_solution - 1 * 6.6ms = 6.6ms (43.1%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addtracktime/InstanceB12.txt
+trains 14 tracks 25 avgtracks 16.21 trackpairs 970 delays 0 avgdelay0
+14 & 25 & 16.21 & 970 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 16 iterations 76 solver SAT instance (MiniSAT v2.1.0) { variables: 947, clauses: 1615 }
+Core size bins {}
+Iteration types {Objective: 16, TravelTimeConflict: 19, ResourceConflict: 1, TravelAndResourceConflict: 39, Solution: 1}
+STATS 76 16 19 1 39 1 778 84
+Solution verified. Cost 16
+Timing information for root profiler:
+  solver - 1 * 3.1ms = 3.1ms (99.3%)
+    iteration - 76 * 39.9us = 3.0ms (98.3%)
+      travel time check - 5554 * 63ns = 354.6us (11.7%)
+      conflict check - 5554 * 80ns = 445.1us (14.7%)
+      sat check - 75 * 11.0us = 827.2us (27.3%)
+      treat core - 16 * 858ns = 13.7us (0.5%)
+      update times - 59 * 14.4us = 848.2us (27.9%)
+        extract solution - 59 * 1.9us = 114.8us (13.5%)
+      extract solution - 2 * 2.0us = 4.0us (0.1%)
+  verify_solution - 1 * 2.3ms = 2.3ms (73.2%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceA1.txt
+trains 29 tracks 33 avgtracks 20.93 trackpairs 5915 delays 0 avgdelay0
+29 & 33 & 20.93 & 5915 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 37 iterations 202 solver SAT instance (MiniSAT v2.1.0) { variables: 5436, clauses: 10574 }
+Core size bins {}
+Iteration types {Objective: 37, TravelTimeConflict: 36, ResourceConflict: 2, TravelAndResourceConflict: 126, Solution: 1}
+STATS 202 37 36 2 126 1 4606 448
+Solution verified. Cost 37
+Timing information for root profiler:
+  solver - 1 * 84.9ms = 84.9ms (99.7%)
+    iteration - 202 * 419.5us = 84.7ms (99.8%)
+      travel time check - 67723 * 48ns = 3.3ms (3.8%)
+      conflict check - 67723 * 126ns = 8.5ms (10.1%)
+      sat check - 356 * 159.8us = 56.9ms (67.1%)
+      treat core - 37 * 1.2us = 44.9us (0.1%)
+      update times - 164 * 70.0us = 11.5ms (13.5%)
+        extract solution - 164 * 7.8us = 1.3ms (11.2%)
+      extract solution - 2 * 7.6us = 15.1us (0.0%)
+  verify_solution - 1 * 20.5ms = 20.5ms (24.1%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 8475 intervals
+Solution verified. Cost 37
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 20.5ms = 20.5ms (0.6%)
+  maxsat ddd external solve init - 1 * 16.0ms = 16.0ms (0.5%)
+  build wcnf - 11 * 9.9ms = 108.4ms (3.3%)
+    addclause - 539691 * 105ns = 57.1ms (52.6%)
+  solve wcnf - 11 * 288.4ms = 3.2s (96.0%)
+    optimize - 11 * 288.2ms = 3.2s (99.9%)
+      solve - 11 * 288.2ms = 3.2s (100.0%)
+    mip_ddd check travel - 11 * 3.5us = 39.0us (0.0%)
+    check conflicts - 11 * 18.5us = 203.1us (0.0%)
+Reading instances_addstationtime/InstanceA2.txt
+trains 25 tracks 33 avgtracks 19.00 trackpairs 3735 delays 0 avgdelay0
+25 & 33 & 19.00 & 3735 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 40 iterations 213 solver SAT instance (MiniSAT v2.1.0) { variables: 4079, clauses: 7949 }
+Core size bins {}
+Iteration types {Objective: 40, TravelTimeConflict: 60, ResourceConflict: 1, TravelAndResourceConflict: 111, Solution: 1}
+STATS 213 40 60 1 111 1 3464 322
+Solution verified. Cost 40
+Timing information for root profiler:
+  solver - 1 * 45.8ms = 45.8ms (99.6%)
+    iteration - 213 * 214.3us = 45.6ms (99.7%)
+      travel time check - 63472 * 44ns = 2.8ms (6.2%)
+      conflict check - 63472 * 113ns = 7.2ms (15.8%)
+      sat check - 250 * 87.0us = 21.8ms (47.7%)
+      treat core - 40 * 730ns = 29.2us (0.1%)
+      update times - 172 * 55.7us = 9.6ms (21.0%)
+        extract solution - 172 * 4.1us = 713.2us (7.4%)
+      extract solution - 2 * 4.0us = 7.9us (0.0%)
+  verify_solution - 1 * 12.7ms = 12.7ms (27.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 7725 intervals
+Solution verified. Cost 40
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 12.6ms = 12.6ms (0.4%)
+  maxsat ddd external solve init - 1 * 9.9ms = 9.9ms (0.3%)
+  build wcnf - 16 * 9.9ms = 157.8ms (4.6%)
+    addclause - 816072 * 100ns = 82.3ms (52.2%)
+  solve wcnf - 16 * 205.3ms = 3.3s (94.8%)
+    optimize - 16 * 205.1ms = 3.3s (99.9%)
+      solve - 16 * 205.1ms = 3.3s (100.0%)
+    mip_ddd check travel - 16 * 2.6us = 41.6us (0.0%)
+    check conflicts - 16 * 12.4us = 198.1us (0.0%)
+Reading instances_addstationtime/InstanceA3.txt
+trains 16 tracks 33 avgtracks 22.38 trackpairs 2061 delays 0 avgdelay0
+16 & 33 & 22.38 & 2061 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 19 iterations 146 solver SAT instance (MiniSAT v2.1.0) { variables: 2092, clauses: 3881 }
+Core size bins {}
+Iteration types {Objective: 19, TravelTimeConflict: 71, ResourceConflict: 2, TravelAndResourceConflict: 53, Solution: 1}
+STATS 146 19 71 2 53 1 1843 114
+Solution verified. Cost 19
+Timing information for root profiler:
+  solver - 1 * 12.3ms = 12.3ms (99.4%)
+    iteration - 146 * 83.6us = 12.2ms (99.4%)
+      travel time check - 20884 * 53ns = 1.1ms (9.1%)
+      conflict check - 20884 * 94ns = 2.0ms (16.1%)
+      sat check - 145 * 31.3us = 4.5ms (37.3%)
+      treat core - 19 * 826ns = 15.7us (0.1%)
+      update times - 126 * 23.8us = 3.0ms (24.6%)
+        extract solution - 126 * 2.9us = 367.0us (12.2%)
+      extract solution - 2 * 2.9us = 5.7us (0.0%)
+  verify_solution - 1 * 7.2ms = 7.2ms (58.3%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 2926 intervals
+Solution verified. Cost 19
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 7.2ms = 7.2ms (4.5%)
+  maxsat ddd external solve init - 1 * 5.5ms = 5.5ms (3.4%)
+  build wcnf - 6 * 2.0ms = 12.0ms (7.6%)
+    addclause - 65985 * 99ns = 6.6ms (54.7%)
+  solve wcnf - 6 * 23.4ms = 140.5ms (88.4%)
+    optimize - 6 * 23.4ms = 140.2ms (99.8%)
+      solve - 6 * 23.4ms = 140.2ms (100.0%)
+    mip_ddd check travel - 6 * 746ns = 4.5us (0.0%)
+    check conflicts - 6 * 6.1us = 36.8us (0.0%)
+Reading instances_addstationtime/InstanceA4.txt
+trains 14 tracks 33 avgtracks 19.21 trackpairs 1175 delays 0 avgdelay0
+14 & 33 & 19.21 & 1175 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 17 iterations 114 solver SAT instance (MiniSAT v2.1.0) { variables: 1100, clauses: 1861 }
+Core size bins {}
+Iteration types {Objective: 17, TravelTimeConflict: 61, ResourceConflict: 1, TravelAndResourceConflict: 34, Solution: 1}
+STATS 114 17 61 1 34 1 966 57
+Solution verified. Cost 17
+Timing information for root profiler:
+  solver - 1 * 4.6ms = 4.6ms (99.5%)
+    iteration - 114 * 40.1us = 4.6ms (98.9%)
+      travel time check - 8847 * 56ns = 500.6us (11.0%)
+      conflict check - 8847 * 80ns = 711.3us (15.6%)
+      sat check - 113 * 12.1us = 1.4ms (30.0%)
+      treat core - 17 * 582ns = 9.9us (0.2%)
+      update times - 96 * 12.6us = 1.2ms (26.4%)
+        extract solution - 96 * 2.1us = 203.7us (16.9%)
+      extract solution - 2 * 2.2us = 4.4us (0.1%)
+  verify_solution - 1 * 4.1ms = 4.1ms (88.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1676 intervals
+Solution verified. Cost 17
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 4.1ms = 4.1ms (9.5%)
+  maxsat ddd external solve init - 1 * 3.0ms = 3.0ms (6.8%)
+  build wcnf - 6 * 1.0ms = 6.1ms (14.0%)
+    addclause - 33811 * 99ns = 3.4ms (55.4%)
+  solve wcnf - 6 * 5.6ms = 33.8ms (78.1%)
+    optimize - 6 * 5.6ms = 33.6ms (99.4%)
+      solve - 6 * 5.6ms = 33.6ms (99.9%)
+    mip_ddd check travel - 6 * 573ns = 3.4us (0.0%)
+    check conflicts - 6 * 3.5us = 20.7us (0.1%)
+Reading instances_addstationtime/InstanceA5.txt
+trains 12 tracks 33 avgtracks 19.25 trackpairs 876 delays 0 avgdelay0
+12 & 33 & 19.25 & 876 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 16 iterations 98 solver SAT instance (MiniSAT v2.1.0) { variables: 1012, clauses: 1793 }
+Core size bins {}
+Iteration types {Objective: 16, TravelTimeConflict: 48, ResourceConflict: 1, TravelAndResourceConflict: 32, Solution: 1}
+STATS 98 16 48 1 32 1 899 52
+Solution verified. Cost 16
+Timing information for root profiler:
+  solver - 1 * 3.8ms = 3.8ms (99.5%)
+    iteration - 98 * 38.6us = 3.8ms (99.0%)
+      travel time check - 8051 * 56ns = 457.8us (12.1%)
+      conflict check - 8051 * 75ns = 604.9us (16.0%)
+      sat check - 97 * 12.0us = 1.2ms (30.8%)
+      treat core - 16 * 485ns = 7.8us (0.2%)
+      update times - 81 * 10.5us = 850.9us (22.5%)
+        extract solution - 81 * 1.8us = 149.1us (17.5%)
+      extract solution - 2 * 1.9us = 3.8us (0.1%)
+  verify_solution - 1 * 3.0ms = 3.0ms (79.4%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 1492 intervals
+Solution verified. Cost 16
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 3.0ms = 3.0ms (10.2%)
+  maxsat ddd external solve init - 1 * 2.1ms = 2.1ms (7.2%)
+  build wcnf - 5 * 865.3us = 4.3ms (14.5%)
+    addclause - 24219 * 98ns = 2.4ms (55.0%)
+  solve wcnf - 5 * 4.6ms = 23.0ms (77.4%)
+    optimize - 5 * 4.6ms = 22.9ms (99.3%)
+      solve - 5 * 4.6ms = 22.9ms (99.9%)
+    mip_ddd check travel - 5 * 492ns = 2.5us (0.0%)
+    check conflicts - 5 * 2.7us = 13.5us (0.1%)
+Reading instances_addstationtime/InstanceA6.txt
+trains 8 tracks 33 avgtracks 18.62 trackpairs 307 delays 0 avgdelay0
+8 & 33 & 18.62 & 307 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 10 iterations 51 solver SAT instance (MiniSAT v2.1.0) { variables: 208, clauses: 288 }
+Core size bins {}
+Iteration types {Objective: 10, TravelTimeConflict: 35, ResourceConflict: 1, TravelAndResourceConflict: 4, Solution: 1}
+STATS 51 10 35 1 4 1 176 8
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 1 * 738.6us = 738.6us (99.3%)
+    iteration - 51 * 14.0us = 714.8us (96.8%)
+      travel time check - 2009 * 51ns = 104.2us (14.6%)
+      conflict check - 2009 * 60ns = 122.3us (17.1%)
+      sat check - 50 * 1.8us = 90.3us (12.6%)
+      treat core - 10 * 370ns = 3.7us (0.5%)
+      update times - 40 * 4.0us = 158.7us (22.2%)
+        extract solution - 40 * 1.2us = 46.5us (29.3%)
+      extract solution - 2 * 1.2us = 2.3us (0.3%)
+  verify_solution - 1 * 1.3ms = 1.3ms (169.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 490 intervals
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 1.3ms = 1.3ms (82.1%)
+  maxsat ddd external solve init - 1 * 855.2us = 855.2us (54.7%)
+  build wcnf - 2 * 152.0us = 303.9us (19.5%)
+    addclause - 1920 * 89ns = 171.4us (56.4%)
+  solve wcnf - 2 * 191.3us = 382.6us (24.5%)
+    optimize - 2 * 177.4us = 354.8us (92.7%)
+      solve - 2 * 176.2us = 352.5us (99.4%)
+    mip_ddd check travel - 2 * 315ns = 630ns (0.2%)
+    check conflicts - 2 * 1.0us = 2.1us (0.5%)
+Reading instances_addstationtime/InstanceA7.txt
+trains 8 tracks 33 avgtracks 12.62 trackpairs 126 delays 0 avgdelay0
+8 & 33 & 12.62 & 126 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 12 iterations 115 solver SAT instance (MiniSAT v2.1.0) { variables: 406, clauses: 654 }
+Core size bins {}
+Iteration types {Objective: 12, TravelTimeConflict: 91, ResourceConflict: 1, TravelAndResourceConflict: 10, Solution: 1}
+STATS 115 12 91 1 10 1 354 15
+Solution verified. Cost 12
+Timing information for root profiler:
+  solver - 1 * 2.3ms = 2.3ms (99.7%)
+    iteration - 115 * 19.9us = 2.3ms (99.1%)
+      travel time check - 6383 * 42ns = 268.5us (11.7%)
+      conflict check - 6383 * 52ns = 333.0us (14.5%)
+      sat check - 114 * 4.3us = 490.8us (21.4%)
+      treat core - 12 * 405ns = 4.9us (0.2%)
+      update times - 102 * 5.7us = 578.5us (25.2%)
+        extract solution - 102 * 952ns = 97.2us (16.8%)
+      extract solution - 2 * 990ns = 2.0us (0.1%)
+  verify_solution - 1 * 617.6us = 617.6us (26.6%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 672 intervals
+Solution verified. Cost 12
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 611.7us = 611.7us (13.2%)
+  maxsat ddd external solve init - 1 * 400.0us = 400.0us (8.6%)
+  build wcnf - 4 * 325.2us = 1.3ms (28.0%)
+    addclause - 7367 * 100ns = 742.8us (57.1%)
+  solve wcnf - 4 * 720.2us = 2.9ms (62.1%)
+    optimize - 4 * 705.2us = 2.8ms (97.9%)
+      solve - 4 * 703.9us = 2.8ms (99.8%)
+    mip_ddd check travel - 4 * 250ns = 1.0us (0.0%)
+    check conflicts - 4 * 592ns = 2.4us (0.1%)
+Reading instances_addstationtime/InstanceA8.txt
+trains 27 tracks 33 avgtracks 19.89 trackpairs 4862 delays 0 avgdelay0
+27 & 33 & 19.89 & 4862 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 43 iterations 267 solver SAT instance (MiniSAT v2.1.0) { variables: 9898, clauses: 22103 }
+Core size bins {}
+Iteration types {Objective: 43, TravelTimeConflict: 41, ResourceConflict: 2, TravelAndResourceConflict: 180, Solution: 1}
+STATS 267 43 41 2 180 1 8394 1141
+Solution verified. Cost 43
+Timing information for root profiler:
+  solver - 1 * 191.3ms = 191.3ms (99.8%)
+    iteration - 267 * 716.2us = 191.2ms (99.9%)
+      travel time check - 114086 * 46ns = 5.3ms (2.8%)
+      conflict check - 114086 * 129ns = 14.8ms (7.8%)
+      sat check - 474 * 303.6us = 143.9ms (75.3%)
+      treat core - 43 * 941ns = 40.5us (0.0%)
+      update times - 223 * 88.6us = 19.7ms (10.3%)
+        extract solution - 223 * 5.3us = 1.2ms (6.0%)
+      extract solution - 2 * 4.6us = 9.2us (0.0%)
+  verify_solution - 1 * 16.2ms = 16.2ms (8.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceA9.txt
+trains 20 tracks 33 avgtracks 20.05 trackpairs 2616 delays 0 avgdelay0
+20 & 33 & 20.05 & 2616 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 27 iterations 152 solver SAT instance (MiniSAT v2.1.0) { variables: 2135, clauses: 3816 }
+Core size bins {}
+Iteration types {Objective: 27, TravelTimeConflict: 61, ResourceConflict: 1, TravelAndResourceConflict: 62, Solution: 1}
+STATS 152 27 61 1 62 1 1858 145
+Solution verified. Cost 27
+Timing information for root profiler:
+  solver - 1 * 13.5ms = 13.5ms (99.5%)
+    iteration - 152 * 88.2us = 13.4ms (99.5%)
+      travel time check - 27373 * 45ns = 1.2ms (9.3%)
+      conflict check - 27373 * 95ns = 2.6ms (19.6%)
+      sat check - 151 * 26.1us = 3.9ms (29.4%)
+      treat core - 27 * 510ns = 13.8us (0.1%)
+      update times - 124 * 28.9us = 3.6ms (26.7%)
+        extract solution - 124 * 3.5us = 428.1us (12.0%)
+      extract solution - 2 * 3.2us = 6.4us (0.0%)
+  verify_solution - 1 * 9.0ms = 9.0ms (66.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 3672 intervals
+Solution verified. Cost 27
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 9.0ms = 9.0ms (4.4%)
+  maxsat ddd external solve init - 1 * 6.7ms = 6.7ms (3.3%)
+  build wcnf - 7 * 2.8ms = 19.7ms (9.7%)
+    addclause - 110282 * 98ns = 10.9ms (55.4%)
+  solve wcnf - 7 * 24.9ms = 174.5ms (86.2%)
+    optimize - 7 * 24.9ms = 174.1ms (99.8%)
+      solve - 7 * 24.9ms = 174.1ms (100.0%)
+    mip_ddd check travel - 7 * 808ns = 5.7us (0.0%)
+    check conflicts - 7 * 7.8us = 54.4us (0.0%)
+Reading instances_addstationtime/InstanceA10.txt
+trains 17 tracks 33 avgtracks 18.18 trackpairs 1632 delays 0 avgdelay0
+17 & 33 & 18.18 & 1632 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 21 iterations 97 solver SAT instance (MiniSAT v2.1.0) { variables: 1136, clauses: 1916 }
+Core size bins {}
+Iteration types {Objective: 21, TravelTimeConflict: 25, ResourceConflict: 1, TravelAndResourceConflict: 49, Solution: 1}
+STATS 97 21 25 1 49 1 958 95
+Solution verified. Cost 21
+Timing information for root profiler:
+  solver - 1 * 4.7ms = 4.7ms (99.6%)
+    iteration - 97 * 48.1us = 4.7ms (98.9%)
+      travel time check - 9601 * 53ns = 510.8us (11.0%)
+      conflict check - 9601 * 90ns = 867.7us (18.6%)
+      sat check - 96 * 11.9us = 1.1ms (24.4%)
+      treat core - 21 * 324ns = 6.8us (0.1%)
+      update times - 75 * 17.6us = 1.3ms (28.3%)
+        extract solution - 75 * 2.4us = 181.4us (13.7%)
+      extract solution - 2 * 2.3us = 4.7us (0.1%)
+  verify_solution - 1 * 5.4ms = 5.4ms (114.7%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 2079 intervals
+Solution verified. Cost 21
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 5.4ms = 5.4ms (7.3%)
+  maxsat ddd external solve init - 1 * 3.9ms = 3.9ms (5.3%)
+  build wcnf - 7 * 1.4ms = 10.0ms (13.5%)
+    addclause - 56156 * 97ns = 5.5ms (55.0%)
+  solve wcnf - 7 * 8.5ms = 59.3ms (80.2%)
+    optimize - 7 * 8.4ms = 59.1ms (99.6%)
+      solve - 7 * 8.4ms = 59.1ms (99.9%)
+    mip_ddd check travel - 7 * 651ns = 4.6us (0.0%)
+    check conflicts - 7 * 4.7us = 32.5us (0.1%)
+Reading instances_addstationtime/InstanceA11.txt
+trains 29 tracks 33 avgtracks 20.48 trackpairs 6144 delays 0 avgdelay0
+29 & 33 & 20.48 & 6144 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 41 iterations 169 solver SAT instance (MiniSAT v2.1.0) { variables: 9251, clauses: 20567 }
+Core size bins {}
+Iteration types {Objective: 41, TravelTimeConflict: 26, ResourceConflict: 1, TravelAndResourceConflict: 100, Solution: 1}
+STATS 169 41 26 1 100 1 7476 1102
+Solution verified. Cost 41
+Timing information for root profiler:
+  solver - 1 * 128.6ms = 128.6ms (99.7%)
+    iteration - 169 * 760.0us = 128.4ms (99.9%)
+      travel time check - 66200 * 56ns = 3.7ms (2.9%)
+      conflict check - 66200 * 146ns = 9.7ms (7.5%)
+      sat check - 190 * 528.0us = 100.3ms (78.1%)
+      treat core - 41 * 2.0us = 82.0us (0.1%)
+      update times - 127 * 80.8us = 10.3ms (8.0%)
+        extract solution - 127 * 5.4us = 685.2us (6.7%)
+      extract solution - 2 * 5.2us = 10.4us (0.0%)
+  verify_solution - 1 * 19.7ms = 19.7ms (15.3%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceA12.txt
+trains 28 tracks 33 avgtracks 21.71 trackpairs 6393 delays 0 avgdelay0
+28 & 33 & 21.71 & 6393 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 44 iterations 202 solver SAT instance (MiniSAT v2.1.0) { variables: 11638, clauses: 26197 }
+Core size bins {}
+Iteration types {Objective: 44, TravelTimeConflict: 4, ResourceConflict: 1, TravelAndResourceConflict: 152, Solution: 1}
+STATS 202 44 4 1 152 1 9421 1436
+Solution verified. Cost 44
+Timing information for root profiler:
+  solver - 1 * 131.6ms = 131.6ms (99.0%)
+    iteration - 202 * 650.0us = 131.3ms (99.7%)
+      travel time check - 90646 * 61ns = 5.5ms (4.2%)
+      conflict check - 90646 * 148ns = 13.4ms (10.2%)
+      sat check - 225 * 397.6us = 89.5ms (68.1%)
+      treat core - 44 * 1.8us = 81.0us (0.1%)
+      update times - 157 * 106.9us = 16.8ms (12.8%)
+        extract solution - 157 * 8.6us = 1.3ms (8.0%)
+      extract solution - 2 * 14.4us = 28.9us (0.0%)
+  verify_solution - 1 * 21.0ms = 21.0ms (15.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout
+Reading instances_addstationtime/InstanceB1.txt
+trains 18 tracks 25 avgtracks 17.33 trackpairs 2022 delays 0 avgdelay0
+18 & 25 & 17.33 & 2022 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 19 iterations 91 solver SAT instance (MiniSAT v2.1.0) { variables: 1300, clauses: 2145 }
+Core size bins {}
+Iteration types {Objective: 19, TravelTimeConflict: 37, ResourceConflict: 1, TravelAndResourceConflict: 33, Solution: 1}
+STATS 91 19 37 1 33 1 1088 83
+Solution verified. Cost 19
+Timing information for root profiler:
+  solver - 1 * 6.5ms = 6.5ms (99.4%)
+    iteration - 91 * 70.8us = 6.4ms (98.8%)
+      travel time check - 13311 * 57ns = 761.0us (11.8%)
+      conflict check - 13311 * 100ns = 1.3ms (20.7%)
+      sat check - 91 * 18.7us = 1.7ms (26.4%)
+      treat core - 19 * 1.2us = 23.5us (0.4%)
+      update times - 71 * 21.9us = 1.6ms (24.2%)
+        extract solution - 71 * 3.3us = 234.4us (15.1%)
+      extract solution - 2 * 3.3us = 6.6us (0.1%)
+  verify_solution - 1 * 4.4ms = 4.4ms (66.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceB2.txt
+trains 5 tracks 25 avgtracks 14.80 trackpairs 87 delays 0 avgdelay0
+5 & 25 & 14.80 & 87 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 7 iterations 48 solver SAT instance (MiniSAT v2.1.0) { variables: 137, clauses: 167 }
+Core size bins {}
+Iteration types {Objective: 7, TravelTimeConflict: 36, ResourceConflict: 1, TravelAndResourceConflict: 3, Solution: 1}
+STATS 48 7 36 1 3 1 101 8
+Solution verified. Cost 7
+Timing information for root profiler:
+  solver - 1 * 605.5us = 605.5us (98.8%)
+    iteration - 48 * 12.1us = 580.5us (95.9%)
+      travel time check - 1185 * 54ns = 64.3us (11.1%)
+      conflict check - 1185 * 58ns = 69.8us (12.0%)
+      sat check - 47 * 2.1us = 98.3us (16.9%)
+      treat core - 7 * 832ns = 5.8us (1.0%)
+      update times - 40 * 3.2us = 128.5us (22.1%)
+        extract solution - 40 * 776ns = 31.1us (24.2%)
+      extract solution - 2 * 640ns = 1.3us (0.2%)
+  verify_solution - 1 * 260.1us = 260.1us (42.4%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 339 intervals
+Solution verified. Cost 7
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 256.3us = 256.3us (15.9%)
+  maxsat ddd external solve init - 1 * 214.9us = 214.9us (13.3%)
+  build wcnf - 3 * 170.4us = 511.3us (31.7%)
+    addclause - 2437 * 122ns = 299.0us (58.5%)
+  solve wcnf - 3 * 285.4us = 856.2us (53.1%)
+    optimize - 3 * 271.8us = 815.4us (95.2%)
+      solve - 3 * 270.7us = 812.0us (99.6%)
+    mip_ddd check travel - 3 * 193ns = 580ns (0.1%)
+    check conflicts - 3 * 633ns = 1.9us (0.2%)
+Reading instances_addstationtime/InstanceB3.txt
+trains 5 tracks 20 avgtracks 16.80 trackpairs 136 delays 0 avgdelay0
+5 & 20 & 16.80 & 136 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 5 iterations 71 solver SAT instance (MiniSAT v2.1.0) { variables: 312, clauses: 513 }
+Core size bins {}
+Iteration types {Objective: 5, TravelTimeConflict: 54, ResourceConflict: 1, TravelAndResourceConflict: 10, Solution: 1}
+STATS 71 5 54 1 10 1 273 15
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 1 * 1.1ms = 1.1ms (99.4%)
+    iteration - 71 * 14.8us = 1.1ms (98.1%)
+      travel time check - 1958 * 68ns = 133.9us (12.7%)
+      conflict check - 1958 * 60ns = 117.9us (11.2%)
+      sat check - 70 * 4.0us = 281.7us (26.8%)
+      treat core - 5 * 490ns = 2.5us (0.2%)
+      update times - 65 * 3.5us = 229.8us (21.8%)
+        extract solution - 65 * 744ns = 48.4us (21.0%)
+      extract solution - 2 * 730ns = 1.5us (0.1%)
+  verify_solution - 1 * 265.0us = 265.0us (24.5%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 425 intervals
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 266.4us = 266.4us (12.7%)
+  maxsat ddd external solve init - 1 * 265.1us = 265.1us (12.6%)
+  build wcnf - 3 * 199.7us = 599.1us (28.5%)
+    addclause - 2940 * 120ns = 354.2us (59.1%)
+  solve wcnf - 3 * 401.1us = 1.2ms (57.2%)
+    optimize - 3 * 386.5us = 1.2ms (96.4%)
+      solve - 3 * 385.4us = 1.2ms (99.7%)
+    mip_ddd check travel - 3 * 190ns = 570ns (0.0%)
+    check conflicts - 3 * 606ns = 1.8us (0.2%)
+Reading instances_addstationtime/InstanceB4.txt
+trains 20 tracks 25 avgtracks 15.95 trackpairs 2246 delays 0 avgdelay0
+20 & 25 & 15.95 & 2246 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 31 iterations 183 solver SAT instance (MiniSAT v2.1.0) { variables: 2067, clauses: 3915 }
+Core size bins {}
+Iteration types {Objective: 31, TravelTimeConflict: 91, ResourceConflict: 1, TravelAndResourceConflict: 59, Solution: 1}
+STATS 183 31 91 1 59 1 1760 157
+Solution verified. Cost 31
+Timing information for root profiler:
+  solver - 1 * 18.5ms = 18.5ms (99.6%)
+    iteration - 183 * 100.9us = 18.5ms (99.6%)
+      travel time check - 32503 * 43ns = 1.4ms (7.7%)
+      conflict check - 32503 * 101ns = 3.3ms (17.8%)
+      sat check - 195 * 30.5us = 5.9ms (32.2%)
+      treat core - 31 * 560ns = 17.4us (0.1%)
+      update times - 151 * 35.8us = 5.4ms (29.3%)
+        extract solution - 151 * 2.8us = 419.0us (7.8%)
+      extract solution - 2 * 2.7us = 5.3us (0.0%)
+  verify_solution - 1 * 4.6ms = 4.6ms (24.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceB5.txt
+trains 5 tracks 25 avgtracks 17.80 trackpairs 136 delays 0 avgdelay0
+5 & 25 & 17.80 & 136 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 6 iterations 79 solver SAT instance (MiniSAT v2.1.0) { variables: 567, clauses: 1047 }
+Core size bins {}
+Iteration types {Objective: 6, TravelTimeConflict: 44, ResourceConflict: 1, TravelAndResourceConflict: 27, Solution: 1}
+STATS 79 6 44 1 27 1 500 35
+Solution verified. Cost 6
+Timing information for root profiler:
+  solver - 1 * 1.6ms = 1.6ms (99.1%)
+    iteration - 79 * 19.3us = 1.5ms (98.1%)
+      travel time check - 1886 * 107ns = 202.9us (13.3%)
+      conflict check - 1886 * 70ns = 132.7us (8.7%)
+      sat check - 78 * 7.2us = 558.8us (36.7%)
+      treat core - 6 * 1.2us = 6.9us (0.5%)
+      update times - 72 * 4.0us = 285.5us (18.7%)
+        extract solution - 72 * 800ns = 57.6us (20.2%)
+      extract solution - 2 * 780ns = 1.6us (0.1%)
+  verify_solution - 1 * 363.8us = 363.8us (23.2%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 521 intervals
+Solution verified. Cost 6
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 361.9us = 361.9us (11.5%)
+  maxsat ddd external solve init - 1 * 307.1us = 307.1us (9.8%)
+  build wcnf - 3 * 245.6us = 736.7us (23.4%)
+    addclause - 3596 * 118ns = 426.2us (57.9%)
+  solve wcnf - 3 * 686.1us = 2.1ms (65.4%)
+    optimize - 3 * 668.8us = 2.0ms (97.5%)
+      solve - 3 * 667.5us = 2.0ms (99.8%)
+    mip_ddd check travel - 3 * 220ns = 660ns (0.0%)
+    check conflicts - 3 * 920ns = 2.8us (0.1%)
+Reading instances_addstationtime/InstanceB6.txt
+trains 5 tracks 25 avgtracks 15.20 trackpairs 93 delays 0 avgdelay0
+5 & 25 & 15.20 & 93 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 5 iterations 46 solver SAT instance (MiniSAT v2.1.0) { variables: 166, clauses: 217 }
+Core size bins {}
+Iteration types {Objective: 5, TravelTimeConflict: 36, ResourceConflict: 1, TravelAndResourceConflict: 3, Solution: 1}
+STATS 46 5 36 1 3 1 138 6
+Solution verified. Cost 5
+Timing information for root profiler:
+  solver - 1 * 522.2us = 522.2us (99.1%)
+    iteration - 46 * 10.9us = 503.6us (96.4%)
+      travel time check - 1153 * 61ns = 71.1us (14.1%)
+      conflict check - 1153 * 56ns = 65.5us (13.0%)
+      sat check - 45 * 1.5us = 69.0us (13.7%)
+      treat core - 5 * 748ns = 3.7us (0.7%)
+      update times - 40 * 2.7us = 107.0us (21.2%)
+        extract solution - 40 * 716ns = 28.6us (26.8%)
+      extract solution - 2 * 665ns = 1.3us (0.3%)
+  verify_solution - 1 * 269.2us = 269.2us (51.1%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceB7.txt
+trains 24 tracks 25 avgtracks 15.25 trackpairs 2865 delays 0 avgdelay0
+24 & 25 & 15.25 & 2865 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 40 iterations 171 solver SAT instance (MiniSAT v2.1.0) { variables: 2941, clauses: 5697 }
+Core size bins {}
+Iteration types {Objective: 40, TravelTimeConflict: 43, ResourceConflict: 1, TravelAndResourceConflict: 86, Solution: 1}
+STATS 171 40 43 1 86 1 2511 238
+Solution verified. Cost 40
+Timing information for root profiler:
+  solver - 1 * 28.8ms = 28.8ms (99.5%)
+    iteration - 171 * 167.9us = 28.7ms (99.7%)
+      travel time check - 34530 * 50ns = 1.7ms (6.0%)
+      conflict check - 34530 * 105ns = 3.6ms (12.7%)
+      sat check - 284 * 54.5us = 15.5ms (53.9%)
+      treat core - 40 * 646ns = 25.9us (0.1%)
+      update times - 130 * 41.2us = 5.4ms (18.7%)
+        extract solution - 130 * 3.9us = 510.3us (9.5%)
+      extract solution - 2 * 3.4us = 6.8us (0.0%)
+  verify_solution - 1 * 5.9ms = 5.9ms (20.4%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 3160 intervals
+Solution verified. Cost 40
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 5.9ms = 5.9ms (1.7%)
+  maxsat ddd external solve init - 1 * 5.7ms = 5.7ms (1.6%)
+  build wcnf - 10 * 2.9ms = 29.4ms (8.2%)
+    addclause - 138825 * 117ns = 16.3ms (55.6%)
+  solve wcnf - 10 * 32.0ms = 320.2ms (89.5%)
+    optimize - 10 * 31.9ms = 319.4ms (99.8%)
+      solve - 10 * 31.9ms = 319.4ms (100.0%)
+    mip_ddd check travel - 10 * 823ns = 8.2us (0.0%)
+    check conflicts - 10 * 8.1us = 80.8us (0.0%)
+Reading instances_addstationtime/InstanceB8.txt
+trains 5 tracks 25 avgtracks 13.40 trackpairs 72 delays 0 avgdelay0
+5 & 25 & 13.40 & 72 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 10 iterations 82 solver SAT instance (MiniSAT v2.1.0) { variables: 223, clauses: 331 }
+Core size bins {}
+Iteration types {Objective: 10, TravelTimeConflict: 66, ResourceConflict: 1, TravelAndResourceConflict: 4, Solution: 1}
+STATS 82 10 66 1 4 1 187 8
+Solution verified. Cost 10
+Timing information for root profiler:
+  solver - 1 * 1.0ms = 1.0ms (99.2%)
+    iteration - 82 * 12.3us = 1.0ms (97.8%)
+      travel time check - 2415 * 50ns = 121.2us (12.1%)
+      conflict check - 2415 * 50ns = 122.2us (12.2%)
+      sat check - 81 * 2.4us = 190.3us (18.9%)
+      treat core - 10 * 613ns = 6.1us (0.6%)
+      update times - 71 * 3.1us = 218.5us (21.7%)
+        extract solution - 71 * 630ns = 44.8us (20.5%)
+      extract solution - 2 * 600ns = 1.2us (0.1%)
+  verify_solution - 1 * 205.3us = 205.3us (19.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceB9.txt
+trains 7 tracks 25 avgtracks 13.57 trackpairs 150 delays 0 avgdelay0
+7 & 25 & 13.57 & 150 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 11 iterations 68 solver SAT instance (MiniSAT v2.1.0) { variables: 409, clauses: 646 }
+Core size bins {}
+Iteration types {Objective: 11, TravelTimeConflict: 34, ResourceConflict: 2, TravelAndResourceConflict: 20, Solution: 1}
+STATS 68 11 34 2 20 1 328 31
+Solution verified. Cost 11
+Timing information for root profiler:
+  solver - 1 * 1.3ms = 1.3ms (98.2%)
+    iteration - 68 * 18.9us = 1.3ms (97.8%)
+      travel time check - 2695 * 62ns = 169.4us (13.2%)
+      conflict check - 2695 * 61ns = 166.1us (12.9%)
+      sat check - 67 * 4.6us = 310.3us (24.1%)
+      treat core - 11 * 506ns = 5.6us (0.4%)
+      update times - 56 * 5.5us = 306.8us (23.8%)
+        extract solution - 56 * 865ns = 48.5us (15.8%)
+      extract solution - 2 * 870ns = 1.7us (0.1%)
+  verify_solution - 1 * 405.7us = 405.7us (30.3%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceB10.txt
+trains 7 tracks 25 avgtracks 12.86 trackpairs 126 delays 0 avgdelay0
+7 & 25 & 12.86 & 126 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 11 iterations 58 solver SAT instance (MiniSAT v2.1.0) { variables: 151, clauses: 187 }
+Core size bins {}
+Iteration types {Objective: 11, TravelTimeConflict: 41, ResourceConflict: 1, TravelAndResourceConflict: 4, Solution: 1}
+STATS 58 11 41 1 4 1 117 7
+Solution verified. Cost 11
+Timing information for root profiler:
+  solver - 1 * 574.4us = 574.4us (98.6%)
+    iteration - 58 * 9.5us = 550.1us (95.8%)
+      travel time check - 841 * 69ns = 58.4us (10.6%)
+      conflict check - 841 * 59ns = 50.4us (9.2%)
+      sat check - 57 * 1.5us = 86.4us (15.7%)
+      treat core - 11 * 560ns = 6.2us (1.1%)
+      update times - 46 * 3.0us = 139.7us (25.4%)
+        extract solution - 46 * 853ns = 39.3us (28.1%)
+      extract solution - 2 * 850ns = 1.7us (0.3%)
+  verify_solution - 1 * 365.9us = 365.9us (62.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir opt
+Solved with 357 intervals
+Solution verified. Cost 11
+Timing information for root profiler:
+  solver - 0 * 0ns = 0ns (0.0%)
+    iteration - 0 * 0ns = 0ns (NaN%)
+      travel time check - 0 * 0ns = 0ns (NaN%)
+      conflict check - 0 * 0ns = 0ns (NaN%)
+      sat check - 0 * 0ns = 0ns (NaN%)
+      treat core - 0 * 0ns = 0ns (NaN%)
+      update times - 0 * 0ns = 0ns (NaN%)
+        extract solution - 0 * 0ns = 0ns (NaN%)
+      extract solution - 0 * 0ns = 0ns (NaN%)
+  verify_solution - 1 * 365.7us = 365.7us (18.6%)
+  maxsat ddd external solve init - 1 * 319.6us = 319.6us (16.3%)
+  build wcnf - 5 * 142.2us = 711.2us (36.2%)
+    addclause - 3745 * 105ns = 396.7us (55.8%)
+  solve wcnf - 5 * 177.7us = 888.4us (45.2%)
+    optimize - 5 * 164.7us = 823.7us (92.7%)
+      solve - 5 * 163.7us = 818.7us (99.4%)
+    mip_ddd check travel - 5 * 236ns = 1.2us (0.1%)
+    check conflicts - 5 * 604ns = 3.0us (0.3%)
+Reading instances_addstationtime/InstanceB11.txt
+trains 25 tracks 25 avgtracks 15.40 trackpairs 3202 delays 0 avgdelay0
+25 & 25 & 15.40 & 3202 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 44 iterations 116 solver SAT instance (MiniSAT v2.1.0) { variables: 2401, clauses: 4360 }
+Core size bins {}
+Iteration types {Objective: 44, TravelTimeConflict: 19, ResourceConflict: 1, TravelAndResourceConflict: 51, Solution: 1}
+STATS 116 44 19 1 51 1 2048 182
+Solution verified. Cost 44
+Timing information for root profiler:
+  solver - 1 * 12.6ms = 12.6ms (99.2%)
+    iteration - 116 * 108.3us = 12.6ms (99.4%)
+      travel time check - 19797 * 55ns = 1.1ms (8.8%)
+      conflict check - 19797 * 112ns = 2.2ms (17.7%)
+      sat check - 169 * 30.2us = 5.1ms (40.7%)
+      treat core - 44 * 473ns = 20.8us (0.2%)
+      update times - 71 * 37.2us = 2.6ms (21.0%)
+        extract solution - 71 * 3.9us = 277.5us (10.5%)
+      extract solution - 2 * 4.1us = 8.2us (0.1%)
+  verify_solution - 1 * 6.5ms = 6.5ms (50.8%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+Reading instances_addstationtime/InstanceB12.txt
+trains 14 tracks 25 avgtracks 16.21 trackpairs 970 delays 0 avgdelay0
+14 & 25 & 16.21 & 970 & 0 & 0 \\
+Starting solver MaxSatDddLadderRC2
+Finished with cost 19 iterations 97 solver SAT instance (MiniSAT v2.1.0) { variables: 1225, clauses: 2276 }
+Core size bins {}
+Iteration types {Objective: 19, TravelTimeConflict: 26, ResourceConflict: 1, TravelAndResourceConflict: 50, Solution: 1}
+STATS 97 19 26 1 50 1 971 118
+Solution verified. Cost 19
+Timing information for root profiler:
+  solver - 1 * 4.7ms = 4.7ms (99.4%)
+    iteration - 97 * 47.9us = 4.6ms (99.0%)
+      travel time check - 7286 * 65ns = 476.9us (10.3%)
+      conflict check - 7286 * 82ns = 603.7us (13.0%)
+      sat check - 96 * 19.2us = 1.8ms (39.6%)
+      treat core - 19 * 898ns = 17.1us (0.4%)
+      update times - 77 * 13.0us = 1.0ms (21.6%)
+        extract solution - 77 * 2.1us = 159.6us (15.9%)
+      extract solution - 2 * 2.0us = 4.0us (0.1%)
+  verify_solution - 1 * 2.2ms = 2.2ms (47.1%)
+  maxsat ddd external solve init - 0 * 0ns = 0ns (0.0%)
+  build wcnf - 0 * 0ns = 0ns (0.0%)
+    addclause - 0 * 0ns = 0ns (NaN%)
+  solve wcnf - 0 * 0ns = 0ns (0.0%)
+    optimize - 0 * 0ns = 0ns (NaN%)
+      solve - 0 * 0ns = 0ns (NaN%)
+    mip_ddd check travel - 0 * 0ns = 0ns (NaN%)
+    check conflicts - 0 * 0ns = 0ns (NaN%)
+Starting solver MaxSatDddIpamir
+calling ipamir
+returned from ipamir
+ipamir opt
+calling ipamir
+returned from ipamir
+ipamir timeout w sol
+    origA1 FiniteSteps123 MaxSatDddLadderRC2    11          5
+    origA1 FiniteSteps123 MaxSatDddIpamir    11         26
+    origA2 FiniteSteps123 MaxSatDddLadderRC2    25          4
+    origA2 FiniteSteps123 MaxSatDddIpamir    25         32
+    origA3 FiniteSteps123 MaxSatDddLadderRC2    10          4
+    origA3 FiniteSteps123 MaxSatDddIpamir    10         12
+    origA4 FiniteSteps123 MaxSatDddLadderRC2    17          5
+    origA4 FiniteSteps123 MaxSatDddIpamir    17         11
+    origA5 FiniteSteps123 MaxSatDddLadderRC2    15          2
+    origA5 FiniteSteps123 MaxSatDddIpamir    15          5
+    origA6 FiniteSteps123 MaxSatDddLadderRC2    10          1
+    origA6 FiniteSteps123 MaxSatDddIpamir    10          3
+    origA7 FiniteSteps123 MaxSatDddLadderRC2    10          1
+    origA7 FiniteSteps123 MaxSatDddIpamir    10          4
+    origA8 FiniteSteps123 MaxSatDddLadderRC2    31         39
+    origA8 FiniteSteps123 MaxSatDddIpamir    31        378
+    origA9 FiniteSteps123 MaxSatDddLadderRC2    18          5
+    origA9 FiniteSteps123 MaxSatDddIpamir    18         16
+   origA10 FiniteSteps123 MaxSatDddLadderRC2    17          3
+   origA10 FiniteSteps123 MaxSatDddIpamir    17         28
+   origA11 FiniteSteps123 MaxSatDddLadderRC2    23         12
+   origA11 FiniteSteps123 MaxSatDddIpamir    23         82
+   origA12 FiniteSteps123 MaxSatDddLadderRC2    24         41
+   origA12 FiniteSteps123 MaxSatDddIpamir  9999       9999
+    origB1 FiniteSteps123 MaxSatDddLadderRC2     4          1
+    origB1 FiniteSteps123 MaxSatDddIpamir     4          5
+    origB2 FiniteSteps123 MaxSatDddLadderRC2     5          0
+    origB2 FiniteSteps123 MaxSatDddIpamir     5          0
+    origB3 FiniteSteps123 MaxSatDddLadderRC2     5          1
+    origB3 FiniteSteps123 MaxSatDddIpamir     5          1
+    origB4 FiniteSteps123 MaxSatDddLadderRC2    16          4
+    origB4 FiniteSteps123 MaxSatDddIpamir    16          7
+    origB5 FiniteSteps123 MaxSatDddLadderRC2     2          1
+    origB5 FiniteSteps123 MaxSatDddIpamir  9999       9999
+    origB6 FiniteSteps123 MaxSatDddLadderRC2     2          0
+    origB6 FiniteSteps123 MaxSatDddIpamir  9999       9999
+    origB7 FiniteSteps123 MaxSatDddLadderRC2    25          7
+    origB7 FiniteSteps123 MaxSatDddIpamir    25       2759
+    origB8 FiniteSteps123 MaxSatDddLadderRC2     6          0
+    origB8 FiniteSteps123 MaxSatDddIpamir  9999       9999
+    origB9 FiniteSteps123 MaxSatDddLadderRC2     7          2
+    origB9 FiniteSteps123 MaxSatDddIpamir     7          4
+   origB10 FiniteSteps123 MaxSatDddLadderRC2    10          1
+   origB10 FiniteSteps123 MaxSatDddIpamir    10          3
+   origB11 FiniteSteps123 MaxSatDddLadderRC2    23          7
+   origB11 FiniteSteps123 MaxSatDddIpamir    23        305
+   origB12 FiniteSteps123 MaxSatDddLadderRC2     6          1
+   origB12 FiniteSteps123 MaxSatDddIpamir     6        387
+   trackA1 FiniteSteps123 MaxSatDddLadderRC2    23         42
+   trackA1 FiniteSteps123 MaxSatDddIpamir    23       1133
+   trackA2 FiniteSteps123 MaxSatDddLadderRC2    33         29
+   trackA2 FiniteSteps123 MaxSatDddIpamir  9999       9999
+   trackA3 FiniteSteps123 MaxSatDddLadderRC2    15         26
+   trackA3 FiniteSteps123 MaxSatDddIpamir  9999       9999
+   trackA4 FiniteSteps123 MaxSatDddLadderRC2    15          5
+   trackA4 FiniteSteps123 MaxSatDddIpamir    15         97
+   trackA5 FiniteSteps123 MaxSatDddLadderRC2    12          3
+   trackA5 FiniteSteps123 MaxSatDddIpamir    12          7
+   trackA6 FiniteSteps123 MaxSatDddLadderRC2     8          1
+   trackA6 FiniteSteps123 MaxSatDddIpamir     8          6
+   trackA7 FiniteSteps123 MaxSatDddLadderRC2     8          1
+   trackA7 FiniteSteps123 MaxSatDddIpamir     8          3
+   trackA8 FiniteSteps123 MaxSatDddLadderRC2    34        147
+   trackA8 FiniteSteps123 MaxSatDddIpamir    34      22958
+   trackA9 FiniteSteps123 MaxSatDddLadderRC2    25         10
+   trackA9 FiniteSteps123 MaxSatDddIpamir    25        353
+  trackA10 FiniteSteps123 MaxSatDddLadderRC2    17          3
+  trackA10 FiniteSteps123 MaxSatDddIpamir    17         30
+  trackA11 FiniteSteps123 MaxSatDddLadderRC2    33        209
+  trackA11 FiniteSteps123 MaxSatDddIpamir  9999       9999
+  trackA12 FiniteSteps123 MaxSatDddLadderRC2    36         95
+  trackA12 FiniteSteps123 MaxSatDddIpamir    36      22646
+   trackB1 FiniteSteps123 MaxSatDddLadderRC2    13          6
+   trackB1 FiniteSteps123 MaxSatDddIpamir  9999       9999
+   trackB2 FiniteSteps123 MaxSatDddLadderRC2     5          1
+   trackB2 FiniteSteps123 MaxSatDddIpamir     5          2
+   trackB3 FiniteSteps123 MaxSatDddLadderRC2     4          1
+   trackB3 FiniteSteps123 MaxSatDddIpamir     4          2
+   trackB4 FiniteSteps123 MaxSatDddLadderRC2    19         11
+   trackB4 FiniteSteps123 MaxSatDddIpamir    19         44
+   trackB5 FiniteSteps123 MaxSatDddLadderRC2     7          2
+   trackB5 FiniteSteps123 MaxSatDddIpamir  9999       9999
+   trackB6 FiniteSteps123 MaxSatDddLadderRC2     2          1
+   trackB6 FiniteSteps123 MaxSatDddIpamir     2          1
+   trackB7 FiniteSteps123 MaxSatDddLadderRC2    27         12
+   trackB7 FiniteSteps123 MaxSatDddIpamir    27         66
+   trackB8 FiniteSteps123 MaxSatDddLadderRC2     8          1
+   trackB8 FiniteSteps123 MaxSatDddIpamir     8          2
+   trackB9 FiniteSteps123 MaxSatDddLadderRC2     9          1
+   trackB9 FiniteSteps123 MaxSatDddIpamir     9         12
+  trackB10 FiniteSteps123 MaxSatDddLadderRC2     8          1
+  trackB10 FiniteSteps123 MaxSatDddIpamir     8          1
+  trackB11 FiniteSteps123 MaxSatDddLadderRC2    31         15
+  trackB11 FiniteSteps123 MaxSatDddIpamir  9999       9999
+  trackB12 FiniteSteps123 MaxSatDddLadderRC2    16          3
+  trackB12 FiniteSteps123 MaxSatDddIpamir  9999       9999
+ stationA1 FiniteSteps123 MaxSatDddLadderRC2    37         85
+ stationA1 FiniteSteps123 MaxSatDddIpamir    37       3306
+ stationA2 FiniteSteps123 MaxSatDddLadderRC2    40         46
+ stationA2 FiniteSteps123 MaxSatDddIpamir    40       3465
+ stationA3 FiniteSteps123 MaxSatDddLadderRC2    19         12
+ stationA3 FiniteSteps123 MaxSatDddIpamir    19        159
+ stationA4 FiniteSteps123 MaxSatDddLadderRC2    17          5
+ stationA4 FiniteSteps123 MaxSatDddIpamir    17         43
+ stationA5 FiniteSteps123 MaxSatDddLadderRC2    16          4
+ stationA5 FiniteSteps123 MaxSatDddIpamir    16         30
+ stationA6 FiniteSteps123 MaxSatDddLadderRC2    10          1
+ stationA6 FiniteSteps123 MaxSatDddIpamir    10          2
+ stationA7 FiniteSteps123 MaxSatDddLadderRC2    12          2
+ stationA7 FiniteSteps123 MaxSatDddIpamir    12          5
+ stationA8 FiniteSteps123 MaxSatDddLadderRC2    43        192
+ stationA8 FiniteSteps123 MaxSatDddIpamir  9999       9999
+ stationA9 FiniteSteps123 MaxSatDddLadderRC2    27         14
+ stationA9 FiniteSteps123 MaxSatDddIpamir    27        202
+stationA10 FiniteSteps123 MaxSatDddLadderRC2    21          5
+stationA10 FiniteSteps123 MaxSatDddIpamir    21         74
+stationA11 FiniteSteps123 MaxSatDddLadderRC2    41        129
+stationA11 FiniteSteps123 MaxSatDddIpamir  9999       9999
+stationA12 FiniteSteps123 MaxSatDddLadderRC2    44        133
+stationA12 FiniteSteps123 MaxSatDddIpamir  9999       9999
+ stationB1 FiniteSteps123 MaxSatDddLadderRC2    19          7
+ stationB1 FiniteSteps123 MaxSatDddIpamir  9999       9999
+ stationB2 FiniteSteps123 MaxSatDddLadderRC2     7          1
+ stationB2 FiniteSteps123 MaxSatDddIpamir     7          2
+ stationB3 FiniteSteps123 MaxSatDddLadderRC2     5          1
+ stationB3 FiniteSteps123 MaxSatDddIpamir     5          2
+ stationB4 FiniteSteps123 MaxSatDddLadderRC2    31         19
+ stationB4 FiniteSteps123 MaxSatDddIpamir  9999       9999
+ stationB5 FiniteSteps123 MaxSatDddLadderRC2     6          2
+ stationB5 FiniteSteps123 MaxSatDddIpamir     6          3
+ stationB6 FiniteSteps123 MaxSatDddLadderRC2     5          1
+ stationB6 FiniteSteps123 MaxSatDddIpamir  9999       9999
+ stationB7 FiniteSteps123 MaxSatDddLadderRC2    40         29
+ stationB7 FiniteSteps123 MaxSatDddIpamir    40        358
+ stationB8 FiniteSteps123 MaxSatDddLadderRC2    10          1
+ stationB8 FiniteSteps123 MaxSatDddIpamir  9999       9999
+ stationB9 FiniteSteps123 MaxSatDddLadderRC2    11          1
+ stationB9 FiniteSteps123 MaxSatDddIpamir  9999       9999
+stationB10 FiniteSteps123 MaxSatDddLadderRC2    11          1
+stationB10 FiniteSteps123 MaxSatDddIpamir    11          2
+stationB11 FiniteSteps123 MaxSatDddLadderRC2    44         13
+stationB11 FiniteSteps123 MaxSatDddIpamir  9999       9999
+stationB12 FiniteSteps123 MaxSatDddLadderRC2    19          5
+stationB12 FiniteSteps123 MaxSatDddIpamir  9999       9999
+
