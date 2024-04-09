@@ -39,7 +39,7 @@ for filename in [
         worsttime = max([s["sol_time"] if "sol_time" in s else 9999 for s in instance["solves"]])
 
         bigm = next((s for s in instance["solves"] if s["solver_name"] == "BigMLazy"))
-        satddd = next((s for s in instance["solves"] if s["solver_name"] == "MaxSatDdd"))
+        satddd = next((s for s in instance["solves"] if s["solver_name"] == "MaxSatDdd" or s["solver_name"] == "MaxSatDddLadderRC2"))
         mipddd = next((s for s in instance["solves"] if s["solver_name"] == "MipDdd"))
 
         # The "worst instances" comparison in done on the finsteps123 objective.

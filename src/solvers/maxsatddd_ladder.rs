@@ -183,10 +183,23 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
 
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
+            let ub = best_heur.map(|(c, _)| c).unwrap_or(i32::MAX);
             println!(
                 "TIMEOUT LB={} UB={}",
                 total_cost,
-                best_heur.map(|(c, _)| c).unwrap_or(i32::MAX)
+                ub
+            );
+
+            do_output_stats(
+                &mut output_stats,
+                iteration,
+                &iteration_types,
+                &stats,
+                &occupations,
+                start_time,
+                solver_time,
+                total_cost,
+                ub
             );
             return Err(SolverError::Timeout);
         }
@@ -204,7 +217,22 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                     if ub_cost == total_cost as i32 {
                         println!("HEURISTIC UB=LB");
                         println!("TERMINATE HEURISTIC");
-                        println!("MAXSAT ITERATIONS {}  {}", n_conflict_constraints, iteration);
+                        println!(
+                            "MAXSAT ITERATIONS {}  {}",
+                            n_conflict_constraints, iteration
+                        );
+                        do_output_stats(
+                            &mut output_stats,
+                            iteration,
+                            &iteration_types,
+                            &stats,
+                            &occupations,
+                            start_time,
+                            solver_time,
+                            total_cost,
+                            ub_cost
+                        );
+        
                         return Ok((ub_sol, stats));
                     }
 
@@ -566,74 +594,24 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
                     /* num conflicts */ stats.n_conflict,
                 );
 
-                output_stats("iterations".to_string(), iteration.into());
-                output_stats(
-                    "objective_iters".to_string(),
-                    (*iteration_types.get(&IterationType::Objective).unwrap_or(&0)).into(),
-                );
-                output_stats(
-                    "travel_iters".to_string(),
-                    (*iteration_types
-                        .get(&IterationType::TravelTimeConflict)
-                        .unwrap_or(&0))
-                    .into(),
-                );
-                output_stats(
-                    "resource_iters".to_string(),
-                    (*iteration_types
-                        .get(&IterationType::ResourceConflict)
-                        .unwrap_or(&0))
-                    .into(),
-                );
-                output_stats(
-                    "travel_and_resource_iters".to_string(),
-                    (*iteration_types
-                        .get(&IterationType::TravelAndResourceConflict)
-                        .unwrap_or(&0))
-                    .into(),
-                );
-                output_stats("num_traveltime".to_string(), stats.n_travel.into());
-                output_stats("num_conflicts".to_string(), stats.n_travel.into());
-                output_stats(
-                    "num_time_points".to_string(),
-                    occupations
-                        .iter()
-                        .map(|o| o.delays.len() - 1)
-                        .sum::<usize>()
-                        .into(),
-                );
-                output_stats(
-                    "max_time_points".to_string(),
-                    occupations
-                        .iter()
-                        .map(|o| o.delays.len() - 1)
-                        .max()
-                        .unwrap()
-                        .into(),
-                );
-                output_stats(
-                    "avg_time_points".to_string(),
-                    ((occupations
-                        .iter()
-                        .map(|o| o.delays.len() - 1)
-                        .sum::<usize>() as f64)
-                        / (occupations.len() as f64))
-                        .into(),
-                );
-
-                output_stats(
-                    "total_time".to_string(),
-                    start_time.elapsed().as_secs_f64().into(),
-                );
-                output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
-                output_stats(
-                    "algorithm_time".to_string(),
-                    (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
+                do_output_stats(
+                    &mut output_stats,
+                    iteration,
+                    &iteration_types,
+                    &stats,
+                    &occupations,
+                    start_time,
+                    solver_time,
+                    total_cost,
+                    total_cost
                 );
 
                 println!("VARSCLAUSES {:?}", solver);
 
-                println!("MAXSAT ITERATIONS {}  {}", n_conflict_constraints, iteration);
+                println!(
+                    "MAXSAT ITERATIONS {}  {}",
+                    n_conflict_constraints, iteration
+                );
                 return Ok((trains, stats));
             }
         }
@@ -1086,12 +1064,27 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
             //     total_cost,
             //     total_cost + min_weight
             // );
-            total_cost += min_weight;
+            total_cost += min_weight as i32;
             println!("    LB={}", total_cost);
 
             if total_cost as i32 == best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
                 println!("TERMINATE HEURISTIC");
-                println!("MAXSAT ITERATIONS {}  {}", n_conflict_constraints, iteration);
+                println!(
+                    "MAXSAT ITERATIONS {}  {}",
+                    n_conflict_constraints, iteration
+                );
+                do_output_stats(
+                    &mut output_stats,
+                    iteration,
+                    &iteration_types,
+                    &stats,
+                    &occupations,
+                    start_time,
+                    solver_time,
+                    total_cost,
+                    total_cost
+                );
+
                 return Ok((best_heur.unwrap().1, stats));
             }
 
@@ -1119,6 +1112,86 @@ pub fn solve_debug<L: satcoder::Lit + Copy + std::fmt::Debug>(
         iteration += 1;
         // println!("iteration {}", iteration);
     }
+}
+
+fn do_output_stats<L:satcoder::Lit>(
+    output_stats: &mut impl FnMut(String, serde_json::Value),
+    iteration: usize,
+    iteration_types: &BTreeMap<IterationType, usize>,
+    stats: &SolveStats,
+    occupations: &TiVec<VisitId, Occ<L>>,
+    start_time: Instant,
+    solver_time: std::time::Duration,
+    lb: i32,
+    ub: i32,
+) {
+    output_stats("iterations".to_string(), iteration.into());
+    output_stats(
+        "objective_iters".to_string(),
+        (*iteration_types.get(&IterationType::Objective).unwrap_or(&0)).into(),
+    );
+    output_stats(
+        "travel_iters".to_string(),
+        (*iteration_types
+            .get(&IterationType::TravelTimeConflict)
+            .unwrap_or(&0))
+        .into(),
+    );
+    output_stats(
+        "resource_iters".to_string(),
+        (*iteration_types
+            .get(&IterationType::ResourceConflict)
+            .unwrap_or(&0))
+        .into(),
+    );
+    output_stats(
+        "travel_and_resource_iters".to_string(),
+        (*iteration_types
+            .get(&IterationType::TravelAndResourceConflict)
+            .unwrap_or(&0))
+        .into(),
+    );
+    output_stats("num_traveltime".to_string(), stats.n_travel.into());
+    output_stats("num_conflicts".to_string(), stats.n_travel.into());
+    output_stats(
+        "num_time_points".to_string(),
+        occupations
+            .iter()
+            .map(|o| o.delays.len() - 1)
+            .sum::<usize>()
+            .into(),
+    );
+    output_stats(
+        "max_time_points".to_string(),
+        occupations
+            .iter()
+            .map(|o| o.delays.len() - 1)
+            .max()
+            .unwrap()
+            .into(),
+    );
+    output_stats(
+        "avg_time_points".to_string(),
+        ((occupations
+            .iter()
+            .map(|o| o.delays.len() - 1)
+            .sum::<usize>() as f64)
+            / (occupations.len() as f64))
+            .into(),
+    );
+
+    output_stats(
+        "total_time".to_string(),
+        start_time.elapsed().as_secs_f64().into(),
+    );
+    output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
+    output_stats(
+        "algorithm_time".to_string(),
+        (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
+    );
+    output_stats("lb".to_string(), lb.into());
+    output_stats("ub".to_string(), ub.into());
+
 }
 
 fn extract_solution<L: satcoder::Lit>(
