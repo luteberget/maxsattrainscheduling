@@ -4,7 +4,10 @@ use ddd::{
     maxsatsolver, parser,
     problem::{self, DelayCostThresholds, DelayCostType, NamedProblem, Visit},
     solvers::{
-        bigm, greedy::{self, default_heuristic}, maxsat_ddd, maxsat_ti, maxsatddd_ladder, maxsatddd_ladder_abstract, milp_ti, SolverError
+        bigm,
+        greedy::{self, default_heuristic},
+        heuristic, maxsat_ddd, maxsat_ti, maxsatddd_ladder, maxsatddd_ladder_abstract, milp_ti,
+        SolverError,
     },
 };
 
@@ -159,11 +162,14 @@ enum SolverType {
     BigMLazy,
     MaxSatDddLadderRC2,
     MaxSatDddLadderRC2Abstract,
+    MaxSatDddLadderIpamir,
     MaxSatDddCadical,
     MaxSatIdl,
     MipDdd,
     MipHull,
     Greedy,
+    GreedyFast,
+    GreedyFStr,
     Cutting,
     BinarizedBigMEager10Sec,
     BinarizedBigMEager30Sec,
@@ -208,11 +214,14 @@ fn main() {
             "bigm_lazy" => SolverType::BigMLazy,
             "maxsat_ddd" => SolverType::MaxSatDddLadderRC2,
             "maxsat_ddd_abstract" => SolverType::MaxSatDddLadderRC2Abstract,
+            "maxsat_ddd_ladder_ipamir" => SolverType::MaxSatDddLadderIpamir,
             "maxsat_ddd_cdc" => SolverType::MaxSatDddCadical,
             "maxsat_idl" => SolverType::MaxSatIdl,
             "mip_ddd" => SolverType::MipDdd,
             "mip_hull" => SolverType::MipHull,
             "greedy" => SolverType::Greedy,
+            "greedyfast" => SolverType::GreedyFast,
+            "greedyfaststrong" => SolverType::GreedyFStr,
             "cutting" => SolverType::Cutting,
             "bin_bigm_eager_10s" => SolverType::BinarizedBigMEager10Sec,
             "bin_bigm_eager_30s" => SolverType::BinarizedBigMEager30Sec,
@@ -300,6 +309,22 @@ fn main() {
                 SolverType::Greedy => {
                     greedy::solve2(&p.problem, &env, delay_cost_type, default_heuristic)
                 }
+                SolverType::GreedyFast => heuristic::solve_heuristic_better(
+                    &env,
+                    &p.problem,
+                    delay_cost_type,
+                    false,
+                    None,
+                )
+                .and_then(|e| e.ok_or(SolverError::NoSolution)),
+                SolverType::GreedyFStr => heuristic::solve_heuristic_better(
+                    &env,
+                    &p.problem,
+                    delay_cost_type,
+                    true,
+                    None,
+                )
+                .and_then(|e| e.ok_or(SolverError::NoSolution)),
                 SolverType::BigMEager => bigm::solve_bigm(
                     &env,
                     &mk_env,
@@ -458,6 +483,17 @@ fn main() {
                     maxsatsolver::CustomRC2Incremental::new(
                         satcoder::solvers::minisat::Solver::new(),
                     ),
+                    &p.problem,
+                    TIMEOUT,
+                    delay_cost_type,
+                    |k, v| {
+                        solve_data.insert(k, v);
+                    },
+                )
+                .map(|(v, _)| v),
+                SolverType::MaxSatDddLadderIpamir => maxsatddd_ladder_abstract::solve(
+                    &mk_env,
+                    maxsatsolver::Incremental::new(),
                     &p.problem,
                     TIMEOUT,
                     delay_cost_type,

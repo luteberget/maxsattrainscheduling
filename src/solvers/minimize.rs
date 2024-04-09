@@ -16,7 +16,7 @@ pub fn minimize_solution(
 
     let mut model = Model::with_env("model2", env).map_err(SolverError::GurobiError)?;
 
-    println!("Solving LP");
+    // println!("Solving LP");
 
     // model
     //     .set_param(param::IntFeasTol, 1e-8)

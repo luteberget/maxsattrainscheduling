@@ -118,6 +118,16 @@ pub struct Incremental {
     n_clauses: usize,
 }
 
+impl std::fmt::Debug for Incremental {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Incremental")
+            .field("ipamir", &self.ipamir.signature())
+            .field("n_vars", &self.n_vars)
+            .field("n_clauses", &self.n_clauses)
+            .finish()
+    }
+}
+
 impl Incremental {
     pub fn new() -> Self {
         Self {
@@ -450,10 +460,17 @@ impl MaxSatSolver for External {
 
         let _p2: hprof::ProfileGuard<'_> = hprof::enter("run external");
 
+        let solver_name = "EvalMaxSAT_bin";
+
         let cmd = if let Some(time) = timeout {
-            duct::cmd!("timeout", &format!("{}", time), "./uwrmaxsat", "temp.wcnf")
+            duct::cmd!(
+                "timeout",
+                &format!("{}", time),
+                &format!("./{}", solver_name),
+                "temp.wcnf"
+            )
         } else {
-            duct::cmd!("./uwrmaxsat", "temp.wcnf")
+            duct::cmd!(&format!("./{}", solver_name), "temp.wcnf")
         };
         let reader = cmd.stderr_to_stdout().reader().unwrap();
         let mut output = String::new();
@@ -509,32 +526,58 @@ impl MaxSatSolver for External {
         // }
 
         // let output = std::fs::read_to_string("uwr_out.txt").unwrap();
-        let mut input_vec = Vec::new();
+
         let mut obj_val = i32::MIN;
-        for line in output.lines() {
-            if line.starts_with("v ") {
-                let mut counter = 0;
-                input_vec = line
-                    .split(' ')
-                    .filter_map(|v| {
-                        if v == "v" {
-                            None
-                        } else {
-                            counter += 1;
-                            if v.starts_with("-") {
-                                assert!(v[1..].parse::<i32>().unwrap() == counter);
-                                Some(false)
+        let input_vec = if solver_name == "uwrmaxsat" {
+            let mut input_vec = Vec::new();
+            for line in output.lines() {
+                if line.starts_with("v ") {
+                    let mut counter = 0;
+                    input_vec = line
+                        .split(' ')
+                        .filter_map(|v| {
+                            if v == "v" {
+                                None
                             } else {
-                                assert!(v.parse::<i32>().unwrap() == counter);
-                                Some(true)
+                                counter += 1;
+                                if v.starts_with("-") {
+                                    assert!(v[1..].parse::<i32>().unwrap() == counter);
+                                    Some(false)
+                                } else {
+                                    assert!(v.parse::<i32>().unwrap() == counter);
+                                    Some(true)
+                                }
                             }
-                        }
-                    })
-                    .collect::<Vec<_>>();
-            } else if line.starts_with("o ") {
-                obj_val = line.split(' ').nth(1).unwrap().parse::<i32>().unwrap();
+                        })
+                        .collect::<Vec<_>>();
+                } else if line.starts_with("o ") {
+                    obj_val = line.split(' ').nth(1).unwrap().parse::<i32>().unwrap();
+                }
             }
-        }
+            input_vec
+        } else if solver_name == "EvalMaxSAT_bin" {
+            let mut input_vec = Vec::new();
+            let mut obj_val = i32::MIN;
+            for line in output.lines() {
+                if line.starts_with("v ") {
+                    input_vec = line
+                        .chars()
+                        .filter_map(|v| {
+                            if v == '0' {
+                                Some(false)
+                            } else if v == '1' {
+                                Some(true)
+                            } else {
+                                None
+                            }
+                        })
+                        .collect::<Vec<_>>();
+                }
+            }
+            input_vec
+        } else {
+            panic!("Unknown solver binary name when parsing solution.");
+        };
 
         println!("Got solution with {} vars", input_vec.len());
         assert!(input_vec.len() == self.wcnf.variables.len());

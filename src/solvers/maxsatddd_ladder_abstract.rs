@@ -178,34 +178,25 @@ pub fn solve_debug(
     // let mut conflict_vars: HashMap<(VisitId, VisitId), Bool<L>> = Default::default();
     // let mut priorities: Vec<(VisitId, VisitId)> = Vec::new();
 
-    const USE_HEURISTIC: bool = false;
+    const USE_HEURISTIC: bool = true;
 
     let heur_thread = USE_HEURISTIC.then(|| {
         let (sol_in_tx, sol_in_rx) = std::sync::mpsc::channel();
         let (sol_out_tx, sol_out_rx) = std::sync::mpsc::channel();
         let problem = problem.clone();
-
-        std::thread::spawn(move || {
-            let env = mk_env();
-            while let Ok(mut sol) = sol_in_rx.recv() {
-                while let Ok(more_recent_sol) = sol_in_rx.try_recv() {
-                    sol = more_recent_sol;
-                }
-                let ub_sol = heuristic::solve_heuristic(&env, &problem, &sol).unwrap();
-                if let Some(ub_sol) = ub_sol {
-                    let ub_cost = problem.verify_solution(&ub_sol, delay_cost_type).unwrap();
-                    let _ = sol_out_tx.send((ub_cost, ub_sol));
-                    println!("HEUR.FEAS. {} {}", iteration, ub_cost);
-                } else {
-                }
-            }
-        });
+        heuristic::spawn_heuristic_thread(mk_env, sol_in_rx, problem, delay_cost_type, sol_out_tx);
 
         (sol_in_tx, sol_out_rx)
     });
+    let mut best_heur: Option<(i32, Vec<Vec<i32>>)> = None;
 
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
+            println!(
+                "TIMEOUT LB={} UB={}",
+                total_cost,
+                best_heur.map(|(c, _)| c).unwrap_or(i32::MAX)
+            );
             return Err(SolverError::Timeout);
         }
 
@@ -221,7 +212,14 @@ pub fn solve_debug(
                 assert!(ub_cost >= total_cost as i32);
                 if ub_cost == total_cost as i32 {
                     println!("HEURISTIC UB=LB");
+                    println!("TERMINATE HEURISTIC");
+
                     return Ok((ub_sol, stats));
+                }
+
+
+                if ub_cost < best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
+                    best_heur = Some((ub_cost, ub_sol));
                 }
             }
         }
@@ -784,6 +782,11 @@ pub fn solve_debug(
         })?;
 
         total_cost = new_cost;
+        if total_cost as i32 == best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
+            println!("TERMINATE HEURISTIC");
+            return Ok((best_heur.unwrap().1, stats));
+        }
+
 
         let model_value = |l: isize| {
             if l > 0 {

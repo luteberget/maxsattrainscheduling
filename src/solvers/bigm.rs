@@ -100,7 +100,6 @@ fn solve(
     model.set_param(grb::param::Cuts, 0).unwrap();
     model.set_param(grb::param::Heuristics, 0.0).unwrap();
 
-
     // timing variables
     let t_vars = problem
         .trains
@@ -166,24 +165,13 @@ fn solve(
         let (sol_in_tx, sol_in_rx) = std::sync::mpsc::channel();
         let (sol_out_tx, sol_out_rx) = std::sync::mpsc::channel();
         let problem = problem.clone();
-
-        std::thread::spawn(move || {
-            let env = mk_env();
-            while let Ok(mut sol) = sol_in_rx.recv() {
-                while let Ok(more_recent_sol) = sol_in_rx.try_recv() {
-                    sol = more_recent_sol;
-                }
-                let ub_sol =
-                    crate::solvers::heuristic::solve_heuristic(&env, &problem, &sol).unwrap();
-                if let Some(ub_sol) = ub_sol {
-                    let ub_cost = problem.verify_solution(&ub_sol, delay_cost_type).unwrap();
-                    let _ = sol_out_tx.send((ub_cost, ub_sol));
-                    println!("HEUR.FEAS. {} {}", iteration, ub_cost);
-                } else {
-                }
-            }
-        });
-
+        crate::solvers::heuristic::spawn_heuristic_thread(
+            mk_env,
+            sol_in_rx,
+            problem,
+            delay_cost_type,
+            sol_out_tx,
+        );
         (sol_in_tx, sol_out_rx)
     });
 
@@ -316,6 +304,8 @@ fn solve(
 
     let mut refinement_iterations = 0usize;
     let mut solver_time = std::time::Duration::ZERO;
+    let mut best_heur: Option<(i32, Vec<Vec<i32>>)> = None;
+    let mut global_lb = 0;
     // println!("INSTANCE");
     loop {
         {
@@ -349,6 +339,11 @@ fn solve(
 
         let status = model.status().map_err(SolverError::GurobiError)?;
         if status == Status::TimeLimit {
+            println!(
+                "TIMEOUT LB={} UB={}",
+                global_lb,
+                best_heur.map(|(c, _)| c).unwrap_or(i32::MAX)
+            );
             return Err(SolverError::Timeout);
         } else if status == Status::Infeasible {
             println!("INFEASIBLE problem");
@@ -376,6 +371,15 @@ fn solve(
         let cost = model
             .get_attr(attr::ObjVal)
             .map_err(SolverError::GurobiError)?;
+
+        global_lb = cost.round() as i32;
+        if cost.round() as i32 == best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
+            println!("TERMINATE HEURISTIC");
+            println!("BIGM ITERATIONS {}", refinement_iterations);
+            return Ok(best_heur.unwrap().1);
+        }
+
+        println!("   bigm LB={}", cost);
 
         let priorities = priority_vars
             .iter()
@@ -430,7 +434,13 @@ fn solve(
                 assert!(ub_cost >= lb_cost);
                 if ub_cost == lb_cost {
                     println!("HEURISTIC UB=LB");
+                    println!("TERMINATE HEURISTIC");
+                    println!("BIGM ITERATIONS {}", refinement_iterations);
                     return Ok(ub_sol);
+                }
+
+                if ub_cost < best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
+                    best_heur = Some((ub_cost, ub_sol));
                 }
             }
         }
@@ -603,6 +613,7 @@ fn solve(
                 "BIGMSTATS {} {} {}",
                 iteration, n_travel_constraints, n_resource_constraints
             );
+            println!("BIGM ITERATIONS {}", refinement_iterations);
             return Ok(solution);
         }
     }

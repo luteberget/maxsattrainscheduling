@@ -1,0 +1,3595 @@
+warning: use of deprecated method `itertools::Itertools::fold1`: Use `Iterator::reduce` instead
+   --> /home/bjornarl/repos/salvers/satcoder/src/constraints/mddlinear.rs:371:10
+    |
+371 |         .fold1(|a, b| a.intersect(&b))
+    |          ^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: unused variable: `c`
+  --> /home/bjornarl/repos/salvers/satcoder/src/constraints/mddlinear.rs:51:28
+   |
+51 |     if groups.iter().map(|(c, us)| us.len()).max().unwrap() < 10 {
+   |                            ^ help: if this is intentional, prefix it with an underscore: `_c`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: variable does not need to be mutable
+   --> /home/bjornarl/repos/salvers/satcoder/src/constraints/mddlinear.rs:196:9
+    |
+196 |     let mut mdd = Mdd {
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: `satcoder` (lib) generated 3 warnings (run `cargo fix --lib -p satcoder` to apply 2 suggestions)
+   Compiling ddd v0.1.0 (/home/bjornarl/repos/maxsattrainscheduling)
+warning: unused import: `serde::Serialize`
+ --> src/solvers/maxsat_ti.rs:1:5
+  |
+1 | use serde::Serialize;
+  |     ^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `BufRead`, `BufReader`, `Read`, `fmt::Display`
+ --> src/solvers/maxsat_ti.rs:4:5
+  |
+4 |     fmt::Display,
+  |     ^^^^^^^^^^^^
+5 |     io::{BufRead, BufReader, Read},
+  |          ^^^^^^^  ^^^^^^^^^  ^^^^
+
+warning: unused import: `External`
+  --> src/solvers/maxsat_ti.rs:10:20
+   |
+10 |     maxsatsolver::{External, MaxSatSolver},
+   |                    ^^^^^^^^
+
+warning: unused import: `typed_index_collections::TiVec`
+ --> src/solvers/maxsat_ddd.rs:4:5
+  |
+4 | use typed_index_collections::TiVec;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `grb::parameter::IntParam::NetworkCuts`
+ --> src/solvers/heuristic.rs:1:5
+  |
+1 | use grb::parameter::IntParam::NetworkCuts;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Bool`, `SatSolverWithCore`, `constraints::Totalizer`, `prelude::SymbolicModel`
+  --> src/solvers/maxsatddd_ladder_abstract.rs:15:5
+   |
+15 |     constraints::Totalizer, prelude::SymbolicModel, Bool, SatInstance, SatSolverWithCore,
+   |     ^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^  ^^^^               ^^^^^^^^^^^^^^^^^
+
+warning: unused import: `costtree::CostTree`
+  --> src/solvers/maxsatddd_ladder_abstract.rs:95:13
+   |
+95 | use super::{costtree::CostTree, SolverError};
+   |             ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `SatInstance`
+  --> src/solvers/maxsatddd_ladder_abstract.rs:15:59
+   |
+15 |     constraints::Totalizer, prelude::SymbolicModel, Bool, SatInstance, SatSolverWithCore,
+   |                                                           ^^^^^^^^^^^
+
+warning: unused variable: `env`
+   --> src/solvers/bigm.rs:164:13
+    |
+164 |         let env = mk_env();
+    |             ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `visit`
+  --> src/solvers/maxsat_ti.rs:72:25
+   |
+72 |         for (visit_idx, visit) in train.visits.iter().enumerate() {
+   |                         ^^^^^ help: if this is intentional, prefix it with an underscore: `_visit`
+
+warning: unused variable: `start_time`
+   --> src/solvers/maxsat_ti.rs:197:9
+    |
+197 |     let start_time = std::time::Instant::now();
+    |         ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_start_time`
+
+warning: unused variable: `solver_time`
+   --> src/solvers/maxsat_ti.rs:198:13
+    |
+198 |     let mut solver_time = std::time::Duration::ZERO;
+    |             ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_solver_time`
+
+warning: unused variable: `output_stats`
+   --> src/solvers/maxsat_ti.rs:193:5
+    |
+193 |     output_stats: impl FnMut(String, serde_json::Value),
+    |     ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_output_stats`
+
+warning: unused variable: `n_new_intervals`
+  --> src/solvers/maxsat_ddd.rs:31:13
+   |
+31 |     let mut n_new_intervals = 0;
+   |             ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_n_new_intervals`
+
+warning: variable `n_traveltime` is assigned to, but never used
+  --> src/solvers/maxsat_ddd.rs:32:13
+   |
+32 |     let mut n_traveltime = 0;
+   |             ^^^^^^^^^^^^
+   |
+   = note: consider using `_n_traveltime` instead
+
+warning: unused variable: `x`
+   --> src/solvers/maxsat_ddd.rs:168:17
+    |
+168 |             let x = occupations[train_idx]
+    |                 ^ help: if this is intentional, prefix it with an underscore: `_x`
+
+warning: unused variable: `env`
+  --> src/solvers/maxsat_ddd.rs:15:5
+   |
+15 |     env: &grb::Env,
+   |     ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `output_stats`
+  --> src/solvers/maxsat_ddd.rs:20:9
+   |
+20 |     mut output_stats: impl FnMut(String, serde_json::Value),
+   |         ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_output_stats`
+
+warning: unused variable: `visit_idx`
+   --> src/solvers/maxsat_ddd.rs:171:24
+    |
+171 |                 .map(|(visit_idx, v)| {
+    |                        ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_visit_idx`
+
+warning: unused variable: `env`
+   --> src/solvers/maxsat_ddd.rs:833:5
+    |
+833 |     env: &grb::Env,
+    |     ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `time_out`
+   --> src/solvers/maxsat_ddd.rs:889:42
+    |
+889 | ...                   .map(|(time, time_out)| {
+    |                                    ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_time_out`
+
+warning: unused variable: `res_id`
+   --> src/solvers/heuristic.rs:163:14
+    |
+163 |         for (res_id, res) in resource_usage.iter().enumerate() {
+    |              ^^^^^^ help: if this is intentional, prefix it with an underscore: `_res_id`
+
+warning: unused variable: `case_idx`
+   --> src/solvers/heuristic.rs:240:25
+    |
+240 |             'case: for (case_idx, (ts, (n1, n2), cost_increase)) in cases.iter_mut().enumerate() {
+    |                         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_case_idx`
+
+warning: value assigned to `old_cost` is never read
+   --> src/solvers/heuristic.rs:256:29
+    |
+256 |                     let mut old_cost = (-1, -1);
+    |                             ^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` on by default
+
+warning: value assigned to `new_cost` is never read
+   --> src/solvers/heuristic.rs:257:29
+    |
+257 |                     let mut new_cost = (-1, -1);
+    |                             ^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+
+warning: unused variable: `env`
+  --> src/solvers/heuristic.rs:72:5
+   |
+72 |     env: &grb::Env,
+   |     ^^^ help: if this is intentional, prefix it with an underscore: `_env`
+
+warning: unused variable: `visit`
+  --> src/solvers/milp_ti.rs:72:25
+   |
+72 |         for (visit_idx, visit) in train.visits.iter().enumerate() {
+   |                         ^^^^^ help: if this is intentional, prefix it with an underscore: `_visit`
+
+warning: unused variable: `start_time`
+   --> src/solvers/milp_ti.rs:216:9
+    |
+216 |     let start_time = std::time::Instant::now();
+    |         ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_start_time`
+
+warning: unused variable: `solver_time`
+   --> src/solvers/milp_ti.rs:217:13
+    |
+217 |     let mut solver_time = std::time::Duration::ZERO;
+    |             ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_solver_time`
+
+warning: unused variable: `output_stats`
+   --> src/solvers/milp_ti.rs:212:5
+    |
+212 |     output_stats: impl FnMut(String, serde_json::Value),
+    |     ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_output_stats`
+
+warning: unused variable: `arg0`
+   --> src/maxsatsolver.rs:207:29
+    |
+207 |             Self::Totalizer(arg0, arg1) => f.debug_tuple("Totalizer").field(arg1).finish(),
+    |                             ^^^^ help: if this is intentional, prefix it with an underscore: `_arg0`
+
+warning: unused variable: `timeout`
+   --> src/maxsatsolver.rs:302:9
+    |
+302 |         timeout: Option<f64>,
+    |         ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_timeout`
+
+warning: unused variable: `obj_val`
+   --> src/maxsatsolver.rs:560:21
+    |
+560 |             let mut obj_val = i32::MIN;
+    |                     ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_obj_val`
+
+warning: unused variable: `last_core_size`
+  --> src/lib.rs:18:17
+   |
+18 |             let last_core_size = core.len();
+   |                 ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_last_core_size`
+
+warning: variable does not need to be mutable
+   --> src/solvers/maxsat_ti.rs:188:5
+    |
+188 |     mut solver: impl MaxSatSolver,
+    |     ----^^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> src/solvers/maxsat_ti.rs:198:9
+    |
+198 |     let mut solver_time = std::time::Duration::ZERO;
+    |         ----^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/solvers/maxsat_ddd.rs:20:5
+   |
+20 |     mut output_stats: impl FnMut(String, serde_json::Value),
+   |     ----^^^^^^^^^^^^
+   |     |
+   |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/solvers/maxsat_ddd.rs:31:9
+   |
+31 |     let mut n_new_intervals = 0;
+   |         ----^^^^^^^^^^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/solvers/maxsat_ddd.rs:841:9
+    |
+841 |     let mut solver_time = std::time::Duration::ZERO;
+    |         ----^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/solvers/milp_ti.rs:217:9
+    |
+217 |     let mut solver_time = std::time::Duration::ZERO;
+    |         ----^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/maxsatsolver.rs:560:17
+    |
+560 |             let mut obj_val = i32::MIN;
+    |                 ----^^^^^^^
+    |                 |
+    |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/lib.rs:14:9
+   |
+14 |     let mut printed = false;
+   |         ----^^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src/lib.rs:49:9
+   |
+49 |     let mut trimmed = false;
+   |         ----^^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: field `vars` is never read
+  --> src/solvers/binarizedbigm.rs:15:5
+   |
+14 | struct TimeIndexedVar {
+   |        -------------- field in this struct
+15 |     vars: Vec<(i32, grb::Var)>,
+   |     ^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: field `problem` is never read
+   --> src/solvers/binarizedbigm.rs:448:5
+    |
+447 | struct ConflictInformation<'a> {
+    |        ------------------- field in this struct
+448 |     problem: &'a Problem,
+    |     ^^^^^^^
+
+warning: `ddd` (lib) generated 45 warnings (run `cargo fix --lib -p ddd` to apply 39 suggestions)
+warning: unused import: `collections::HashSet`
+ --> src/main.rs:1:26
+  |
+1 | use std::{cell::RefCell, collections::HashSet, fmt::Write};
+  |                          ^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `DelayCostThresholds`
+ --> src/main.rs:5:21
+  |
+5 |     problem::{self, DelayCostThresholds, DelayCostType, NamedProblem, Visit},
+  |                     ^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::path::PathBuf`
+  --> src/main.rs:14:5
+   |
+14 | use std::path::PathBuf;
+   |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `instances`
+   --> src/main.rs:119:9
+    |
+119 |     let instances = [20];
+    |         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_instances`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `new_solution`
+   --> src/main.rs:138:17
+    |
+138 |             let new_solution = x(
+    |                 ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_new_solution`
+
+warning: unused variable: `solve_stats`
+   --> src/main.rs:637:17
+    |
+637 |             let solve_stats = if let Ok(solution) = solution.as_ref() {
+    |                 ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_solve_stats`
+
+warning: fields `debug` and `instance_name_filter` are never read
+  --> src/main.rs:25:5
+   |
+22 | struct Opt {
+   |        --- fields in this struct
+...
+25 |     debug: bool,
+   |     ^^^^^
+...
+37 |     instance_name_filter: Option<String>,
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `Opt` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: unused `Result` that must be used
+   --> src/main.rs:723:13
+    |
+723 |             solve_it(name, p);
+    |             ^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+    = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+    |
+723 |             let _ = solve_it(name, p);
+    |             +++++++
+
+warning: unused `Result` that must be used
+   --> src/main.rs:728:13
+    |
+728 |             solve_it(name, p);
+    |             ^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+    |
+728 |             let _ = solve_it(name, p);
+    |             +++++++
+
+warning: `ddd` (bin "ddd") generated 9 warnings (run `cargo fix --bin "ddd"` to apply 6 suggestions)
+    Finished release [optimized] target(s) in 3.53s
+     Running `target/release/ddd --objective infsteps180 --txt-instances -s bigm_lazy`
+Opt { debug: false, solvers: ["bigm_lazy"], xml_instances: false, txt_instances: true, instance_name_filter: None, verify_instances: false, objective: Some("infsteps180"), other_objective: None, json_output: None }
+Using solvers [BigMLazy]
+Using delay cost type InfiniteSteps180
+Starting gurobi environment...
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+...ok.
+Reading instances_original/InstanceA1.txt
+trains 29 tracks 33 avgtracks 20.93 trackpairs 5915 delays 0 avgdelay0
+29 & 33 & 20.93 & 5915 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=28
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 6 conflict constraints None lazy objectives
+   bigm LB=33
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 8 conflict constraints None lazy objectives
+   bigm LB=34
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 9 conflict constraints None lazy objectives
+   bigm LB=34
+Solved with cost 34 and 9 conflict constraints after 3 refinements
+SAVING instances_original/InstanceA1.txt_model_final.lp
+BIGMSTATS 4 1214 9
+BIGM ITERATIONS 3
+Solution verified. Cost 34
+Timing information for root profiler:
+  bigm solver - 1 * 114.8ms = 114.8ms (100.0%)
+    optimize - 4 * 2.2ms = 8.9ms (7.8%)
+    minimize-solution - 4 * 1.2ms = 4.8ms (4.2%)
+      build - 4 * 599.9us = 2.4ms (50.0%)
+      solve - 4 * 499.2us = 2.0ms (41.6%)
+      extract - 4 * 40.4us = 161.5us (3.4%)
+    check conflicts - 4 * 8.0us = 31.8us (0.0%)
+  verify_solution - 1 * 12.5ms = 12.5ms (10.9%)
+Reading instances_original/InstanceA2.txt
+trains 25 tracks 33 avgtracks 19.00 trackpairs 3735 delays 0 avgdelay0
+25 & 33 & 19.00 & 3735 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 34
+Solution verified. Cost 34
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=30
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 12 conflict constraints None lazy objectives
+   bigm LB=36
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 13 conflict constraints None lazy objectives
+   bigm LB=36
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 17 conflict constraints None lazy objectives
+   bigm LB=37
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 20 conflict constraints None lazy objectives
+   bigm LB=37
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 21 conflict constraints None lazy objectives
+   bigm LB=37
+Solved with cost 37 and 21 conflict constraints after 5 refinements
+SAVING instances_original/InstanceA2.txt_model_final.lp
+BIGMSTATS 6 950 21
+BIGM ITERATIONS 5
+Solution verified. Cost 37
+Timing information for root profiler:
+  bigm solver - 1 * 116.7ms = 116.7ms (100.0%)
+    optimize - 6 * 2.8ms = 16.7ms (14.3%)
+    minimize-solution - 6 * 923.1us = 5.5ms (4.7%)
+      build - 6 * 499.8us = 3.0ms (54.1%)
+      solve - 6 * 344.0us = 2.1ms (37.3%)
+      extract - 6 * 30.6us = 183.9us (3.3%)
+    check conflicts - 6 * 5.7us = 34.4us (0.0%)
+  verify_solution - 1 * 7.7ms = 7.7ms (6.6%)
+Reading instances_original/InstanceA3.txt
+trains 16 tracks 33 avgtracks 22.38 trackpairs 2061 delays 0 avgdelay0
+16 & 33 & 22.38 & 2061 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 37
+Solution verified. Cost 37
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=9
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 6 conflict constraints None lazy objectives
+   bigm LB=12
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 8 conflict constraints None lazy objectives
+   bigm LB=12
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 9 conflict constraints None lazy objectives
+   bigm LB=13
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 10 conflict constraints None lazy objectives
+   bigm LB=13
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 11 conflict constraints None lazy objectives
+   bigm LB=14
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 13 conflict constraints None lazy objectives
+   bigm LB=14
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 14 conflict constraints None lazy objectives
+   bigm LB=14
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 9 with 16 conflict constraints None lazy objectives
+   bigm LB=14
+Solved with cost 14 and 16 conflict constraints after 8 refinements
+SAVING instances_original/InstanceA3.txt_model_final.lp
+BIGMSTATS 9 716 16
+BIGM ITERATIONS 8
+Solution verified. Cost 14
+Timing information for root profiler:
+  bigm solver - 1 * 114.7ms = 114.7ms (100.0%)
+    optimize - 9 * 2.1ms = 18.9ms (16.5%)
+    minimize-solution - 9 * 726.9us = 6.5ms (5.7%)
+      build - 9 * 391.2us = 3.5ms (53.8%)
+      solve - 9 * 288.1us = 2.6ms (39.6%)
+      extract - 9 * 24.5us = 220.3us (3.4%)
+    check conflicts - 9 * 3.2us = 28.4us (0.0%)
+  verify_solution - 1 * 4.4ms = 4.4ms (3.8%)
+Reading instances_original/InstanceA4.txt
+trains 14 tracks 33 avgtracks 19.21 trackpairs 1175 delays 0 avgdelay0
+14 & 33 & 19.21 & 1175 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 14
+Solution verified. Cost 14
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=17
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 6 conflict constraints None lazy objectives
+   bigm LB=22
+[2024-04-09T11:46:05Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 7 conflict constraints None lazy objectives
+   bigm LB=22
+Solved with cost 22 and 7 conflict constraints after 2 refinements
+SAVING instances_original/InstanceA4.txt_model_final.lp
+BIGMSTATS 3 538 7
+BIGM ITERATIONS 2
+Solution verified. Cost 22
+Timing information for root profiler:
+  bigm solver - 1 * 92.1ms = 92.1ms (100.0%)
+    optimize - 3 * 1.6ms = 4.7ms (5.1%)
+    minimize-solution - 3 * 558.7us = 1.7ms (1.8%)
+      build - 3 * 288.1us = 864.5us (51.6%)
+      solve - 3 * 232.3us = 697.0us (41.6%)
+      extract - 3 * 19.1us = 57.3us (3.4%)
+    check conflicts - 3 * 2.2us = 6.7us (0.0%)
+  verify_solution - 1 * 2.5ms = 2.5ms (2.7%)
+Reading instances_original/InstanceA5.txt
+trains 12 tracks 33 avgtracks 19.25 trackpairs 876 delays 0 avgdelay0
+12 & 33 & 19.25 & 876 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 22
+Solution verified. Cost 22
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=15
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=19
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 7 conflict constraints None lazy objectives
+   bigm LB=19
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 9 conflict constraints None lazy objectives
+   bigm LB=19
+Solved with cost 19 and 9 conflict constraints after 3 refinements
+SAVING instances_original/InstanceA5.txt_model_final.lp
+BIGMSTATS 4 462 9
+BIGM ITERATIONS 3
+Solution verified. Cost 19
+Timing information for root profiler:
+  bigm solver - 1 * 92.2ms = 92.2ms (100.0%)
+    optimize - 4 * 1.4ms = 5.4ms (5.9%)
+    minimize-solution - 4 * 492.9us = 2.0ms (2.1%)
+      build - 4 * 253.2us = 1.0ms (51.4%)
+      solve - 4 * 206.6us = 826.3us (41.9%)
+      extract - 4 * 16.4us = 65.8us (3.3%)
+    check conflicts - 4 * 1.9us = 7.5us (0.0%)
+  verify_solution - 1 * 1.8ms = 1.8ms (2.0%)
+Reading instances_original/InstanceA6.txt
+trains 8 tracks 33 avgtracks 18.62 trackpairs 307 delays 0 avgdelay0
+8 & 33 & 18.62 & 307 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 19
+Solution verified. Cost 19
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=12
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 3 conflict constraints None lazy objectives
+   bigm LB=14
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 4 conflict constraints None lazy objectives
+   bigm LB=14
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 5 conflict constraints None lazy objectives
+   bigm LB=14
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 6 conflict constraints None lazy objectives
+   bigm LB=14
+Solved with cost 14 and 6 conflict constraints after 4 refinements
+SAVING instances_original/InstanceA6.txt_model_final.lp
+BIGMSTATS 5 298 6
+BIGM ITERATIONS 4
+Solution verified. Cost 14
+Timing information for root profiler:
+  bigm solver - 1 * 90.8ms = 90.8ms (100.0%)
+    optimize - 5 * 1.2ms = 5.9ms (6.5%)
+    minimize-solution - 5 * 379.0us = 1.9ms (2.1%)
+      build - 5 * 201.4us = 1.0ms (53.1%)
+      solve - 5 * 154.1us = 770.5us (40.7%)
+      extract - 5 * 10.6us = 53.1us (2.8%)
+    check conflicts - 5 * 828ns = 4.1us (0.0%)
+  verify_solution - 1 * 784.8us = 784.8us (0.9%)
+Reading instances_original/InstanceA7.txt
+trains 8 tracks 33 avgtracks 12.62 trackpairs 126 delays 0 avgdelay0
+8 & 33 & 12.62 & 126 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 14
+Solution verified. Cost 14
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=13
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=15
+Solved with cost 15 and 5 conflict constraints after 1 refinements
+SAVING instances_original/InstanceA7.txt_model_final.lp
+BIGMSTATS 2 202 5
+BIGM ITERATIONS 1
+Solution verified. Cost 15
+Timing information for root profiler:
+  bigm solver - 1 * 84.9ms = 84.9ms (100.0%)
+    optimize - 2 * 809.8us = 1.6ms (1.9%)
+    minimize-solution - 2 * 309.5us = 618.9us (0.7%)
+      build - 2 * 154.3us = 308.7us (49.9%)
+      solve - 2 * 136.7us = 273.4us (44.2%)
+      extract - 2 * 7.8us = 15.6us (2.5%)
+    check conflicts - 2 * 920ns = 1.8us (0.0%)
+  verify_solution - 1 * 386.6us = 386.6us (0.5%)
+Reading instances_original/InstanceA8.txt
+trains 28 tracks 33 avgtracks 19.21 trackpairs 4877 delays 0 avgdelay0
+28 & 33 & 19.21 & 4877 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 15
+Solution verified. Cost 15
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=117
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 21 conflict constraints None lazy objectives
+   bigm LB=128
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 29 conflict constraints None lazy objectives
+   bigm LB=131
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 39 conflict constraints None lazy objectives
+   bigm LB=133
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 45 conflict constraints None lazy objectives
+   bigm LB=134
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 50 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 142
+Solution verified. Cost 142
+HEUR.FEAS. 142
+Finishing with cost 142
+Solution verified. Cost 142
+HEUR.FEAS. 142
+   bigm LB=136
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 53 conflict constraints None lazy objectives
+Finishing with cost 143
+Solution verified. Cost 143
+HEUR.FEAS. 143
+Finishing with cost 142
+Solution verified. Cost 142
+HEUR.FEAS. 142
+   bigm LB=136
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 57 conflict constraints None lazy objectives
+Finishing with cost 139
+Solution verified. Cost 139
+HEUR.FEAS. 139
+Finishing with cost 139
+Solution verified. Cost 139
+HEUR.FEAS. 139
+   bigm LB=136
+Solved with cost 136 and 57 conflict constraints after 7 refinements
+SAVING instances_original/InstanceA8.txt_model_final.lp
+Finishing with cost 136
+BIGMSTATS 8 1076 57
+BIGM ITERATIONS 7
+Solution verified. Cost 136
+Solution verified. Cost 136
+Timing information for root profiler:
+  bigm solver - 1 * 365.2ms = 365.2ms (100.0%)
+    optimize - 8 * 32.4ms = 258.9ms (70.9%)
+    minimize-solution - 8 * 1.2ms = 9.3ms (2.5%)
+      build - 8 * 615.9us = 4.9ms (53.3%)
+      solve - 8 * 454.0us = 3.6ms (39.2%)
+      extract - 8 * 34.8us = 278.3us (3.0%)
+    check conflicts - 8 * 8.0us = 63.6us (0.0%)
+  verify_solution - 1 * 10.1ms = 10.1ms (2.8%)
+Reading instances_original/InstanceA9.txt
+trains 20 tracks 33 avgtracks 20.05 trackpairs 2616 delays 0 avgdelay0
+20 & 33 & 20.05 & 2616 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=32
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 7 conflict constraints None lazy objectives
+   bigm LB=36
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 13 conflict constraints None lazy objectives
+   bigm LB=39
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 17 conflict constraints None lazy objectives
+   bigm LB=40
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 22 conflict constraints None lazy objectives
+   bigm LB=40
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 23 conflict constraints None lazy objectives
+   bigm LB=40
+Solved with cost 40 and 23 conflict constraints after 5 refinements
+SAVING instances_original/InstanceA9.txt_model_final.lp
+BIGMSTATS 6 802 23
+BIGM ITERATIONS 5
+Solution verified. Cost 40
+Timing information for root profiler:
+  bigm solver - 1 * 110.7ms = 110.7ms (100.0%)
+    optimize - 6 * 2.6ms = 15.4ms (14.0%)
+    minimize-solution - 6 * 793.3us = 4.8ms (4.3%)
+      build - 6 * 414.4us = 2.5ms (52.2%)
+      solve - 6 * 323.5us = 1.9ms (40.8%)
+      extract - 6 * 27.8us = 167.0us (3.5%)
+    check conflicts - 6 * 4.1us = 24.6us (0.0%)
+  verify_solution - 1 * 5.5ms = 5.5ms (5.0%)
+Reading instances_original/InstanceA10.txt
+trains 17 tracks 33 avgtracks 18.18 trackpairs 1632 delays 0 avgdelay0
+17 & 33 & 18.18 & 1632 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 40
+Solution verified. Cost 40
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=27
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 9 conflict constraints None lazy objectives
+   bigm LB=31
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 14 conflict constraints None lazy objectives
+   bigm LB=32
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 16 conflict constraints None lazy objectives
+   bigm LB=33
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 17 conflict constraints None lazy objectives
+   bigm LB=33
+Solved with cost 33 and 17 conflict constraints after 4 refinements
+SAVING instances_original/InstanceA10.txt_model_final.lp
+BIGMSTATS 5 618 17
+BIGM ITERATIONS 4
+Solution verified. Cost 33
+Timing information for root profiler:
+  bigm solver - 1 * 101.2ms = 101.2ms (100.0%)
+    optimize - 5 * 2.2ms = 10.9ms (10.7%)
+    minimize-solution - 5 * 653.1us = 3.3ms (3.2%)
+      build - 5 * 351.6us = 1.8ms (53.8%)
+      solve - 5 * 256.8us = 1.3ms (39.3%)
+      extract - 5 * 21.1us = 105.5us (3.2%)
+    check conflicts - 5 * 2.9us = 14.7us (0.0%)
+  verify_solution - 1 * 3.3ms = 3.3ms (3.3%)
+Reading instances_original/InstanceA11.txt
+trains 30 tracks 33 avgtracks 19.83 trackpairs 6162 delays 0 avgdelay0
+30 & 33 & 19.83 & 6162 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 33
+Solution verified. Cost 33
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=11
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 11 conflict constraints None lazy objectives
+   bigm LB=21
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 25 conflict constraints None lazy objectives
+   bigm LB=25
+[2024-04-09T11:46:06Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 29 conflict constraints None lazy objectives
+   bigm LB=25
+Solved with cost 25 and 29 conflict constraints after 3 refinements
+SAVING instances_original/InstanceA11.txt_model_final.lp
+BIGMSTATS 4 1190 29
+BIGM ITERATIONS 3
+Solution verified. Cost 25
+Timing information for root profiler:
+  bigm solver - 1 * 120.4ms = 120.4ms (100.0%)
+    optimize - 4 * 4.1ms = 16.4ms (13.6%)
+    minimize-solution - 4 * 1.1ms = 4.5ms (3.8%)
+      build - 4 * 617.6us = 2.5ms (54.5%)
+      solve - 4 * 421.2us = 1.7ms (37.2%)
+      extract - 4 * 38.3us = 153.3us (3.4%)
+    check conflicts - 4 * 9.7us = 38.6us (0.0%)
+  verify_solution - 1 * 12.2ms = 12.2ms (10.1%)
+Reading instances_original/InstanceA12.txt
+trains 28 tracks 33 avgtracks 21.71 trackpairs 6393 delays 0 avgdelay0
+28 & 33 & 21.71 & 6393 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 25
+Solution verified. Cost 25
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=13
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 15 conflict constraints None lazy objectives
+   bigm LB=23
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 28 conflict constraints None lazy objectives
+   bigm LB=27
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 33 conflict constraints None lazy objectives
+   bigm LB=28
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 34 conflict constraints None lazy objectives
+   bigm LB=28
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 39 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 36
+Solution verified. Cost 36
+HEUR.FEAS. 36
+Finishing with cost 36
+Solution verified. Cost 36
+HEUR.FEAS. 36
+   bigm LB=28
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 40 conflict constraints None lazy objectives
+Finishing with cost 29
+Solution verified. Cost 29
+HEUR.FEAS. 29
+Finishing with cost 29
+Solution verified. Cost 29
+HEUR.FEAS. 29
+   bigm LB=29
+HEURISTIC UB=LB
+TERMINATE HEURISTIC
+BIGM ITERATIONS 6
+Finishing with cost 29
+Solution verified. Cost 29
+Timing information for root profiler:
+  bigm solver - 1 * 265.3ms = 265.3ms (100.0%)
+    optimize - 7 * 22.4ms = 157.0ms (59.2%)
+    minimize-solution - 7 * 1.2ms = 8.6ms (3.2%)
+      build - 7 * 673.4us = 4.7ms (54.9%)
+      solve - 7 * 465.2us = 3.3ms (37.9%)
+      extract - 7 * 39.6us = 277.0us (3.2%)
+    check conflicts - 6 * 9.3us = 55.9us (0.0%)
+  verify_solution - 1 * 12.7ms = 12.7ms (4.8%)
+Reading instances_original/InstanceB1.txt
+Solution verified. Cost 29
+trains 18 tracks 25 avgtracks 17.33 trackpairs 2022 delays 0 avgdelay0
+18 & 25 & 17.33 & 2022 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=4
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 2 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 3 conflict constraints None lazy objectives
+   bigm LB=7
+Solved with cost 7 and 3 conflict constraints after 2 refinements
+SAVING instances_original/InstanceB1.txt_model_final.lp
+BIGMSTATS 3 624 3
+BIGM ITERATIONS 2
+Solution verified. Cost 7
+Timing information for root profiler:
+  bigm solver - 1 * 92.9ms = 92.9ms (100.0%)
+    optimize - 3 * 1.1ms = 3.2ms (3.5%)
+    minimize-solution - 3 * 616.1us = 1.8ms (2.0%)
+      build - 3 * 330.4us = 991.1us (53.6%)
+      solve - 3 * 243.7us = 731.0us (39.6%)
+      extract - 3 * 21.0us = 63.0us (3.4%)
+    check conflicts - 3 * 3.1us = 9.2us (0.0%)
+  verify_solution - 1 * 2.7ms = 2.7ms (2.9%)
+Reading instances_original/InstanceB2.txt
+trains 5 tracks 25 avgtracks 14.80 trackpairs 87 delays 0 avgdelay0
+5 & 25 & 14.80 & 87 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 7
+Solution verified. Cost 7
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=4
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 1 conflict constraints None lazy objectives
+   bigm LB=5
+Solved with cost 5 and 1 conflict constraints after 1 refinements
+SAVING instances_original/InstanceB2.txt_model_final.lp
+BIGMSTATS 2 148 1
+BIGM ITERATIONS 1
+Solution verified. Cost 5
+Timing information for root profiler:
+  bigm solver - 1 * 83.6ms = 83.6ms (100.0%)
+    optimize - 2 * 591.0us = 1.2ms (1.4%)
+    minimize-solution - 2 * 222.6us = 445.2us (0.5%)
+      build - 2 * 95.4us = 190.8us (42.9%)
+      solve - 2 * 111.6us = 223.2us (50.1%)
+      extract - 2 * 6.6us = 13.2us (3.0%)
+    check conflicts - 2 * 760ns = 1.5us (0.0%)
+  verify_solution - 1 * 168.9us = 168.9us (0.2%)
+Reading instances_original/InstanceB3.txt
+trains 5 tracks 20 avgtracks 16.80 trackpairs 136 delays 0 avgdelay0
+5 & 20 & 16.80 & 136 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 5
+Solution verified. Cost 5
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=4
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 3 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 4 conflict constraints None lazy objectives
+   bigm LB=7
+Solved with cost 7 and 4 conflict constraints after 2 refinements
+SAVING instances_original/InstanceB3.txt_model_final.lp
+BIGMSTATS 3 168 4
+BIGM ITERATIONS 2
+Solution verified. Cost 7
+Timing information for root profiler:
+  bigm solver - 1 * 85.6ms = 85.6ms (100.0%)
+    optimize - 3 * 834.1us = 2.5ms (2.9%)
+    minimize-solution - 3 * 250.3us = 751.0us (0.9%)
+      build - 3 * 115.2us = 345.7us (46.0%)
+      solve - 3 * 117.8us = 353.4us (47.1%)
+      extract - 3 * 7.3us = 22.0us (2.9%)
+    check conflicts - 3 * 566ns = 1.7us (0.0%)
+  verify_solution - 1 * 166.9us = 166.9us (0.2%)
+Reading instances_original/InstanceB4.txt
+trains 20 tracks 25 avgtracks 15.95 trackpairs 2246 delays 0 avgdelay0
+20 & 25 & 15.95 & 2246 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 7
+Solution verified. Cost 7
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=298
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=301
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 7 conflict constraints None lazy objectives
+   bigm LB=301
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 8 conflict constraints None lazy objectives
+   bigm LB=301
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 9 conflict constraints None lazy objectives
+   bigm LB=301
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 10 conflict constraints None lazy objectives
+   bigm LB=301
+Solved with cost 301 and 10 conflict constraints after 5 refinements
+SAVING instances_original/InstanceB4.txt_model_final.lp
+BIGMSTATS 6 638 10
+BIGM ITERATIONS 5
+Solution verified. Cost 301
+Timing information for root profiler:
+  bigm solver - 1 * 100.6ms = 100.6ms (100.0%)
+    optimize - 6 * 1.5ms = 9.0ms (8.9%)
+    minimize-solution - 6 * 653.1us = 3.9ms (3.9%)
+      build - 6 * 355.5us = 2.1ms (54.4%)
+      solve - 6 * 255.1us = 1.5ms (39.1%)
+      extract - 6 * 21.2us = 127.2us (3.2%)
+    check conflicts - 6 * 3.6us = 21.4us (0.0%)
+  verify_solution - 1 * 3.2ms = 3.2ms (3.2%)
+Reading instances_original/InstanceB5.txt
+trains 5 tracks 25 avgtracks 17.80 trackpairs 136 delays 0 avgdelay0
+5 & 25 & 17.80 & 136 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 301
+Solution verified. Cost 301
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=1
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 1 conflict constraints None lazy objectives
+   bigm LB=2
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 2 conflict constraints None lazy objectives
+   bigm LB=2
+Solved with cost 2 and 2 conflict constraints after 2 refinements
+SAVING instances_original/InstanceB5.txt_model_final.lp
+BIGMSTATS 3 178 2
+BIGM ITERATIONS 2
+Solution verified. Cost 2
+Timing information for root profiler:
+  bigm solver - 1 * 85.1ms = 85.1ms (100.0%)
+    optimize - 3 * 699.4us = 2.1ms (2.5%)
+    minimize-solution - 3 * 251.1us = 753.3us (0.9%)
+      build - 3 * 118.6us = 355.8us (47.2%)
+      solve - 3 * 116.1us = 348.3us (46.2%)
+      extract - 3 * 6.6us = 19.9us (2.6%)
+    check conflicts - 3 * 673ns = 2.0us (0.0%)
+  verify_solution - 1 * 221.9us = 221.9us (0.3%)
+Reading instances_original/InstanceB6.txt
+trains 5 tracks 25 avgtracks 15.20 trackpairs 93 delays 0 avgdelay0
+5 & 25 & 15.20 & 93 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 2
+Solution verified. Cost 2
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=2
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 1 conflict constraints None lazy objectives
+   bigm LB=2
+Solved with cost 2 and 1 conflict constraints after 1 refinements
+SAVING instances_original/InstanceB6.txt_model_final.lp
+BIGMSTATS 2 152 1
+BIGM ITERATIONS 1
+Solution verified. Cost 2
+Timing information for root profiler:
+  bigm solver - 1 * 83.6ms = 83.6ms (100.0%)
+    optimize - 2 * 329.8us = 659.7us (0.8%)
+    minimize-solution - 2 * 223.8us = 447.7us (0.5%)
+      build - 2 * 100.6us = 201.2us (44.9%)
+      solve - 2 * 108.5us = 217.1us (48.5%)
+      extract - 2 * 5.9us = 11.8us (2.6%)
+    check conflicts - 2 * 655ns = 1.3us (0.0%)
+  verify_solution - 1 * 164.9us = 164.9us (0.2%)
+Reading instances_original/InstanceB7.txt
+trains 24 tracks 25 avgtracks 15.25 trackpairs 2865 delays 0 avgdelay0
+24 & 25 & 15.25 & 2865 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 2
+Solution verified. Cost 2
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=361
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 11 conflict constraints None lazy objectives
+   bigm LB=367
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 17 conflict constraints None lazy objectives
+   bigm LB=369
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 20 conflict constraints None lazy objectives
+   bigm LB=369
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 22 conflict constraints None lazy objectives
+   bigm LB=370
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 24 conflict constraints None lazy objectives
+   bigm LB=370
+Solved with cost 370 and 24 conflict constraints after 5 refinements
+SAVING instances_original/InstanceB7.txt_model_final.lp
+BIGMSTATS 6 732 24
+BIGM ITERATIONS 5
+Solution verified. Cost 370
+Timing information for root profiler:
+  bigm solver - 1 * 113.9ms = 113.9ms (100.0%)
+    optimize - 6 * 3.3ms = 19.7ms (17.3%)
+    minimize-solution - 6 * 799.9us = 4.8ms (4.2%)
+      build - 6 * 450.8us = 2.7ms (56.4%)
+      solve - 6 * 298.9us = 1.8ms (37.4%)
+      extract - 6 * 25.8us = 154.6us (3.2%)
+    check conflicts - 6 * 5.4us = 32.1us (0.0%)
+  verify_solution - 1 * 3.7ms = 3.7ms (3.3%)
+Reading instances_original/InstanceB8.txt
+trains 5 tracks 25 avgtracks 13.40 trackpairs 72 delays 0 avgdelay0
+5 & 25 & 13.40 & 72 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 370
+Solution verified. Cost 370
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:46:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 1 conflict constraints None lazy objectives
+   bigm LB=6
+Solved with cost 6 and 1 conflict constraints after 1 refinements
+SAVING instances_original/InstanceB8.txt_model_final.lp
+BIGMSTATS 2 134 1
+BIGM ITERATIONS 1
+Solution verified. Cost 6
+Timing information for root profiler:
+  bigm solver - 1 * 83.5ms = 83.5ms (100.0%)
+    optimize - 2 * 342.6us = 685.3us (0.8%)
+    minimize-solution - 2 * 215.4us = 430.7us (0.5%)
+      build - 2 * 95.3us = 190.6us (44.2%)
+      solve - 2 * 105.7us = 211.4us (49.1%)
+      extract - 2 * 6.0us = 11.9us (2.8%)
+    check conflicts - 2 * 595ns = 1.2us (0.0%)
+  verify_solution - 1 * 131.7us = 131.7us (0.2%)
+Reading instances_original/InstanceB9.txt
+trains 7 tracks 25 avgtracks 13.57 trackpairs 150 delays 0 avgdelay0
+7 & 25 & 13.57 & 150 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 6
+Solution verified. Cost 6
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=31
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=35
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 8 conflict constraints None lazy objectives
+   bigm LB=35
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 9 conflict constraints None lazy objectives
+   bigm LB=35
+Solved with cost 35 and 9 conflict constraints after 3 refinements
+SAVING instances_original/InstanceB9.txt_model_final.lp
+BIGMSTATS 4 190 9
+BIGM ITERATIONS 3
+Solution verified. Cost 35
+Timing information for root profiler:
+  bigm solver - 1 * 87.9ms = 87.9ms (100.0%)
+    optimize - 4 * 1.0ms = 4.1ms (4.7%)
+    minimize-solution - 4 * 288.4us = 1.2ms (1.3%)
+      build - 4 * 130.9us = 523.8us (45.4%)
+      solve - 4 * 138.6us = 554.3us (48.0%)
+      extract - 4 * 7.9us = 31.6us (2.7%)
+    check conflicts - 4 * 815ns = 3.3us (0.0%)
+  verify_solution - 1 * 277.4us = 277.4us (0.3%)
+Reading instances_original/InstanceB10.txt
+trains 8 tracks 25 avgtracks 11.38 trackpairs 130 delays 0 avgdelay0
+8 & 25 & 11.38 & 130 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 35
+Solution verified. Cost 35
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=31
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 6 conflict constraints None lazy objectives
+   bigm LB=34
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 8 conflict constraints None lazy objectives
+   bigm LB=34
+Solved with cost 34 and 8 conflict constraints after 2 refinements
+SAVING instances_original/InstanceB10.txt_model_final.lp
+BIGMSTATS 3 182 8
+BIGM ITERATIONS 2
+Solution verified. Cost 34
+Timing information for root profiler:
+  bigm solver - 1 * 86.1ms = 86.1ms (100.0%)
+    optimize - 3 * 1.0ms = 3.0ms (3.5%)
+    minimize-solution - 3 * 277.5us = 832.6us (1.0%)
+      build - 3 * 123.0us = 369.0us (44.3%)
+      solve - 3 * 135.8us = 407.4us (48.9%)
+      extract - 3 * 7.7us = 23.0us (2.8%)
+    check conflicts - 3 * 933ns = 2.8us (0.0%)
+  verify_solution - 1 * 259.5us = 259.5us (0.3%)
+Reading instances_original/InstanceB11.txt
+trains 25 tracks 25 avgtracks 15.40 trackpairs 3202 delays 0 avgdelay0
+25 & 25 & 15.40 & 3202 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 34
+Solution verified. Cost 34
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=411
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 8 conflict constraints None lazy objectives
+   bigm LB=418
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 15 conflict constraints None lazy objectives
+   bigm LB=419
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 22 conflict constraints None lazy objectives
+   bigm LB=420
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 28 conflict constraints None lazy objectives
+   bigm LB=421
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 37 conflict constraints None lazy objectives
+   bigm LB=423
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 41 conflict constraints None lazy objectives
+   bigm LB=424
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 43 conflict constraints None lazy objectives
+   bigm LB=424
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 9 with 48 conflict constraints None lazy objectives
+   bigm LB=424
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 10 with 51 conflict constraints None lazy objectives
+   bigm LB=424
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 11 with 52 conflict constraints None lazy objectives
+   bigm LB=424
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 12 with 53 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 425
+Solution verified. Cost 425
+HEUR.FEAS. 425
+Finishing with cost 425
+   bigm LB=424
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 13 with 55 conflict constraints None lazy objectives
+Solution verified. Cost 425
+HEUR.FEAS. 425
+Finishing with cost 427
+Solution verified. Cost 427
+HEUR.FEAS. 427
+Finishing with cost 427
+Solution verified. Cost 427
+HEUR.FEAS. 427
+   bigm LB=424
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 14 with 56 conflict constraints None lazy objectives
+Finishing with cost 425
+Solution verified. Cost 425
+HEUR.FEAS. 425
+Finishing with cost 425
+Solution verified. Cost 425
+HEUR.FEAS. 425
+   bigm LB=424
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 15 with 58 conflict constraints None lazy objectives
+Finishing with cost 427
+Solution verified. Cost 427
+HEUR.FEAS. 427
+Finishing with cost 427
+Solution verified. Cost 427
+HEUR.FEAS. 427
+TERMINATE HEURISTIC
+BIGM ITERATIONS 14
+Solution verified. Cost 425
+Timing information for root profiler:
+  bigm solver - 1 * 214.7ms = 214.7ms (100.0%)
+    optimize - 15 * 7.5ms = 112.0ms (52.2%)
+    minimize-solution - 14 * 885.2us = 12.4ms (5.8%)
+      build - 14 * 492.8us = 6.9ms (55.7%)
+      solve - 14 * 336.0us = 4.7ms (38.0%)
+      extract - 14 * 28.0us = 391.4us (3.2%)
+    check conflicts - 14 * 5.4us = 75.1us (0.0%)
+  verify_solution - 1 * 4.4ms = 4.4ms (2.1%)
+Reading instances_original/InstanceB12.txt
+trains 14 tracks 25 avgtracks 16.21 trackpairs 970 delays 0 avgdelay0
+14 & 25 & 16.21 & 970 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=5
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 3 conflict constraints None lazy objectives
+   bigm LB=6
+Solved with cost 6 and 3 conflict constraints after 1 refinements
+SAVING instances_original/InstanceB12.txt_model_final.lp
+BIGMSTATS 2 454 3
+BIGM ITERATIONS 1
+Solution verified. Cost 6
+Timing information for root profiler:
+  bigm solver - 1 * 88.7ms = 88.7ms (100.0%)
+    optimize - 2 * 880.6us = 1.8ms (2.0%)
+    minimize-solution - 2 * 543.8us = 1.1ms (1.2%)
+      build - 2 * 279.8us = 559.5us (51.4%)
+      solve - 2 * 228.3us = 456.7us (42.0%)
+      extract - 2 * 17.1us = 34.2us (3.1%)
+    check conflicts - 2 * 2.2us = 4.3us (0.0%)
+  verify_solution - 1 * 1.5ms = 1.5ms (1.7%)
+Reading instances_addtracktime/InstanceA1.txt
+trains 29 tracks 33 avgtracks 20.93 trackpairs 5915 delays 0 avgdelay0
+29 & 33 & 20.93 & 5915 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 6
+Solution verified. Cost 6
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=41
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 48 conflict constraints None lazy objectives
+   bigm LB=58
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 60 conflict constraints None lazy objectives
+   bigm LB=59
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 68 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 63
+Solution verified. Cost 63
+HEUR.FEAS. 63
+Finishing with cost 63
+   bigm LB=60
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 73 conflict constraints None lazy objectives
+Solution verified. Cost 63
+HEUR.FEAS. 63
+Finishing with cost 64
+Solution verified. Cost 64
+HEUR.FEAS. 64
+Finishing with cost 63
+   bigm LB=60
+Solved with cost 60 and 73 conflict constraints after 4 refinements
+SAVING instances_addtracktime/InstanceA1.txt_model_final.lp
+BIGMSTATS 5 1214 73
+BIGM ITERATIONS 4
+Solution verified. Cost 63
+Finishing with cost 60
+Solution verified. Cost 60
+Timing information for root profiler:
+  bigm solver - 1 * 233.6ms = 233.6ms (100.0%)
+    optimize - 5 * 25.0ms = 125.0ms (53.5%)
+    minimize-solution - 5 * 1.3ms = 6.6ms (2.8%)
+      build - 5 * 712.8us = 3.6ms (54.2%)
+      solve - 5 * 519.9us = 2.6ms (39.6%)
+      extract - 5 * 41.5us = 207.4us (3.2%)
+    check conflicts - 5 * 16.2us = 81.2us (0.0%)
+  verify_solution - 1 * 13.4ms = 13.4ms (5.7%)
+Reading instances_addtracktime/InstanceA2.txt
+trains 25 tracks 33 avgtracks 19.00 trackpairs 3735 delays 0 avgdelay0
+25 & 33 & 19.00 & 3735 & 0 & 0 \\
+Starting solver BigMLazy
+Solution verified. Cost 60
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=27
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 36 conflict constraints None lazy objectives
+   bigm LB=43
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 45 conflict constraints None lazy objectives
+   bigm LB=47
+[2024-04-09T11:46:08Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 50 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 50
+Solution verified. Cost 50
+HEUR.FEAS. 50
+Finishing with cost 50
+Solution verified. Cost 50
+HEUR.FEAS. 50
+   bigm LB=48
+Solved with cost 48 and 50 conflict constraints after 3 refinements
+SAVING instances_addtracktime/InstanceA2.txt_model_final.lp
+Finishing with cost 48
+BIGMSTATS 4 950 50
+BIGM ITERATIONS 3
+Solution verified. Cost 48
+Solution verified. Cost 48
+Timing information for root profiler:
+  bigm solver - 1 * 217.0ms = 217.0ms (100.0%)
+    optimize - 4 * 29.5ms = 118.0ms (54.4%)
+    minimize-solution - 4 * 1.0ms = 4.0ms (1.8%)
+      build - 4 * 544.0us = 2.2ms (54.4%)
+      solve - 4 * 394.0us = 1.6ms (39.4%)
+      extract - 4 * 31.8us = 127.2us (3.2%)
+    check conflicts - 4 * 12.4us = 49.5us (0.0%)
+  verify_solution - 1 * 7.8ms = 7.8ms (3.6%)
+Reading instances_addtracktime/InstanceA3.txt
+trains 16 tracks 33 avgtracks 22.38 trackpairs 2061 delays 0 avgdelay0
+16 & 33 & 22.38 & 2061 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 25 conflict constraints None lazy objectives
+   bigm LB=16
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 29 conflict constraints None lazy objectives
+   bigm LB=17
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 33 conflict constraints None lazy objectives
+   bigm LB=18
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 34 conflict constraints None lazy objectives
+   bigm LB=18
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 35 conflict constraints None lazy objectives
+   bigm LB=18
+Solved with cost 18 and 35 conflict constraints after 5 refinements
+SAVING instances_addtracktime/InstanceA3.txt_model_final.lp
+BIGMSTATS 6 716 35
+BIGM ITERATIONS 5
+Solution verified. Cost 18
+Timing information for root profiler:
+  bigm solver - 1 * 134.8ms = 134.8ms (100.0%)
+    optimize - 6 * 6.8ms = 40.6ms (30.1%)
+    minimize-solution - 6 * 776.4us = 4.7ms (3.5%)
+      build - 6 * 406.9us = 2.4ms (52.4%)
+      solve - 6 * 320.4us = 1.9ms (41.3%)
+      extract - 6 * 24.8us = 148.8us (3.2%)
+    check conflicts - 6 * 6.8us = 40.6us (0.0%)
+  verify_solution - 1 * 4.4ms = 4.4ms (3.2%)
+Reading instances_addtracktime/InstanceA4.txt
+trains 14 tracks 33 avgtracks 19.21 trackpairs 1175 delays 0 avgdelay0
+14 & 33 & 19.21 & 1175 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 18
+Solution verified. Cost 18
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=11
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 15 conflict constraints None lazy objectives
+   bigm LB=17
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 16 conflict constraints None lazy objectives
+   bigm LB=17
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 17 conflict constraints None lazy objectives
+   bigm LB=18
+Solved with cost 18 and 17 conflict constraints after 3 refinements
+SAVING instances_addtracktime/InstanceA4.txt_model_final.lp
+BIGMSTATS 4 538 17
+BIGM ITERATIONS 3
+Solution verified. Cost 18
+Timing information for root profiler:
+  bigm solver - 1 * 98.9ms = 98.9ms (100.0%)
+    optimize - 4 * 2.3ms = 9.3ms (9.4%)
+    minimize-solution - 4 * 602.2us = 2.4ms (2.4%)
+      build - 4 * 317.9us = 1.3ms (52.8%)
+      solve - 4 * 246.9us = 987.7us (41.0%)
+      extract - 4 * 17.9us = 71.4us (3.0%)
+    check conflicts - 4 * 6.1us = 24.5us (0.0%)
+  verify_solution - 1 * 2.5ms = 2.5ms (2.5%)
+Reading instances_addtracktime/InstanceA5.txt
+trains 12 tracks 33 avgtracks 19.25 trackpairs 876 delays 0 avgdelay0
+12 & 33 & 19.25 & 876 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 18
+Solution verified. Cost 18
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=12
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 10 conflict constraints None lazy objectives
+   bigm LB=18
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 14 conflict constraints None lazy objectives
+   bigm LB=19
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 15 conflict constraints None lazy objectives
+   bigm LB=19
+Solved with cost 19 and 15 conflict constraints after 3 refinements
+SAVING instances_addtracktime/InstanceA5.txt_model_final.lp
+BIGMSTATS 4 462 15
+BIGM ITERATIONS 3
+Solution verified. Cost 19
+Timing information for root profiler:
+  bigm solver - 1 * 94.7ms = 94.7ms (100.0%)
+    optimize - 4 * 1.9ms = 7.7ms (8.2%)
+    minimize-solution - 4 * 536.0us = 2.1ms (2.3%)
+      build - 4 * 279.2us = 1.1ms (52.1%)
+      solve - 4 * 223.5us = 893.9us (41.7%)
+      extract - 4 * 15.7us = 62.8us (2.9%)
+    check conflicts - 4 * 1.9us = 7.7us (0.0%)
+  verify_solution - 1 * 1.8ms = 1.8ms (1.9%)
+Reading instances_addtracktime/InstanceA6.txt
+trains 8 tracks 33 avgtracks 18.62 trackpairs 307 delays 0 avgdelay0
+8 & 33 & 18.62 & 307 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 19
+Solution verified. Cost 19
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=9
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=11
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 6 conflict constraints None lazy objectives
+   bigm LB=11
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 7 conflict constraints None lazy objectives
+   bigm LB=11
+Solved with cost 11 and 7 conflict constraints after 3 refinements
+SAVING instances_addtracktime/InstanceA6.txt_model_final.lp
+BIGMSTATS 4 298 7
+BIGM ITERATIONS 3
+Solution verified. Cost 11
+Timing information for root profiler:
+  bigm solver - 1 * 88.6ms = 88.6ms (100.0%)
+    optimize - 4 * 786.6us = 3.1ms (3.6%)
+    minimize-solution - 4 * 363.7us = 1.5ms (1.6%)
+      build - 4 * 176.6us = 706.5us (48.6%)
+      solve - 4 * 163.8us = 655.1us (45.0%)
+      extract - 4 * 10.4us = 41.7us (2.9%)
+    check conflicts - 4 * 865ns = 3.5us (0.0%)
+  verify_solution - 1 * 765.4us = 765.4us (0.9%)
+Reading instances_addtracktime/InstanceA7.txt
+trains 8 tracks 33 avgtracks 12.62 trackpairs 126 delays 0 avgdelay0
+8 & 33 & 12.62 & 126 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 11
+Solution verified. Cost 11
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=5
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 6 conflict constraints None lazy objectives
+   bigm LB=10
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 8 conflict constraints None lazy objectives
+   bigm LB=10
+Solved with cost 10 and 8 conflict constraints after 2 refinements
+SAVING instances_addtracktime/InstanceA7.txt_model_final.lp
+BIGMSTATS 3 202 8
+BIGM ITERATIONS 2
+Solution verified. Cost 10
+Timing information for root profiler:
+  bigm solver - 1 * 86.3ms = 86.3ms (100.0%)
+    optimize - 3 * 928.9us = 2.8ms (3.2%)
+    minimize-solution - 3 * 331.0us = 993.0us (1.2%)
+      build - 3 * 150.2us = 450.8us (45.4%)
+      solve - 3 * 158.6us = 475.9us (47.9%)
+      extract - 3 * 9.4us = 28.1us (2.8%)
+    check conflicts - 3 * 997ns = 3.0us (0.0%)
+  verify_solution - 1 * 363.5us = 363.5us (0.4%)
+Reading instances_addtracktime/InstanceA8.txt
+trains 27 tracks 33 avgtracks 19.89 trackpairs 4862 delays 0 avgdelay0
+27 & 33 & 19.89 & 4862 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 10
+Solution verified. Cost 10
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=92
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 55 conflict constraints None lazy objectives
+   bigm LB=127
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 85 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 210
+Solution verified. Cost 210
+HEUR.FEAS. 210
+Finishing with cost 204
+Solution verified. Cost 204
+HEUR.FEAS. 204
+   bigm LB=136
+[2024-04-09T11:46:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 103 conflict constraints None lazy objectives
+Finishing with cost 180
+Solution verified. Cost 180
+HEUR.FEAS. 180
+Finishing with cost 199
+Solution verified. Cost 199
+HEUR.FEAS. 199
+   bigm LB=140
+[2024-04-09T11:46:10Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 115 conflict constraints None lazy objectives
+Finishing with cost 177
+Solution verified. Cost 177
+HEUR.FEAS. 177
+Finishing with cost 170
+Solution verified. Cost 170
+HEUR.FEAS. 170
+   bigm LB=143
+[2024-04-09T11:46:15Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 127 conflict constraints None lazy objectives
+Finishing with cost 158
+Solution verified. Cost 158
+HEUR.FEAS. 158
+Finishing with cost 162
+Solution verified. Cost 162
+HEUR.FEAS. 162
+   bigm LB=145
+[2024-04-09T11:46:20Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 141 conflict constraints None lazy objectives
+Finishing with cost 191
+Solution verified. Cost 191
+HEUR.FEAS. 191
+Finishing with cost 186
+Solution verified. Cost 186
+HEUR.FEAS. 186
+   bigm LB=145
+[2024-04-09T11:46:30Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 145 conflict constraints None lazy objectives
+Finishing with cost 153
+Solution verified. Cost 153
+HEUR.FEAS. 153
+Finishing with cost 150
+Solution verified. Cost 150
+HEUR.FEAS. 150
+   bigm LB=145
+[2024-04-09T11:46:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 9 with 151 conflict constraints None lazy objectives
+Finishing with cost 153
+Solution verified. Cost 153
+HEUR.FEAS. 153
+Finishing with cost 153
+Solution verified. Cost 153
+HEUR.FEAS. 153
+   bigm LB=146
+[2024-04-09T11:47:04Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 10 with 162 conflict constraints None lazy objectives
+Finishing with cost 160
+Solution verified. Cost 160
+HEUR.FEAS. 160
+Finishing with cost 157
+Solution verified. Cost 157
+HEUR.FEAS. 157
+   bigm LB=146
+[2024-04-09T11:47:10Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 11 with 165 conflict constraints None lazy objectives
+Finishing with cost 152
+Solution verified. Cost 152
+HEUR.FEAS. 152
+Finishing with cost 152
+Solution verified. Cost 152
+HEUR.FEAS. 152
+   bigm LB=146
+[2024-04-09T11:47:30Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 12 with 169 conflict constraints None lazy objectives
+Finishing with cost 146
+Solution verified. Cost 146
+HEUR.FEAS. 146
+Finishing with cost 146
+Solution verified. Cost 146
+HEUR.FEAS. 146
+   bigm LB=146
+HEURISTIC UB=LB
+TERMINATE HEURISTIC
+BIGM ITERATIONS 11
+Finishing with cost 146
+Solution verified. Cost 146
+Solution verified. Cost 146
+Timing information for root profiler:
+  bigm solver - 1 * 85.0s = 85.0s (100.0%)
+    optimize - 12 * 7.1s = 84.9s (99.9%)
+    minimize-solution - 12 * 1.3ms = 15.3ms (0.0%)
+      build - 12 * 652.6us = 7.8ms (51.3%)
+      solve - 12 * 519.8us = 6.2ms (40.9%)
+      extract - 12 * 37.0us = 444.5us (2.9%)
+    check conflicts - 11 * 16.7us = 184.1us (0.0%)
+  verify_solution - 1 * 10.0ms = 10.0ms (0.0%)
+Reading instances_addtracktime/InstanceA9.txt
+trains 20 tracks 33 avgtracks 20.05 trackpairs 2616 delays 0 avgdelay0
+20 & 33 & 20.05 & 2616 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=26
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 30 conflict constraints None lazy objectives
+   bigm LB=41
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 37 conflict constraints None lazy objectives
+   bigm LB=42
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 40 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 44
+   bigm LB=43
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 41 conflict constraints None lazy objectives
+Solution verified. Cost 44
+HEUR.FEAS. 44
+Finishing with cost 43
+Solution verified. Cost 43
+HEUR.FEAS. 43
+Finishing with cost 43
+   bigm LB=43
+Solution verified. Cost 43
+HEUR.FEAS. 43
+HEURISTIC UB=LB
+TERMINATE HEURISTIC
+BIGM ITERATIONS 4
+Finishing with cost 43
+Solution verified. Cost 43
+Solution verified. Cost 43
+Timing information for root profiler:
+  bigm solver - 1 * 187.9ms = 187.9ms (100.0%)
+    optimize - 5 * 18.7ms = 93.5ms (49.7%)
+    minimize-solution - 5 * 851.5us = 4.3ms (2.3%)
+      build - 5 * 446.4us = 2.2ms (52.4%)
+      solve - 5 * 351.6us = 1.8ms (41.3%)
+      extract - 5 * 26.8us = 134.1us (3.1%)
+    check conflicts - 4 * 10.4us = 41.6us (0.0%)
+  verify_solution - 1 * 5.5ms = 5.5ms (3.0%)
+Reading instances_addtracktime/InstanceA10.txt
+trains 17 tracks 33 avgtracks 18.18 trackpairs 1632 delays 0 avgdelay0
+17 & 33 & 18.18 & 1632 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=26
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 15 conflict constraints None lazy objectives
+   bigm LB=33
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 18 conflict constraints None lazy objectives
+   bigm LB=33
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 20 conflict constraints None lazy objectives
+   bigm LB=33
+Solved with cost 33 and 20 conflict constraints after 3 refinements
+SAVING instances_addtracktime/InstanceA10.txt_model_final.lp
+BIGMSTATS 4 618 20
+BIGM ITERATIONS 3
+Solution verified. Cost 33
+Timing information for root profiler:
+  bigm solver - 1 * 99.6ms = 99.6ms (100.0%)
+    optimize - 4 * 2.4ms = 9.6ms (9.7%)
+    minimize-solution - 4 * 669.7us = 2.7ms (2.7%)
+      build - 4 * 355.0us = 1.4ms (53.0%)
+      solve - 4 * 272.9us = 1.1ms (40.7%)
+      extract - 4 * 20.4us = 81.6us (3.0%)
+    check conflicts - 4 * 7.3us = 29.3us (0.0%)
+  verify_solution - 1 * 3.3ms = 3.3ms (3.3%)
+Reading instances_addtracktime/InstanceA11.txt
+trains 29 tracks 33 avgtracks 20.48 trackpairs 6144 delays 0 avgdelay0
+29 & 33 & 20.48 & 6144 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 33
+Solution verified. Cost 33
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 61 conflict constraints None lazy objectives
+   bigm LB=50
+[2024-04-09T11:47:34Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 99 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 148
+Solution verified. Cost 148
+HEUR.FEAS. 148
+Finishing with cost 180
+Solution verified. Cost 180
+HEUR.FEAS. 180
+   bigm LB=75
+[2024-04-09T11:47:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 130 conflict constraints None lazy objectives
+Finishing with cost 154
+Solution verified. Cost 154
+HEUR.FEAS. 154
+Finishing with cost 170
+Solution verified. Cost 170
+HEUR.FEAS. 170
+   bigm LB=78
+[2024-04-09T11:47:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 147 conflict constraints None lazy objectives
+Finishing with cost 141
+Solution verified. Cost 141
+HEUR.FEAS. 141
+Finishing with cost 150
+Solution verified. Cost 150
+HEUR.FEAS. 150
+   bigm LB=85
+[2024-04-09T11:47:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 177 conflict constraints None lazy objectives
+Finishing with cost 156
+Solution verified. Cost 156
+HEUR.FEAS. 156
+Finishing with cost 170
+Solution verified. Cost 170
+HEUR.FEAS. 170
+   bigm LB=91
+[2024-04-09T11:47:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 197 conflict constraints None lazy objectives
+Finishing with cost 148
+Solution verified. Cost 148
+HEUR.FEAS. 148
+Finishing with cost 147
+Solution verified. Cost 147
+HEUR.FEAS. 147
+   bigm LB=95
+[2024-04-09T11:47:59Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 221 conflict constraints None lazy objectives
+Finishing with cost 157
+Solution verified. Cost 157
+HEUR.FEAS. 157
+Finishing with cost 162
+Solution verified. Cost 162
+HEUR.FEAS. 162
+   bigm LB=97
+[2024-04-09T11:49:01Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 9 with 243 conflict constraints None lazy objectives
+Finishing with cost 156
+Solution verified. Cost 156
+HEUR.FEAS. 156
+Finishing with cost 170
+Solution verified. Cost 170
+HEUR.FEAS. 170
+TIMEOUT LB=97 UB=141
+Reading instances_addtracktime/InstanceA12.txt
+trains 28 tracks 33 avgtracks 21.71 trackpairs 6393 delays 0 avgdelay0
+28 & 33 & 21.71 & 6393 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:49:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=12
+[2024-04-09T11:49:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 67 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 175
+Solution verified. Cost 175
+HEUR.FEAS. 175
+   bigm LB=58
+[2024-04-09T11:49:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 100 conflict constraints None lazy objectives
+Finishing with cost 191
+Solution verified. Cost 191
+HEUR.FEAS. 191
+Finishing with cost 175
+Solution verified. Cost 175
+HEUR.FEAS. 175
+Finishing with cost 195
+Solution verified. Cost 195
+HEUR.FEAS. 195
+   bigm LB=82
+[2024-04-09T11:49:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 138 conflict constraints None lazy objectives
+Finishing with cost 161
+Solution verified. Cost 161
+HEUR.FEAS. 161
+Finishing with cost 167
+Solution verified. Cost 167
+HEUR.FEAS. 167
+   bigm LB=88
+[2024-04-09T11:49:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 155 conflict constraints None lazy objectives
+Finishing with cost 168
+Solution verified. Cost 168
+HEUR.FEAS. 168
+Finishing with cost 172
+Solution verified. Cost 172
+HEUR.FEAS. 172
+   bigm LB=98
+[2024-04-09T11:49:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 184 conflict constraints None lazy objectives
+Finishing with cost 165
+Solution verified. Cost 165
+HEUR.FEAS. 165
+Finishing with cost 188
+Solution verified. Cost 188
+HEUR.FEAS. 188
+   bigm LB=101
+[2024-04-09T11:49:59Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 211 conflict constraints None lazy objectives
+Finishing with cost 181
+Solution verified. Cost 181
+HEUR.FEAS. 181
+Finishing with cost 183
+Solution verified. Cost 183
+HEUR.FEAS. 183
+   bigm LB=105
+[2024-04-09T11:51:04Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 227 conflict constraints None lazy objectives
+Finishing with cost 148
+Solution verified. Cost 148
+HEUR.FEAS. 148
+Finishing with cost 167
+Solution verified. Cost 167
+HEUR.FEAS. 167
+TIMEOUT LB=105 UB=161
+Reading instances_addtracktime/InstanceB1.txt
+trains 18 tracks 25 avgtracks 17.33 trackpairs 2022 delays 0 avgdelay0
+18 & 25 & 17.33 & 2022 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=4
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 17 conflict constraints None lazy objectives
+   bigm LB=12
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 21 conflict constraints None lazy objectives
+   bigm LB=14
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 22 conflict constraints None lazy objectives
+   bigm LB=14
+Solved with cost 14 and 22 conflict constraints after 3 refinements
+SAVING instances_addtracktime/InstanceB1.txt_model_final.lp
+BIGMSTATS 4 624 22
+BIGM ITERATIONS 3
+Solution verified. Cost 14
+Timing information for root profiler:
+  bigm solver - 1 * 108.3ms = 108.3ms (100.0%)
+    optimize - 4 * 3.7ms = 14.7ms (13.5%)
+    minimize-solution - 4 * 672.8us = 2.7ms (2.5%)
+      build - 4 * 353.8us = 1.4ms (52.6%)
+      solve - 4 * 277.3us = 1.1ms (41.2%)
+      extract - 4 * 20.2us = 80.7us (3.0%)
+    check conflicts - 4 * 7.7us = 30.7us (0.0%)
+  verify_solution - 1 * 2.7ms = 2.7ms (2.5%)
+Reading instances_addtracktime/InstanceB2.txt
+trains 5 tracks 25 avgtracks 14.80 trackpairs 87 delays 0 avgdelay0
+5 & 25 & 14.80 & 87 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 14
+Solution verified. Cost 14
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=2
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=26
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 6 conflict constraints None lazy objectives
+   bigm LB=26
+Solved with cost 26 and 6 conflict constraints after 2 refinements
+SAVING instances_addtracktime/InstanceB2.txt_model_final.lp
+BIGMSTATS 3 148 6
+BIGM ITERATIONS 2
+Solution verified. Cost 26
+Timing information for root profiler:
+  bigm solver - 1 * 85.0ms = 85.0ms (100.0%)
+    optimize - 3 * 696.5us = 2.1ms (2.5%)
+    minimize-solution - 3 * 257.5us = 772.6us (0.9%)
+      build - 3 * 116.7us = 350.0us (45.3%)
+      solve - 3 * 124.2us = 372.6us (48.2%)
+      extract - 3 * 6.7us = 20.2us (2.6%)
+    check conflicts - 3 * 546ns = 1.6us (0.0%)
+  verify_solution - 1 * 157.8us = 157.8us (0.2%)
+Reading instances_addtracktime/InstanceB3.txt
+trains 5 tracks 20 avgtracks 16.80 trackpairs 136 delays 0 avgdelay0
+5 & 20 & 16.80 & 136 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 26
+Solution verified. Cost 26
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=2
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=4
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 7 conflict constraints None lazy objectives
+   bigm LB=4
+Solved with cost 4 and 7 conflict constraints after 2 refinements
+SAVING instances_addtracktime/InstanceB3.txt_model_final.lp
+BIGMSTATS 3 168 7
+BIGM ITERATIONS 2
+Solution verified. Cost 4
+Timing information for root profiler:
+  bigm solver - 1 * 88.0ms = 88.0ms (100.0%)
+    optimize - 3 * 1.5ms = 4.6ms (5.3%)
+    minimize-solution - 3 * 258.1us = 774.2us (0.9%)
+      build - 3 * 114.7us = 344.2us (44.5%)
+      solve - 3 * 127.2us = 381.5us (49.3%)
+      extract - 3 * 6.5us = 19.5us (2.5%)
+    check conflicts - 3 * 856ns = 2.6us (0.0%)
+  verify_solution - 1 * 166.5us = 166.5us (0.2%)
+Reading instances_addtracktime/InstanceB4.txt
+trains 20 tracks 25 avgtracks 15.95 trackpairs 2246 delays 0 avgdelay0
+20 & 25 & 15.95 & 2246 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 4
+Solution verified. Cost 4
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=325
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 21 conflict constraints None lazy objectives
+   bigm LB=332
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 29 conflict constraints None lazy objectives
+   bigm LB=338
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 30 conflict constraints None lazy objectives
+   bigm LB=340
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 33 conflict constraints None lazy objectives
+   bigm LB=341
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 34 conflict constraints None lazy objectives
+   bigm LB=341
+Solved with cost 341 and 34 conflict constraints after 5 refinements
+SAVING instances_addtracktime/InstanceB4.txt_model_final.lp
+BIGMSTATS 6 638 34
+BIGM ITERATIONS 5
+Solution verified. Cost 341
+Timing information for root profiler:
+  bigm solver - 1 * 123.2ms = 123.2ms (100.0%)
+    optimize - 6 * 5.2ms = 30.9ms (25.1%)
+    minimize-solution - 6 * 738.5us = 4.4ms (3.6%)
+      build - 6 * 395.0us = 2.4ms (53.5%)
+      solve - 6 * 299.3us = 1.8ms (40.5%)
+      extract - 6 * 21.6us = 129.6us (2.9%)
+    check conflicts - 6 * 6.6us = 39.7us (0.0%)
+  verify_solution - 1 * 2.8ms = 2.8ms (2.3%)
+Reading instances_addtracktime/InstanceB5.txt
+trains 5 tracks 25 avgtracks 17.80 trackpairs 136 delays 0 avgdelay0
+5 & 25 & 17.80 & 136 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 341
+Solution verified. Cost 341
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=1
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 8 conflict constraints None lazy objectives
+   bigm LB=10
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 10 conflict constraints None lazy objectives
+   bigm LB=11
+Solved with cost 11 and 10 conflict constraints after 3 refinements
+SAVING instances_addtracktime/InstanceB5.txt_model_final.lp
+BIGMSTATS 4 178 10
+BIGM ITERATIONS 3
+Solution verified. Cost 11
+Timing information for root profiler:
+  bigm solver - 1 * 88.7ms = 88.7ms (100.0%)
+    optimize - 4 * 1.2ms = 4.9ms (5.5%)
+    minimize-solution - 4 * 271.1us = 1.1ms (1.2%)
+      build - 4 * 126.9us = 507.5us (46.8%)
+      solve - 4 * 127.2us = 508.7us (46.9%)
+      extract - 4 * 6.9us = 27.8us (2.6%)
+    check conflicts - 4 * 882ns = 3.5us (0.0%)
+  verify_solution - 1 * 221.3us = 221.3us (0.2%)
+Reading instances_addtracktime/InstanceB6.txt
+trains 5 tracks 25 avgtracks 15.20 trackpairs 93 delays 0 avgdelay0
+5 & 25 & 15.20 & 93 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 11
+Solution verified. Cost 11
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=1
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 3 conflict constraints None lazy objectives
+   bigm LB=2
+Solved with cost 2 and 3 conflict constraints after 1 refinements
+SAVING instances_addtracktime/InstanceB6.txt_model_final.lp
+BIGMSTATS 2 152 3
+BIGM ITERATIONS 1
+Solution verified. Cost 2
+Timing information for root profiler:
+  bigm solver - 1 * 84.2ms = 84.2ms (100.0%)
+    optimize - 2 * 681.9us = 1.4ms (1.6%)
+    minimize-solution - 2 * 245.0us = 490.0us (0.6%)
+      build - 2 * 109.0us = 217.9us (44.5%)
+      solve - 2 * 121.0us = 241.9us (49.4%)
+      extract - 2 * 6.0us = 12.0us (2.4%)
+    check conflicts - 2 * 945ns = 1.9us (0.0%)
+  verify_solution - 1 * 164.1us = 164.1us (0.2%)
+Reading instances_addtracktime/InstanceB7.txt
+trains 24 tracks 25 avgtracks 15.25 trackpairs 2865 delays 0 avgdelay0
+24 & 25 & 15.25 & 2865 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 2
+Solution verified. Cost 2
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=303
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 24 conflict constraints None lazy objectives
+   bigm LB=312
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 35 conflict constraints None lazy objectives
+   bigm LB=316
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 40 conflict constraints None lazy objectives
+   bigm LB=318
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 41 conflict constraints None lazy objectives
+   bigm LB=318
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 42 conflict constraints None lazy objectives
+   bigm LB=318
+Solved with cost 318 and 42 conflict constraints after 5 refinements
+SAVING instances_addtracktime/InstanceB7.txt_model_final.lp
+BIGMSTATS 6 732 42
+BIGM ITERATIONS 5
+Solution verified. Cost 318
+Timing information for root profiler:
+  bigm solver - 1 * 145.4ms = 145.4ms (100.0%)
+    optimize - 6 * 8.6ms = 51.6ms (35.5%)
+    minimize-solution - 6 * 800.2us = 4.8ms (3.3%)
+      build - 6 * 430.8us = 2.6ms (53.8%)
+      solve - 6 * 319.2us = 1.9ms (39.9%)
+      extract - 6 * 25.1us = 150.5us (3.1%)
+    check conflicts - 6 * 7.8us = 46.8us (0.0%)
+  verify_solution - 1 * 3.7ms = 3.7ms (2.6%)
+Reading instances_addtracktime/InstanceB8.txt
+trains 5 tracks 25 avgtracks 13.40 trackpairs 72 delays 0 avgdelay0
+5 & 25 & 13.40 & 72 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 318
+Solution verified. Cost 318
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=5
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 3 conflict constraints None lazy objectives
+   bigm LB=5
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 5 conflict constraints None lazy objectives
+   bigm LB=12
+[2024-04-09T11:51:35Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 6 conflict constraints None lazy objectives
+   bigm LB=12
+Solved with cost 12 and 6 conflict constraints after 3 refinements
+SAVING instances_addtracktime/InstanceB8.txt_model_final.lp
+BIGMSTATS 4 134 6
+BIGM ITERATIONS 3
+Solution verified. Cost 12
+Timing information for root profiler:
+  bigm solver - 1 * 87.5ms = 87.5ms (100.0%)
+    optimize - 4 * 829.5us = 3.3ms (3.8%)
+    minimize-solution - 4 * 224.7us = 898.8us (1.0%)
+      build - 4 * 101.3us = 405.0us (45.1%)
+      solve - 4 * 108.9us = 435.6us (48.5%)
+      extract - 4 * 5.3us = 21.3us (2.4%)
+    check conflicts - 4 * 520ns = 2.1us (0.0%)
+  verify_solution - 1 * 132.0us = 132.0us (0.2%)
+Reading instances_addtracktime/InstanceB9.txt
+trains 7 tracks 25 avgtracks 13.57 trackpairs 150 delays 0 avgdelay0
+7 & 25 & 13.57 & 150 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=45
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=49
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 8 conflict constraints None lazy objectives
+   bigm LB=50
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 10 conflict constraints None lazy objectives
+   bigm LB=51
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 11 conflict constraints None lazy objectives
+   bigm LB=51
+Solved with cost 51 and 11 conflict constraints after 4 refinements
+SAVING instances_addtracktime/InstanceB9.txt_model_final.lp
+BIGMSTATS 5 190 11
+BIGM ITERATIONS 4
+Solution verified. Cost 51
+Timing information for root profiler:
+  bigm solver - 1 * 90.7ms = 90.7ms (100.0%)
+    optimize - 5 * 1.2ms = 5.9ms (6.5%)
+    minimize-solution - 5 * 279.0us = 1.4ms (1.5%)
+      build - 5 * 126.1us = 630.3us (45.2%)
+      solve - 5 * 135.3us = 676.4us (48.5%)
+      extract - 5 * 7.1us = 35.6us (2.6%)
+    check conflicts - 5 * 764ns = 3.8us (0.0%)
+  verify_solution - 1 * 262.9us = 262.9us (0.3%)
+Reading instances_addtracktime/InstanceB10.txt
+trains 7 tracks 25 avgtracks 12.86 trackpairs 126 delays 0 avgdelay0
+7 & 25 & 12.86 & 126 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter Threads to value 4
+Finishing with cost 12
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Solution verified. Cost 12
+Set parameter Threads to value 4
+Finishing with cost 51
+Solution verified. Cost 51
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=40
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 3 conflict constraints None lazy objectives
+   bigm LB=41
+Solved with cost 41 and 3 conflict constraints after 1 refinements
+SAVING instances_addtracktime/InstanceB10.txt_model_final.lp
+BIGMSTATS 2 180 3
+BIGM ITERATIONS 1
+Solution verified. Cost 41
+Timing information for root profiler:
+  bigm solver - 1 * 85.5ms = 85.5ms (100.0%)
+    optimize - 2 * 744.5us = 1.5ms (1.7%)
+    minimize-solution - 2 * 244.3us = 488.7us (0.6%)
+      build - 2 * 106.3us = 212.6us (43.5%)
+      solve - 2 * 120.5us = 240.9us (49.3%)
+      extract - 2 * 6.9us = 13.8us (2.8%)
+    check conflicts - 2 * 725ns = 1.4us (0.0%)
+  verify_solution - 1 * 239.9us = 239.9us (0.3%)
+Reading instances_addtracktime/InstanceB11.txt
+trains 25 tracks 25 avgtracks 15.40 trackpairs 3202 delays 0 avgdelay0
+25 & 25 & 15.40 & 3202 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 41
+Solution verified. Cost 41
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=373
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 26 conflict constraints None lazy objectives
+   bigm LB=383
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 39 conflict constraints None lazy objectives
+   bigm LB=390
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 42 conflict constraints None lazy objectives
+   bigm LB=391
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 43 conflict constraints None lazy objectives
+   bigm LB=391
+Solved with cost 391 and 43 conflict constraints after 4 refinements
+SAVING instances_addtracktime/InstanceB11.txt_model_final.lp
+BIGMSTATS 5 770 43
+BIGM ITERATIONS 4
+Solution verified. Cost 391
+Timing information for root profiler:
+  bigm solver - 1 * 141.0ms = 141.0ms (100.0%)
+    optimize - 5 * 9.4ms = 47.0ms (33.4%)
+    minimize-solution - 5 * 829.1us = 4.1ms (2.9%)
+      build - 5 * 437.5us = 2.2ms (52.8%)
+      solve - 5 * 338.8us = 1.7ms (40.9%)
+      extract - 5 * 26.9us = 134.6us (3.2%)
+    check conflicts - 5 * 9.1us = 45.3us (0.0%)
+  verify_solution - 1 * 4.2ms = 4.2ms (3.0%)
+Reading instances_addtracktime/InstanceB12.txt
+trains 14 tracks 25 avgtracks 16.21 trackpairs 970 delays 0 avgdelay0
+14 & 25 & 16.21 & 970 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 391
+Solution verified. Cost 391
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=5
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 14 conflict constraints None lazy objectives
+   bigm LB=59
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 22 conflict constraints None lazy objectives
+   bigm LB=63
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 26 conflict constraints None lazy objectives
+   bigm LB=85
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 29 conflict constraints None lazy objectives
+   bigm LB=85
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 32 conflict constraints None lazy objectives
+   bigm LB=88
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 34 conflict constraints None lazy objectives
+   bigm LB=88
+Solved with cost 88 and 34 conflict constraints after 6 refinements
+SAVING instances_addtracktime/InstanceB12.txt_model_final.lp
+BIGMSTATS 7 454 34
+BIGM ITERATIONS 6
+Solution verified. Cost 88
+Timing information for root profiler:
+  bigm solver - 1 * 124.7ms = 124.7ms (100.0%)
+    optimize - 7 * 5.1ms = 35.8ms (28.7%)
+    minimize-solution - 7 * 538.5us = 3.8ms (3.0%)
+      build - 7 * 273.1us = 1.9ms (50.7%)
+      solve - 7 * 231.5us = 1.6ms (43.0%)
+      extract - 7 * 16.0us = 112.2us (3.0%)
+    check conflicts - 7 * 2.3us = 16.1us (0.0%)
+  verify_solution - 1 * 1.4ms = 1.4ms (1.2%)
+Reading instances_addstationtime/InstanceA1.txt
+trains 29 tracks 33 avgtracks 20.93 trackpairs 5915 delays 0 avgdelay0
+29 & 33 & 20.93 & 5915 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 88
+Solution verified. Cost 88
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=41
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 47 conflict constraints None lazy objectives
+   bigm LB=73
+Set parameter Threads to value 4
+Finishing with cost 88
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 61 conflict constraints None lazy objectives
+Solution verified. Cost 88
+HEUR.FEAS. 88
+Finishing with cost 89
+Solution verified. Cost 89
+HEUR.FEAS. 89
+Finishing with cost 86
+Solution verified. Cost 86
+HEUR.FEAS. 86
+   bigm LB=79
+[2024-04-09T11:51:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 69 conflict constraints None lazy objectives
+Finishing with cost 89
+Solution verified. Cost 89
+HEUR.FEAS. 89
+Finishing with cost 89
+Solution verified. Cost 89
+HEUR.FEAS. 89
+   bigm LB=81
+[2024-04-09T11:51:37Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 72 conflict constraints None lazy objectives
+Finishing with cost 92
+Solution verified. Cost 92
+HEUR.FEAS. 92
+Finishing with cost 94
+Solution verified. Cost 94
+HEUR.FEAS. 94
+   bigm LB=81
+[2024-04-09T11:51:38Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 74 conflict constraints None lazy objectives
+Finishing with cost 92
+Solution verified. Cost 92
+HEUR.FEAS. 92
+Finishing with cost 85
+Solution verified. Cost 85
+HEUR.FEAS. 85
+   bigm LB=81
+[2024-04-09T11:51:38Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 76 conflict constraints None lazy objectives
+Finishing with cost 97
+Solution verified. Cost 97
+HEUR.FEAS. 97
+Finishing with cost 87
+Solution verified. Cost 87
+HEUR.FEAS. 87
+   bigm LB=81
+[2024-04-09T11:51:39Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 77 conflict constraints None lazy objectives
+Finishing with cost 81
+Solution verified. Cost 81
+HEUR.FEAS. 81
+Finishing with cost 81
+Solution verified. Cost 81
+HEUR.FEAS. 81
+   bigm LB=81
+HEURISTIC UB=LB
+TERMINATE HEURISTIC
+BIGM ITERATIONS 7
+Finishing with cost 81
+Solution verified. Cost 81
+Solution verified. Cost 81
+Timing information for root profiler:
+  bigm solver - 1 * 3.8s = 3.8s (100.0%)
+    optimize - 8 * 456.5ms = 3.7s (97.1%)
+    minimize-solution - 8 * 1.4ms = 11.2ms (0.3%)
+      build - 8 * 789.5us = 6.3ms (56.3%)
+      solve - 8 * 527.9us = 4.2ms (37.7%)
+      extract - 8 * 41.2us = 329.9us (2.9%)
+    check conflicts - 7 * 20.9us = 146.1us (0.0%)
+  verify_solution - 1 * 12.8ms = 12.8ms (0.3%)
+Reading instances_addstationtime/InstanceA2.txt
+trains 25 tracks 33 avgtracks 19.00 trackpairs 3735 delays 0 avgdelay0
+25 & 33 & 19.00 & 3735 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=29
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 42 conflict constraints None lazy objectives
+   bigm LB=53
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 52 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 65
+Solution verified. Cost 65
+HEUR.FEAS. 65
+Finishing with cost 66
+Solution verified. Cost 66
+HEUR.FEAS. 66
+   bigm LB=56
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 60 conflict constraints None lazy objectives
+Finishing with cost 62
+Solution verified. Cost 62
+HEUR.FEAS. 62
+Finishing with cost 64
+Solution verified. Cost 64
+HEUR.FEAS. 64
+   bigm LB=57
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 63 conflict constraints None lazy objectives
+Finishing with cost 59
+Solution verified. Cost 59
+HEUR.FEAS. 59
+Finishing with cost 59
+Solution verified. Cost 59
+HEUR.FEAS. 59
+   bigm LB=59
+HEURISTIC UB=LB
+TERMINATE HEURISTIC
+BIGM ITERATIONS 4
+Finishing with cost 59
+Solution verified. Cost 59
+Timing information for root profiler:
+  bigm solver - 1 * 527.1ms = 527.1ms (100.0%)
+    optimize - 5 * 85.4ms = 427.2ms (81.1%)
+    minimize-solution - 5 * 1.1ms = 5.4ms (1.0%)
+      build - 5 * 567.1us = 2.8ms (52.6%)
+      solve - 5 * 442.1us = 2.2ms (41.0%)
+      extract - 5 * 33.2us = 166.0us (3.1%)
+    check conflicts - 4 * 13.2us = 52.7us (0.0%)
+  verify_solution - 1 * 14.2ms = 14.2ms (2.7%)
+Reading instances_addstationtime/InstanceA3.txt
+Solution verified. Cost 59
+trains 16 tracks 33 avgtracks 22.38 trackpairs 2061 delays 0 avgdelay0
+16 & 33 & 22.38 & 2061 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=7
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 20 conflict constraints None lazy objectives
+   bigm LB=23
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 27 conflict constraints None lazy objectives
+   bigm LB=25
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 31 conflict constraints None lazy objectives
+   bigm LB=26
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 34 conflict constraints None lazy objectives
+   bigm LB=26
+Solved with cost 26 and 34 conflict constraints after 4 refinements
+SAVING instances_addstationtime/InstanceA3.txt_model_final.lp
+BIGMSTATS 5 716 34
+BIGM ITERATIONS 4
+Solution verified. Cost 26
+Timing information for root profiler:
+  bigm solver - 1 * 141.2ms = 141.2ms (100.0%)
+    optimize - 5 * 9.6ms = 48.1ms (34.0%)
+    minimize-solution - 5 * 777.1us = 3.9ms (2.8%)
+      build - 5 * 405.8us = 2.0ms (52.2%)
+      solve - 5 * 322.7us = 1.6ms (41.5%)
+      extract - 5 * 24.2us = 120.8us (3.1%)
+    check conflicts - 5 * 8.0us = 40.2us (0.0%)
+  verify_solution - 1 * 4.5ms = 4.5ms (3.2%)
+Reading instances_addstationtime/InstanceA4.txt
+trains 14 tracks 33 avgtracks 19.21 trackpairs 1175 delays 0 avgdelay0
+14 & 33 & 19.21 & 1175 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 26
+Solution verified. Cost 26
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=13
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 13 conflict constraints None lazy objectives
+   bigm LB=21
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 15 conflict constraints None lazy objectives
+   bigm LB=21
+[2024-04-09T11:51:40Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 19 conflict constraints None lazy objectives
+   bigm LB=22
+Solved with cost 22 and 19 conflict constraints after 3 refinements
+SAVING instances_addstationtime/InstanceA4.txt_model_final.lp
+BIGMSTATS 4 538 19
+BIGM ITERATIONS 3
+Solution verified. Cost 22
+Timing information for root profiler:
+  bigm solver - 1 * 102.5ms = 102.5ms (100.0%)
+    optimize - 4 * 2.8ms = 11.1ms (10.8%)
+    minimize-solution - 4 * 587.5us = 2.4ms (2.3%)
+      build - 4 * 308.8us = 1.2ms (52.6%)
+      solve - 4 * 241.7us = 966.7us (41.1%)
+      extract - 4 * 17.5us = 70.0us (3.0%)
+    check conflicts - 4 * 2.4us = 9.4us (0.0%)
+  verify_solution - 1 * 2.5ms = 2.5ms (2.5%)
+Reading instances_addstationtime/InstanceA5.txt
+trains 12 tracks 33 avgtracks 19.25 trackpairs 876 delays 0 avgdelay0
+12 & 33 & 19.25 & 876 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 22
+Solution verified. Cost 22
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=13
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 11 conflict constraints None lazy objectives
+   bigm LB=21
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 15 conflict constraints None lazy objectives
+   bigm LB=23
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 22 conflict constraints None lazy objectives
+   bigm LB=23
+Solved with cost 23 and 22 conflict constraints after 3 refinements
+SAVING instances_addstationtime/InstanceA5.txt_model_final.lp
+BIGMSTATS 4 462 22
+BIGM ITERATIONS 3
+Solution verified. Cost 23
+Timing information for root profiler:
+  bigm solver - 1 * 98.6ms = 98.6ms (100.0%)
+    optimize - 4 * 2.7ms = 10.8ms (11.0%)
+    minimize-solution - 4 * 530.5us = 2.1ms (2.2%)
+      build - 4 * 273.1us = 1.1ms (51.5%)
+      solve - 4 * 223.7us = 894.8us (42.2%)
+      extract - 4 * 15.8us = 63.2us (3.0%)
+    check conflicts - 4 * 2.1us = 8.6us (0.0%)
+  verify_solution - 1 * 1.8ms = 1.8ms (1.9%)
+Reading instances_addstationtime/InstanceA6.txt
+trains 8 tracks 33 avgtracks 18.62 trackpairs 307 delays 0 avgdelay0
+8 & 33 & 18.62 & 307 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 23
+Solution verified. Cost 23
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=11
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 4 conflict constraints None lazy objectives
+   bigm LB=15
+Solved with cost 15 and 4 conflict constraints after 1 refinements
+SAVING instances_addstationtime/InstanceA6.txt_model_final.lp
+BIGMSTATS 2 298 4
+BIGM ITERATIONS 1
+Solution verified. Cost 15
+Timing information for root profiler:
+  bigm solver - 1 * 86.2ms = 86.2ms (100.0%)
+    optimize - 2 * 871.3us = 1.7ms (2.0%)
+    minimize-solution - 2 * 409.5us = 819.1us (1.0%)
+      build - 2 * 181.1us = 362.1us (44.2%)
+      solve - 2 * 201.4us = 402.7us (49.2%)
+      extract - 2 * 11.2us = 22.4us (2.7%)
+    check conflicts - 2 * 1.1us = 2.3us (0.0%)
+  verify_solution - 1 * 754.6us = 754.6us (0.9%)
+Reading instances_addstationtime/InstanceA7.txt
+trains 8 tracks 33 avgtracks 12.62 trackpairs 126 delays 0 avgdelay0
+8 & 33 & 12.62 & 126 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 15
+Solution verified. Cost 15
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=9
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=15
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 7 conflict constraints None lazy objectives
+   bigm LB=16
+Solved with cost 16 and 7 conflict constraints after 2 refinements
+SAVING instances_addstationtime/InstanceA7.txt_model_final.lp
+BIGMSTATS 3 202 7
+BIGM ITERATIONS 2
+Solution verified. Cost 16
+Timing information for root profiler:
+  bigm solver - 1 * 86.5ms = 86.5ms (100.0%)
+    optimize - 3 * 1.0ms = 3.1ms (3.6%)
+    minimize-solution - 3 * 278.1us = 834.4us (1.0%)
+      build - 3 * 124.8us = 374.3us (44.9%)
+      solve - 3 * 134.8us = 404.4us (48.5%)
+      extract - 3 * 7.8us = 23.4us (2.8%)
+    check conflicts - 3 * 706ns = 2.1us (0.0%)
+  verify_solution - 1 * 355.6us = 355.6us (0.4%)
+Reading instances_addstationtime/InstanceA8.txt
+trains 27 tracks 33 avgtracks 19.89 trackpairs 4862 delays 0 avgdelay0
+27 & 33 & 19.89 & 4862 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 16
+Solution verified. Cost 16
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=96
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 54 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 183
+Solution verified. Cost 183
+HEUR.FEAS. 183
+Finishing with cost 196
+   bigm LB=143
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 72 conflict constraints None lazy objectives
+Solution verified. Cost 196
+HEUR.FEAS. 196
+Finishing with cost 195
+Solution verified. Cost 195
+HEUR.FEAS. 195
+Finishing with cost 196
+Solution verified. Cost 196
+HEUR.FEAS. 196
+   bigm LB=149
+[2024-04-09T11:51:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 96 conflict constraints None lazy objectives
+Finishing with cost 187
+Solution verified. Cost 187
+HEUR.FEAS. 187
+Finishing with cost 174
+Solution verified. Cost 174
+HEUR.FEAS. 174
+   bigm LB=152
+[2024-04-09T11:51:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 113 conflict constraints None lazy objectives
+Finishing with cost 192
+Solution verified. Cost 192
+HEUR.FEAS. 192
+Finishing with cost 184
+Solution verified. Cost 184
+HEUR.FEAS. 184
+   bigm LB=152
+[2024-04-09T11:51:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 123 conflict constraints None lazy objectives
+Finishing with cost 189
+Solution verified. Cost 189
+HEUR.FEAS. 189
+Finishing with cost 170
+Solution verified. Cost 170
+HEUR.FEAS. 170
+   bigm LB=156
+[2024-04-09T11:51:49Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 131 conflict constraints None lazy objectives
+Finishing with cost 179
+Solution verified. Cost 179
+HEUR.FEAS. 179
+Finishing with cost 183
+Solution verified. Cost 183
+HEUR.FEAS. 183
+   bigm LB=156
+[2024-04-09T11:51:56Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 140 conflict constraints None lazy objectives
+Finishing with cost 174
+Solution verified. Cost 174
+HEUR.FEAS. 174
+Finishing with cost 182
+Solution verified. Cost 182
+HEUR.FEAS. 182
+   bigm LB=158
+[2024-04-09T11:52:09Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 9 with 150 conflict constraints None lazy objectives
+Finishing with cost 193
+Solution verified. Cost 193
+HEUR.FEAS. 193
+Finishing with cost 185
+Solution verified. Cost 185
+HEUR.FEAS. 185
+   bigm LB=158
+[2024-04-09T11:52:23Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 10 with 159 conflict constraints None lazy objectives
+Finishing with cost 177
+Solution verified. Cost 177
+HEUR.FEAS. 177
+Finishing with cost 183
+Solution verified. Cost 183
+HEUR.FEAS. 183
+   bigm LB=159
+[2024-04-09T11:52:36Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 11 with 166 conflict constraints None lazy objectives
+Finishing with cost 192
+Solution verified. Cost 192
+HEUR.FEAS. 192
+Finishing with cost 176
+Solution verified. Cost 176
+HEUR.FEAS. 176
+   bigm LB=159
+[2024-04-09T11:52:59Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 12 with 172 conflict constraints None lazy objectives
+Finishing with cost 168
+Solution verified. Cost 168
+HEUR.FEAS. 168
+Finishing with cost 167
+Solution verified. Cost 167
+HEUR.FEAS. 167
+TIMEOUT LB=159 UB=170
+Reading instances_addstationtime/InstanceA9.txt
+trains 20 tracks 33 avgtracks 20.05 trackpairs 2616 delays 0 avgdelay0
+20 & 33 & 20.05 & 2616 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=26
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 30 conflict constraints None lazy objectives
+   bigm LB=46
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 36 conflict constraints None lazy objectives
+   bigm LB=47
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 42 conflict constraints None lazy objectives
+   bigm LB=49
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 45 conflict constraints None lazy objectives
+   bigm LB=49
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 46 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 49
+Solution verified. Cost 49
+HEUR.FEAS. 49
+Finishing with cost 49
+   bigm LB=49
+HEURISTIC UB=LB
+TERMINATE HEURISTIC
+BIGM ITERATIONS 5
+Solution verified. Cost 49
+Finishing with cost 49
+Solution verified. Cost 49
+Solution verified. Cost 49
+Timing information for root profiler:
+  bigm solver - 1 * 181.9ms = 181.9ms (100.0%)
+    optimize - 6 * 14.1ms = 84.6ms (46.5%)
+    minimize-solution - 6 * 853.1us = 5.1ms (2.8%)
+      build - 6 * 451.2us = 2.7ms (52.9%)
+      solve - 6 * 348.7us = 2.1ms (40.9%)
+      extract - 6 * 26.1us = 156.8us (3.1%)
+    check conflicts - 5 * 9.5us = 47.5us (0.0%)
+  verify_solution - 1 * 5.5ms = 5.5ms (3.0%)
+Reading instances_addstationtime/InstanceA10.txt
+trains 17 tracks 33 avgtracks 18.18 trackpairs 1632 delays 0 avgdelay0
+17 & 33 & 18.18 & 1632 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=28
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 16 conflict constraints None lazy objectives
+   bigm LB=40
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 18 conflict constraints None lazy objectives
+   bigm LB=41
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 22 conflict constraints None lazy objectives
+   bigm LB=41
+Solved with cost 41 and 22 conflict constraints after 3 refinements
+SAVING instances_addstationtime/InstanceA10.txt_model_final.lp
+BIGMSTATS 4 618 22
+BIGM ITERATIONS 3
+Solution verified. Cost 41
+Timing information for root profiler:
+  bigm solver - 1 * 104.3ms = 104.3ms (100.0%)
+    optimize - 4 * 3.7ms = 14.6ms (14.0%)
+    minimize-solution - 4 * 651.5us = 2.6ms (2.5%)
+      build - 4 * 344.9us = 1.4ms (52.9%)
+      solve - 4 * 263.8us = 1.1ms (40.5%)
+      extract - 4 * 21.5us = 85.9us (3.3%)
+    check conflicts - 4 * 7.4us = 29.5us (0.0%)
+  verify_solution - 1 * 3.3ms = 3.3ms (3.1%)
+Reading instances_addstationtime/InstanceA11.txt
+trains 29 tracks 33 avgtracks 20.48 trackpairs 6144 delays 0 avgdelay0
+29 & 33 & 20.48 & 6144 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 41
+Solution verified. Cost 41
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=7
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 60 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 133
+Solution verified. Cost 133
+HEUR.FEAS. 133
+Finishing with cost 156
+Solution verified. Cost 156
+HEUR.FEAS. 156
+   bigm LB=70
+[2024-04-09T11:53:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 90 conflict constraints None lazy objectives
+Finishing with cost 154
+Solution verified. Cost 154
+HEUR.FEAS. 154
+Finishing with cost 169
+Solution verified. Cost 169
+HEUR.FEAS. 169
+   bigm LB=83
+[2024-04-09T11:53:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 114 conflict constraints None lazy objectives
+Finishing with cost 159
+Solution verified. Cost 159
+HEUR.FEAS. 159
+Finishing with cost 157
+Solution verified. Cost 157
+HEUR.FEAS. 157
+   bigm LB=88
+[2024-04-09T11:53:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 141 conflict constraints None lazy objectives
+Finishing with cost 152
+Solution verified. Cost 152
+HEUR.FEAS. 152
+Finishing with cost 143
+Solution verified. Cost 143
+HEUR.FEAS. 143
+   bigm LB=97
+[2024-04-09T11:53:50Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 171 conflict constraints None lazy objectives
+Finishing with cost 195
+Solution verified. Cost 195
+HEUR.FEAS. 195
+Finishing with cost 194
+Solution verified. Cost 194
+HEUR.FEAS. 194
+   bigm LB=99
+[2024-04-09T11:54:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 193 conflict constraints None lazy objectives
+Finishing with cost 168
+Solution verified. Cost 168
+HEUR.FEAS. 168
+Finishing with cost 146
+Solution verified. Cost 146
+HEUR.FEAS. 146
+   bigm LB=103
+[2024-04-09T11:55:07Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 8 with 221 conflict constraints None lazy objectives
+Finishing with cost 183
+Solution verified. Cost 183
+HEUR.FEAS. 183
+Finishing with cost 169
+Solution verified. Cost 169
+HEUR.FEAS. 169
+TIMEOUT LB=103 UB=133
+Reading instances_addstationtime/InstanceA12.txt
+trains 28 tracks 33 avgtracks 21.71 trackpairs 6393 delays 0 avgdelay0
+28 & 33 & 21.71 & 6393 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:55:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=13
+[2024-04-09T11:55:41Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 64 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 160
+Solution verified. Cost 160
+HEUR.FEAS. 160
+Finishing with cost 193
+Solution verified. Cost 193
+HEUR.FEAS. 193
+   bigm LB=78
+[2024-04-09T11:55:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 95 conflict constraints None lazy objectives
+Finishing with cost 162
+Solution verified. Cost 162
+HEUR.FEAS. 162
+Finishing with cost 210
+Solution verified. Cost 210
+HEUR.FEAS. 210
+   bigm LB=87
+[2024-04-09T11:55:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 124 conflict constraints None lazy objectives
+Finishing with cost 166
+Solution verified. Cost 166
+HEUR.FEAS. 166
+Finishing with cost 199
+Solution verified. Cost 199
+HEUR.FEAS. 199
+   bigm LB=93
+[2024-04-09T11:55:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 158 conflict constraints None lazy objectives
+Finishing with cost 171
+Solution verified. Cost 171
+HEUR.FEAS. 171
+Finishing with cost 204
+Solution verified. Cost 204
+HEUR.FEAS. 204
+   bigm LB=102
+[2024-04-09T11:55:49Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 174 conflict constraints None lazy objectives
+Finishing with cost 165
+Solution verified. Cost 165
+HEUR.FEAS. 165
+Finishing with cost 171
+Solution verified. Cost 171
+HEUR.FEAS. 171
+   bigm LB=108
+[2024-04-09T11:56:01Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 7 with 205 conflict constraints None lazy objectives
+Finishing with cost 171
+Solution verified. Cost 171
+HEUR.FEAS. 171
+Finishing with cost 203
+Solution verified. Cost 203
+HEUR.FEAS. 203
+TIMEOUT LB=108 UB=160
+Reading instances_addstationtime/InstanceB1.txt
+trains 18 tracks 25 avgtracks 17.33 trackpairs 2022 delays 0 avgdelay0
+18 & 25 & 17.33 & 2022 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=4
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 22 conflict constraints None lazy objectives
+   bigm LB=25
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 27 conflict constraints None lazy objectives
+   bigm LB=30
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 31 conflict constraints None lazy objectives
+   bigm LB=30
+Solved with cost 30 and 31 conflict constraints after 3 refinements
+SAVING instances_addstationtime/InstanceB1.txt_model_final.lp
+BIGMSTATS 4 624 31
+BIGM ITERATIONS 3
+Solution verified. Cost 30
+Timing information for root profiler:
+  bigm solver - 1 * 143.1ms = 143.1ms (100.0%)
+    optimize - 4 * 12.1ms = 48.3ms (33.8%)
+    minimize-solution - 4 * 714.3us = 2.9ms (2.0%)
+      build - 4 * 376.2us = 1.5ms (52.7%)
+      solve - 4 * 294.5us = 1.2ms (41.2%)
+      extract - 4 * 21.3us = 85.3us (3.0%)
+    check conflicts - 4 * 8.2us = 32.9us (0.0%)
+  verify_solution - 1 * 2.7ms = 2.7ms (1.9%)
+Reading instances_addstationtime/InstanceB2.txt
+trains 5 tracks 25 avgtracks 14.80 trackpairs 87 delays 0 avgdelay0
+5 & 25 & 14.80 & 87 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 30
+Solution verified. Cost 30
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=2
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=29
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 6 conflict constraints None lazy objectives
+   bigm LB=29
+Solved with cost 29 and 6 conflict constraints after 2 refinements
+SAVING instances_addstationtime/InstanceB2.txt_model_final.lp
+BIGMSTATS 3 148 6
+BIGM ITERATIONS 2
+Solution verified. Cost 29
+Timing information for root profiler:
+  bigm solver - 1 * 92.7ms = 92.7ms (100.0%)
+    optimize - 3 * 1.6ms = 4.7ms (5.1%)
+    minimize-solution - 3 * 225.9us = 677.8us (0.7%)
+      build - 3 * 99.3us = 297.8us (43.9%)
+      solve - 3 * 111.7us = 335.2us (49.4%)
+      extract - 3 * 5.6us = 16.9us (2.5%)
+    check conflicts - 3 * 683ns = 2.0us (0.0%)
+  verify_solution - 1 * 167.5us = 167.5us (0.2%)
+Reading instances_addstationtime/InstanceB3.txt
+trains 5 tracks 20 avgtracks 16.80 trackpairs 136 delays 0 avgdelay0
+5 & 20 & 16.80 & 136 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 29
+Solution verified. Cost 29
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=3
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=6
+Solved with cost 6 and 5 conflict constraints after 1 refinements
+SAVING instances_addstationtime/InstanceB3.txt_model_final.lp
+BIGMSTATS 2 168 5
+BIGM ITERATIONS 1
+Solution verified. Cost 6
+Timing information for root profiler:
+  bigm solver - 1 * 85.3ms = 85.3ms (100.0%)
+    optimize - 2 * 834.3us = 1.7ms (2.0%)
+    minimize-solution - 2 * 248.1us = 496.2us (0.6%)
+      build - 2 * 111.2us = 222.4us (44.8%)
+      solve - 2 * 119.6us = 239.2us (48.2%)
+      extract - 2 * 7.1us = 14.3us (2.9%)
+    check conflicts - 2 * 795ns = 1.6us (0.0%)
+  verify_solution - 1 * 166.2us = 166.2us (0.2%)
+Reading instances_addstationtime/InstanceB4.txt
+trains 20 tracks 25 avgtracks 15.95 trackpairs 2246 delays 0 avgdelay0
+20 & 25 & 15.95 & 2246 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 6
+Solution verified. Cost 6
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=328
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 24 conflict constraints None lazy objectives
+   bigm LB=351
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 32 conflict constraints None lazy objectives
+   bigm LB=353
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 35 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 355
+Solution verified. Cost 355
+HEUR.FEAS. 355
+Finishing with cost 355
+Solution verified. Cost 355
+HEUR.FEAS. 355
+   bigm LB=355
+HEURISTIC UB=LB
+TERMINATE HEURISTIC
+BIGM ITERATIONS 3
+Finishing with cost 358
+Solution verified. Cost 355
+Timing information for root profiler:
+  bigm solver - 1 * 216.9ms = 216.9ms (100.0%)
+    optimize - 4 * 31.3ms = 125.1ms (57.7%)
+    minimize-solution - 4 * 727.3us = 2.9ms (1.3%)
+      build - 4 * 379.9us = 1.5ms (52.2%)
+      solve - 4 * 301.8us = 1.2ms (41.5%)
+      extract - 4 * 21.6us = 86.4us (3.0%)
+    check conflicts - 3 * 10.3us = 31.0us (0.0%)
+  verify_solution - 1 * 2.9ms = 2.9ms (1.3%)
+Reading instances_addstationtime/InstanceB5.txt
+Solution verified. Cost 358
+trains 5 tracks 25 avgtracks 17.80 trackpairs 136 delays 0 avgdelay0
+5 & 25 & 17.80 & 136 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=1
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 5 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 6 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 7 conflict constraints None lazy objectives
+   bigm LB=8
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 8 conflict constraints None lazy objectives
+   bigm LB=9
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 10 conflict constraints None lazy objectives
+   bigm LB=10
+Solved with cost 10 and 10 conflict constraints after 5 refinements
+SAVING instances_addstationtime/InstanceB5.txt_model_final.lp
+BIGMSTATS 6 178 10
+BIGM ITERATIONS 5
+Solution verified. Cost 10
+Timing information for root profiler:
+  bigm solver - 1 * 92.3ms = 92.3ms (100.0%)
+    optimize - 6 * 1.2ms = 7.3ms (7.9%)
+    minimize-solution - 6 * 269.6us = 1.6ms (1.8%)
+      build - 6 * 126.4us = 758.5us (46.9%)
+      solve - 6 * 126.9us = 761.5us (47.1%)
+      extract - 6 * 6.5us = 39.1us (2.4%)
+    check conflicts - 6 * 691ns = 4.2us (0.0%)
+  verify_solution - 1 * 235.3us = 235.3us (0.3%)
+Reading instances_addstationtime/InstanceB6.txt
+trains 5 tracks 25 avgtracks 15.20 trackpairs 93 delays 0 avgdelay0
+5 & 25 & 15.20 & 93 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 10
+Solution verified. Cost 10
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=2
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 3 conflict constraints None lazy objectives
+   bigm LB=5
+Solved with cost 5 and 3 conflict constraints after 1 refinements
+SAVING instances_addstationtime/InstanceB6.txt_model_final.lp
+BIGMSTATS 2 152 3
+BIGM ITERATIONS 1
+Solution verified. Cost 5
+Timing information for root profiler:
+  bigm solver - 1 * 84.6ms = 84.6ms (100.0%)
+    optimize - 2 * 722.3us = 1.4ms (1.7%)
+    minimize-solution - 2 * 260.5us = 521.1us (0.6%)
+      build - 2 * 130.5us = 261.0us (50.1%)
+      solve - 2 * 114.4us = 228.8us (43.9%)
+      extract - 2 * 6.2us = 12.3us (2.4%)
+    check conflicts - 2 * 550ns = 1.1us (0.0%)
+  verify_solution - 1 * 231.8us = 231.8us (0.3%)
+Reading instances_addstationtime/InstanceB7.txt
+trains 24 tracks 25 avgtracks 15.25 trackpairs 2865 delays 0 avgdelay0
+24 & 25 & 15.25 & 2865 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 5
+Solution verified. Cost 5
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=307
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 30 conflict constraints None lazy objectives
+   bigm LB=333
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 41 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 347
+Solution verified. Cost 347
+HEUR.FEAS. 347
+Finishing with cost 350
+Solution verified. Cost 350
+HEUR.FEAS. 350
+   bigm LB=337
+[2024-04-09T11:57:42Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 48 conflict constraints None lazy objectives
+Finishing with cost 345
+Solution verified. Cost 345
+HEUR.FEAS. 345
+Finishing with cost 348
+Solution verified. Cost 348
+HEUR.FEAS. 348
+   bigm LB=339
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 49 conflict constraints None lazy objectives
+Finishing with cost 340
+Solution verified. Cost 340
+HEUR.FEAS. 340
+Finishing with cost 340
+Solution verified. Cost 340
+HEUR.FEAS. 340
+   bigm LB=339
+Solved with cost 339 and 49 conflict constraints after 4 refinements
+SAVING instances_addstationtime/InstanceB7.txt_model_final.lp
+Finishing with cost 339
+BIGMSTATS 5 732 49
+BIGM ITERATIONS 4
+Solution verified. Cost 339
+Solution verified. Cost 339
+Timing information for root profiler:
+  bigm solver - 1 * 400.1ms = 400.1ms (100.0%)
+    optimize - 5 * 61.2ms = 306.2ms (76.5%)
+    minimize-solution - 5 * 849.3us = 4.2ms (1.1%)
+      build - 5 * 443.3us = 2.2ms (52.2%)
+      solve - 5 * 347.6us = 1.7ms (40.9%)
+      extract - 5 * 25.2us = 126.2us (3.0%)
+    check conflicts - 5 * 5.2us = 26.1us (0.0%)
+  verify_solution - 1 * 3.8ms = 3.8ms (1.0%)
+Reading instances_addstationtime/InstanceB8.txt
+trains 5 tracks 25 avgtracks 13.40 trackpairs 72 delays 0 avgdelay0
+5 & 25 & 13.40 & 72 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=6
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 4 conflict constraints None lazy objectives
+   bigm LB=14
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 5 conflict constraints None lazy objectives
+   bigm LB=16
+Solved with cost 16 and 5 conflict constraints after 2 refinements
+SAVING instances_addstationtime/InstanceB8.txt_model_final.lp
+BIGMSTATS 3 134 5
+BIGM ITERATIONS 2
+Solution verified. Cost 16
+Timing information for root profiler:
+  bigm solver - 1 * 91.7ms = 91.7ms (100.0%)
+    optimize - 3 * 878.8us = 2.6ms (2.9%)
+    minimize-solution - 3 * 228.2us = 684.6us (0.7%)
+      build - 3 * 105.8us = 317.4us (46.4%)
+      solve - 3 * 108.1us = 324.4us (47.4%)
+      extract - 3 * 5.4us = 16.1us (2.4%)
+    check conflicts - 3 * 740ns = 2.2us (0.0%)
+  verify_solution - 1 * 139.0us = 139.0us (0.2%)
+Reading instances_addstationtime/InstanceB9.txt
+trains 7 tracks 25 avgtracks 13.57 trackpairs 150 delays 0 avgdelay0
+7 & 25 & 13.57 & 150 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 16
+Solution verified. Cost 16
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=59
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 6 conflict constraints None lazy objectives
+   bigm LB=68
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 8 conflict constraints None lazy objectives
+   bigm LB=69
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 9 conflict constraints None lazy objectives
+   bigm LB=69
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 10 conflict constraints None lazy objectives
+   bigm LB=70
+Solved with cost 70 and 10 conflict constraints after 4 refinements
+SAVING instances_addstationtime/InstanceB9.txt_model_final.lp
+BIGMSTATS 5 190 10
+BIGM ITERATIONS 4
+Solution verified. Cost 70
+Timing information for root profiler:
+  bigm solver - 1 * 90.0ms = 90.0ms (100.0%)
+    optimize - 5 * 1.2ms = 6.1ms (6.8%)
+    minimize-solution - 5 * 283.5us = 1.4ms (1.6%)
+      build - 5 * 135.7us = 678.5us (47.9%)
+      solve - 5 * 130.0us = 650.0us (45.9%)
+      extract - 5 * 7.1us = 35.4us (2.5%)
+    check conflicts - 5 * 926ns = 4.6us (0.0%)
+  verify_solution - 1 * 267.0us = 267.0us (0.3%)
+Reading instances_addstationtime/InstanceB10.txt
+trains 7 tracks 25 avgtracks 12.86 trackpairs 126 delays 0 avgdelay0
+7 & 25 & 12.86 & 126 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 70
+Solution verified. Cost 70
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=48
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 3 conflict constraints None lazy objectives
+   bigm LB=53
+Solved with cost 53 and 3 conflict constraints after 1 refinements
+SAVING instances_addstationtime/InstanceB10.txt_model_final.lp
+BIGMSTATS 2 180 3
+BIGM ITERATIONS 1
+Solution verified. Cost 53
+Timing information for root profiler:
+  bigm solver - 1 * 84.9ms = 84.9ms (100.0%)
+    optimize - 2 * 888.0us = 1.8ms (2.1%)
+    minimize-solution - 2 * 275.0us = 550.1us (0.6%)
+      build - 2 * 129.8us = 259.6us (47.2%)
+      solve - 2 * 127.5us = 255.0us (46.4%)
+      extract - 2 * 7.1us = 14.2us (2.6%)
+    check conflicts - 2 * 690ns = 1.4us (0.0%)
+  verify_solution - 1 * 237.3us = 237.3us (0.3%)
+Reading instances_addstationtime/InstanceB11.txt
+trains 25 tracks 25 avgtracks 15.40 trackpairs 3202 delays 0 avgdelay0
+25 & 25 & 15.40 & 3202 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Finishing with cost 53
+Solution verified. Cost 53
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=377
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 32 conflict constraints None lazy objectives
+   bigm LB=407
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 42 conflict constraints None lazy objectives
+Set parameter Threads to value 4
+Finishing with cost 417
+Solution verified. Cost 417
+HEUR.FEAS. 417
+Finishing with cost 417
+Solution verified. Cost 417
+HEUR.FEAS. 417
+   bigm LB=410
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 45 conflict constraints None lazy objectives
+Finishing with cost 415
+Solution verified. Cost 415
+HEUR.FEAS. 415
+Finishing with cost 415
+Solution verified. Cost 415
+HEUR.FEAS. 415
+   bigm LB=411
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 51 conflict constraints None lazy objectives
+Finishing with cost 420
+Solution verified. Cost 420
+HEUR.FEAS. 420
+Finishing with cost 431
+Solution verified. Cost 431
+HEUR.FEAS. 431
+   bigm LB=414
+[2024-04-09T11:57:43Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 57 conflict constraints None lazy objectives
+Finishing with cost 420
+Solution verified. Cost 420
+HEUR.FEAS. 420
+Finishing with cost 420
+Solution verified. Cost 420
+HEUR.FEAS. 420
+TERMINATE HEURISTIC
+BIGM ITERATIONS 5
+Solution verified. Cost 415
+Timing information for root profiler:
+  bigm solver - 1 * 581.0ms = 581.0ms (100.0%)
+    optimize - 6 * 81.2ms = 486.9ms (83.8%)
+    minimize-solution - 5 * 874.2us = 4.4ms (0.8%)
+      build - 5 * 463.1us = 2.3ms (53.0%)
+      solve - 5 * 353.6us = 1.8ms (40.4%)
+      extract - 5 * 26.8us = 134.1us (3.1%)
+    check conflicts - 5 * 9.7us = 48.5us (0.0%)
+  verify_solution - 1 * 4.2ms = 4.2ms (0.7%)
+Reading instances_addstationtime/InstanceB12.txt
+trains 14 tracks 25 avgtracks 16.21 trackpairs 970 delays 0 avgdelay0
+14 & 25 & 16.21 & 970 & 0 & 0 \\
+Starting solver BigMLazy
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+Set parameter Threads to value 4
+Set parameter ServerPassword
+Set parameter CSQueueTimeout to value 300
+Set parameter TokenServer to value "gurobi-ac.sintef.dev"
+[2024-04-09T11:57:44Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 1 with 0 conflict constraints None lazy objectives
+   bigm LB=5
+[2024-04-09T11:57:44Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 2 with 15 conflict constraints None lazy objectives
+   bigm LB=78
+[2024-04-09T11:57:44Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 3 with 23 conflict constraints None lazy objectives
+   bigm LB=85
+[2024-04-09T11:57:44Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 4 with 26 conflict constraints None lazy objectives
+   bigm LB=95
+[2024-04-09T11:57:44Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 5 with 28 conflict constraints None lazy objectives
+   bigm LB=97
+[2024-04-09T11:57:44Z DEBUG ddd::solvers::bigm] Starting optimize on iteration 6 with 32 conflict constraints None lazy objectives
+   bigm LB=98
+Solved with cost 98 and 32 conflict constraints after 5 refinements
+SAVING instances_addstationtime/InstanceB12.txt_model_final.lp
+BIGMSTATS 6 454 32
+BIGM ITERATIONS 5
+Solution verified. Cost 98
+Timing information for root profiler:
+  bigm solver - 1 * 128.3ms = 128.3ms (100.0%)
+    optimize - 6 * 6.2ms = 36.9ms (28.8%)
+    minimize-solution - 6 * 549.4us = 3.3ms (2.6%)
+      build - 6 * 284.5us = 1.7ms (51.8%)
+      solve - 6 * 231.0us = 1.4ms (42.1%)
+      extract - 6 * 16.0us = 96.0us (2.9%)
+    check conflicts - 6 * 4.9us = 29.3us (0.0%)
+  verify_solution - 1 * 1.4ms = 1.4ms (1.1%)
+    origA1 InfiniteSteps180 BigMLazy        34        115
+    origA2 InfiniteSteps180 BigMLazy        37        117
+    origA3 InfiniteSteps180 BigMLazy        14        115
+    origA4 InfiniteSteps180 BigMLazy        22         92
+    origA5 InfiniteSteps180 BigMLazy        19         92
+    origA6 InfiniteSteps180 BigMLazy        14         91
+    origA7 InfiniteSteps180 BigMLazy        15         85
+    origA8 InfiniteSteps180 BigMLazy       136        365
+    origA9 InfiniteSteps180 BigMLazy        40        111
+   origA10 InfiniteSteps180 BigMLazy        33        101
+   origA11 InfiniteSteps180 BigMLazy        25        120
+   origA12 InfiniteSteps180 BigMLazy        29        265
+    origB1 InfiniteSteps180 BigMLazy         7         93
+    origB2 InfiniteSteps180 BigMLazy         5         84
+    origB3 InfiniteSteps180 BigMLazy         7         86
+    origB4 InfiniteSteps180 BigMLazy       301        101
+    origB5 InfiniteSteps180 BigMLazy         2         85
+    origB6 InfiniteSteps180 BigMLazy         2         84
+    origB7 InfiniteSteps180 BigMLazy       370        114
+    origB8 InfiniteSteps180 BigMLazy         6         83
+    origB9 InfiniteSteps180 BigMLazy        35         88
+   origB10 InfiniteSteps180 BigMLazy        34         86
+   origB11 InfiniteSteps180 BigMLazy       425        215
+   origB12 InfiniteSteps180 BigMLazy         6         89
+   trackA1 InfiniteSteps180 BigMLazy        60        234
+   trackA2 InfiniteSteps180 BigMLazy        48        217
+   trackA3 InfiniteSteps180 BigMLazy        18        135
+   trackA4 InfiniteSteps180 BigMLazy        18         99
+   trackA5 InfiniteSteps180 BigMLazy        19         95
+   trackA6 InfiniteSteps180 BigMLazy        11         89
+   trackA7 InfiniteSteps180 BigMLazy        10         86
+   trackA8 InfiniteSteps180 BigMLazy       146      85037
+   trackA9 InfiniteSteps180 BigMLazy        43        188
+  trackA10 InfiniteSteps180 BigMLazy        33        100
+  trackA11 InfiniteSteps180 BigMLazy      9999       9999
+  trackA12 InfiniteSteps180 BigMLazy      9999       9999
+   trackB1 InfiniteSteps180 BigMLazy        14        108
+   trackB2 InfiniteSteps180 BigMLazy        26         85
+   trackB3 InfiniteSteps180 BigMLazy         4         88
+   trackB4 InfiniteSteps180 BigMLazy       341        123
+   trackB5 InfiniteSteps180 BigMLazy        11         89
+   trackB6 InfiniteSteps180 BigMLazy         2         84
+   trackB7 InfiniteSteps180 BigMLazy       318        145
+   trackB8 InfiniteSteps180 BigMLazy        12         88
+   trackB9 InfiniteSteps180 BigMLazy        51         91
+  trackB10 InfiniteSteps180 BigMLazy        41         85
+  trackB11 InfiniteSteps180 BigMLazy       391        141
+  trackB12 InfiniteSteps180 BigMLazy        88        125
+ stationA1 InfiniteSteps180 BigMLazy        81       3763
+ stationA2 InfiniteSteps180 BigMLazy        59        527
+ stationA3 InfiniteSteps180 BigMLazy        26        141
+ stationA4 InfiniteSteps180 BigMLazy        22        103
+ stationA5 InfiniteSteps180 BigMLazy        23         99
+ stationA6 InfiniteSteps180 BigMLazy        15         86
+ stationA7 InfiniteSteps180 BigMLazy        16         87
+ stationA8 InfiniteSteps180 BigMLazy      9999       9999
+ stationA9 InfiniteSteps180 BigMLazy        49        182
+stationA10 InfiniteSteps180 BigMLazy        41        104
+stationA11 InfiniteSteps180 BigMLazy      9999       9999
+stationA12 InfiniteSteps180 BigMLazy      9999       9999
+ stationB1 InfiniteSteps180 BigMLazy        30        143
+ stationB2 InfiniteSteps180 BigMLazy        29         93
+ stationB3 InfiniteSteps180 BigMLazy         6         85
+ stationB4 InfiniteSteps180 BigMLazy       355        217
+ stationB5 InfiniteSteps180 BigMLazy        10         92
+ stationB6 InfiniteSteps180 BigMLazy         5         85
+ stationB7 InfiniteSteps180 BigMLazy       339        400
+ stationB8 InfiniteSteps180 BigMLazy        16         92
+ stationB9 InfiniteSteps180 BigMLazy        70         90
+stationB10 InfiniteSteps180 BigMLazy        53         85
+stationB11 InfiniteSteps180 BigMLazy       415        581
+stationB12 InfiniteSteps180 BigMLazy        98        128
+
