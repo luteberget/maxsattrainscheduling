@@ -12,7 +12,11 @@ use crate::problem::{Problem, DelayCostType};
 use super::SolverError;
 const M: f64 = 100_000.0;
 
-pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, timeout :f64, mut output_stats :impl FnMut(String, serde_json::Value),
+pub fn solve(    
+    mk_env: impl Fn() -> grb::Env + Send + 'static,
+env: &grb::Env,
+problem: &Problem, 
+delay_cost_type: DelayCostType, timeout :f64, mut output_stats :impl FnMut(String, serde_json::Value),
 ) -> Result<Vec<Vec<i32>>, SolverError> {
     // assert!(matches!(delay_cost_type, DelayCostType::FiniteSteps123));
     let start_time = std::time::Instant::now();
@@ -59,11 +63,30 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
     // println!("PROBLEM {:?}", problem);
     // println!("RESOURCE USAGE {:?}", resource_usage);
 
+    const USE_HEURISTIC: bool = true;
+
+    let heur_thread = USE_HEURISTIC.then(|| {
+        let (sol_in_tx, sol_in_rx) = std::sync::mpsc::channel();
+        let (sol_out_tx, sol_out_rx) = std::sync::mpsc::channel();
+        let problem = problem.clone();
+        crate::solvers::heuristic::spawn_heuristic_thread(
+            mk_env,
+            sol_in_rx,
+            problem,
+            delay_cost_type,
+            sol_out_tx,
+        );
+        (sol_in_tx, sol_out_rx)
+    });
+
+
     let visit_conflicts = super::bigm::visit_conflicts(problem);
     // println!("Conflicts {:?}", visit_conflicts);
 
     drop(_p_init);
     let mut iteration = 0;
+    let mut best_heur: Option<(i32, Vec<Vec<i32>>)> = None;
+    let mut global_lb = 0i32;
 
     loop {
         iteration += 1;
@@ -197,6 +220,7 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
 
         drop(_p_enc);
 
+
         info!("Solving MIPDDD iteration {} with {} travel time {} conflicts", iteration, n_travel_time_constraints, n_conflict_constraints);
 
         model
@@ -223,6 +247,16 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
 
         
         if status == Status::TimeLimit {
+            
+            let ub = best_heur.map(|(c, _)| c).unwrap_or(i32::MAX);
+            println!(
+                "TIMEOUT LB={} UB={}",
+                global_lb,
+                ub
+            );
+
+            do_output_stats(&mut output_stats, iteration, interval_vars, n_travel_time_constraints, n_conflict_constraints, global_lb as f64, start_time, solver_time, global_lb, ub);
+
             return Err(SolverError::Timeout);
         } else if status != Status::Optimal {
             model.compute_iis().map_err(SolverError::GurobiError)?;
@@ -235,6 +269,15 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
         let cost = model
             .get_attr(attr::ObjVal)
             .map_err(SolverError::GurobiError)?;
+
+        global_lb = cost.round() as i32;
+
+        if cost.round() as i32 == best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
+            println!("TERMINATE HEURISTIC");
+            do_output_stats(&mut output_stats, iteration, interval_vars, n_travel_time_constraints, n_conflict_constraints, global_lb as f64, start_time, solver_time, global_lb, global_lb);
+            return Ok(best_heur.unwrap().1);
+        }
+
 
         info!("cost {}", cost);
 
@@ -295,6 +338,27 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
                         train_times.push(last);   train_times }
         ).collect::<Vec<_>>();
         
+
+
+        if let Some((sol_tx, sol_rx)) = heur_thread.as_ref() {
+            let _ = sol_tx.send(solution.clone());
+
+            while let Ok((ub_cost, ub_sol)) = sol_rx.try_recv() {
+                let lb_cost = cost.round() as i32;
+                assert!(ub_cost >= lb_cost);
+                if ub_cost == lb_cost {
+                    println!("HEURISTIC UB=LB");
+                    println!("TERMINATE HEURISTIC");
+                    do_output_stats(&mut output_stats, iteration, interval_vars, n_travel_time_constraints, n_conflict_constraints, global_lb as f64, start_time, solver_time, global_lb, global_lb);
+                    return Ok(ub_sol);
+                }
+
+                if ub_cost < best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
+                    best_heur = Some((ub_cost, ub_sol));
+                }
+            }
+        }
+
         let mut new_intervals = VecDeque::new();
         let mut n_new_intervals = 0;
         let mut n_conflicts = 0;
@@ -411,21 +475,7 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
             println!("Solved with cost {} and {} intervals", cost, n_intervals);
 
 
-            output_stats("iteration".to_string(), iteration.into());
-            output_stats("intervals".to_string(), interval_vars.iter().map(|is| is.iter().map(|i| i.len()).sum::<usize>()).sum::<usize>().into());
-            output_stats("travel_constraints".to_string(), n_travel_time_constraints.into());
-            output_stats("resource_constraints".to_string(), n_conflict_constraints.into());
-            output_stats("internal_cost".to_string(), cost.into());
-
-            output_stats(
-                "total_time".to_string(),
-                start_time.elapsed().as_secs_f64().into(),
-            );
-            output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
-            output_stats(
-                "algorithm_time".to_string(),
-                (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
-            );
+            do_output_stats(&mut output_stats, iteration, interval_vars, n_travel_time_constraints, n_conflict_constraints, cost, start_time, solver_time, global_lb, global_lb);
 
             return Ok(solution);
         }
@@ -434,6 +484,26 @@ pub fn solve(env: &grb::Env,problem: &Problem, delay_cost_type: DelayCostType, t
         //     panic!();
         // }
     }
+}
+
+fn do_output_stats(output_stats: &mut impl FnMut(String, serde_json::Value), iteration: i32, interval_vars: Vec<Vec<Vec<Var>>>, n_travel_time_constraints: i32, n_conflict_constraints: i32, cost: f64, start_time: std::time::Instant, solver_time: std::time::Duration, lb :i32, ub :i32) {
+    output_stats("iteration".to_string(), iteration.into());
+    output_stats("intervals".to_string(), interval_vars.iter().map(|is| is.iter().map(|i| i.len()).sum::<usize>()).sum::<usize>().into());
+    output_stats("travel_constraints".to_string(), n_travel_time_constraints.into());
+    output_stats("resource_constraints".to_string(), n_conflict_constraints.into());
+    output_stats("internal_cost".to_string(), cost.into());
+    output_stats("lb".to_string(), lb.into());
+    output_stats("ub".to_string(), ub.into());
+
+    output_stats(
+        "total_time".to_string(),
+        start_time.elapsed().as_secs_f64().into(),
+    );
+    output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
+    output_stats(
+        "algorithm_time".to_string(),
+        (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
+    );
 }
 
 fn check_conflict(

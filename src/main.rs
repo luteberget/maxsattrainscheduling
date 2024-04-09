@@ -317,14 +317,10 @@ fn main() {
                     None,
                 )
                 .and_then(|e| e.ok_or(SolverError::NoSolution)),
-                SolverType::GreedyFStr => heuristic::solve_heuristic_better(
-                    &env,
-                    &p.problem,
-                    delay_cost_type,
-                    true,
-                    None,
-                )
-                .and_then(|e| e.ok_or(SolverError::NoSolution)),
+                SolverType::GreedyFStr => {
+                    heuristic::solve_heuristic_better(&env, &p.problem, delay_cost_type, true, None)
+                        .and_then(|e| e.ok_or(SolverError::NoSolution))
+                }
                 SolverType::BigMEager => bigm::solve_bigm(
                     &env,
                     &mk_env,
@@ -521,6 +517,7 @@ fn main() {
                     }
                 }
                 SolverType::MipDdd => ddd::solvers::mipdddpack::solve(
+                    &mk_env,
                     &env,
                     &p.problem,
                     delay_cost_type,
@@ -841,9 +838,15 @@ mod tests {
         env.set(grb::param::OutputFlag, 0).unwrap();
 
         let problem = crate::problem::problem1_with_stations();
-        let result =
-            ddd::solvers::mipdddpack::solve(&env, &problem, delay_cost_type, 120.0, |_, _| {})
-                .unwrap();
+        let result = ddd::solvers::mipdddpack::solve(
+            &crate::mk_env,
+            &env,
+            &problem,
+            delay_cost_type,
+            120.0,
+            |_, _| {},
+        )
+        .unwrap();
         let score = problem.verify_solution(&result, delay_cost_type);
         assert!(score.is_some());
     }
