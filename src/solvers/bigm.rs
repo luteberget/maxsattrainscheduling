@@ -161,7 +161,6 @@ fn solve(
     const USE_HEURISTIC: bool = true;
 
     let heur_thread = USE_HEURISTIC.then(|| {
-        let env = mk_env();
         let (sol_in_tx, sol_in_rx) = std::sync::mpsc::channel();
         let (sol_out_tx, sol_out_rx) = std::sync::mpsc::channel();
         let problem = problem.clone();
