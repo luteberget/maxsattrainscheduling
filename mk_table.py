@@ -20,15 +20,16 @@ alg_time = {"bigm": {"total_time": 0.0, "alg_time": 0.0},
             "mipddd": {"total_time": 0.0, "alg_time": 0.0}}
 
 for filename in [
-        "results/2023-06-13-cont.json",
-        "results/2023-06-13-infsteps180.json",
-        "results/2023-06-13-finsteps123.json",
+        "results/2024-04-09-cont.json",
+        "results/2024-04-09-infsteps180.json",
+        "results/2024-04-09-finsteps123.json",
         ]:
 
     print(f"# {filename}")
     with open(filename,"r") as f:
         data = json.load(f)
 
+    prev_instance_class = None
     for instance in data:
 
         if not instance["name"] in comparison:
@@ -55,8 +56,18 @@ for filename in [
             if "algorithm_time" in solver:
                 alg_time[solver_name]["alg_time"] += solver["algorithm_time"]
 
+        bigm_gap = 100.0*(bigm["ub"] - bigm["lb"])/float(bigm["ub"])
+        sat_gap = 100.0*(satddd["ub"] - satddd["lb"])/float(satddd["ub"])
+        mipddd_gap = 100.0*(mipddd["ub"] - mipddd["lb"])/float(mipddd["ub"])
+
         #if worsttime < 100.0:
         #    continue
+
+        instance_class = instance["name"][:1]
+        if prev_instance_class is not None and instance_class != prev_instance_class:
+            print("\\midrule")
+        prev_instance_class = instance_class
+
         cols = [
                 # Instance name
                 tr_name(instance["name"]),
@@ -65,17 +76,20 @@ for filename in [
                 str(bigm["iteration"]) if "iteration" in bigm else "-",
                 str(bigm["added_conflict_pairs"]) if "added_conflict_pairs" in bigm else "-",
                 f"{bigm['sol_time']:.0f}" if "sol_time" in bigm else "\\timeout",
+                f"{bigm_gap:.0f}\\%",
 
 
                 # Iterations, total intervals, avg. intervals (per event), solve time
                 str(satddd["iterations"]) if "iterations" in satddd else "-",
                 str(satddd["num_time_points"]) if "num_time_points" in satddd else "-",
                 f"{satddd['sol_time']:.0f}" if "sol_time" in satddd else "\\timeout",
+                f"{sat_gap:.0f}\\%",
 
                 # MIP DDD solve time
                 f"{mipddd['iteration']:.0f}" if "iteration" in mipddd else "-",
                 f"{mipddd['intervals']:.0f}" if "intervals" in mipddd else "-",
                 f"{mipddd['sol_time']:.0f}" if "sol_time" in mipddd else "\\timeout",
+                f"{mipddd_gap:.0f}\\%",
 
 
                 # Ratio of solve time between bigm and satddd
