@@ -1,34 +1,33 @@
-use ddd::{
-    maxsat,
-    problem::{DelayCostType, DelayMeasurementType},
-};
 use std::process::exit;
 
-const TIMEOUT: f64 = 120.0;
+use ipamir_trainscheduling::problem::{DelayCostType, DelayMeasurementType};
+use log::info;
+
+const TIMEOUT: f64 = f64::INFINITY;
 const DELAY_MEASUREMENT_TYPE: DelayMeasurementType = DelayMeasurementType::FinalStationArrival;
 const DELAY_COST_TYPE: DelayCostType = DelayCostType::InfiniteSteps180;
 
 fn main() {
     pretty_env_logger::env_logger::Builder::from_env(
-        pretty_env_logger::env_logger::Env::default().default_filter_or("trace"),
+        pretty_env_logger::env_logger::Env::default().default_filter_or("info"),
     )
     .init();
 
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 1 {
-        log::error!("Usage: trainscheduling <filename>");
+    if args.len() != 2 {
+        log::error!("Usage: {} <filename>", args[0]);
         exit(1);
     }
 
-    let filename = &args[0];
+    let filename = &args[1];
 
     log::debug!("Reading {}", filename);
     #[allow(unused)]
     let (named_problem, _) =
-        ddd::parser::read_txt_file(&filename, DELAY_MEASUREMENT_TYPE, false, None, |_| {});
+        ipamir_trainscheduling::parser::read_txt_file(&filename, DELAY_MEASUREMENT_TYPE, false, None, |_| {});
 
-    let solution = ddd::scheduling::solve(
-        maxsat::IPAMIRSolver::new(),
+    let solution = ipamir_trainscheduling::scheduling::solve(
+        ipamir_trainscheduling::ipamir::IPAMIRSolver::new(),
         &named_problem.problem,
         TIMEOUT,
         DELAY_COST_TYPE,
@@ -39,5 +38,5 @@ fn main() {
         .verify_solution(&solution.unwrap().0, DELAY_COST_TYPE)
         .unwrap();
 
-    println!("success: cost={}", cost);
+    info!("success: cost={}", cost);
 }

@@ -1,3 +1,5 @@
+use log::{debug, error};
+
 #[derive(Debug, Clone, Copy)]
 pub enum DelayMeasurementType {
     EverywhereEarliest,
@@ -62,7 +64,6 @@ impl Problem {
 
             let cost = train.visit_delay_cost(delay_cost_type, visit_idx, t1_in) as i32;
             if cost > 0 {
-                // println!("Added cost for t{} v{} = {}", train_idx, visit_idx, cost);
                 sum_cost += cost;
             }
         }
@@ -79,7 +80,6 @@ impl Problem {
                 let t1_in = solution[train_idx][visit_idx];
                 let cost = train.visit_delay_cost(delay_cost_type, visit_idx, t1_in) as i32;
                 if cost > 0 {
-                    // println!("Added cost for t{} v{} = {}", train_idx, visit_idx, cost);
                     sum_cost += cost;
                 }
             }
@@ -115,22 +115,21 @@ impl Problem {
                 let t1_out = solution[train_idx][visit_idx + 1];
 
                 if t1_in < *earliest - 10 {
-                    println!("Earliest entry conflict t{} v{}", train_idx, visit_idx);
-                    println!("train {}: {:?}", train_idx, train);
-                    println!("  train solution: {:?}", solution[train_idx]);
+                    error!("Earliest entry conflict t{} v{}", train_idx, visit_idx);
+                    error!("train {}: {:?}", train_idx, train);
+                    error!("  train solution: {:?}", solution[train_idx]);
                     return None;
                 }
 
                 if t1_in + travel_time > t1_out {
-                    println!("Travel time conflict t{} v{}", train_idx, visit_idx);
-                    println!("train {}: {:?}", train_idx, train);
-                    println!("  train solution: {:?}", solution[train_idx]);
+                    error!("Travel time conflict t{} v{}", train_idx, visit_idx);
+                    error!("train {}: {:?}", train_idx, train);
+                    error!("  train solution: {:?}", solution[train_idx]);
                     return None;
                 }
 
                 let cost = train.visit_delay_cost(delay_cost_type, visit_idx, t1_in) as i32;
                 if cost > 0 {
-                    // println!("Added cost for t{} v{} = {}", train_idx, visit_idx, cost);
                     sum_cost += cost;
                 }
             }
@@ -165,7 +164,7 @@ impl Problem {
 
                             let ok = t1_in >= t2_out - 1 || t2_in >= t1_out - 1;
                             if !ok {
-                                println!(
+                                error!(
                                     "Resource conflict {}-{} in t{} v{} {}-{} t{} v{} {}-{}",
                                     *r1, *r2,
                                     train_idx1,
@@ -177,12 +176,12 @@ impl Problem {
                                     t2_in,
                                     t2_out
                                 );
-                                println!("train1 {}: {:?}", train_idx1, train1);
-                                println!("  train1 solution: {:?}", solution[train_idx1]);
-                                println!("  {:?}", train1.visits[visit_idx1]);
-                                println!("train2 {}: {:?}", train_idx2, train2);
-                                println!("  train2 solution: {:?}", solution[train_idx2]);
-                                println!("  {:?}", train2.visits[visit_idx2]);
+                                error!("train1 {}: {:?}", train_idx1, train1);
+                                error!("  train1 solution: {:?}", solution[train_idx1]);
+                                error!("  {:?}", train1.visits[visit_idx1]);
+                                error!("train2 {}: {:?}", train_idx2, train2);
+                                error!("  train2 solution: {:?}", solution[train_idx2]);
+                                error!("  {:?}", train2.visits[visit_idx2]);
                                 return None;
                             }
                         }
@@ -191,7 +190,7 @@ impl Problem {
             }
         }
 
-        println!("Solution verified. Cost {}", sum_cost);
+        debug!("Solution verified. Cost {}", sum_cost);
         Some(sum_cost)
     }
 }

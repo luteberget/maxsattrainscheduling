@@ -3,15 +3,19 @@ use std::{
     time::Instant,
 };
 
+use log::debug;
 use typed_index_collections::TiVec;
 
+use crate::{
+    ipamir::{MaxSatError, MaxSatSolver},
+    problem::{DelayCostType, Problem},
+};
 
 #[derive(Clone, Copy, Debug)]
 pub enum SolverError {
     NoSolution,
     Timeout,
 }
-
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 struct VisitId(u32);
@@ -62,39 +66,11 @@ pub struct SolveStats {
 }
 
 pub fn solve(
-    solver: impl MaxSatSolver + std::fmt::Debug,
-    problem: &Problem,
-    timeout: f64,
-    delay_cost_type: DelayCostType,
-) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
-    solve_debug(
-        solver,
-        problem,
-        timeout,
-        delay_cost_type,
-    )
-}
-
-use crate::{
-    maxsat::{MaxSatError, MaxSatSolver},
-    problem::{DelayCostType, Problem},
-};
-
-
-pub fn solve_debug(
     mut solver: impl MaxSatSolver + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
-    // TODO
-    //  - more eager constraint generation
-    //    - propagate simple presedences?
-    //    - update all conflicts and presedences when adding new time points?
-    //    - smt refinement of the simple presedences?
-    //  - get rid of the multiple adding of constraints
-    //  - cadical doesn't use false polarity, so it can generate unlimited conflicts when cost is maxed. Two trains pushing each other forward.
-
 
     let start_time: Instant = Instant::now();
     let mut solver_time = std::time::Duration::ZERO;
@@ -107,10 +83,6 @@ pub fn solve_debug(
     let mut conflicts: HashMap<usize, Vec<usize>> = HashMap::new();
     let mut new_time_points = Vec::new();
 
-    #[allow(unused)]
-    let mut core_sizes: BTreeMap<usize, usize> = BTreeMap::new();
-    #[allow(unused)]
-    let mut processed_core_sizes: BTreeMap<usize, usize> = BTreeMap::new();
     let mut iteration_types: BTreeMap<IterationType, usize> = BTreeMap::new();
 
     let mut n_timepoints = 0;
@@ -151,22 +123,13 @@ pub fn solve_debug(
 
     // The first iteration (0) does not need a solve call; we
     // know it's SAT because there are no constraints yet.
+    
     let mut iteration = 1;
-
     let mut total_cost = 0;
-    // let mut soft_constraints = HashMap::new();
-    // let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
-
-    // let mut conflicts_added: HashSet<((VisitId, i32), (VisitId, i32))> = Default::default();
-    // let mut conflict_vars: HashMap<(VisitId, VisitId), Bool<L>> = Default::default();
-    // let mut priorities: Vec<(VisitId, VisitId)> = Vec::new();
-
-
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
             return Err(SolverError::Timeout);
         }
-
 
         let mut found_travel_time_conflict = false;
         let mut found_resource_conflict = false;
@@ -194,11 +157,6 @@ pub fn solve_debug(
                 // TRAVEL TIME CONFLICT
                 if t1_in + visit.travel_time > t1_out {
                     found_travel_time_conflict = true;
-                    // println!(
-                    //     "  - TRAVEL time conflict train{} visit{} resource{} in{} travel{} out{}",
-                    //     train_idx, visit_idx, this_resource_id, t1_in, travel_time, t1_out
-                    // );
-
 
                     // Insert the new time point.
                     let t1_in_var = v1.delays[v1.incumbent_idx].0;
@@ -208,7 +166,6 @@ pub fn solve_debug(
 
                     // T1_IN delay implies T1_EARLIEST_OUT delay.
 
-                    // SatInstance::add_clause(&mut solver, vec![!t1_in_var, t1_earliest_out_var]);
                     solver.add_clause(None, vec![-t1_in_var, t1_earliest_out_var]);
 
                     stats.n_travel += 1;
@@ -217,41 +174,10 @@ pub fn solve_debug(
                         new_time_points.push((next_visit, t1_earliest_out_var, new_t));
                     }
                 }
-
-                // let v1 = &occupations[visit];
-                // let v2 = &occupations[next_visit];
-
-                // // TRAVEL TIME CONFLICT
-                // if t1_in + travel_time < t1_out {
-                //     found_conflict = true;
-                //     println!(
-                //                             "  - TRAVEL OVERtime conflict train{} visit{} resource{} in{} travel{} out{}",
-                //                             train_idx, visit_idx, this_resource_id, t1_in, travel_time, t1_out
-                //                         );
-
-                //     // Insert the new time point.
-                //     let t1_in_var = v1.delays[v1.incumbent].0;
-                //     let new_t = v1.incumbent_time() + travel_time;
-                //     let (t1_earliest_out_var, t1_is_new) =
-                //         occupations[next_visit].time_point(&mut solver, new_t);
-
-                //     // T1_IN delay implies T1_EARLIEST_OUT delay.
-                //     SatInstance::add_clause(&mut solver, vec![!t1_in_var, t1_earliest_out_var]);
-                //     // The new timepoint might have a cost.
-                //     if t1_is_new {
-                //         new_time_points.push((next_visit, t1_in_var, new_t));
-                //     }
-                // }
             }
         }
 
-        // println!("Solving conflicts in iteration {}", iteration);
-
         // SOLVE ALL SIMPLE PRESEDENCES BEFORE CONFLICTS
-        // if !found_conflict {
-
-        let mut deconflicted_train_pairs: HashSet<(usize, usize)> = HashSet::new();
-        // for visit_id in touched_intervals.iter().copied() {
 
         touched_intervals.retain(|visit_id| {
             let visit_id = *visit_id;
@@ -269,13 +195,10 @@ pub fn solve_debug(
             let visit = problem.trains[train_idx].visits[visit_idx];
 
             // RESOURCE CONFLICT
-            // println!("touchesd {:?}", usize::from(visit_id));
-
             let mut retain = false;
 
             if let Some(conflicting_resources) = conflicts.get(&visit.resource_id) {
                 for other_resource in conflicting_resources.iter().copied() {
-                    // println!(" other resource {:?}", other_resource);
                     let t1_out = next_visit
                         .map(|nx| occupations[nx].incumbent_time())
                         .unwrap_or(t1_in + visit.travel_time);
@@ -323,45 +246,8 @@ pub fn solve_debug(
                             continue;
                         }
 
-                        // let conflict_id_a = (visit_id, t1_out);
-                        // let conflict_id_b = (other_visit, t2_out);
-
-                        // if conflicts_added.contains(&(conflict_id_b, conflict_id_a)) {
-                        //     continue;
-                        // }
-
-                        // println!("Inserting {:?}", (conflict_id_a, conflict_id_b));
-                        // assert!(conflicts_added.insert((conflict_id_a, conflict_id_b)));
-
-                        // let t2_out = t2_earliest_out;
-                        // let t1_out = t1_earliest_out;
-                        // if t1_out <= t2_in || t2_out <= t1_in {
-                        //     panic!("kejks");
-                        // }
-
-                        if !deconflicted_train_pairs.insert((train_idx, other_train_idx))
-                            || !deconflicted_train_pairs.insert((other_train_idx, train_idx))
-                        {
-                            retain = true;
-                            continue;
-                        }
-
                         found_resource_conflict = true;
                         stats.n_conflict += 1;
-
-                        // println!(
-                        //         " - RESOURCE conflict between t{}-v{}-r{}-in{}-out{} t{}-v{}-r{}-in{}-out{}",
-                        //         train_idx,
-                        //         visit_idx,
-                        //         problem.trains[train_idx].visits[visit_idx].0,
-                        //         t1_in,
-                        //         t1_out,
-                        //         other_train_idx,
-                        //         other_visit_idx,
-                        //         problem.trains[other_train_idx].visits[other_visit_idx].0,
-                        //         t2_in,
-                        //         t2_out,
-                        //     );
 
                         // We should not need to use these.
                         #[allow(unused, clippy::let_unit_value)]
@@ -376,10 +262,6 @@ pub fn solve_debug(
                             occupations[other_visit].time_point(&mut solver, t1_out);
                         let (delay_t1, t1_is_new) =
                             occupations[visit_id].time_point(&mut solver, t2_out);
-
-                        if !t2_is_new && !t1_is_new {
-                            // println!("Did we solve this before?");
-                        }
 
                         if t1_is_new {
                             new_time_points.push((visit_id, delay_t1, t2_out));
@@ -401,45 +283,18 @@ pub fn solve_debug(
                             .map(|v| occupations[v].delays[occupations[v].incumbent_idx].0)
                             .unwrap_or_else(|| true_lit);
 
-                        const USE_CHOICE_VAR: bool = false;
                         n_conflict_constraints += 1;
-
-                        if USE_CHOICE_VAR {
-                            unimplemented!();
-                            // let (pa, pb) = (visit_id, other_visit);
-
-                            // let choose =
-                            //     conflict_vars.get(&(pa, pb)).copied().unwrap_or_else(|| {
-                            //         let new_var = SatInstance::new_var(&mut solver);
-                            //         conflict_vars.insert((pa, pb), new_var);
-                            //         conflict_vars.insert((pb, pa), !new_var);
-                            //         new_var
-                            //     });
-
-                            // SatInstance::add_clause(
-                            //     &mut solver,
-                            //     vec![!choose, !t1_out_lit, delay_t2],
-                            // );
-                            // SatInstance::add_clause(
-                            //     &mut solver,
-                            //     vec![choose, !t2_out_lit, delay_t1],
-                            // );
-                        } else {
-                            // SatInstance::add_clause(
-                            //     &mut solver,
-
-                            solver.add_clause(
-                                None,
-                                vec![
-                                    // !t1_in_lit,
-                                    -t1_out_lit,
-                                    // !t2_in_lit,
-                                    -t2_out_lit,
-                                    delay_t1,
-                                    delay_t2,
-                                ],
-                            );
-                        }
+                        solver.add_clause(
+                            None,
+                            vec![
+                                // !t1_in_lit,
+                                -t1_out_lit,
+                                // !t2_in_lit,
+                                -t2_out_lit,
+                                delay_t1,
+                                delay_t2,
+                            ],
+                        );
                     }
                 }
             }
@@ -447,16 +302,11 @@ pub fn solve_debug(
             retain
         });
 
-        // touched_intervals.clear();
-        // assert!(touched_intervals.is_empty());
-        // }
-
         let iterationtype = if found_travel_time_conflict && found_resource_conflict {
             IterationType::TravelAndResourceConflict
         } else if found_travel_time_conflict {
             IterationType::TravelTimeConflict
         } else if found_resource_conflict {
-            // println!("Iteration {}", iteration);
             IterationType::ResourceConflict
         } else {
             IterationType::Solution
@@ -467,121 +317,18 @@ pub fn solve_debug(
         if !(found_resource_conflict || found_travel_time_conflict) {
             // Incumbent times are feasible and optimal.
 
-            const USE_LP_MINIMIZE: bool = false;
+            let trains = extract_solution(problem, &occupations);
 
-            let trains = if !USE_LP_MINIMIZE {
-                extract_solution(problem, &occupations)
-            } else {
-                // let p = priorities
-                //     .into_iter()
-                //     .map(|(a, b)| (visits[a], visits[b]))
-                //     .collect();
-                // minimize::minimize_solution(env, problem, p)?
-                panic!()
-            };
-
-            println!(
+            debug!(
                 "Finished with cost {} iterations {} solver {:?}",
                 total_cost, iteration, solver
             );
-            println!("Core size bins {:?}", core_sizes);
-            println!("Iteration types {:?}", iteration_types);
 
             stats.satsolver = format!("{:?}", solver);
-
-            println!(
-                "STATS {} {} {} {} {} {} {} {}",
-                /* iter */ iteration,
-                /* objective iters */
-                iteration_types.get(&IterationType::Objective).unwrap_or(&0),
-                /* travel iters */
-                iteration_types
-                    .get(&IterationType::TravelTimeConflict)
-                    .unwrap_or(&0),
-                /* resource iters */
-                iteration_types
-                    .get(&IterationType::ResourceConflict)
-                    .unwrap_or(&0),
-                /* both iters */
-                iteration_types
-                    .get(&IterationType::TravelAndResourceConflict)
-                    .unwrap_or(&0),
-                /* solution iters */
-                iteration_types.get(&IterationType::Solution).unwrap_or(&0),
-                /* num traveltime */ stats.n_travel,
-                /* num conflicts */ stats.n_conflict,
-            );
-
-            // output_stats("iterations".to_string(), iteration.into());
-            // output_stats(
-            //     "objective_iters".to_string(),
-            //     (*iteration_types.get(&IterationType::Objective).unwrap_or(&0)).into(),
-            // );
-            // output_stats(
-            //     "travel_iters".to_string(),
-            //     (*iteration_types
-            //         .get(&IterationType::TravelTimeConflict)
-            //         .unwrap_or(&0))
-            //     .into(),
-            // );
-            // output_stats(
-            //     "resource_iters".to_string(),
-            //     (*iteration_types
-            //         .get(&IterationType::ResourceConflict)
-            //         .unwrap_or(&0))
-            //     .into(),
-            // );
-            // output_stats(
-            //     "travel_and_resource_iters".to_string(),
-            //     (*iteration_types
-            //         .get(&IterationType::TravelAndResourceConflict)
-            //         .unwrap_or(&0))
-            //     .into(),
-            // );
-            // output_stats("num_traveltime".to_string(), stats.n_travel.into());
-            // output_stats("num_conflicts".to_string(), stats.n_travel.into());
-            // output_stats(
-            //     "num_time_points".to_string(),
-            //     occupations
-            //         .iter()
-            //         .map(|o| o.delays.len() - 1)
-            //         .sum::<usize>()
-            //         .into(),
-            // );
-            // output_stats(
-            //     "max_time_points".to_string(),
-            //     occupations
-            //         .iter()
-            //         .map(|o| o.delays.len() - 1)
-            //         .max()
-            //         .unwrap()
-            //         .into(),
-            // );
-            // output_stats(
-            //     "avg_time_points".to_string(),
-            //     ((occupations
-            //         .iter()
-            //         .map(|o| o.delays.len() - 1)
-            //         .sum::<usize>() as f64)
-            //         / (occupations.len() as f64))
-            //         .into(),
-            // );
-
-            // output_stats(
-            //     "total_time".to_string(),
-            //     start_time.elapsed().as_secs_f64().into(),
-            // );
-            // output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
-            // output_stats(
-            //     "algorithm_time".to_string(),
-            //     (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
-            // );
-
             return Ok((trains, stats));
         }
 
         assert!(found_resource_conflict || found_travel_time_conflict);
-
 
         for (visit, new_timepoint_var, new_t) in new_time_points.drain(..) {
             n_timepoints += 1;
@@ -592,23 +339,11 @@ pub fn solve_debug(
                 problem.trains[train_idx].visit_delay_cost(delay_cost_type, visit_idx, new_t);
 
             if new_timepoint_cost > 0 {
-                // println!(
-                //     "new var for t{} v{} t{} cost{}",
-                //     train_idx, visit_idx, new_t, new_timepoint_cost
-                // );
 
-                // let var_name = format!(
-                //     "t{}v{}t{}cost{}",
-                //     train_idx, visit_idx, new_t, new_timepoint_cost
-                // );
-
-                const USE_COST_TREE: bool = false;
-                if !USE_COST_TREE {
                     for cost in occupations[visit].cost.len()..=new_timepoint_cost {
                         let prev_cost_var = occupations[visit].cost[cost - 1];
                         let next_cost_var = solver.new_var();
 
-                        // SatInstance::add_clause(&mut solver, vec![!next_cost_var, prev_cost_var]);
                         solver.add_clause(None, vec![-next_cost_var, prev_cost_var]);
 
                         occupations[visit].cost.push(next_cost_var);
@@ -616,14 +351,8 @@ pub fn solve_debug(
 
                         // soft_constraints.insert(!next_cost_var, (Soft::Delay, 1, 1));
                         solver.add_clause(Some(1), vec![-next_cost_var]);
-                        // println!(
-                        //     "Extending t{}v{} to cost {} {:?}",
-                        //     train_idx, visit_idx, cost, next_cost_var
-                        // );
                     }
 
-                    // SatInstance::add_clause(
-                    //     &mut solver,
                     solver.add_clause(
                         None,
                         vec![
@@ -631,61 +360,10 @@ pub fn solve_debug(
                             occupations[visit].cost[new_timepoint_cost],
                         ],
                     );
-
-                    // println!("  highest cost {}", occupations[visit].cost.len() - 1);
-                } else {
-                    unimplemented!();
-                    // if let Some((weight, cost_var)) = occupations[visit].cost_tree.add_cost(
-                    //     &mut solver,
-                    //     new_timepoint_var,
-                    //     new_timepoint_cost,
-                    // ) {
-                    //     assert!(weight > 0);
-                    //     soft_constraints.insert(!cost_var, (Soft::Delay, weight, weight));
-                    // }
-
-                    // occupations[visit].cost_tree.add_cost(
-                    // // &mut solver,
-                    // // new_timepoint_var,
-                    // // new_timepoint_cost,
-                    // // // var_name,
-                    // // &mut |weight, cost_var| {
-                    //     // cost_var_names.insert(!cost_var, name);
-                    // //     soft_constraints.insert(!cost_var, (Soft::Delay, weight, weight));
-                    //     // },
-                    // );
-                }
             }
-
-            // set the cost for this new time point.
-
-            // WATCH.with(|x| {
-            //     if *x.borrow() == Some((train_idx, visit_idx)) {
-            // println!(
-            //     "Soft constraint for t{}-v{}-r{} t{} cost{} lit{:?}",
-            //     train_idx, visit_idx, resource, new_t, new_var_cost, new_var
-            // );
-            // println!(
-            //     "   new var implies cost {}=>{:?}",
-            //     new_var_cost, occupations[visit].cost[new_var_cost]
-            // );
-            //     }
-            // });
-            // println!(
-            //     "Soft constraint for t{}-v{}-r{} t{} cost{} lit{:?}",
-            //     train_idx, visit_idx, resource, new_t, new_var_cost, new_var
-            // );
-            // println!(
-            //     "   new var implies cost {}=>{:?}",
-            //     new_var_cost, occupations[visit].cost[new_var_cost]
-            // );
-            // SatInstance::add_clause(
-            //     &mut solver,
-            //     vec![!new_var, occupations[visit].cost[new_var_cost]],
-            // );
         }
 
-        log::info!(
+        debug!(
             "solving it{} with {} timepoints {} conflicts",
             iteration,
             n_timepoints,
@@ -693,11 +371,7 @@ pub fn solve_debug(
         );
 
         let solve_start = Instant::now();
-        let result: Result<(i32, Vec<bool>), crate::maxsat::MaxSatError> = {
-            // SatSolverWithCore::solve_with_assumptions(
-            //     &mut solver,
-            //     assumptions.iter().map(|(k, _)| *k).take(n_assumps),
-            // )
+        let result: Result<(i32, Vec<bool>), MaxSatError> = {
             solver.optimize(
                 Some(timeout - solve_start.elapsed().as_secs_f64()),
                 std::iter::empty(),
@@ -711,7 +385,6 @@ pub fn solve_debug(
         })?;
 
         total_cost = new_cost;
-
 
         let model_value = |l: isize| {
             if l > 0 {
@@ -737,25 +410,7 @@ pub fn solve_debug(
             }
             let (_train_idx, visit_idx) = visits[visit];
 
-            // let resource = problem.trains[train_idx].visits[visit_idx].resource_id;
-            // let new_time = this_occ.incumbent_time();
-
-            // WATCH.with(|x| {
-            //     if *x.borrow() == Some((train_idx, visit_idx))  && touched {
-            //         println!("Delays {:?}", this_occ.delays);
-            //         println!(
-            //             "Updated t{}-v{}-r{}  t={}-->{}",
-            //             train_idx, visit_idx, resource, old_time, new_time
-            //         );
-            //     }
-            // });
-
             if touched {
-                // println!(
-                //     "Updated t{}-v{}-r{}  t={}-->{}",
-                //     train_idx, visit_idx, resource, old_time, new_time
-                // );
-
                 // We are really interested not in the visits, but the resource occupation
                 // intervals. Therefore, also the previous visit has been touched by this visit.
                 if visit_idx > 0 {
@@ -766,16 +421,6 @@ pub fn solve_debug(
                 }
                 touched_intervals.push(visit);
             }
-
-            // let cost = this_occ
-            //     .cost
-            //     .iter()
-            //     .map(|c| if model.value(c) { 1 } else { 0 })
-            //     .sum::<isize>()
-            //     - 1;
-            // if cost > 0 {
-            //     // println!("t{}-v{}  cost={}", train_idx, visit_idx, cost);
-            // }
         }
 
         const USE_LOCAL_MINIMIZE: bool = true;
@@ -786,8 +431,6 @@ pub fn solve_debug(
             assert!(visits.len() == occupations.len());
             while last_mod < occs_len {
                 let mut touched = false;
-                // println!("i = {} (l={})",i, visits.len());
-
                 let visit_id = VisitId(i % occs_len as u32);
                 while occupations[visit_id].incumbent_idx > 0 {
                     // We can always leave earlier, so the critical interval is
@@ -867,7 +510,6 @@ pub fn solve_debug(
                             });
 
                     if can_reduce {
-                        // println!("REDUCE {} {} {}", train_idx, visit_idx, occupations[visit_id].incumbent_time());
                         occupations[visit_id].incumbent_idx -= 1;
                         touched = true;
                         last_mod = 0;
@@ -894,7 +536,6 @@ pub fn solve_debug(
         }
 
         iteration += 1;
-        // println!("iteration {}", iteration);
     }
 }
 
@@ -936,8 +577,6 @@ impl Occ {
         // assert!(idx == self.delays.len() || self.delays[idx + 1].1 > t);
 
         let idx = self.delays.partition_point(|(_, t0)| *t0 < t);
-
-        // println!("idx {} t {}   delays{:?}", idx, t, self.delays);
 
         assert!(idx > 0 || t == self.delays[0].1); // cannot insert before the earliest time.
         assert!(idx < self.delays.len()); // cannot insert after infinity.

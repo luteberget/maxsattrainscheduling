@@ -215,7 +215,6 @@ pub fn parse_solution_txt(txt: &str) -> Result<Vec<TxtTrain>, TxtParseError> {
 
     let mut lines = txt.lines();
     let _headerline = lines.next().unwrap();
-    // println!("Parsing {}", headerline);
     let _empty = lines.next().unwrap();
 
     let mut lines = lines.peekable();
@@ -223,7 +222,6 @@ pub fn parse_solution_txt(txt: &str) -> Result<Vec<TxtTrain>, TxtParseError> {
         let mut fields = line.split_ascii_whitespace();
 
         if header.is_none() {
-            // println!(" parsing header {}", line);
             // Parse header
             // Train=166 Init Delay=0 FinalDelay=49
 
@@ -242,7 +240,6 @@ pub fn parse_solution_txt(txt: &str) -> Result<Vec<TxtTrain>, TxtParseError> {
                 delay.parse().map_err(|_| TxtParseError)?,
                 final_delay.parse().map_err(|_| TxtParseError)?,
             ));
-            // println!("Header {:?}", header);
         } else {
             // Parse visit
             // T24 TrainID=166 AimedDepartureTime=3118 WaitTime=0 Delay=0 RunTime=143 FinalTimeScheduled=3118

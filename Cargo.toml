@@ -1,5 +1,5 @@
 [package]
-name = "ddd"
+name = "ipamir_trainscheduling"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,4 +9,3 @@ edition = "2021"
 typed-index-collections = "3.0"
 log = "0.4"
 pretty_env_logger = "0.4"
-ipamir-rs = { version = "0.1.0", path = "../ipamir-rs" }
