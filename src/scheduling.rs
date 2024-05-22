@@ -1,20 +1,17 @@
 use std::{
-    cell::RefCell,
     collections::{BTreeMap, HashMap, HashSet},
     time::Instant,
 };
 
-#[allow(unused)]
-use crate::{
-    debug::{ResourceInterval, SolverAction},
-    minimize_core,
-    problem::Problem,
-    trim_core,
-};
-use satcoder::{
-    constraints::Totalizer, prelude::SymbolicModel, Bool, SatInstance, SatSolverWithCore,
-};
 use typed_index_collections::TiVec;
+
+
+#[derive(Clone, Copy, Debug)]
+pub enum SolverError {
+    NoSolution,
+    Timeout,
+}
+
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 struct VisitId(u32);
@@ -65,42 +62,30 @@ pub struct SolveStats {
 }
 
 pub fn solve(
-    mk_env: impl Fn() -> grb::Env + Send + 'static,
     solver: impl MaxSatSolver + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
-    output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     solve_debug(
-        mk_env,
         solver,
         problem,
         timeout,
         delay_cost_type,
-        |_| {},
-        output_stats,
     )
 }
 
-thread_local! { pub static  WATCH : std::cell::RefCell<Option<(usize,usize)>>  = RefCell::new(None);}
-
 use crate::{
-    debug::DebugInfo,
-    maxsatsolver::{MaxSatError, MaxSatSolver},
-    problem::DelayCostType,
-    solvers::heuristic,
+    maxsat::{MaxSatError, MaxSatSolver},
+    problem::{DelayCostType, Problem},
 };
 
-use super::{costtree::CostTree, SolverError};
+
 pub fn solve_debug(
-    mk_env: impl Fn() -> grb::Env + Send + 'static,
     mut solver: impl MaxSatSolver + std::fmt::Debug,
     problem: &Problem,
     timeout: f64,
     delay_cost_type: DelayCostType,
-    debug_out: impl Fn(DebugInfo),
-    mut output_stats: impl FnMut(String, serde_json::Value),
 ) -> Result<(Vec<Vec<i32>>, SolveStats), SolverError> {
     // TODO
     //  - more eager constraint generation
@@ -110,7 +95,6 @@ pub fn solve_debug(
     //  - get rid of the multiple adding of constraints
     //  - cadical doesn't use false polarity, so it can generate unlimited conflicts when cost is maxed. Two trains pushing each other forward.
 
-    let _p = hprof::enter("solver");
 
     let start_time: Instant = Instant::now();
     let mut solver_time = std::time::Duration::ZERO;
@@ -171,58 +155,18 @@ pub fn solve_debug(
 
     let mut total_cost = 0;
     // let mut soft_constraints = HashMap::new();
-    let mut debug_actions = Vec::new();
     // let mut cost_var_names: HashMap<Bool<L>, String> = HashMap::new();
 
     // let mut conflicts_added: HashSet<((VisitId, i32), (VisitId, i32))> = Default::default();
     // let mut conflict_vars: HashMap<(VisitId, VisitId), Bool<L>> = Default::default();
     // let mut priorities: Vec<(VisitId, VisitId)> = Vec::new();
 
-    const USE_HEURISTIC: bool = true;
-
-    let heur_thread = USE_HEURISTIC.then(|| {
-        let (sol_in_tx, sol_in_rx) = std::sync::mpsc::channel();
-        let (sol_out_tx, sol_out_rx) = std::sync::mpsc::channel();
-        let problem = problem.clone();
-        heuristic::spawn_heuristic_thread(mk_env, sol_in_rx, problem, delay_cost_type, sol_out_tx);
-
-        (sol_in_tx, sol_out_rx)
-    });
-    let mut best_heur: Option<(i32, Vec<Vec<i32>>)> = None;
 
     loop {
         if start_time.elapsed().as_secs_f64() > timeout {
-            println!(
-                "TIMEOUT LB={} UB={}",
-                total_cost,
-                best_heur.map(|(c, _)| c).unwrap_or(i32::MAX)
-            );
             return Err(SolverError::Timeout);
         }
 
-        let _p = hprof::enter("iteration");
-
-        // println!("Iteration {} conflict detection starting...", iteration);
-
-        if let Some((sol_tx, sol_rx)) = heur_thread.as_ref() {
-            let sol = extract_solution(problem, &occupations);
-            let _ = sol_tx.send(sol);
-
-            while let Ok((ub_cost, ub_sol)) = sol_rx.try_recv() {
-                assert!(ub_cost >= total_cost as i32);
-                if ub_cost == total_cost as i32 {
-                    println!("HEURISTIC UB=LB");
-                    println!("TERMINATE HEURISTIC");
-
-                    return Ok((ub_sol, stats));
-                }
-
-
-                if ub_cost < best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
-                    best_heur = Some((ub_cost, ub_sol));
-                }
-            }
-        }
 
         let mut found_travel_time_conflict = false;
         let mut found_resource_conflict = false;
@@ -230,7 +174,6 @@ pub fn solve_debug(
         // let mut touched_intervals = visits.keys().collect::<Vec<_>>();
 
         for visit_id in touched_intervals.iter().copied() {
-            let _p = hprof::enter("travel time check");
             let (train_idx, visit_idx) = visits[visit_id];
             let next_visit: Option<VisitId> =
                 if visit_idx + 1 < problem.trains[train_idx].visits.len() {
@@ -256,13 +199,6 @@ pub fn solve_debug(
                     //     train_idx, visit_idx, this_resource_id, t1_in, travel_time, t1_out
                     // );
 
-                    debug_actions.push(SolverAction::TravelTimeConflict(ResourceInterval {
-                        train_idx,
-                        visit_idx,
-                        resource_idx: visit.resource_id,
-                        time_in: t1_in,
-                        time_out: t1_out,
-                    }));
 
                     // Insert the new time point.
                     let t1_in_var = v1.delays[v1.incumbent_idx].0;
@@ -320,7 +256,6 @@ pub fn solve_debug(
         touched_intervals.retain(|visit_id| {
             let visit_id = *visit_id;
 
-            let _p = hprof::enter("conflict check");
             let (train_idx, visit_idx) = visits[visit_id];
             let next_visit: Option<VisitId> =
                 if visit_idx + 1 < problem.trains[train_idx].visits.len() {
@@ -551,11 +486,6 @@ pub fn solve_debug(
             );
             println!("Core size bins {:?}", core_sizes);
             println!("Iteration types {:?}", iteration_types);
-            debug_out(DebugInfo {
-                iteration,
-                actions: std::mem::take(&mut debug_actions),
-                solution: extract_solution(problem, &occupations),
-            });
 
             stats.satsolver = format!("{:?}", solver);
 
@@ -582,70 +512,70 @@ pub fn solve_debug(
                 /* num conflicts */ stats.n_conflict,
             );
 
-            output_stats("iterations".to_string(), iteration.into());
-            output_stats(
-                "objective_iters".to_string(),
-                (*iteration_types.get(&IterationType::Objective).unwrap_or(&0)).into(),
-            );
-            output_stats(
-                "travel_iters".to_string(),
-                (*iteration_types
-                    .get(&IterationType::TravelTimeConflict)
-                    .unwrap_or(&0))
-                .into(),
-            );
-            output_stats(
-                "resource_iters".to_string(),
-                (*iteration_types
-                    .get(&IterationType::ResourceConflict)
-                    .unwrap_or(&0))
-                .into(),
-            );
-            output_stats(
-                "travel_and_resource_iters".to_string(),
-                (*iteration_types
-                    .get(&IterationType::TravelAndResourceConflict)
-                    .unwrap_or(&0))
-                .into(),
-            );
-            output_stats("num_traveltime".to_string(), stats.n_travel.into());
-            output_stats("num_conflicts".to_string(), stats.n_travel.into());
-            output_stats(
-                "num_time_points".to_string(),
-                occupations
-                    .iter()
-                    .map(|o| o.delays.len() - 1)
-                    .sum::<usize>()
-                    .into(),
-            );
-            output_stats(
-                "max_time_points".to_string(),
-                occupations
-                    .iter()
-                    .map(|o| o.delays.len() - 1)
-                    .max()
-                    .unwrap()
-                    .into(),
-            );
-            output_stats(
-                "avg_time_points".to_string(),
-                ((occupations
-                    .iter()
-                    .map(|o| o.delays.len() - 1)
-                    .sum::<usize>() as f64)
-                    / (occupations.len() as f64))
-                    .into(),
-            );
+            // output_stats("iterations".to_string(), iteration.into());
+            // output_stats(
+            //     "objective_iters".to_string(),
+            //     (*iteration_types.get(&IterationType::Objective).unwrap_or(&0)).into(),
+            // );
+            // output_stats(
+            //     "travel_iters".to_string(),
+            //     (*iteration_types
+            //         .get(&IterationType::TravelTimeConflict)
+            //         .unwrap_or(&0))
+            //     .into(),
+            // );
+            // output_stats(
+            //     "resource_iters".to_string(),
+            //     (*iteration_types
+            //         .get(&IterationType::ResourceConflict)
+            //         .unwrap_or(&0))
+            //     .into(),
+            // );
+            // output_stats(
+            //     "travel_and_resource_iters".to_string(),
+            //     (*iteration_types
+            //         .get(&IterationType::TravelAndResourceConflict)
+            //         .unwrap_or(&0))
+            //     .into(),
+            // );
+            // output_stats("num_traveltime".to_string(), stats.n_travel.into());
+            // output_stats("num_conflicts".to_string(), stats.n_travel.into());
+            // output_stats(
+            //     "num_time_points".to_string(),
+            //     occupations
+            //         .iter()
+            //         .map(|o| o.delays.len() - 1)
+            //         .sum::<usize>()
+            //         .into(),
+            // );
+            // output_stats(
+            //     "max_time_points".to_string(),
+            //     occupations
+            //         .iter()
+            //         .map(|o| o.delays.len() - 1)
+            //         .max()
+            //         .unwrap()
+            //         .into(),
+            // );
+            // output_stats(
+            //     "avg_time_points".to_string(),
+            //     ((occupations
+            //         .iter()
+            //         .map(|o| o.delays.len() - 1)
+            //         .sum::<usize>() as f64)
+            //         / (occupations.len() as f64))
+            //         .into(),
+            // );
 
-            output_stats(
-                "total_time".to_string(),
-                start_time.elapsed().as_secs_f64().into(),
-            );
-            output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
-            output_stats(
-                "algorithm_time".to_string(),
-                (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
-            );
+            // output_stats(
+            //     "total_time".to_string(),
+            //     start_time.elapsed().as_secs_f64().into(),
+            // );
+            // output_stats("solver_time".to_string(), solver_time.as_secs_f64().into());
+            // output_stats(
+            //     "algorithm_time".to_string(),
+            //     (start_time.elapsed().as_secs_f64() - solver_time.as_secs_f64()).into(),
+            // );
 
             return Ok((trains, stats));
         }
@@ -763,8 +693,7 @@ pub fn solve_debug(
         );
 
         let solve_start = Instant::now();
-        let result: Result<(i32, Vec<bool>), crate::maxsatsolver::MaxSatError> = {
-            let _p = hprof::enter("sat check");
+        let result: Result<(i32, Vec<bool>), crate::maxsat::MaxSatError> = {
             // SatSolverWithCore::solve_with_assumptions(
             //     &mut solver,
             //     assumptions.iter().map(|(k, _)| *k).take(n_assumps),
@@ -782,10 +711,6 @@ pub fn solve_debug(
         })?;
 
         total_cost = new_cost;
-        if total_cost as i32 == best_heur.as_ref().map(|(c, _)| *c).unwrap_or(i32::MAX) {
-            println!("TERMINATE HEURISTIC");
-            return Ok((best_heur.unwrap().1, stats));
-        }
 
 
         let model_value = |l: isize| {
@@ -797,7 +722,6 @@ pub fn solve_debug(
         };
 
         stats.n_sat += 1;
-        let _p = hprof::enter("update times");
 
         for (visit, this_occ) in occupations.iter_mut_enumerated() {
             // let old_time = this_occ.incumbent_time();
@@ -975,7 +899,6 @@ pub fn solve_debug(
 }
 
 fn extract_solution(problem: &Problem, occupations: &TiVec<VisitId, Occ>) -> Vec<Vec<i32>> {
-    let _p = hprof::enter("extract solution");
     let mut trains = Vec::new();
     let mut i = 0;
     for (train_idx, train) in problem.trains.iter().enumerate() {

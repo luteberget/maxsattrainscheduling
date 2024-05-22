@@ -92,7 +92,6 @@ impl Problem {
         solution: &[Vec<i32>],
         delay_cost_type: DelayCostType,
     ) -> Option<i32> {
-        let _p = hprof::enter("verify_solution");
         // Check the shape of the solution
         assert!(self.trains.len() == solution.len());
         for (train_idx, train) in self.trains.iter().enumerate() {
@@ -224,11 +223,7 @@ impl Train {
 }
 
 pub fn infinite_staircase(delay: i32, interval: usize) -> usize {
-    // if delay <= 0 {
-    //     0
-    // } else {
     (delay as f64 / interval as f64).ceil() as usize
-    // }
 }
 
 pub fn iter_infinite_staircase(interval: usize) -> impl Iterator<Item = (i32, usize)> {
@@ -273,104 +268,5 @@ impl DelayCostThresholds {
             }
         }
         0
-    }
-}
-
-fn visit(resource_id: usize, earliest: i32, travel_time: i32) -> Visit {
-    Visit {
-        resource_id,
-        earliest,
-        travel_time,
-        aimed: Some(earliest),
-    }
-}
-
-#[allow(unused)]
-pub fn problem1_with_stations() -> Problem {
-    // a = 0
-    // b = 1
-    // c = 2
-    // d = 3
-    // e = 4
-    // f = 5
-    // g = 6
-
-    let travel_times = vec![6, 3, 4, 9, 10, 5, 8];
-    Problem {
-        name: "Unnamed".to_string(),
-        trains: vec![
-            Train {
-                visits: vec![
-                    visit(0, 0, travel_times[0]),
-                    visit(7, 6, 0),
-                    visit(1, 6, travel_times[1]),
-                    visit(7, 9, 0),
-                    visit(6, 9, travel_times[6]),
-                ],
-            },
-            Train {
-                visits: vec![
-                    visit(2, 0, travel_times[2]),
-                    visit(7, 4, 0),
-                    visit(1, 4, travel_times[1]),
-                ],
-            },
-            Train {
-                visits: vec![
-                    visit(3, 0, travel_times[3]),
-                    visit(7, 9, 0),
-                    visit(1, 9, travel_times[1]),
-                    visit(7, 12, 0),
-                    visit(5, 12, travel_times[5]),
-                ],
-            },
-            Train {
-                visits: vec![
-                    visit(4, 0, travel_times[4]),
-                    visit(7, 10, 0),
-                    visit(5, 10, travel_times[5]),
-                ],
-            },
-        ],
-
-        conflicts: (0..=6).map(|i| (i, i)).collect(), // resources only conflict with themselves.
-    }
-}
-#[allow(unused)]
-pub fn problem1() -> Problem {
-    // a = 0
-    // b = 1
-    // c = 2
-    // d = 3
-    // e = 4
-    // f = 5
-    // g = 6
-    let travel_times = vec![6, 3, 4, 9, 10, 5, 8];
-    Problem {
-        name: "Unnamed".to_string(),
-        trains: vec![
-            Train {
-                visits: vec![
-                    visit(0, 0, travel_times[0]),
-                    visit(1, 6, travel_times[1]),
-                    visit(6, 9, travel_times[6]),
-                ],
-            },
-            Train {
-                visits: vec![visit(2, 0, travel_times[2]), visit(1, 4, travel_times[1])],
-            },
-            Train {
-                visits: vec![
-                    visit(3, 0, travel_times[3]),
-                    visit(1, 9, travel_times[1]),
-                    visit(5, 12, travel_times[5]),
-                ],
-            },
-            Train {
-                visits: vec![visit(4, 0, travel_times[4]), visit(5, 10, travel_times[5])],
-            },
-        ],
-
-        conflicts: (0..=6).map(|i| (i, i)).collect(), // resources only conflict with themselves.
     }
 }
