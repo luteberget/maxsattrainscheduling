@@ -1,6 +1,6 @@
 use std::process::exit;
 
-use ipamir_trainscheduling::problem::{DelayCostType, DelayMeasurementType};
+use ipamirtrainscheduling::problem::{DelayCostType, DelayMeasurementType};
 use log::info;
 
 const TIMEOUT: f64 = f64::INFINITY;
@@ -24,10 +24,10 @@ fn main() {
     log::debug!("Reading {}", filename);
     #[allow(unused)]
     let (named_problem, _) =
-        ipamir_trainscheduling::parser::read_txt_file(&filename, DELAY_MEASUREMENT_TYPE, false, None, |_| {});
+        ipamirtrainscheduling::parser::read_txt_file(&filename, DELAY_MEASUREMENT_TYPE, false, None, |_| {});
 
-    let solution = ipamir_trainscheduling::scheduling::solve(
-        ipamir_trainscheduling::ipamir::IPAMIRSolver::new(),
+    let solution = ipamirtrainscheduling::scheduling::solve(
+        ipamirtrainscheduling::ipamir::IPAMIRSolver::new(),
         &named_problem.problem,
         TIMEOUT,
         DELAY_COST_TYPE,
