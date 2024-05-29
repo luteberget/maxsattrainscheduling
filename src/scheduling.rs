@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, HashMap},
     time::Instant,
 };
 
@@ -195,7 +195,7 @@ pub fn solve(
             let visit = problem.trains[train_idx].visits[visit_idx];
 
             // RESOURCE CONFLICT
-            let mut retain = false;
+            let retain = false;
 
             if let Some(conflicting_resources) = conflicts.get(&visit.resource_id) {
                 for other_resource in conflicting_resources.iter().copied() {

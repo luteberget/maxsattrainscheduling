@@ -42,8 +42,11 @@ clean:
 	rm -f $(TARGET) *.o
 	rm -rf pblib
 
-ipamir_trainscheduling: src/*rs build.rs Cargo.toml $(DEPS)
-	touch build.rs && LIBS="$(LIBS)" cargo build --release && cp target/release/ipamir_trainscheduling .
+vscode:
+	IPAMIR_LINKER_ARGS="$(LIBS)" code .
+
+$(TARGET): src/*rs build.rs Cargo.toml $(DEPS)
+	touch build.rs && IPAMIR_LINKER_ARGS="$(LIBS)" cargo build --release && cp target/release/$(TARGET) .
 
 #--------------------------------------------------------------------------#
 # Local app specific rules.

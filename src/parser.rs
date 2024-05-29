@@ -1,5 +1,4 @@
-use crate::problem::{self, DelayMeasurementType, NamedProblem, Problem, Visit};
-use log::debug;
+use crate::problem::{DelayMeasurementType, NamedProblem, Problem, Visit};
 use std::{collections::HashMap, mem::take};
 
 

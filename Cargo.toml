@@ -1,5 +1,5 @@
 [package]
-name = "ipamir_trainscheduling"
+name = "ipamirtrainscheduling"
 version = "0.1.0"
 edition = "2021"
 
