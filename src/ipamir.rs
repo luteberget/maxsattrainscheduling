@@ -127,7 +127,6 @@ impl MaxSatSolver for IPAMIRSolver {
     }
 }
 
-#[link(name = "ipamir")]
 extern "C" {
     fn ipamir_signature() -> *const c_char;
     fn ipamir_init() -> *const c_void;
