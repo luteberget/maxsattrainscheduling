@@ -1,0 +1,88 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[backend=bibtex,bibencoding=ascii,style=ieee,sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+
+\begin{document}
+
+\title{Incremental MaxSAT benchmarks from dynamic discretizations of train scheduling problems}
+
+\author{\IEEEauthorblockN{Bjørnar Luteberget}
+\IEEEauthorblockA{\textit{SINTEF Digital AS} \\
+Oslo, Norway \\
+bjornar.luteberget@sintef.no}
+}
+\maketitle
+
+SAT and MaxSAT solvers are good choices for solving scheduling problems when there is a
+natural and coarse discretization of time, such as in academic timetabling \cite{asin2014curriculum}.
+%
+In the railway domain, online/real-time scheduling applications have typically not been
+a good match for time discretization approaches (see \cite{mannino2009optimal, harrod2011modeling, boland2019perspectives}), because there is
+often no reasonable choice of coarseness: when the discretization is too fine,
+the problem instance becomes too large to solve in a reasonable amount of time, and when the discretization is
+too coarse, the approximate solutions may prove suboptimal or even infeasible
+in the field.
+
+Dynamic Discretization Discovery (DDD), recently introduced by \cite{boland2017continuous}, is a
+technique used to convert scheduling problems over continuous time into
+discrete variables in a way that mitigates these size and approximation issues. 
+By solving a sequence of smaller problems, the discretization
+is built incrementally in a way that ensures convergence to an optimal
+solution of the complete continuous formulation.
+
+In \cite{croella2024maxsat}, the DDD technique was adapted to a the train dispatching problem, which
+is a type of railway scheduling problem that is solved in an online
+setting where some trains have become delayed and are no longer able to follow
+their original timetables.  The objective of the train dispatching problem in
+\cite{croella2024maxsat} is to reschedule the trains to minimize the sum of delays.
+%
+The measure of the delay may either be the continuous numerical value of the
+delay, or a step-wise function that defines constant  costs for exceeding some
+defined delay thresholds. For example, if a train is delayed by 3 minutes it could incur
+a cost of 1, if it is more than 10 minutes delayed, a cost of 2, and so on.
+
+The paper \cite{croella2024maxsat} compares two approaches
+for solving the train dispatching problem:
+the commercial mixed-integer programming solver 
+Gurobi using continuous variables, and
+the 
+dynamic discretization (DDD) solved using
+ the RC2  MaxSAT algorithm \cite{IgnatievRC2}.
+On step-wise objective functions, the MaxSAT approach had better performance.
+
+The IPAMIR Train Scheduling benchmark submitted to the MaxSAT Evaulation 2024
+is a command-line application that solves the train scheduling problems from
+\cite{croella2024maxsat} with a step-wise objective function.
+The program uses incremental calls to a MaxSAT solver through the IPAMIR
+interface.  It calls IPAMIR to add hard clauses and to set literal weights (but
+only on literals that previously did not have an assigned weight, i.e., the
+weights are
+non-decreasing).
+The benchmarking program uses the \emph{linear rounded} objective defined in 
+\cite{croella2024maxsat}, i.e. the cost is $c(d) =  \lfloor d / Q \rfloor $,
+for each train's delay $d$, with $Q=180$ sec.
+
+The input files provided with the benchmarking program 
+are 72 problem instances constructed from real-world railway data
+from two single-track
+railroad networks, named Line A and Line B, 
+extracted from the real-time train information system of the Norwegian state railways. 
+Line A is 124 km long, includes 30 stations and
+an average of 20 trains per problem instance.
+Line B is 115 km, includes 20 stations and an average of 11 trains per problem instance.
+There are 24 original instances from the information system, 
+named in the style \texttt{origA01.txt}, where \texttt{A} is the 
+railway line and \texttt{01} is the instance number.
+In addition, two types of modifications were made to create harder problem instances:
+instances named \texttt{track*.txt} have increased traveling time between stations,
+and instances named \texttt{station*.txt} have increased station dwelling times.
+See \cite{croella2024maxsat} for more details.
+ 
+
+
+\printbibliography
+
+
+
+\end{document}
