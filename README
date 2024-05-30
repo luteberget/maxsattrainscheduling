@@ -1,0 +1,36 @@
+# ipamirtrainscheduling
+
+This is the IPAMIR Train Scheduling benchmark submitted to the MaxSAT
+Evaluation 2024.  It is a command-line application that solves the train
+scheduling problems from [1].  
+
+Building requires the C++ build tools and also the Rust build tools including
+Cargo. The makefile produces the executable `ipamirtrainscheduling` in the
+current directory and the benchmarks are executed by running e.g.
+`./ipamirtrainscheduling inputs/origA01.txt`. The output should look like:
+
+ > [2024-05-30T10:54:56Z INFO  ipamirtrainscheduling] success: cost=34
+
+The program uses incremental calls to a MaxSAT solver through the IPAMIR
+interface.  It calls IPAMIR to add hard clauses and to set literal weights (but
+only on literals that previously did not have an assigned weight, i.e., the
+weights are non-decreasing).  The benchmarking program uses the linear rounded
+objective defined in [1] with Q=180.
+
+The input files provided with the benchmarking program are 72 problem instances
+constructed from real-world railway data from two single-track railroad
+networks, named Line A and Line B, extracted from the real-time train
+information system of the Norwegian state railways.  Line A is 124 km long,
+includes 30 stations and an average of 20 trains per problem instance.  Line B
+is 115 km, includes 20 stations and an average of 11 trains per problem
+instance.  There are 24 original instances from the information system, named
+in the style `origA01.txt`, where `A` is the railway line and `01` is the
+instance number.  In addition, two types of modifications were made to create
+harder problem instances: instances named `track*.txt` have increased traveling
+time between stations, and instances named `station*.txt` have increased
+station dwelling times.  See [1] for more details.
+ 
+
+[1]: Croella, A. L., Luteberget, B., Mannino, C., & Ventura, P. (2024). A
+MaxSAT approach for solving a new Dynamic Discretization Discovery model for
+train rescheduling problems. Computers & Operations Research, 167, 106679.
